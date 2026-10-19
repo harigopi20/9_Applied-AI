@@ -1,4 +1,4 @@
-# DIY Project Finder – Requirements Specification > CHANGE TEST can you see?
+# DIY Project Finder – Requirements Specification
 
 Oct 17, 2026 · @Patrik Saile
 
