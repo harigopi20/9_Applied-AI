@@ -1,5 +1,5 @@
 # Baumarkt-Buddy 🛠️
-*AI shopping and project assistant for DIY stores – MBA Applied AI group project (FAU)*
+*AI shopping and project assistant for DIY stores – MBA Applied AI group project*
 
 ## What is it?
 Baumarkt-Buddy is a mobile web app that helps DIY-store customers plan small home projects.
