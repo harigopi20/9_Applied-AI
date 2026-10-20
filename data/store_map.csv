@@ -1,0 +1,71 @@
+aisle_nr,aisle_name,shelf_nr,product_nr,product_name,category,size,qty_on_shelf,load_kg,price_eur,colour
+1,Wall paint,1,P001,Interior wall paint matt,Paint,10 L,24,,49.99,White
+1,Wall paint,1,P002,Interior wall paint matt,Paint,5 L,30,,29.99,White
+1,Wall paint,2,P003,Colour wall paint,Paint,2.5 L,18,,24.99,Sage green
+1,Wall paint,2,P004,Colour wall paint,Paint,2.5 L,18,,24.99,Anthracite grey
+1,Wall paint,3,P005,Wood varnish,Paint,750 ml,20,,14.99,Clear
+1,Wall paint,3,P006,Wood stain,Paint,750 ml,16,,16.99,Walnut
+1,Wall paint,4,P007,Metal protection paint,Paint,750 ml,12,,19.99,Black
+2,Painting tools,1,P008,Paint roller set,Painting tools,25 cm,25,,12.99,
+2,Painting tools,1,P009,Flat brush set,Painting tools,3 pcs 30/50/70 mm,40,,8.99,
+2,Painting tools,2,P010,Masking tape,Painting tools,30 mm x 50 m,60,,4.49,Yellow
+2,Painting tools,2,P011,Drop cloth,Painting tools,4 x 5 m,35,,5.99,Transparent
+2,Painting tools,3,P012,Wall filler,Wall repair,500 g,30,,6.49,White
+2,Painting tools,3,P013,Sanding paper set,Painting tools,P80/P120/P180,45,,5.99,
+3,Electrical & lighting,1,P014,LED bulb E27,Lighting,9 W 806 lm,80,,3.99,Warm white
+3,Electrical & lighting,1,P015,LED bulb GU10,Lighting,5 W 345 lm,60,,4.49,Neutral white
+3,Electrical & lighting,2,P016,Extension cord 3-way,Electrical,5 m,25,,14.99,White
+3,Electrical & lighting,2,P017,Installation cable NYM-J,Electrical,3 x 1.5 mmÂ² 10 m,15,,19.99,Grey
+3,Electrical & lighting,3,P018,Voltage tester,Electrical,12-250 V,20,,9.99,
+3,Electrical & lighting,3,P019,Light switch flush-mounted,Electrical,55 x 55 mm,30,,6.99,White
+4,Plumbing,1,P020,Tap washer set,Plumbing,1/2 in,50,,3.99,
+4,Plumbing,1,P021,PTFE thread seal tape,Plumbing,12 mm x 12 m,70,,1.99,White
+4,Plumbing,2,P022,Shower hose,Plumbing,1.75 m,20,,14.99,Chrome
+4,Plumbing,2,P023,Sink siphon,Plumbing,1 1/4 in,15,,11.99,White
+4,Plumbing,3,P024,Pipe wrench,Plumbing,1 in,10,,17.99,Red
+5,Garden,1,P025,Garden hose,Garden,20 m 1/2 in,15,,24.99,Green
+5,Garden,2,P026,Potting soil,Garden,40 L,40,,6.99,
+6,Safety,1,P027,Work gloves,Safety,Size 9,50,,4.99,Grey
+6,Safety,1,P028,Safety goggles,Safety,One size,30,,6.99,Clear
+6,Safety,2,P029,Dust mask FFP2,Safety,5 pcs,40,,7.99,White
+7,Hand tools & drill bits,1,P030,Claw hammer,Hand tools,500 g,20,,12.99,
+7,Hand tools & drill bits,1,P031,Screwdriver set,Hand tools,6 pcs,25,,14.99,
+7,Hand tools & drill bits,2,P032,Spirit level,Hand tools,60 cm,18,,14.99,Yellow
+7,Hand tools & drill bits,2,P033,Tape measure,Hand tools,5 m,40,,7.99,
+7,Hand tools & drill bits,2,P034,Stud and cable detector,Hand tools,Depth up to 50 mm,12,,24.99,
+7,Hand tools & drill bits,3,P035,Masonry drill bit,Drill bits,6 mm,35,,3.99,
+7,Hand tools & drill bits,3,P036,Masonry drill bit,Drill bits,8 mm,40,,4.99,
+7,Hand tools & drill bits,3,P037,Masonry drill bit,Drill bits,10 mm,30,,5.49,
+7,Hand tools & drill bits,4,P038,Wood drill bit set,Drill bits,3-10 mm 7 pcs,20,,11.99,
+8,Power tools,1,P039,Cordless drill driver,Power tools,18 V,10,,89.99,Green
+8,Power tools,1,P040,Hammer drill,Power tools,750 W,8,,79.99,Blue
+8,Power tools,2,P041,Jigsaw,Power tools,650 W,6,,69.99,Green
+8,Power tools,2,P042,Orbital sander,Power tools,240 W,6,,49.99,Blue
+12,Fixings,1,P043,Universal wall plug,Fixings,6 mm 50 pcs,50,15,3.49,Grey
+12,Fixings,1,P044,Universal wall plug,Fixings,8 mm 50 pcs,50,25,3.99,Grey
+12,Fixings,1,P045,Heavy-duty wall plug,Fixings,10 mm 20 pcs,30,50,5.99,Grey
+12,Fixings,2,P046,Plasterboard anchor,Fixings,M5 10 pcs,30,15,6.99,Silver
+12,Fixings,2,P047,Heavy-duty anchor bolt,Fixings,M8 x 80 mm 4 pcs,20,100,8.99,Zinc
+12,Fixings,3,P048,Wood screw,Fixings,4 x 40 mm 100 pcs,40,15,4.49,Zinc
+12,Fixings,3,P049,Wood screw,Fixings,5 x 50 mm 50 pcs,40,25,4.99,Zinc
+12,Fixings,3,P050,Wood screw,Fixings,6 x 60 mm 25 pcs,35,50,5.49,Zinc
+12,Fixings,4,P051,Picture hook set,Fixings,20 pcs,45,10,3.99,Brass
+13,Adhesives & sealants,1,P052,Mounting adhesive,Adhesives,290 g,30,40,8.99,White
+13,Adhesives & sealants,1,P053,Wood glue,Adhesives,250 g,25,,5.49,White
+13,Adhesives & sealants,2,P054,Sanitary silicone,Sealants,310 ml,40,,7.99,White
+13,Adhesives & sealants,2,P055,Sanitary silicone,Sealants,310 ml,25,,7.99,Transparent
+13,Adhesives & sealants,3,P056,Acrylic sealant,Sealants,310 ml,30,,4.99,White
+13,Adhesives & sealants,3,P057,Caulking gun,Sealants,For 310 ml cartridges,20,,6.99,
+15,Shelving,1,P058,Shelf bracket,Shelving,150 mm 2 pcs,30,20,5.99,White
+15,Shelving,1,P059,Shelf bracket,Shelving,200 mm 2 pcs,30,30,7.99,White
+15,Shelving,1,P060,Shelf bracket heavy-duty,Shelving,250 mm 2 pcs,20,60,12.99,Black
+15,Shelving,2,P061,Floating shelf kit,Shelving,800 x 200 mm,15,15,29.99,Oak
+15,Shelving,2,P062,Wall rail system,Shelving,1000 mm,12,40,14.99,Silver
+15,Shelving,3,P063,Shelf board,Shelving,800 x 200 x 18 mm,25,20,12.99,White
+15,Shelving,3,P064,Shelf board,Shelving,800 x 250 x 18 mm,20,25,14.99,Oak decor
+18,Timber,1,P065,Wooden block,Timber,44 x 44 x 2000 mm,40,,4.99,Natural pine
+18,Timber,1,P066,Wooden block,Timber,24 x 48 x 2000 mm,50,,3.49,Natural pine
+18,Timber,2,P067,Batten,Timber,18 x 38 x 2400 mm,60,,2.99,Natural spruce
+18,Timber,2,P068,Square timber,Timber,70 x 70 x 2500 mm,15,,12.99,Douglas fir
+18,Timber,3,P069,Glued laminated panel,Timber,1200 x 400 x 18 mm,15,,24.99,Beech
+18,Timber,3,P070,MDF board,Timber,1200 x 600 x 12 mm,20,,14.99,Raw MDF
