@@ -1,71 +1,71 @@
-product_nr,product_name,category,size,description,material,colour,price_eur,max_load_kg,suitable_wall_types,compatible_with,use_cases,requires_professional,safety_note
-P001,Interior wall paint matt,Paint,10 L,Water-based matt wall paint for interior walls and ceilings,Acrylic emulsion,White,49.99,,,P008;P010;P011,painting walls;ceiling,no,
-P002,Interior wall paint matt,Paint,5 L,"Water-based matt wall paint, small pack",Acrylic emulsion,White,29.99,,,P008;P010;P011,painting walls,no,
-P003,Colour wall paint,Paint,2.5 L,Tinted interior wall paint,Acrylic emulsion,Sage green,24.99,,,P008;P009;P010,feature wall;painting walls,no,
-P004,Colour wall paint,Paint,2.5 L,Tinted interior wall paint,Acrylic emulsion,Anthracite grey,24.99,,,P008;P009;P010,feature wall;painting walls,no,
-P005,Wood varnish,Paint,750 ml,Clear protective varnish for indoor wood,Water-based varnish,Clear,14.99,,,P009;P013,furniture;shelf finishing,no,
-P006,Wood stain,Paint,750 ml,Coloured stain for indoor and outdoor wood,Solvent-free stain,Walnut,16.99,,,P009;P013,furniture;garden wood,no,
-P007,Metal protection paint,Paint,750 ml,Rust-protection paint for metal,Alkyd resin,Black,19.99,,,P009;P013,railings;metal parts,no,Use in ventilated area
-P008,Paint roller set,Painting tools,25 cm,Roller with frame and paint tray,Polyester / plastic,,12.99,,,P001;P002;P003;P004,painting walls,no,
-P009,Flat brush set,Painting tools,3 pcs 30/50/70 mm,Flat brushes for edges and wood,Natural bristle,,8.99,,,P003;P005;P006;P007,edges;varnishing,no,
-P010,Masking tape,Painting tools,30 mm x 50 m,Painter tape for clean edges,Paper,Yellow,4.49,,,P001;P002;P003;P004,painting walls,no,
-P011,Drop cloth,Painting tools,4 x 5 m,Plastic sheet to protect floors and furniture,PE plastic,Transparent,5.99,,,P001;P002,painting walls,no,
-P012,Wall filler,Wall repair,500 g,Ready-mixed filler for holes and cracks,Gypsum-based,White,6.49,,,P013,wall repair;filling drill holes,no,
-P013,Sanding paper set,Painting tools,P80/P120/P180,Sandpaper assortment coarse to fine,Aluminium oxide,,5.99,,,P012;P005;P042,sanding wood;wall repair,no,
-P014,LED bulb E27,Lighting,9 W 806 lm,Standard LED bulb,LED,Warm white,3.99,,,,lighting,no,
-P015,LED bulb GU10,Lighting,5 W 345 lm,Spotlight LED bulb,LED,Neutral white,4.49,,,,spotlights,no,
-P016,Extension cord 3-way,Electrical,5 m,3-way socket extension with cable,PVC,White,14.99,,,P039;P040;P041;P042,power for tools,no,
-P017,Installation cable NYM-J,Electrical,3 x 1.5 mm² 10 m,Installation cable for fixed wiring,Copper / PVC,Grey,19.99,,,P018,electrical installation,yes,Electrical work only by a qualified electrician
-P018,Voltage tester,Electrical,12-250 V,Contactless and contact voltage tester,Plastic,,9.99,,,P017;P019,checking cables,no,Does not replace professional measurement
-P019,Light switch flush-mounted,Electrical,55 x 55 mm,Flush-mounted light switch,Thermoplastic,White,6.99,,,P018,replacing switches,yes,Electrical work only by a qualified electrician
-P020,Tap washer set,Plumbing,1/2 in,Rubber washer assortment for taps,Rubber,,3.99,,,P024,fixing dripping tap,no,
-P021,PTFE thread seal tape,Plumbing,12 mm x 12 m,Seal tape for threaded pipe joints,PTFE,White,1.99,,,P022;P023,plumbing joints,no,
-P022,Shower hose,Plumbing,1.75 m,Universal shower hose,Stainless steel,Chrome,14.99,,,P021,shower repair,no,
-P023,Sink siphon,Plumbing,1 1/4 in,Siphon for wash basins,Polypropylene,White,11.99,,,P021,sink repair,no,
-P024,Pipe wrench,Plumbing,1 in,Adjustable pipe wrench,Steel,Red,17.99,,,P020;P021,plumbing repair,no,
-P025,Garden hose,Garden,20 m 1/2 in,Flexible garden hose,PVC,Green,24.99,,,,watering garden,no,
-P026,Potting soil,Garden,40 L,Universal potting soil,Peat-reduced soil,,6.99,,,,planting;repotting,no,
-P027,Work gloves,Safety,Size 9,Work gloves with grip coating,Nylon / nitrile,Grey,4.99,,,,all DIY work,no,
-P028,Safety goggles,Safety,One size,Safety goggles,Polycarbonate,Clear,6.99,,,P039;P040;P041;P042,drilling;sawing;sanding,no,
-P029,Dust mask FFP2,Safety,5 pcs,FFP2 dust mask,Fleece,White,7.99,,,P042;P013,sanding;drilling dust,no,
-P030,Claw hammer,Hand tools,500 g,Claw hammer with fibreglass handle,Steel / fibreglass,,12.99,,,P051,nailing;picture hanging,no,
-P031,Screwdriver set,Hand tools,6 pcs,Slotted and Phillips screwdrivers,Chrome-vanadium steel,,14.99,,,P048;P049;P050,screwing,no,
-P032,Spirit level,Hand tools,60 cm,Spirit level with 3 vials,Aluminium,Yellow,14.99,,,P058;P059;P060;P061;P062,shelf hanging;picture hanging,no,
-P033,Tape measure,Hand tools,5 m,Steel tape measure,Steel / plastic,,7.99,,,,measuring,no,
-P034,Stud and cable detector,Hand tools,Depth up to 50 mm,"Detects studs, metal and live cables in walls",Plastic,,24.99,,,P039;P040,before drilling,no,Always scan wall before drilling
-P035,Masonry drill bit,Drill bits,6 mm,Masonry drill bit for 6 mm plugs,Carbide tip,,3.99,,concrete;brick,P043;P040,drilling concrete;drilling brick,no,
-P036,Masonry drill bit,Drill bits,8 mm,Masonry drill bit for 8 mm plugs,Carbide tip,,4.99,,concrete;brick,P044;P040,drilling concrete;drilling brick,no,
-P037,Masonry drill bit,Drill bits,10 mm,Masonry drill bit for 10 mm plugs,Carbide tip,,5.49,,concrete;brick,P045;P040,drilling concrete;drilling brick,no,
-P038,Wood drill bit set,Drill bits,3-10 mm 7 pcs,Wood drill bits with centre point,HSS steel,,11.99,,,P039,drilling wood,no,
-P039,Cordless drill driver,Power tools,18 V,Cordless drill driver with 2 batteries,Plastic / metal,Green,89.99,,,P038;P048;P049;P050;P028,screwing;drilling wood;drilling plasterboard,no,
-P040,Hammer drill,Power tools,750 W,Hammer drill for concrete and brick,Plastic / metal,Blue,79.99,,,P035;P036;P037;P028;P034,drilling concrete;drilling brick,no,Wear safety goggles
-P041,Jigsaw,Power tools,650 W,Jigsaw for wood and plastic,Plastic / metal,Green,69.99,,,P028;P064;P070,cutting wood;cutting boards,no,Wear safety goggles
-P042,Orbital sander,Power tools,240 W,Orbital sander with dust bag,Plastic / metal,Blue,49.99,,,P013;P029,sanding wood,no,Wear dust mask
-P043,Universal wall plug,Fixings,6 mm 50 pcs,"Universal plug for concrete, brick, plasterboard",Nylon,Grey,3.49,15,concrete;brick;plasterboard,P035;P048,light loads;picture hanging,no,
-P044,Universal wall plug,Fixings,8 mm 50 pcs,"Universal plug for concrete, brick, plasterboard",Nylon,Grey,3.99,25,concrete;brick;plasterboard,P036;P049,shelf hanging;cabinets,no,
-P045,Heavy-duty wall plug,Fixings,10 mm 20 pcs,Heavy-duty plug for concrete and solid brick,Nylon,Grey,5.99,50,concrete;solid brick,P037;P050,heavy shelves;wall cabinets,no,
-P046,Plasterboard anchor,Fixings,M5 10 pcs,Cavity anchor for plasterboard walls,Steel,Silver,6.99,15,plasterboard,P039,plasterboard;light shelves,no,
-P047,Heavy-duty anchor bolt,Fixings,M8 x 80 mm 4 pcs,Steel anchor bolt for heavy loads in concrete,Galvanised steel,Zinc,8.99,100,concrete,P037;P040,heavy loads;wall cabinets,no,Over 50 kg: consider a professional
-P048,Wood screw,Fixings,4 x 40 mm 100 pcs,Wood screw for 6 mm plugs,Galvanised steel,Zinc,4.49,15,,P043;P031;P039,light loads,no,
-P049,Wood screw,Fixings,5 x 50 mm 50 pcs,Wood screw for 8 mm plugs,Galvanised steel,Zinc,4.99,25,,P044;P031;P039,shelf hanging,no,
-P050,Wood screw,Fixings,6 x 60 mm 25 pcs,Wood screw for 10 mm plugs,Galvanised steel,Zinc,5.49,50,,P045;P031;P039,heavy shelves,no,
-P051,Picture hook set,Fixings,20 pcs,Picture hooks with nails,Brass-plated steel,Brass,3.99,10,,P030,picture hanging,no,
-P052,Mounting adhesive,Adhesives,290 g,"Mounting adhesive, no drilling needed",Polymer,White,8.99,40,tile;smooth wall,P057,tiles;light fixtures without drilling,no,
-P053,Wood glue,Adhesives,250 g,White wood glue,PVAc,White,5.49,,,,furniture repair;woodwork,no,
-P054,Sanitary silicone,Sealants,310 ml,Mould-resistant silicone for bathroom and kitchen,Silicone,White,7.99,,,P057,bathroom;kitchen sealing,no,
-P055,Sanitary silicone,Sealants,310 ml,Mould-resistant silicone for bathroom and kitchen,Silicone,Transparent,7.99,,,P057,bathroom;kitchen sealing,no,
-P056,Acrylic sealant,Sealants,310 ml,Paintable acrylic sealant for joints,Acrylic,White,4.99,,,P057;P001,wall joints;skirting boards,no,
-P057,Caulking gun,Sealants,For 310 ml cartridges,Caulking gun for cartridges,Steel,,6.99,,,P052;P054;P055;P056,sealing,no,
-P058,Shelf bracket,Shelving,150 mm 2 pcs,Shelf bracket pair,Steel,White,5.99,20,,P044;P049;P063,shelf hanging,no,
-P059,Shelf bracket,Shelving,200 mm 2 pcs,Shelf bracket pair,Steel,White,7.99,30,,P044;P049;P063;P064,shelf hanging,no,
-P060,Shelf bracket heavy-duty,Shelving,250 mm 2 pcs,Heavy-duty shelf bracket pair,Steel,Black,12.99,60,,P045;P050;P064,heavy shelves,no,
-P061,Floating shelf kit,Shelving,800 x 200 mm,Floating shelf with hidden fixing,Oak veneer / steel,Oak,29.99,15,,P044;P049;P032,decorative shelf,no,
-P062,Wall rail system,Shelving,1000 mm,Wall rail for adjustable shelving,Aluminium,Silver,14.99,40,,P044;P049;P032,shelving system,no,
-P063,Shelf board,Shelving,800 x 200 x 18 mm,Melamine-coated shelf board,Chipboard,White,12.99,20,,P058;P059,shelf hanging,no,
-P064,Shelf board,Shelving,800 x 250 x 18 mm,Melamine-coated shelf board,Chipboard,Oak decor,14.99,25,,P059;P060;P041,shelf hanging,no,
-P065,Wooden block,Timber,44 x 44 x 2000 mm,Planed wooden block,Pine,Natural pine,4.99,,,P041;P038;P053,DIY frames;furniture,no,
-P066,Wooden block,Timber,24 x 48 x 2000 mm,Planed wooden block,Pine,Natural pine,3.49,,,P041;P038;P053,DIY frames;furniture,no,
-P067,Batten,Timber,18 x 38 x 2400 mm,Rough-sawn batten,Spruce,Natural spruce,2.99,,,P041;P038,substructure;battens,no,
-P068,Square timber,Timber,70 x 70 x 2500 mm,Planed square timber,Douglas fir,Douglas fir,12.99,,,P041,garden;load-bearing frames,no,
-P069,Glued laminated panel,Timber,1200 x 400 x 18 mm,Solid wood glued panel,Beech,Beech,24.99,,,P041;P005;P053,tabletops;shelves,no,
-P070,MDF board,Timber,1200 x 600 x 12 mm,MDF board for furniture making,MDF,Raw MDF,14.99,,,P041;P001;P053,furniture;painting,no,
+product_nr,product_name,category,size,description,material,colour,price_eur,max_load_kg,suitable_wall_types,compatible_with,use_cases,requires_professional,safety_note,aisle_nr,aisle_name,shelf_nr,qty_on_shelf
+P001,Interior wall paint matt,Paint,10 L,Water-based matt wall paint for interior walls and ceilings,Acrylic emulsion,White,49.99,,,P008;P010;P011,painting walls;ceiling,no,,1,Wall paint,1,24
+P002,Interior wall paint matt,Paint,5 L,"Water-based matt wall paint, small pack",Acrylic emulsion,White,29.99,,,P008;P010;P011,painting walls,no,,1,Wall paint,1,30
+P003,Colour wall paint,Paint,2.5 L,Tinted interior wall paint,Acrylic emulsion,Sage green,24.99,,,P008;P009;P010,feature wall;painting walls,no,,1,Wall paint,2,18
+P004,Colour wall paint,Paint,2.5 L,Tinted interior wall paint,Acrylic emulsion,Anthracite grey,24.99,,,P008;P009;P010,feature wall;painting walls,no,,1,Wall paint,2,18
+P005,Wood varnish,Paint,750 ml,Clear protective varnish for indoor wood,Water-based varnish,Clear,14.99,,,P009;P013,furniture;shelf finishing,no,,1,Wall paint,3,20
+P006,Wood stain,Paint,750 ml,Coloured stain for indoor and outdoor wood,Solvent-free stain,Walnut,16.99,,,P009;P013,furniture;garden wood,no,,1,Wall paint,3,16
+P007,Metal protection paint,Paint,750 ml,Rust-protection paint for metal,Alkyd resin,Black,19.99,,,P009;P013,railings;metal parts,no,Use in ventilated area,1,Wall paint,4,12
+P008,Paint roller set,Painting tools,25 cm,Roller with frame and paint tray,Polyester / plastic,,12.99,,,P001;P002;P003;P004,painting walls,no,,2,Painting tools,1,25
+P009,Flat brush set,Painting tools,3 pcs 30/50/70 mm,Flat brushes for edges and wood,Natural bristle,,8.99,,,P003;P005;P006;P007,edges;varnishing,no,,2,Painting tools,1,40
+P010,Masking tape,Painting tools,30 mm x 50 m,Painter tape for clean edges,Paper,Yellow,4.49,,,P001;P002;P003;P004,painting walls,no,,2,Painting tools,2,60
+P011,Drop cloth,Painting tools,4 x 5 m,Plastic sheet to protect floors and furniture,PE plastic,Transparent,5.99,,,P001;P002,painting walls,no,,2,Painting tools,2,35
+P012,Wall filler,Wall repair,500 g,Ready-mixed filler for holes and cracks,Gypsum-based,White,6.49,,,P013,wall repair;filling drill holes,no,,2,Painting tools,3,30
+P013,Sanding paper set,Painting tools,P80/P120/P180,Sandpaper assortment coarse to fine,Aluminium oxide,,5.99,,,P012;P005;P042,sanding wood;wall repair,no,,2,Painting tools,3,45
+P014,LED bulb E27,Lighting,9 W 806 lm,Standard LED bulb,LED,Warm white,3.99,,,,lighting,no,,3,Electrical & lighting,1,80
+P015,LED bulb GU10,Lighting,5 W 345 lm,Spotlight LED bulb,LED,Neutral white,4.49,,,,spotlights,no,,3,Electrical & lighting,1,60
+P016,Extension cord 3-way,Electrical,5 m,3-way socket extension with cable,PVC,White,14.99,,,P039;P040;P041;P042,power for tools,no,,3,Electrical & lighting,2,25
+P017,Installation cable NYM-J,Electrical,3 x 1.5 mm² 10 m,Installation cable for fixed wiring,Copper / PVC,Grey,19.99,,,P018,electrical installation,yes,Electrical work only by a qualified electrician,3,Electrical & lighting,2,15
+P018,Voltage tester,Electrical,12-250 V,Contactless and contact voltage tester,Plastic,,9.99,,,P017;P019,checking cables,no,Does not replace professional measurement,3,Electrical & lighting,3,20
+P019,Light switch flush-mounted,Electrical,55 x 55 mm,Flush-mounted light switch,Thermoplastic,White,6.99,,,P018,replacing switches,yes,Electrical work only by a qualified electrician,3,Electrical & lighting,3,30
+P020,Tap washer set,Plumbing,1/2 in,Rubber washer assortment for taps,Rubber,,3.99,,,P024,fixing dripping tap,no,,4,Plumbing,1,50
+P021,PTFE thread seal tape,Plumbing,12 mm x 12 m,Seal tape for threaded pipe joints,PTFE,White,1.99,,,P022;P023,plumbing joints,no,,4,Plumbing,1,70
+P022,Shower hose,Plumbing,1.75 m,Universal shower hose,Stainless steel,Chrome,14.99,,,P021,shower repair,no,,4,Plumbing,2,20
+P023,Sink siphon,Plumbing,1 1/4 in,Siphon for wash basins,Polypropylene,White,11.99,,,P021,sink repair,no,,4,Plumbing,2,15
+P024,Pipe wrench,Plumbing,1 in,Adjustable pipe wrench,Steel,Red,17.99,,,P020;P021,plumbing repair,no,,4,Plumbing,3,10
+P025,Garden hose,Garden,20 m 1/2 in,Flexible garden hose,PVC,Green,24.99,,,,watering garden,no,,5,Garden,1,15
+P026,Potting soil,Garden,40 L,Universal potting soil,Peat-reduced soil,,6.99,,,,planting;repotting,no,,5,Garden,2,40
+P027,Work gloves,Safety,Size 9,Work gloves with grip coating,Nylon / nitrile,Grey,4.99,,,,all DIY work,no,,6,Safety,1,50
+P028,Safety goggles,Safety,One size,Safety goggles,Polycarbonate,Clear,6.99,,,P039;P040;P041;P042,drilling;sawing;sanding,no,,6,Safety,1,30
+P029,Dust mask FFP2,Safety,5 pcs,FFP2 dust mask,Fleece,White,7.99,,,P042;P013,sanding;drilling dust,no,,6,Safety,2,40
+P030,Claw hammer,Hand tools,500 g,Claw hammer with fibreglass handle,Steel / fibreglass,,12.99,,,P051,nailing;picture hanging,no,,7,Hand tools & drill bits,1,20
+P031,Screwdriver set,Hand tools,6 pcs,Slotted and Phillips screwdrivers,Chrome-vanadium steel,,14.99,,,P048;P049;P050,screwing,no,,7,Hand tools & drill bits,1,25
+P032,Spirit level,Hand tools,60 cm,Spirit level with 3 vials,Aluminium,Yellow,14.99,,,P058;P059;P060;P061;P062,shelf hanging;picture hanging,no,,7,Hand tools & drill bits,2,18
+P033,Tape measure,Hand tools,5 m,Steel tape measure,Steel / plastic,,7.99,,,,measuring,no,,7,Hand tools & drill bits,2,40
+P034,Stud and cable detector,Hand tools,Depth up to 50 mm,"Detects studs, metal and live cables in walls",Plastic,,24.99,,,P039;P040,before drilling,no,Always scan wall before drilling,7,Hand tools & drill bits,2,12
+P035,Masonry drill bit,Drill bits,6 mm,Masonry drill bit for 6 mm plugs,Carbide tip,,3.99,,concrete;brick,P043;P040,drilling concrete;drilling brick,no,,7,Hand tools & drill bits,3,35
+P036,Masonry drill bit,Drill bits,8 mm,Masonry drill bit for 8 mm plugs,Carbide tip,,4.99,,concrete;brick,P044;P040,drilling concrete;drilling brick,no,,7,Hand tools & drill bits,3,40
+P037,Masonry drill bit,Drill bits,10 mm,Masonry drill bit for 10 mm plugs,Carbide tip,,5.49,,concrete;brick,P045;P040,drilling concrete;drilling brick,no,,7,Hand tools & drill bits,3,30
+P038,Wood drill bit set,Drill bits,3-10 mm 7 pcs,Wood drill bits with centre point,HSS steel,,11.99,,,P039,drilling wood,no,,7,Hand tools & drill bits,4,20
+P039,Cordless drill driver,Power tools,18 V,Cordless drill driver with 2 batteries,Plastic / metal,Green,89.99,,,P038;P048;P049;P050;P028,screwing;drilling wood;drilling plasterboard,no,,8,Power tools,1,10
+P040,Hammer drill,Power tools,750 W,Hammer drill for concrete and brick,Plastic / metal,Blue,79.99,,,P035;P036;P037;P028;P034,drilling concrete;drilling brick,no,Wear safety goggles,8,Power tools,1,8
+P041,Jigsaw,Power tools,650 W,Jigsaw for wood and plastic,Plastic / metal,Green,69.99,,,P028;P064;P070,cutting wood;cutting boards,no,Wear safety goggles,8,Power tools,2,6
+P042,Orbital sander,Power tools,240 W,Orbital sander with dust bag,Plastic / metal,Blue,49.99,,,P013;P029,sanding wood,no,Wear dust mask,8,Power tools,2,6
+P043,Universal wall plug,Fixings,6 mm 50 pcs,"Universal plug for concrete, brick, plasterboard",Nylon,Grey,3.49,15,concrete;brick;plasterboard,P035;P048,light loads;picture hanging,no,,12,Fixings,1,50
+P044,Universal wall plug,Fixings,8 mm 50 pcs,"Universal plug for concrete, brick, plasterboard",Nylon,Grey,3.99,25,concrete;brick;plasterboard,P036;P049,shelf hanging;cabinets,no,,12,Fixings,1,50
+P045,Heavy-duty wall plug,Fixings,10 mm 20 pcs,Heavy-duty plug for concrete and solid brick,Nylon,Grey,5.99,50,concrete;solid brick,P037;P050,heavy shelves;wall cabinets,no,,12,Fixings,1,30
+P046,Plasterboard anchor,Fixings,M5 10 pcs,Cavity anchor for plasterboard walls,Steel,Silver,6.99,15,plasterboard,P039,plasterboard;light shelves,no,,12,Fixings,2,30
+P047,Heavy-duty anchor bolt,Fixings,M8 x 80 mm 4 pcs,Steel anchor bolt for heavy loads in concrete,Galvanised steel,Zinc,8.99,100,concrete,P037;P040,heavy loads;wall cabinets,no,Over 50 kg: consider a professional,12,Fixings,2,20
+P048,Wood screw,Fixings,4 x 40 mm 100 pcs,Wood screw for 6 mm plugs,Galvanised steel,Zinc,4.49,15,,P043;P031;P039,light loads,no,,12,Fixings,3,40
+P049,Wood screw,Fixings,5 x 50 mm 50 pcs,Wood screw for 8 mm plugs,Galvanised steel,Zinc,4.99,25,,P044;P031;P039,shelf hanging,no,,12,Fixings,3,40
+P050,Wood screw,Fixings,6 x 60 mm 25 pcs,Wood screw for 10 mm plugs,Galvanised steel,Zinc,5.49,50,,P045;P031;P039,heavy shelves,no,,12,Fixings,3,35
+P051,Picture hook set,Fixings,20 pcs,Picture hooks with nails,Brass-plated steel,Brass,3.99,10,,P030,picture hanging,no,,12,Fixings,4,45
+P052,Mounting adhesive,Adhesives,290 g,"Mounting adhesive, no drilling needed",Polymer,White,8.99,40,tile;smooth wall,P057,tiles;light fixtures without drilling,no,,13,Adhesives & sealants,1,30
+P053,Wood glue,Adhesives,250 g,White wood glue,PVAc,White,5.49,,,,furniture repair;woodwork,no,,13,Adhesives & sealants,1,25
+P054,Sanitary silicone,Sealants,310 ml,Mould-resistant silicone for bathroom and kitchen,Silicone,White,7.99,,,P057,bathroom;kitchen sealing,no,,13,Adhesives & sealants,2,40
+P055,Sanitary silicone,Sealants,310 ml,Mould-resistant silicone for bathroom and kitchen,Silicone,Transparent,7.99,,,P057,bathroom;kitchen sealing,no,,13,Adhesives & sealants,2,25
+P056,Acrylic sealant,Sealants,310 ml,Paintable acrylic sealant for joints,Acrylic,White,4.99,,,P057;P001,wall joints;skirting boards,no,,13,Adhesives & sealants,3,30
+P057,Caulking gun,Sealants,For 310 ml cartridges,Caulking gun for cartridges,Steel,,6.99,,,P052;P054;P055;P056,sealing,no,,13,Adhesives & sealants,3,20
+P058,Shelf bracket,Shelving,150 mm 2 pcs,Shelf bracket pair,Steel,White,5.99,20,,P044;P049;P063,shelf hanging,no,,15,Shelving,1,30
+P059,Shelf bracket,Shelving,200 mm 2 pcs,Shelf bracket pair,Steel,White,7.99,30,,P044;P049;P063;P064,shelf hanging,no,,15,Shelving,1,30
+P060,Shelf bracket heavy-duty,Shelving,250 mm 2 pcs,Heavy-duty shelf bracket pair,Steel,Black,12.99,60,,P045;P050;P064,heavy shelves,no,,15,Shelving,1,20
+P061,Floating shelf kit,Shelving,800 x 200 mm,Floating shelf with hidden fixing,Oak veneer / steel,Oak,29.99,15,,P044;P049;P032,decorative shelf,no,,15,Shelving,2,15
+P062,Wall rail system,Shelving,1000 mm,Wall rail for adjustable shelving,Aluminium,Silver,14.99,40,,P044;P049;P032,shelving system,no,,15,Shelving,2,12
+P063,Shelf board,Shelving,800 x 200 x 18 mm,Melamine-coated shelf board,Chipboard,White,12.99,20,,P058;P059,shelf hanging,no,,15,Shelving,3,25
+P064,Shelf board,Shelving,800 x 250 x 18 mm,Melamine-coated shelf board,Chipboard,Oak decor,14.99,25,,P059;P060;P041,shelf hanging,no,,15,Shelving,3,20
+P065,Wooden block,Timber,44 x 44 x 2000 mm,Planed wooden block,Pine,Natural pine,4.99,,,P041;P038;P053,DIY frames;furniture,no,,18,Timber,1,40
+P066,Wooden block,Timber,24 x 48 x 2000 mm,Planed wooden block,Pine,Natural pine,3.49,,,P041;P038;P053,DIY frames;furniture,no,,18,Timber,1,50
+P067,Batten,Timber,18 x 38 x 2400 mm,Rough-sawn batten,Spruce,Natural spruce,2.99,,,P041;P038,substructure;battens,no,,18,Timber,2,60
+P068,Square timber,Timber,70 x 70 x 2500 mm,Planed square timber,Douglas fir,Douglas fir,12.99,,,P041,garden;load-bearing frames,no,,18,Timber,2,15
+P069,Glued laminated panel,Timber,1200 x 400 x 18 mm,Solid wood glued panel,Beech,Beech,24.99,,,P041;P005;P053,tabletops;shelves,no,,18,Timber,3,15
+P070,MDF board,Timber,1200 x 600 x 12 mm,MDF board for furniture making,MDF,Raw MDF,14.99,,,P041;P001;P053,furniture;painting,no,,18,Timber,3,20
