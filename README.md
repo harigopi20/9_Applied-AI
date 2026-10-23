@@ -21,7 +21,7 @@ See [diagrams](diagrams/baumarkt-buddy-diagrams.md) for details.
 ## Repository structure
 | Folder | Content |
 |---|---|
-| `docs/` | Requirements, research, meeting notes, references |
+| `requirements/` | Requirements |
 | `data/` | Product catalogue (CSV) and store map |
 | `diagrams/` | Architecture and planning diagrams |
 | `app/` | App code and AI prompts |
