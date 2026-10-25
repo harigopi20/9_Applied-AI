@@ -58,10 +58,15 @@ flowchart LR
 - **Store data:** stock and aisle/shelf only from the selected store – never invented, never from another store.
 
 ## Look and feel
-Clean DIY-store app style: white surfaces on a light grey page, pill-shaped buttons,
-cards with soft shadows, brand orange **#FF7313** for actions and accents (tokens at
-the top of `app/style.css`). White text on #FF7313 would fail WCAG contrast (2.7:1),
-so orange buttons carry dark text (6.4:1) and orange text uses #B84A00 (5.2:1).
+DIY-store app style: white page, orange header band (**#FF7313**) with a diagonal
+edge and the title in a white box, a round language button, condensed bold
+headlines, black pill buttons and outlined secondary buttons, outlined project
+tiles with line icons, flat product rows with big prices and an availability dot,
+the total in a black price box, and a bottom tab bar (Start · Store · List).
+Only general style cues – no logo, mascot, name or other brand assets of a real
+company. Colour tokens are at the top of `app/style.css`. White text on #FF7313
+would fail WCAG contrast (2.7:1), so text on orange is black and orange text uses
+darker shades (#E05A00 for large bold text, #C85000 for normal text).
 
 ## Using the app
 1. **Start:** notice about AI use, sample data, privacy and the browser speech service.
@@ -113,19 +118,27 @@ typing and the project buttons always work.
 
 ## Store selection by PLZ (FR-29, FR-30)
 - The PLZ is checked in code: exactly 5 digits **and** present in the PLZ table.
-- Valid → stores within `store.maxDistanceKm` (50 km), sorted by straight-line distance, at most `store.maxStoresShown` (5).
-- Invalid, unknown or no store in range → message plus the full store list. **A store is never selected automatically** – not even if only one is in range.
+- Valid → stores within `store.maxDistanceKm` (50 km), sorted by straight-line distance, at most `store.maxStoresShown` (5), with address and opening hours.
+- Invalid, unknown or no store in range → message plus the full store list.
+- **A store is never selected automatically** – not even the nearest one or the only one in range; the customer taps it (RB-16, SR-06). *Team decision 25 Oct 2026: no preselection* – FR-29, design D-11 and TC-38 say the same.
 - Skipped → the complete list with identical checks; aisle, shelf and stock show "not available" plus an "Add postcode" button.
-- The PLZ stays on the device: never sent to the AI, never logged, cleared after the choice.
+- The PLZ stays on the device: never sent to the AI, never logged, cleared after the choice. Only the PLZ centre coordinates are kept in memory for referral distances (FR-31).
 - If the PLZ table or store data fail to load, the app continues without a store.
 
+## Availability in the chosen store (FR-31, RB-21)
+- In the data, an **empty aisle** means the store does not carry the product; **qty 0** means it is out of stock.
+- Such an item **always stays on the list**, marked "Not available in <store> (out of stock / not carried)". Quantities, checks and the total do not change.
+- The app names the **nearest other sample store with qty > 0** within 50 km, measured from the entered PLZ (or from the chosen store if no PLZ was entered): "Available at <store> (x km) – referral". Only the store name and distance are shown – never the other store's aisle, shelf or stock (RB-15 exception, labelled as sample data).
+- If no store nearby has it: "Not available in nearby stores – please ask staff". **No substitute product is ever suggested.**
+- A summary line at the top of the list counts the items the store cannot supply.
+
 ## Run and test locally
-The app loads its data files with `fetch`, so it needs a local web server:
+The app loads its data files with `fetch` – including the team workbook in the
+repository's `data/` folder – so serve the **repository root**:
 ```bash
-cd app
-python3 -m http.server 8000
-# app:   http://localhost:8000/index.html
-# tests: http://localhost:8000/tests.html   (summary at the top: 62 tests)
+python3 -m http.server 8000          # in the repository root
+# app:   http://localhost:8000/app/
+# tests: http://localhost:8000/app/tests.html   (summary at the top: 69 tests)
 ```
 `tests.html` runs all automated tests in the browser against the real data files,
 fixture copies of the catalogue, the AI `mock` mode and a simulated Web Speech API.
@@ -142,25 +155,25 @@ Worker secret, CORS allowlist, 10 requests per minute per IP, logs off, structur
 JSON output. Then set `aiMode: "proxy"` and `ai.proxyUrl` in `app/config.js`.
 
 ## Data and sources
-All prices, stock levels, stores, aisles and shelves are **sample data** and are
-labelled as such in the app (DR-02, NFR-05).
+All prices, stock levels, aisles and shelves are **sample data** and are labelled
+as such in the app (DR-01, NFR-05). The store list says: *"Fictional partnership
+for a university exam scenario. Aisles, shelves, stock and prices are sample data,
+not real store data."* See [`data/README.md`](data/README.md) for the team's notes.
 
-### `app/data/baumarkt-buddy-data.xlsx` – the only product source (DR-01 … DR-03)
-Built from the team's `data/product_catalogue.csv` and `data/store_map.csv` with
-`python3 tools/build_sample_data.py`.
+### `data/product_catalogue.xlsx` – the only product source (DR-01)
+The team's workbook (exports: `products.csv`, `store_stock.csv`, `stores.csv`):
 
-| Sheet | Columns |
+| Sheet | Content |
 |---|---|
-| `Products` | `product_nr`, `product_name`, `variant_group`, `category`, `size`, `pack_qty` (pieces per sales unit; empty = unclear), `pack_unit`, `specs` (`key=value;…`, e.g. `diameter_mm=8`), `description`, `material`, `colour`, `price_eur`, `max_load_kg`, `suitable_wall_types`, `compatible_with`, `use_cases`, `requires_professional`, `safety_note`, `data_status`, `data_note` |
-| `Stores` | `store_id`, `store_name`, `plz`, `city`, `lat`, `lon`, `data_status` |
-| `Stock` | `store_id`, `product_nr`, `stock_qty`, `aisle_nr`, `aisle_name`, `shelf_nr`, `data_status` – empty aisle = unknown, shown as "not available" |
-| `Info` | Sample-data notice and build date |
+| `Products` | Product data once for all stores: `product_nr`, `product_name`, `category`, `size`, `description`, `material`, `colour`, `price_eur`, `max_load_kg`, `suitable_wall_types`, `compatible_with`, `use_cases`, `requires_professional`, `safety_note` – plus the **rule-engine columns** `variant_group`, `pack_qty` (pieces per sales unit; empty = unclear), `pack_unit`, `specs` (`key=value;…`, e.g. `diameter_mm=8`), `data_note` |
+| `Store stock` | Per product and store: `<store_id>_aisle_nr`, `_aisle_name`, `_shelf_nr`, `_qty` (empty aisle = not carried, qty 0 = out of stock) |
+| `Stores` | 5 stores: `store_id`, `store_name`, `street`, `plz`, `city`, `opening_hours`, `lat`, `lon` |
 
-3 sample stores with different data: S01 Berlin (= original `store_map.csv`),
-S02 München (other aisles and stock; no aisle for P036/P049), S03 Hamburg (other
-layout; P060/P061 not stocked). Store coordinates are the centre of the store's PLZ
-from the PLZ table. Added for the sample: `suitable_wall_types` of P051 (picture
-hooks) = brick, plasterboard – **team to verify**.
+The app finds the header row in each sheet (title rows above it are fine) and
+skips legend or note rows. The rule-engine columns are added or refreshed with
+`python3 tools/add_rule_columns.py`, which also re-exports `products.csv`; all other
+cells stay as the team wrote them. Added for the app: `suitable_wall_types` of P051
+(picture hooks) = brick, plasterboard – **team to verify** (noted in `data_note`).
 
 ### Other data files (`app/data/`)
 | File | Content |
@@ -169,19 +182,19 @@ hooks) = brick, plasterboard – **team to verify**.
 | `safety-rules.json` | Clearance phrases (SR-02), weakening phrases (SR-07), high-risk keywords (SR-09) |
 | `understanding-lexicon.json` | Words for the keyword mode (intents, wall types, units, number words DE/EN) |
 | `ai-mock-responses.json` | Fixed AI answers for the `mock` mode and tests |
-| `plz-de.csv` | PLZ reference table (DR-08), see below |
 
-### PLZ reference table `app/data/plz-de.csv` (DR-08)
+### PLZ reference table `data/plz_coordinates.csv` (DR-08)
 | | |
 |---|---|
-| Content | 8,216 German 5-digit postcodes → centre coordinates (`plz,lat,lon`, WGS84) |
-| Source | [OpenGeoDB](https://sourceforge.net/projects/opengeodb/), release 0.2.5a, dump `opengeodb-02513_2007-10-02.sql` ([download](https://sourceforge.net/projects/opengeodb/files/Data/0.2.5a/)) |
-| Licence | Public domain (as stated on the OpenGeoDB SourceForge project page) |
-| Date | Data release 2 Oct 2007; table built 25 Oct 2026 |
-| Method | `python3 -I tools/build_plz_table.py <dump.sql.gz>`: average of the coordinates of all OpenGeoDB locations in Germany that carry the postcode. Postcodes without coordinates are left out – no coordinate is invented. |
-| Limitations | Postcodes created after 2007 are "unknown" (the customer then sees all stores). In large cities many postcodes share the city's coordinates, so distances are approximate. Replace with a current source before real use. |
+| Content | 8,298 German postcodes → centre coordinates (`plz,lat,lon`) |
+| Source | **plz_geocoord** by Markus Konrad, Wissenschaftszentrum Berlin für Sozialforschung (WZB), January 2019 – <https://github.com/WZBSocialScienceCenter/plz_geocoord> (chosen by the data team, see `data/README.md`) |
+| Licence | Apache License 2.0 |
+| Use | Distance sorting of the stores and referral distances; straight-line km, approximate |
 
 ### Third-party code
+Fonts: Barlow and Barlow Condensed (SIL Open Font License 1.1, `app/fonts/OFL-Barlow.txt`),
+self-hosted in `app/fonts/` from the `@fontsource` packages – no request to a font CDN.
+
 `app/lib/xlsx.mini.min.js` – SheetJS Community Edition 0.18.5 (Apache-2.0,
 `app/lib/SHEETJS-LICENSE.txt`), stored in the repo so the app needs no CDN. 0.18.5 has
 known advisories for *untrusted* files; the app only reads its own data file.
@@ -197,8 +210,9 @@ usability test or by hand.
 | **FR-25** speech input | `speech.js`, mic button, consent, editable transcript, tap to continue | FR-25 / NFR-04, FR-25 / NFR-02, FR-25 (abort), manual S1–S5 |
 | **FR-03** intent from text | `ai-adapter.js` (3 modes), `validateOutput` | FR-03 / DR-05, NFR-09 |
 | **FR-27** intent from speech | same adapter on the transcript | RB-18 / SR-11, NFR-09 (speech) |
-| **FR-29** PLZ store selection | `checkPlz`, `findStores`, store screen | RB-16 (×2), FR-29 |
+| **FR-29** PLZ store selection | `checkPlz`, `findStores`, store screen (no preselection) | RB-16 (×2), FR-29, TC-38 / RB-16 |
 | **FR-30** list without PLZ | store bar "Add postcode", `storeInfo` → "not available" | RB-17, FR-30 / RB-17 (UI) |
+| **FR-31** availability + referral | `availability` in `rules.js`, item note and summary line | TC-34, TC-35, TC-36, TC-37, RB-21, RB-15 (FR-31 exception) |
 | **FR-04** capture facts | template questions, fact statuses | SR-01 / FR-04 / FR-05 |
 | **FR-05** max. 3 questions | asks only unconfirmed facts | DR-04 / SR-10, SR-01 / FR-04 / FR-05 |
 | **FR-06** structured BOM | sections materials / tools / safety gear | UC-1 |
@@ -226,24 +240,22 @@ usability test or by hand.
 | **NFR-06** API key, rate limit | `proxy/` Worker | NFR-04 / NFR-06 (client side); proxy tested with a stubbed API |
 | **NFR-07** untrusted input | `textContent` only, data never interpreted, commands are text | RB-09, NFR-07, NFR-07 (speech) |
 | **NFR-09** German and English | `i18n.js`, `de-DE`/`en-US`, number words | NFR-09 (×2), NFR-09 (speech) |
-| **NFR-10** data in files | Excel, JSON, CSV in `app/data/` | DR-01, DR-04 / SR-10 |
-| **DR-01** single Excel file | `data.js` + SheetJS | DR-01 |
-| **DR-02** sample stock/price | `data_status`, "sample" labels | DR-01, NFR-05 |
-| **DR-03** aisle/shelf per store | `Stock` sheet | RB-06, RB-15 |
+| **NFR-10** data in files | Excel and CSV in `data/`, JSON in `app/data/` | DR-01, DR-04 / SR-10 |
+| **DR-01** single Excel file (incl. former DR-02, DR-03) | `data.js` + SheetJS reads `data/product_catalogue.xlsx`; "sample" labels | DR-01, RB-06, RB-15, NFR-05 |
 | **DR-04** 2 templates | `templates/*.json` | DR-04 / SR-10 |
 | **DR-05** schema-validated AI | `validateOutput`, structured output in the proxy | DR-05, FR-03 / DR-05 |
 | **DR-07** evidence log | `evidence` per check and product | DR-07 |
-| **DR-08** PLZ table | `plz-de.csv`, `build_plz_table.py` | DR-08 |
-| Release-blocking tests | – | RB-01, RB-03, RB-04, RB-06, RB-07, RB-08, RB-09, RB-13, RB-15, RB-16, RB-17, RB-18, RB-19, RB-20 |
+| **DR-08** PLZ table | `data/plz_coordinates.csv` | DR-08 |
+| Release-blocking tests | – | RB-01, RB-03, RB-04, RB-06, RB-07, RB-08, RB-09, RB-13, RB-15, RB-16, RB-17, RB-18, RB-19, RB-20, RB-21 |
 
 ## Repository structure
 | Folder | Content |
 |---|---|
 | `app/` | The web app, its data files (`app/data/`) and `tests.html` |
 | `proxy/` | Optional AI proxy (Cloudflare Worker) |
-| `tools/` | Scripts that build the Excel file and the PLZ table |
+| `tools/` | Script that adds the rule-engine columns to the team workbook |
 | `requirements/` | Requirements (R1 MVP, R2–R4) |
-| `data/` | Concept, requirements and design documents, team CSV source data |
+| `data/` | Team data workbook (`product_catalogue.xlsx`) with CSV exports, PLZ table, concept and design documents |
 | `test/` | Test case descriptions |
 | `diagrams/` | Architecture and planning diagrams |
 | `pitch/` | Pitch deck |
@@ -261,6 +273,7 @@ usability test or by hand.
 2-week MVP sprint starting 19 Oct 2026 → final pitch.
 
 ## Limitations
-Sample catalogue (70 products), invented prices, stock and aisle positions, 3 sample
-stores, PLZ data from 2007, two project templates not yet reviewed by the team.
+Sample catalogue (70 products), invented prices, stock and aisle positions, 5 sample
+stores in a fictional partnership scenario (addresses and opening hours to be verified
+by the team), approximate PLZ distances, two project templates not yet reviewed by the team.
 Quantities are estimates. The app does not replace advice from a qualified person.

@@ -98,7 +98,7 @@
 | TC-35 | FR-31, RB-21 | Test data: one listed product with no aisle in all 5 stores | Generate the list | Product stays on the list: "Not available in nearby stores – please ask staff"; no substitute shown | M |
 | TC-36 | FR-31, FR-11 | PLZ 90431 → OBI Nürnberg-Leyh selected | Hang 20 kg shelf on concrete | All items in stock: aisle/shelf of Nürnberg-Leyh shown; no referral text | M |
 | TC-37 | FR-31 | PLZ 90480 → OBI Regensburger Str. selected (P059 not carried) | List contains P059 | Referral names the nearest store with qty > 0; a store with qty 0 is never suggested | M |
-| TC-38 | FR-29 | App start | Enter PLZ 91056 | OBI Erlangen West preselected and shown with "change"; other stores listed by distance | M |
+| TC-38 | FR-29, RB-16 | App start | Enter PLZ 91056 | Stores listed by distance with OBI Erlangen West first; **no store is preselected** – only the customer's tap selects one, then it is shown with "change" (team decision 25 Oct 2026) | M |
 
 ---
 

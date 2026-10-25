@@ -541,6 +541,42 @@
     return { status: "nearby", reason: null, stores: near };
   }
 
+  /**
+   * FR-31 / RB-21: availability of one list item in the selected store.
+   * The item ALWAYS stays on the list – this only adds a marking and, if the
+   * selected store cannot supply it, a referral to the nearest other sample
+   * store that has it in stock (qty > 0), measured from `origin` (the centre of
+   * the entered PLZ, else the selected store). No store in range → ask staff.
+   * Never a substitute product. The referral names only store and distance –
+   * no aisle, shelf or stock of the other store (RB-15 exception, labelled).
+   *
+   * status: no_store | in_stock | out_of_stock | not_carried
+   */
+  function availability(stockIndex, stores, storeId, productNr, origin, cfg) {
+    if (!storeId) return { status: "no_store", referral: null, ask_staff: false };
+    const here = storeInfo(stockIndex, storeId, productNr);
+    let status;
+    if (here.status !== "ok" || here.aisle_nr === null) status = "not_carried";
+    else if (here.stock_qty === null || here.stock_qty <= 0) status = "out_of_stock";
+    else status = "in_stock";
+    if (status === "in_stock") return { status, referral: null, ask_staff: false };
+
+    const selected = (stores || []).find((s) => s.store_id === storeId);
+    const from = origin && Number.isFinite(origin.lat) ? origin : selected;
+    const candidates = (stores || [])
+      .filter((s) => s.store_id !== storeId && Number.isFinite(s.lat) && Number.isFinite(s.lon))
+      .filter((s) => {
+        const row = stockIndex && stockIndex.get(s.store_id + "|" + productNr);
+        return row && row.aisle_nr !== null && row.stock_qty !== null && row.stock_qty > 0;
+      })
+      .map((s) => ({ store: s, km: from && Number.isFinite(from.lat) ? Math.round(distanceKm(from, s) * 10) / 10 : null }))
+      .filter((x) => x.km !== null && x.km <= cfg.maxDistanceKm)
+      .sort((a, b) => a.km - b.km || (a.store.store_id < b.store.store_id ? -1 : 1));
+    return candidates.length
+      ? { status, referral: candidates[0], ask_staff: false }
+      : { status, referral: null, ask_staff: true };
+  }
+
   /** Variants the customer may switch to for a role (same pool as the rule). */
   function variantOptions(template, roleName, catalogue) {
     const all = [].concat(...template.methods.map((m) => m.roles), template.common_roles || []);
@@ -550,7 +586,7 @@
 
   root.BBRules = Object.freeze({
     STATUS, UNKNOWN_VALUE, makeFact, trustedValue,
-    evaluate, storeInfo, variantOptions, compatible, checkPlz, distanceKm, findStores,
+    evaluate, storeInfo, availability, variantOptions, compatible, checkPlz, distanceKm, findStores,
     guardGeneratedText, impliesClearance, checkScope, findPhrase
   });
 })(typeof window !== "undefined" ? window : globalThis);

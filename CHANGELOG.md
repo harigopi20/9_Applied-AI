@@ -4,6 +4,56 @@ All notable changes to this project are documented here.
 Entries are collected under "Unreleased" and grouped into a milestone
 when they are released to `main`.
 
+## Milestone: Design update 2 and store availability (FR-31) – 2026-10-25
+Summary (same as the pull request):
+- Layout and fonts reworked after screenshots of a DIY-store app: orange header band with diagonal edge, condensed headlines, black pill buttons, outlined tiles, flat product rows, black price box, bottom tab bar
+- Self-hosted Barlow / Barlow Condensed fonts (OFL)
+- Own neutral toolbox mark instead of the "B"; no logo or mascot of a real company
+- FR-31: unavailable items stay on the list, marked, with referral to the nearest store with stock or "please ask staff"; no substitutes
+- App switched to the team workbook `data/product_catalogue.xlsx` (5 stores) and `data/plz_coordinates.csv`; rule-engine columns added
+- TC-38 without store preselection (team decision); FR-29, D-11 and TC-38 in the team documents aligned; 69 tests passing
+
+- **2026-10-25 – FR-31: availability in the chosen store and referral; app switched to the team workbook.**
+  The app now reads the team's `data/product_catalogue.xlsx` (5 stores, sheet
+  "Store stock") and `data/plz_coordinates.csv` (WZB, Apache-2.0) as required by
+  DR-01/DR-08; header rows, legend and note rows are handled. The rule-engine
+  columns (`variant_group`, `pack_qty`, `pack_unit`, `specs`, `data_note`) were
+  added to the *Products* sheet by the new `tools/add_rule_columns.py` (other cells
+  unchanged; P051 wall types filled, flagged). Removed the superseded
+  `app/data/baumarkt-buddy-data.xlsx`, `app/data/plz-de.csv` and their build
+  scripts. New `availability()` in `rules.js`: an out-of-stock or not-carried item
+  stays on the list, marked, with the nearest other store with qty > 0 (from the
+  PLZ centre, ≤ 50 km) or "please ask staff"; never a substitute. Store list shows
+  address, opening hours and a fictional-partnership/sample-data note. TC-38 is
+  implemented **without preselection** (RB-16). Tests updated to the 5 stores and
+  extended by TC-34…TC-38, RB-21 (69 passing). README and data/README updated;
+  local testing now serves the repository root.
+  *Why:* team requirement FR-31 (round 5) and DR-01 data merge.
+  *Prompt:* "Yes, implement FR-31, TC-38 without preselection."
+
+- **2026-10-25 – Team documents aligned with "no store preselection":** FR-29 text
+  and simple-language column (`requirements/requirements-R1-MVP.md`, plus a round-6
+  team comment), design element D-11 (`data/03-design.md`) and TC-38
+  (`test/01_test_cases.md`) now say: stores listed nearest first, the customer taps
+  one, nothing is preselected (SR-06, RB-16).
+  *Why:* the documents still described an automatic preselection that the team
+  decided against.
+  *Prompt:* "Yes, update the team documents."
+- **2026-10-25 – Design update 2: DIY-store app layout and fonts.**
+  `app/style.css` rewritten: white page; orange #FF7313 header band with diagonal
+  edge, title in a white box, round language button and toolbox mark; Barlow
+  Condensed headlines and buttons, Barlow body text (self-hosted, OFL); black
+  pill primary buttons and outlined secondary buttons; text field in a pill
+  search-field look with a black round microphone button; project buttons as
+  outlined tiles with line icons; flat product rows with big prices and small
+  cents, availability dot (green = in stock); total in a black price box; bottom
+  tab bar Start · Store · List (new `renderNav` in `app.js`). Contrast kept
+  (black on orange, darker orange for text). The requested OBI beaver image was
+  not used: it is a trademark and mascot of a real company.
+  *Why:* the team wants the look of a familiar DIY-store app.
+  *Prompt:* "These are screenshots of the OBI app, please adapt fonts / layout /
+  design accordingly" and "put the beaver / the photo instead of the B".
+
 ## Milestone: Design update – brand orange #FF7313 – 2026-10-25
 Summary (same as the pull request):
 - Brand orange changed to #FF7313 and app look modernised in a clean DIY-store app style

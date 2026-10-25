@@ -7,6 +7,7 @@
  * Stage 2: free text, AI adapter ("mock" mode, fake proxy), fallback.
  * Stage 3: voice input with a simulated Web Speech API (RB-18/19/20).
  * Stage 4: PLZ check and store selection (RB-16, FR-29, FR-30).
+ * FR-31: availability in the selected store and referral (TC-34…TC-38, RB-21).
  */
 (function () {
   "use strict";
@@ -16,6 +17,7 @@
   const results = [];
   let D = null;          // loaded data (real files)
   let productRows = null; // raw Products rows for fixtures
+  let stockRows = null;   // raw "Store stock" rows for fixtures
 
   // ---------------------------------------------------------------------
   // Mini test framework
@@ -60,9 +62,10 @@
   const SHELF_OK = { wall_type: "concrete", load_kg: 20, shelf_length_cm: 80, shelf_depth_cm: 25 };
 
   /** Renders the result screen of the real app into the sandbox (UI tests). */
-  function renderResult(template, facts, storeId, catalogue) {
+  function renderResult(template, facts, storeId, catalogue, extra) {
     const s = window.BBApp.state;
-    s.data = Object.assign({}, D, catalogue ? { catalogue } : {});
+    s.data = Object.assign({}, D, catalogue ? { catalogue } : {}, (extra && extra.data) || {});
+    s.storeOrigin = (extra && extra.origin) || null;
     s.template = template;
     s.facts = facts;
     s.overrides = {};
@@ -225,19 +228,17 @@
   // ---------------------------------------------------------------------
   // RB-06 – missing aisle/shelf never invented
   // ---------------------------------------------------------------------
-  test("RB-06", "Store S02 has no aisle for P036/P049 → aisle and shelf stay empty", () => {
-    ["P036", "P049"].forEach((nr) => {
-      const s = R.storeInfo(D.stock, "S02", nr);
-      eq(s.status, "ok");
-      eq([s.aisle_nr, s.shelf_nr, s.aisle_name], [null, null, ""], nr);
-    });
-    const notListed = R.storeInfo(D.stock, "S03", "P060");
-    eq([notListed.status, notListed.aisle_nr, notListed.stock_qty], ["not_listed", null, null]);
+  test("RB-06", "NUE-REG does not carry P059 (empty aisle) → aisle, shelf and stock stay empty", () => {
+    const s = R.storeInfo(D.stock, "NUE-REG", "P059");
+    eq(s.status, "ok");
+    eq([s.aisle_nr, s.shelf_nr, s.aisle_name, s.stock_qty], [null, null, "", null]);
+    const unknown = R.storeInfo(D.stock, "NUE-REG", "P999");
+    eq([unknown.status, unknown.aisle_nr, unknown.stock_qty], ["not_listed", null, null]);
   });
 
-  test("RB-06 (UI)", "Rendered list for S02 shows 'not available' for missing aisles, never a number", () => {
-    const box = renderResult(SHELF(), confirmed(SHELF_OK), "S02");
-    ["P036", "P049"].forEach((nr) => {
+  test("RB-06 (UI)", "Rendered list for NUE-REG shows 'not available' for the missing aisle, never a number", () => {
+    const box = renderResult(SHELF(), confirmed(SHELF_OK), "NUE-REG");
+    ["P059"].forEach((nr) => {
       const li = box.querySelector('[data-product="' + nr + '"] .store-info');
       assert(li, "item " + nr + " rendered");
       eq(li.getAttribute("data-aisle"), "none");
@@ -349,10 +350,10 @@
   // ---------------------------------------------------------------------
   // RB-15 – stock and aisle only for the selected store
   // ---------------------------------------------------------------------
-  test("RB-15", "S01 and S02 have different data; each list shows only its own store", () => {
-    const a = R.storeInfo(D.stock, "S01", "P044"), b = R.storeInfo(D.stock, "S02", "P044");
+  test("RB-15", "Stores have different data; each list shows only its own store's aisle and stock", () => {
+    const a = R.storeInfo(D.stock, "NUE-LEY", "P044"), b = R.storeInfo(D.stock, "ERL-OST", "P044");
     assert(a.aisle_nr !== b.aisle_nr && a.stock_qty !== b.stock_qty, "stores differ");
-    ["S01", "S02", "S03"].forEach((sid) => {
+    D.stores.map((x) => x.store_id).forEach((sid) => {
       const box = renderResult(SHELF(), confirmed(SHELF_OK), sid);
       box.querySelectorAll("[data-product]").forEach((li) => {
         const nr = li.getAttribute("data-product");
@@ -368,8 +369,8 @@
   // RB-17 – no PLZ/store: full list, identical checks, no aisle values
   // ---------------------------------------------------------------------
   test("RB-17", "Without store: identical products, checks and total; aisle/shelf/stock 'not available'", () => {
-    const withStore = renderResult(SHELF(), confirmed(SHELF_OK), "S01");
-    assert(withStore.querySelector('.store-info:not([data-aisle="none"])'), "control: store values exist with S01");
+    const withStore = renderResult(SHELF(), confirmed(SHELF_OK), "NUE-LEY");
+    assert(withStore.querySelector('.store-info:not([data-aisle="none"])'), "control: store values exist with NUE-LEY");
     const resWith = window.BBApp.state.result;
     const noStore = renderResult(SHELF(), confirmed(SHELF_OK), null);
     const resWithout = window.BBApp.state.result;
@@ -516,10 +517,10 @@
       proxyUrl: "https://proxy.test/understand",
       fetchImpl: async (u, o) => { sent = JSON.parse(o.body); return { ok: true, status: 200, json: async () => ({ output: JSON.parse(D.mockResponses.responses[0].raw) }) }; }
     });
-    const r = await ok.understand("Regal 12 kg, ich wohne in 80331 München, Tel. 0170 1234567, max@example.com", "de");
+    const r = await ok.understand("Regal 12 kg, ich wohne in 90431 Nürnberg, Tel. 0170 1234567, max@example.com", "de");
     assert(r.ok);
     eq(Object.keys(sent).sort(), ["lang", "text"]);
-    assert(!/80331|1234567|example\.com/.test(sent.text), "redacted: " + sent.text);
+    assert(!/90431|1234567|example\.com/.test(sent.text), "redacted: " + sent.text);
     assert(!/P0\d\d|safety_note/.test(sent.text), "no catalogue data");
   });
 
@@ -813,12 +814,14 @@
   }
   const renderStore = () => { const box = document.getElementById("sandbox"); box.replaceChildren(window.BBApp.viewStore()); return box; };
 
-  test("DR-08", "PLZ reference table loaded (OpenGeoDB) and store coordinates come from it", () => {
+  test("DR-08", "PLZ reference table loaded and store coordinates match their PLZ centre", () => {
     assert(D.plzTable && D.plzTable.size > 8000, "postcodes: " + (D.plzTable && D.plzTable.size));
+    eq(D.stores.length, 5, "5 sample stores (DR-01)");
     D.stores.forEach((st) => {
       const p = D.plzTable.get(st.plz);
       assert(p, "store PLZ in table: " + st.plz);
-      eq([st.lat, st.lon], [p.lat, p.lon], st.store_id + " coordinates = PLZ centre");
+      const km = R.distanceKm(p, st);
+      assert(km < 2, st.store_id + " is " + km.toFixed(2) + " km from its PLZ centre");
     });
   });
 
@@ -835,10 +838,12 @@
   });
 
   test("RB-16 / SR-06", "Valid PLZ with only one store in range still needs a tap; no store near you → message + full list", () => {
+    const one = R.findStores("91056", D.plzTable, D.stores, { maxDistanceKm: 2, maxStoresShown: 5 });
+    eq(one.status, "nearby");
+    eq(one.stores.map((x) => x.store.store_id), ["ERL-WEST"], "only Erlangen West within 2 km");
     const s = storeSetup();
-    const res = window.BBApp.searchStores("10117");
+    const res = window.BBApp.searchStores("91056");
     eq(res.status, "nearby");
-    eq(res.stores.map((x) => x.store.store_id), ["S01"], "only Berlin within 50 km");
     eq(s.storeId, null, "not selected automatically");
     const far = window.BBApp.searchStores("50667"); // Köln
     eq(far.status, "none_in_range");
@@ -849,25 +854,27 @@
 
   test("FR-29", "Stores are sorted by distance and limited by config; selection only by tap", () => {
     const cfg = { maxDistanceKm: 1000, maxStoresShown: 2 };
-    const r = R.findStores("37073", D.plzTable, D.stores, cfg); // Göttingen
+    const r = R.findStores("90431", D.plzTable, D.stores, cfg);
     eq(r.stores.length, 2, "maxStoresShown");
     assert(r.stores[0].km <= r.stores[1].km, "sorted");
-    const all = R.findStores("37073", D.plzTable, D.stores, { maxDistanceKm: 1000, maxStoresShown: 10 });
-    eq(all.stores.map((x) => x.store.store_id), ["S03", "S01", "S02"], "Göttingen: Hamburg, Berlin, München");
+    const all = R.findStores("90431", D.plzTable, D.stores, { maxDistanceKm: 1000, maxStoresShown: 10 });
+    eq(all.stores[0].store.store_id, "NUE-LEY", "Nürnberg-Leyh nearest to 90431");
+    all.stores.forEach((x, i) => { if (i) assert(all.stores[i - 1].km <= x.km, "sorted by distance"); });
     const km = R.distanceKm({ lat: 52.5167, lon: 13.4 }, { lat: 48.15, lon: 11.5833 });
     assert(km > 490 && km < 510, "Berlin–München ≈ 504 km, got " + km);
     const s = storeSetup();
-    window.BBApp.searchStores("80331");
+    window.BBApp.searchStores("90480");
     const box = renderStore();
-    box.querySelector('[data-store="S02"]').click();
-    eq(s.storeId, "S02", "tap selects the store");
+    assert(box.querySelector("[data-store-disclaimer]"), "sample-data / fictional-partnership note");
+    box.querySelector('[data-store="NUE-REG"]').click();
+    eq(s.storeId, "NUE-REG", "tap selects the store");
     eq(s.plzInput, "", "PLZ not kept after selection");
     eq(s.storeSearch, null);
   });
 
   test("NFR-02 (store)", "Store search under 1 second", () => {
     const t0 = performance.now();
-    for (let i = 0; i < 100; i++) R.findStores("20095", D.plzTable, D.stores, CFG.store);
+    for (let i = 0; i < 100; i++) R.findStores("91052", D.plzTable, D.stores, CFG.store);
     const ms = (performance.now() - t0) / 100;
     assert(ms < 1000, ms + " ms");
     return "store search " + ms.toFixed(2) + " ms";
@@ -878,13 +885,13 @@
     const spy = adapter("proxy", { proxyUrl: "https://proxy.test/understand",
       fetchImpl: async (u, o) => { sent = o.body; return { ok: true, status: 200, json: async () => ({ output: JSON.parse(D.mockResponses.responses[0].raw) }) }; } });
     const s = storeSetup();
-    window.BBApp.searchStores("80331");
+    window.BBApp.searchStores("90431");
     s.ai = spy;
     await window.BBApp.submitText("Regal 12 kg Beton");
-    assert(sent && !sent.includes("80331"), "request: " + sent);
+    assert(sent && !sent.includes("90431"), "request: " + sent);
     window.BBApp.startTemplate(SHELF(), {});
     const ev = JSON.stringify(s.result.evidence);
-    assert(!ev.includes("80331"), "PLZ in evidence");
+    assert(!ev.includes("90431"), "PLZ in evidence");
   });
 
   test("FR-30 / RB-17 (UI)", "From the list: 'Add postcode' → choose store → same list with that store's aisles", () => {
@@ -899,18 +906,18 @@
     assert(box.querySelector("#add-plz"), "Add postcode button");
     box.querySelector("#add-plz").click();
     eq(s.screen, "store");
-    window.BBApp.searchStores("20095");
-    window.BBApp.chooseStore("S03");
+    window.BBApp.searchStores("91052");
+    window.BBApp.chooseStore("ERL-OST");
     eq(s.screen, "result", "back to the list");
     box.replaceChildren(window.BBApp.viewResult());
-    eq(box.querySelector("[data-store-bar]").getAttribute("data-store-bar"), "S03");
+    eq(box.querySelector("[data-store-bar]").getAttribute("data-store-bar"), "ERL-OST");
     eq(JSON.stringify(nrs(s.result)), before, "identical products and checks");
     const nr = "P044";
-    eq(box.querySelector('[data-product="' + nr + '"] .store-info').getAttribute("data-aisle"), String(R.storeInfo(D.stock, "S03", nr).aisle_nr));
+    eq(box.querySelector('[data-product="' + nr + '"] .store-info').getAttribute("data-aisle"), String(R.storeInfo(D.stock, "ERL-OST", nr).aisle_nr));
   });
 
   test("NFR-03 (store)", "Missing PLZ table or store sheets → app continues without a store", () => {
-    const r = R.findStores("10117", null, D.stores, CFG.store);
+    const r = R.findStores("90431", null, D.stores, CFG.store);
     eq([r.status, r.reason], ["invalid", "no_table"]);
     eq(r.stores.length, D.stores.length, "store list still offered");
     const wb = XLSX.utils.book_new();
@@ -927,6 +934,99 @@
     box.querySelector("#store-skip").click();
     eq(s.screen, "choose", "continue without store");
     s.data = D;
+  });
+
+  // ---------------------------------------------------------------------
+  // FR-31 / RB-21 – availability in the selected store and referral
+  // ---------------------------------------------------------------------
+  /** Stock index from changed copies of the raw "Store stock" rows. */
+  function fixtureStock(fn) {
+    const rows = stockRows.map((r) => Object.assign({}, r));
+    const byId = {};
+    rows.forEach((r) => { byId[r.product_nr] = r; });
+    fn(byId);
+    return window.BBData.buildStock(rows, D.stores);
+  }
+  const plzPoint = (plz) => R.checkPlz(plz, D.plzTable).point;
+  const avail = (storeId, nr, plz, stock) =>
+    R.availability(stock || D.stock, D.stores, storeId, nr, plz ? plzPoint(plz) : null, CFG.store);
+
+  test("TC-34 / FR-31", "P044 out of stock in Erlangen-Ost → stays on the list, referral to Erlangen West", () => {
+    const a = avail("ERL-OST", "P044", "91052");
+    eq(a.status, "out_of_stock");
+    eq(a.referral.store.store_id, "ERL-WEST");
+    assert(a.referral.km > 0 && a.referral.km < 10, "km " + a.referral.km);
+    const box = renderResult(SHELF(), confirmed(SHELF_OK), "ERL-OST", null, { origin: plzPoint("91052") });
+    const li = box.querySelector('[data-product="P044"]');
+    assert(li, "P044 still on the list");
+    eq(li.getAttribute("data-availability"), "out_of_stock");
+    eq(li.querySelector("[data-referral]").getAttribute("data-referral"), "ERL-WEST");
+    assert(li.querySelector(".referral").textContent.includes("Erlangen West"), "names the store");
+    assert(box.querySelector("[data-missing]"), "summary line on the list");
+  });
+
+  test("TC-35 / RB-21", "Product not carried in any store → 'please ask staff', no substitute", () => {
+    const stock = fixtureStock((byId) => {
+      D.stores.forEach((st) => { byId.P049[st.store_id + "_aisle_nr"] = null; });
+    });
+    const a = avail("NUE-LEY", "P049", "90431", stock);
+    eq([a.status, a.referral, a.ask_staff], ["not_carried", null, true]);
+    const box = renderResult(SHELF(), confirmed(SHELF_OK), "NUE-LEY", null, { data: { stock }, origin: plzPoint("90431") });
+    const li = box.querySelector('[data-product="P049"]');
+    assert(li, "P049 stays on the list");
+    eq(li.querySelector("[data-referral]").getAttribute("data-referral"), "ask_staff");
+    eq(window.BBApp.state.result.items.find((i) => i.role === "screw").product.product_nr, "P049", "no substitute screw");
+  });
+
+  test("TC-36 / FR-31", "Nürnberg-Leyh has everything → aisles of that store, no referral text", () => {
+    const box = renderResult(SHELF(), confirmed(SHELF_OK), "NUE-LEY", null, { origin: plzPoint("90431") });
+    eq(box.querySelectorAll(".referral").length, 0, "no referral");
+    eq(box.querySelector("[data-missing]"), null, "no summary line");
+    box.querySelectorAll("[data-product] .store-info").forEach((n) => assert(n.getAttribute("data-aisle") !== "none", "aisle shown"));
+  });
+
+  test("TC-37 / FR-31", "Referral names the nearest store with qty > 0; a store with qty 0 is never suggested", () => {
+    const a = avail("NUE-REG", "P059", "90480");
+    eq(a.status, "not_carried");
+    const from = plzPoint("90480");
+    const withStock = D.stores.filter((st) => st.store_id !== "NUE-REG" && (R.storeInfo(D.stock, st.store_id, "P059").stock_qty || 0) > 0)
+      .sort((x, y) => R.distanceKm(from, x) - R.distanceKm(from, y));
+    eq(a.referral.store.store_id, withStock[0].store_id, "nearest with stock");
+    const nearest = withStock[0].store_id;
+    const stock = fixtureStock((byId) => { byId.P059[nearest + "_qty"] = 0; });
+    const b = avail("NUE-REG", "P059", "90480", stock);
+    assert(b.referral && b.referral.store.store_id !== nearest, "store with qty 0 not suggested");
+    eq(b.referral.store.store_id, withStock[1].store_id, "next nearest with stock");
+  });
+
+  test("RB-21", "An unavailable part is never removed or replaced: same items, products and total in every store", () => {
+    const base = run(SHELF(), confirmed(SHELF_OK));
+    D.stores.forEach((st) => {
+      const box = renderResult(SHELF(), confirmed(SHELF_OK), st.store_id);
+      const r = window.BBApp.state.result;
+      eq(nrs(r), nrs(base), st.store_id + " products");
+      eq(r.total, base.total, st.store_id + " total");
+      eq(box.querySelectorAll("[data-product]").length, base.items.length, st.store_id + " all rows rendered");
+    });
+  });
+
+  test("RB-15 (FR-31 exception)", "A referral shows only the other store's name and distance – never its aisle, shelf or stock", () => {
+    const box = renderResult(SHELF(), confirmed(SHELF_OK), "ERL-OST", null, { origin: plzPoint("91052") });
+    const ref = box.querySelector('[data-product="P044"] .referral').textContent;
+    const other = R.storeInfo(D.stock, "ERL-WEST", "P044");
+    ["aisle", "shelf", "stock"].forEach((k) => assert(!ref.includes(window.BBI18n.t(k)), "mentions " + k));
+    assert(!ref.includes(" " + other.stock_qty + " "), "no stock number of the other store");
+    assert(ref.includes(window.BBI18n.t("sample_note")), "labelled as sample");
+  });
+
+  test("TC-38 / RB-16", "Valid PLZ 91056: stores sorted by distance, Erlangen West first – but NOT preselected (team decision)", () => {
+    const s = storeSetup();
+    const res = window.BBApp.searchStores("91056");
+    eq(res.status, "nearby");
+    eq(res.stores[0].store.store_id, "ERL-WEST");
+    eq(s.storeId, null, "no automatic preselection");
+    const box = renderStore();
+    eq(box.querySelectorAll(".btn.store.selected").length, 0, "nothing highlighted as chosen");
   });
 
   // ---------------------------------------------------------------------
@@ -959,10 +1059,13 @@
   // ---------------------------------------------------------------------
   // Runner
   // ---------------------------------------------------------------------
-  async function loadProductRows() {
+  async function loadRawRows() {
     const res = await fetch(CFG.data.workbook, { cache: "no-cache" });
     const wb = XLSX.read(await res.arrayBuffer(), { type: "array" });
-    return XLSX.utils.sheet_to_json(wb.Sheets.Products, { defval: null, raw: true });
+    return {
+      products: window.BBData.sheetRows(XLSX, wb.Sheets.Products, "product_nr"),
+      stock: window.BBData.sheetRows(XLSX, wb.Sheets["Store stock"], "product_nr")
+    };
   }
 
   function report(t, status, details) {
@@ -982,7 +1085,9 @@
     window.BBI18n.setLang("en");
     try {
       D = await window.BBData.loadAll(CFG);
-      productRows = await loadProductRows();
+      const raw = await loadRawRows();
+      productRows = raw.products;
+      stockRows = raw.stock;
     } catch (e) {
       report({ id: "SETUP", name: "Load data files" }, "fail", e.message);
     }

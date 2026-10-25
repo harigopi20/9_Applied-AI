@@ -159,7 +159,7 @@ flowchart TD
 | D-8 | Output: `store_id`, `store_status`; aisle/shelf empty without a store | §8 | – |
 | D-9 | Privacy: the PLZ never leaves the device, is not sent to the AI and is not logged | Cross-cutting | DC-37 |
 | D-10 | Unit tests: validator, distance sorting; RB-15, RB-16, RB-17 | §12 | – |
-| D-11 | Nearest store preselected automatically and shown with "change" (FR-29) | L1, L4 | DC-12, DC-43 |
+| D-11 | Stores listed nearest first; the customer taps one – never preselected (team decision 25 Oct 2026, SR-06 / RB-16); the chosen store is shown with "change" (FR-29) | L1, L4 | DC-12, DC-43 |
 | D-12 | Availability referral: item with qty 0 or no aisle in the selected store stays on the list, marked; nearest other store with qty > 0 is named, else "please ask staff"; never removed or substituted (FR-31) | L4, L1 | DC-43, DC-35, DC-04 |
 
 **AI layer (L3): no change.** The AI never receives the PLZ or the store.
