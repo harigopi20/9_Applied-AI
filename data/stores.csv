@@ -1,0 +1,6 @@
+store_id,store_name,street,plz,city,opening_hours,lat,lon,coordinate_source,note
+NUE-LEY,OBI Markt Nürnberg-Leyh,Leyher Str. 123,90431,Nürnberg,Mo–Sa 7:00–20:00,49.445947,11.026757,"PLZ centre (approx.), data/plz_coordinates.csv","Fictional partnership for the exam scenario – aisle, shelf, stock are SAMPLE DATA"
+NUE-REG,OBI Markt Nürnberg Regensburger Straße,Regensburger Str. 250,90480,Nürnberg,Mo–Sa 7:00–20:00,49.441806,11.12342,"PLZ centre (approx.), data/plz_coordinates.csv","Fictional partnership for the exam scenario – aisle, shelf, stock are SAMPLE DATA"
+NUE-BAY,OBI Markt Nürnberg Äußere Bayreuther Straße,Äußere Bayreuther Str. 220,90411,Nürnberg,Mo–Sa 8:00–20:00,49.490474,11.098683,"PLZ centre (approx.), data/plz_coordinates.csv","Fictional partnership for the exam scenario – aisle, shelf, stock are SAMPLE DATA"
+ERL-OST,OBI Markt Erlangen-Ost,Kurt-Schumacher-Straße 14,91052,Erlangen,Mo–Sa 8:00–20:00,49.589036,11.011868,"PLZ centre (approx.), data/plz_coordinates.csv","Fictional partnership for the exam scenario – aisle, shelf, stock are SAMPLE DATA"
+ERL-WEST,OBI Markt Erlangen West (Neumühle),Neumühle 1,91056,Erlangen,Mo–Sa 8:00–20:00,49.590636,10.968277,"PLZ centre (approx.), data/plz_coordinates.csv","Fictional partnership for the exam scenario – aisle, shelf, stock are SAMPLE DATA"
