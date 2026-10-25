@@ -4,7 +4,7 @@
 |---|---|
 | **Document** | `docs/03-design.md` |
 | **V-model phase** | 3 – Design |
-| **Version** | 0.3 (speech input moved to R1) |
+| **Version** | 0.4 (one data workbook, 5 OBI stores, availability referral) |
 | **Date** | 25 October 2026 |
 | **Inputs** | [`docs/01-concept.md`](01-concept.md) · [`requirements/baumarkt-buddy-product-requirements.md`](../requirements/baumarkt-buddy-product-requirements.md) v1.0 · [`diagrams/`](../diagrams/) |
 | **Owner / approver** | App builder · reviewed by Quality & Responsible AI |
@@ -159,6 +159,8 @@ flowchart TD
 | D-8 | Output: `store_id`, `store_status`; aisle/shelf empty without a store | §8 | – |
 | D-9 | Privacy: the PLZ never leaves the device, is not sent to the AI and is not logged | Cross-cutting | DC-37 |
 | D-10 | Unit tests: validator, distance sorting; RB-15, RB-16, RB-17 | §12 | – |
+| D-11 | Nearest store preselected automatically and shown with "change" (FR-29) | L1, L4 | DC-12, DC-43 |
+| D-12 | Availability referral: item with qty 0 or no aisle in the selected store stays on the list, marked; nearest other store with qty > 0 is named, else "please ask staff"; never removed or substituted (FR-31) | L4, L1 | DC-43, DC-35, DC-04 |
 
 **AI layer (L3): no change.** The AI never receives the PLZ or the store.
 
@@ -260,11 +262,12 @@ All values below are **mock values for the prototype** and must be confirmed by 
 
 | File | Content | Key fields |
 |---|---|---|
-| `data/product_catalogue.csv` | 70 products | `product_nr`, `product_name`, `category`, `size`, `price_eur`, `max_load_kg`, `suitable_wall_types`, `compatible_with`, `requires_professional`, `safety_note`, `aisle_nr`, `shelf_nr` |
-| `data/store_map.csv` | Placement and stock | `aisle_nr`, `aisle_name`, `shelf_nr`, `product_nr`, `qty_on_shelf` |
+| `data/product_catalogue.xlsx` – sheet **Products** (export `data/products.csv`) | 70 products, written once for all stores (DR-01) | `product_nr`, `product_name`, `category`, `size`, `price_eur`, `max_load_kg`, `suitable_wall_types`, `compatible_with`, `requires_professional`, `safety_note` |
+| `data/product_catalogue.xlsx` – sheet **Store stock** (export `data/store_stock.csv`) | Aisle, shelf and quantity per product for each store (DR-01) | `product_nr`, then per store `<store_id>_aisle_nr`, `_aisle_name`, `_shelf_nr`, `_qty` · empty aisle = not carried · qty 0 = out of stock |
+| `data/product_catalogue.xlsx` – sheet **Stores** (export `data/stores.csv`) | 5 sample OBI stores: NUE-LEY, NUE-REG, NUE-BAY, ERL-OST, ERL-WEST (fictional partnership for the exam) | `store_id`, `store_name`, `street`, `plz`, `city`, `opening_hours`, `lat`, `lon` |
+| `data/product_catalogue.csv`, `data/store_map.csv` | **Obsolete** since v0.4 – kept for reference only | – |
 | `data/templates/*.json` *(to be created)* | Project templates | `project_type`, `required_facts`, `questions`, `bom_roles`, `quantity_rules`, `review_status` |
-| Stores sheet in the single data file *(new, v0.2)* | Sample stores | `store_id`, `store_name`, `plz`, `city`, `lat`, `lon`; stock and aisle/shelf per `store_id` |
-| PLZ reference table *(new, v0.2, DR-08)* | German PLZ → centre coordinates | `plz`, `lat`, `lon`; source, licence and date documented |
+| `data/plz_coordinates.csv` (DR-08) | German PLZ → centre coordinates (8,298 PLZ) | `plz`, `lat`, `lon` · source: plz_geocoord, WZB Berlin 2019, Apache-2.0 · store coordinates = PLZ centre (approximate) |
 
 ### 7.2 Core entities
 
@@ -413,6 +416,7 @@ Rule: a failed service call never advances a state; any change to material, dime
 | State model (section 9) | State-transition tests | Load change invalidates validated BOM |
 | End-to-end pipeline | System tests / exit tests T1–T5 | UC-1 full list with aisle and shelf |
 | Store selection (§4.2) | Unit + release-blocking tests | Invalid PLZ selects no store (RB-16); skipped PLZ gives full list (RB-17); only the selected store's aisle/shelf (RB-15) |
+| Availability referral (§4.2, D-12) | Release-blocking + system tests | Missing part never removed (RB-21); referral to nearest store with stock (TC-34 to TC-37) |
 | Speech input (§4.3) | Release-blocking + UI tests | Misheard value confirmed (RB-18); microphone denied → typing (RB-19); high-risk by voice refused (RB-20) |
 
 ---
@@ -427,9 +431,9 @@ Rule: a failed service call never advances a state; any change to material, dime
 | DD-4 | Where the orchestrator runs (browser vs. backend) | Backend/edge, to keep API keys and rules off the client |
 | DD-5 | Speech-to-text service | Browser Web Speech API (in R1). Not available in Firefox → typing; audio may be processed by the browser vendor → named in the privacy notice |
 | DD-6 | Distance for "no store near you" and max. stores shown | TBD (team) |
-| DD-7 | Number of sample stores | TBD – at least 2 with different data to test RB-15 |
+| DD-7 | Number of sample stores | **Decided:** 5 OBI stores in Nürnberg and Erlangen (sample data) |
 | DD-8 | Stock and price display without a store | TBD (team) |
-| DD-9 | PLZ data source and licence | Open data; data team chooses |
+| DD-9 | PLZ data source and licence | **Decided:** plz_geocoord (WZB Berlin, Apache-2.0) → `data/plz_coordinates.csv` |
 
 ---
 

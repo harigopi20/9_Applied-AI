@@ -1,0 +1,71 @@
+product_nr,product_name,NUE-LEY_aisle_nr,NUE-LEY_aisle_name,NUE-LEY_shelf_nr,NUE-LEY_qty,NUE-REG_aisle_nr,NUE-REG_aisle_name,NUE-REG_shelf_nr,NUE-REG_qty,NUE-BAY_aisle_nr,NUE-BAY_aisle_name,NUE-BAY_shelf_nr,NUE-BAY_qty,ERL-OST_aisle_nr,ERL-OST_aisle_name,ERL-OST_shelf_nr,ERL-OST_qty,ERL-WEST_aisle_nr,ERL-WEST_aisle_name,ERL-WEST_shelf_nr,ERL-WEST_qty
+P001,Interior wall paint matt,2,Wall paint,1,13,15,Wall paint,1,14,1,Wall paint,1,30,1,Wall paint,1,24,5,Wall paint,1,22
+P002,Interior wall paint matt,2,Wall paint,1,21,15,Wall paint,1,25,1,Wall paint,1,34,1,Wall paint,1,30,5,Wall paint,1,18
+P003,Colour wall paint,2,Wall paint,2,22,15,Wall paint,2,9,1,Wall paint,2,16,1,Wall paint,2,18,5,Wall paint,2,20
+P004,Colour wall paint,2,Wall paint,2,12,15,Wall paint,2,14,1,Wall paint,2,13,1,Wall paint,2,18,5,Wall paint,2,11
+P005,Wood varnish,2,Wall paint,3,27,15,Wall paint,3,25,1,Wall paint,3,24,1,Wall paint,3,20,5,Wall paint,3,20
+P006,Wood stain,2,Wall paint,3,12,15,Wall paint,3,19,1,Wall paint,3,24,1,Wall paint,3,16,5,Wall paint,3,13
+P007,Metal protection paint,2,Wall paint,4,6,15,Wall paint,4,12,1,Wall paint,4,11,1,Wall paint,4,12,5,Wall paint,4,14
+P008,Paint roller set,5,Painting tools,1,23,7,Painting tools,1,31,8,Painting tools,1,34,2,Painting tools,1,25,3,Painting tools,1,16
+P009,Flat brush set,5,Painting tools,1,27,7,Painting tools,1,38,8,Painting tools,1,21,2,Painting tools,1,40,3,Painting tools,1,59
+P010,Masking tape,5,Painting tools,2,31,7,Painting tools,2,82,8,Painting tools,2,62,2,Painting tools,2,60,3,Painting tools,2,34
+P011,Drop cloth,5,Painting tools,2,27,7,Painting tools,2,39,8,Painting tools,2,25,2,Painting tools,2,35,3,Painting tools,2,20
+P012,Wall filler,5,Painting tools,3,29,7,Painting tools,3,19,8,Painting tools,3,30,2,Painting tools,3,30,3,Painting tools,3,35
+P013,Sanding paper set,5,Painting tools,3,31,7,Painting tools,3,48,8,Painting tools,3,50,2,Painting tools,3,45,3,Painting tools,3,67
+P014,LED bulb E27,13,Electrical & lighting,1,108,3,Electrical & lighting,1,78,4,Electrical & lighting,1,108,3,Electrical & lighting,1,80,13,Electrical & lighting,1,109
+P015,LED bulb GU10,13,Electrical & lighting,1,48,3,Electrical & lighting,1,62,4,Electrical & lighting,1,61,3,Electrical & lighting,1,60,13,Electrical & lighting,1,79
+P016,Extension cord 3-way,13,Electrical & lighting,2,30,3,Electrical & lighting,2,18,4,Electrical & lighting,2,34,3,Electrical & lighting,2,25,13,Electrical & lighting,2,16
+P017,Installation cable NYM-J,13,Electrical & lighting,2,13,3,Electrical & lighting,2,18,4,Electrical & lighting,2,12,3,Electrical & lighting,2,15,13,Electrical & lighting,2,10
+P018,Voltage tester,13,Electrical & lighting,3,12,3,Electrical & lighting,3,14,4,Electrical & lighting,3,13,3,Electrical & lighting,3,20,13,Electrical & lighting,3,16
+P019,Light switch flush-mounted,13,Electrical & lighting,3,28,3,Electrical & lighting,3,24,4,Electrical & lighting,3,29,3,Electrical & lighting,3,30,13,Electrical & lighting,3,22
+P020,Tap washer set,1,Plumbing,1,59,2,Plumbing,1,37,2,Plumbing,1,61,4,Plumbing,1,50,12,Plumbing,1,34
+P021,PTFE thread seal tape,1,Plumbing,1,69,2,Plumbing,1,54,2,Plumbing,1,85,4,Plumbing,1,70,12,Plumbing,1,56
+P022,Shower hose,1,Plumbing,2,23,2,Plumbing,2,14,2,Plumbing,2,11,4,Plumbing,2,20,12,Plumbing,2,18
+P023,Sink siphon,1,Plumbing,2,9,2,Plumbing,2,19,2,Plumbing,2,11,4,Plumbing,2,15,12,Plumbing,2,12
+P024,Pipe wrench,1,Plumbing,3,6,2,Plumbing,3,12,2,Plumbing,3,8,4,Plumbing,3,10,12,Plumbing,3,13
+P025,Garden hose,4,Garden,1,9,5,Garden,1,8,7,Garden,1,15,5,Garden,1,15,2,Garden,1,20
+P026,Potting soil,4,Garden,2,40,5,Garden,2,43,7,Garden,2,54,5,Garden,2,40,2,Garden,2,25
+P027,Work gloves,12,Safety,1,68,18,Safety,1,29,12,Safety,1,39,6,Safety,1,50,8,Safety,1,51
+P028,Safety goggles,12,Safety,1,26,18,Safety,1,34,12,Safety,1,16,6,Safety,1,30,8,Safety,1,37
+P029,Dust mask FFP2,12,Safety,2,53,18,Safety,2,36,12,Safety,2,56,6,Safety,2,40,8,Safety,2,21
+P030,Claw hammer,6,Hand tools & drill bits,1,12,1,Hand tools & drill bits,1,21,5,Hand tools & drill bits,1,27,7,Hand tools & drill bits,1,20,18,Hand tools & drill bits,1,29
+P031,Screwdriver set,6,Hand tools & drill bits,1,18,1,Hand tools & drill bits,1,32,5,Hand tools & drill bits,1,32,7,Hand tools & drill bits,1,25,18,Hand tools & drill bits,1,27
+P032,Spirit level,6,Hand tools & drill bits,2,21,1,Hand tools & drill bits,2,23,5,Hand tools & drill bits,2,10,7,Hand tools & drill bits,2,18,18,Hand tools & drill bits,2,17
+P033,Tape measure,6,Hand tools & drill bits,2,51,1,Hand tools & drill bits,2,47,5,Hand tools & drill bits,2,30,7,Hand tools & drill bits,2,40,18,Hand tools & drill bits,2,36
+P034,Stud and cable detector,6,Hand tools & drill bits,2,16,1,Hand tools & drill bits,2,10,5,Hand tools & drill bits,2,8,7,Hand tools & drill bits,2,12,18,Hand tools & drill bits,2,17
+P035,Masonry drill bit,6,Hand tools & drill bits,3,23,1,Hand tools & drill bits,3,21,5,Hand tools & drill bits,3,50,7,Hand tools & drill bits,3,35,18,Hand tools & drill bits,3,36
+P036,Masonry drill bit,6,Hand tools & drill bits,3,42,1,Hand tools & drill bits,3,43,5,Hand tools & drill bits,3,25,7,Hand tools & drill bits,3,40,18,Hand tools & drill bits,3,38
+P037,Masonry drill bit,6,Hand tools & drill bits,3,22,1,Hand tools & drill bits,3,31,5,Hand tools & drill bits,3,19,7,Hand tools & drill bits,3,30,18,Hand tools & drill bits,3,44
+P038,Wood drill bit set,6,Hand tools & drill bits,4,25,1,Hand tools & drill bits,4,28,5,Hand tools & drill bits,4,14,7,Hand tools & drill bits,4,20,18,Hand tools & drill bits,4,14
+P039,Cordless drill driver,7,Power tools,1,11,8,Power tools,1,14,18,Power tools,1,13,8,Power tools,1,10,6,Power tools,1,10
+P040,Hammer drill,7,Power tools,1,10,8,Power tools,1,6,18,Power tools,1,6,8,Power tools,1,8,6,Power tools,1,11
+P041,Jigsaw,7,Power tools,2,8,8,Power tools,2,5,18,Power tools,2,9,8,Power tools,2,6,6,Power tools,2,8
+P042,Orbital sander,7,Power tools,2,9,8,Power tools,2,7,18,Power tools,2,5,8,Power tools,2,6,6,Power tools,2,8
+P043,Universal wall plug,18,Fixings,1,48,6,Fixings,1,46,6,Fixings,1,58,12,Fixings,1,50,7,Fixings,1,68
+P044,Universal wall plug,18,Fixings,1,75,6,Fixings,1,73,6,Fixings,1,35,12,Fixings,1,0,7,Fixings,1,32
+P045,Heavy-duty wall plug,18,Fixings,1,24,6,Fixings,1,15,6,Fixings,1,24,12,Fixings,1,30,7,Fixings,1,35
+P046,Plasterboard anchor,18,Fixings,2,41,6,Fixings,2,27,6,Fixings,2,41,12,Fixings,2,30,7,Fixings,2,30
+P047,Heavy-duty anchor bolt,18,Fixings,2,12,6,Fixings,2,27,6,Fixings,2,30,12,Fixings,2,20,7,Fixings,2,30
+P048,Wood screw,18,Fixings,3,49,6,Fixings,3,58,6,Fixings,3,30,12,Fixings,3,40,7,Fixings,3,59
+P049,Wood screw,18,Fixings,3,56,6,Fixings,3,40,6,Fixings,3,34,12,Fixings,3,40,7,Fixings,3,36
+P050,Wood screw,18,Fixings,3,37,6,Fixings,3,26,6,Fixings,3,20,12,Fixings,3,35,7,Fixings,3,46
+P051,Picture hook set,18,Fixings,4,39,6,Fixings,4,49,6,Fixings,4,31,12,Fixings,4,45,7,Fixings,4,39
+P052,Mounting adhesive,15,Adhesives & sealants,1,40,12,Adhesives & sealants,1,25,13,Adhesives & sealants,1,27,13,Adhesives & sealants,1,30,15,Adhesives & sealants,1,27
+P053,Wood glue,15,Adhesives & sealants,1,33,12,Adhesives & sealants,1,30,13,Adhesives & sealants,1,26,13,Adhesives & sealants,1,25,15,Adhesives & sealants,1,30
+P054,Sanitary silicone,15,Adhesives & sealants,2,49,12,Adhesives & sealants,2,34,13,Adhesives & sealants,2,43,13,Adhesives & sealants,2,40,15,Adhesives & sealants,2,55
+P055,Sanitary silicone,15,Adhesives & sealants,2,21,12,Adhesives & sealants,2,17,13,Adhesives & sealants,2,21,13,Adhesives & sealants,2,25,15,Adhesives & sealants,2,32
+P056,Acrylic sealant,15,Adhesives & sealants,3,30,12,Adhesives & sealants,3,33,13,Adhesives & sealants,3,20,13,Adhesives & sealants,3,30,15,Adhesives & sealants,3,21
+P057,Caulking gun,15,Adhesives & sealants,3,10,12,Adhesives & sealants,3,25,13,Adhesives & sealants,3,21,13,Adhesives & sealants,3,20,15,Adhesives & sealants,3,11
+P058,Shelf bracket,8,Shelving,1,31,4,Shelving,1,30,15,Shelving,1,25,15,Shelving,1,30,4,Shelving,1,43
+P059,Shelf bracket,8,Shelving,1,24,,,,,15,Shelving,1,25,15,Shelving,1,30,4,Shelving,1,31
+P060,Shelf bracket heavy-duty,8,Shelving,1,24,4,Shelving,1,21,15,Shelving,1,29,15,Shelving,1,20,4,Shelving,1,22
+P061,Floating shelf kit,8,Shelving,2,8,4,Shelving,2,15,15,Shelving,2,16,15,Shelving,2,15,4,Shelving,2,18
+P062,Wall rail system,8,Shelving,2,11,4,Shelving,2,6,15,Shelving,2,6,15,Shelving,2,12,4,Shelving,2,17
+P063,Shelf board,8,Shelving,3,15,4,Shelving,3,22,15,Shelving,3,36,15,Shelving,3,25,4,Shelving,3,31
+P064,Shelf board,8,Shelving,3,17,4,Shelving,3,27,15,Shelving,3,0,15,Shelving,3,20,4,Shelving,3,22
+P065,Wooden block,3,Timber,1,59,13,Timber,1,40,3,Timber,1,36,18,Timber,1,40,1,Timber,1,38
+P066,Wooden block,3,Timber,1,63,13,Timber,1,64,3,Timber,1,74,18,Timber,1,50,1,Timber,1,59
+P067,Batten,3,Timber,2,69,13,Timber,2,87,3,Timber,2,36,18,Timber,2,60,1,Timber,2,74
+P068,Square timber,3,Timber,2,13,13,Timber,2,8,3,Timber,2,21,18,Timber,2,15,1,Timber,2,16
+P069,Glued laminated panel,3,Timber,3,9,13,Timber,3,18,3,Timber,3,10,18,Timber,3,15,1,Timber,3,22
+P070,MDF board,3,Timber,3,11,13,Timber,3,20,3,Timber,3,27,18,Timber,3,20,1,Timber,3,17
