@@ -1,0 +1,249 @@
+{
+  "template_id": "hang_shelf",
+  "version": "1.0.0",
+  "comment": "DR-04 project template. All limits and factors are MOCK values (design DD-3) and must be checked by the team before the demo (SR-10). The rule engine (rules.js) interprets this file; no product decision is made by the AI.",
+  "review": {
+    "status": "pending_team_review",
+    "reviewed_by": null,
+    "review_date": null,
+    "created": "2026-10-25"
+  },
+  "title": { "en": "Hang a shelf", "de": "Regal aufhängen" },
+  "icon": "▤",
+  "safety_factor": 1.25,
+  "max_load_kg": 50,
+  "wall_limits": {
+    "plasterboard": { "max_load_kg": 25, "rule_id": "R-08" }
+  },
+  "required_facts": ["wall_type", "load_kg", "shelf_length_cm", "shelf_depth_cm"],
+  "questions": [
+    {
+      "id": "Q1",
+      "fact": "wall_type",
+      "type": "choice",
+      "options": ["concrete", "brick", "plasterboard", "unknown"],
+      "text": { "en": "What is the wall made of?", "de": "Woraus besteht die Wand?" },
+      "help": {
+        "en": "If you are not sure, choose \"I don't know\". We will not guess.",
+        "de": "Wenn Sie unsicher sind, wählen Sie „Weiß ich nicht“. Wir raten nicht."
+      }
+    },
+    {
+      "id": "Q2",
+      "fact": "load_kg",
+      "type": "number",
+      "unit": "kg",
+      "min": 0.5,
+      "max": 500,
+      "allow_unknown": true,
+      "text": {
+        "en": "How heavy will the shelf be in total, including everything on it?",
+        "de": "Wie schwer wird das Regal insgesamt, inklusive allem, was darauf steht?"
+      },
+      "help": {
+        "en": "Round up if in doubt. Books weigh about 1 kg per 4 cm of shelf.",
+        "de": "Im Zweifel aufrunden. Bücher wiegen ca. 1 kg je 4 cm Regalbreite."
+      }
+    },
+    {
+      "id": "Q3",
+      "type": "group",
+      "text": { "en": "How big should the shelf be?", "de": "Wie groß soll das Regal sein?" },
+      "fields": [
+        {
+          "fact": "shelf_length_cm",
+          "type": "number",
+          "unit": "cm",
+          "min": 10,
+          "max": 300,
+          "label": { "en": "Length", "de": "Länge" }
+        },
+        {
+          "fact": "shelf_depth_cm",
+          "type": "choice",
+          "options": [20, 25, "unknown"],
+          "unit": "cm",
+          "label": { "en": "Depth", "de": "Tiefe" }
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "bracket_count": {
+      "rule_id": "SHELF-Q1",
+      "comment": "R-14: one bracket at least every 50 cm of board, minimum 2 (estimate).",
+      "expr": { "max": [2, { "ceil_div": [{ "spec": "board.length_mm" }, 500] }] }
+    },
+    "fixing_points": {
+      "rule_id": "SHELF-Q2",
+      "comment": "R-14: 2 screw holes per bracket (template assumption - check the bracket).",
+      "expr": { "mul": [{ "var": "bracket_count" }, 2] }
+    }
+  },
+  "methods": [
+    {
+      "method_id": "drill",
+      "rule_id": "SHELF-M1",
+      "penetrates_wall": true,
+      "drilling": true,
+      "label": { "en": "Drill and fix with wall plugs", "de": "Bohren und mit Dübeln befestigen" },
+      "roles": [
+        {
+          "role": "board",
+          "section": "materials",
+          "rule_ids": ["R-03"],
+          "label": { "en": "Shelf board", "de": "Regalbrett" },
+          "select": {
+            "variant_groups": ["shelf-board"],
+            "spec_eq": { "depth_mm": { "mul": [{ "fact": "shelf_depth_cm" }, 10] } },
+            "spec_gte": { "length_mm": { "mul": [{ "fact": "shelf_length_cm" }, 10] } },
+            "load_rated": true,
+            "prefer": ["max_load_kg", "price_eur"]
+          },
+          "on_none": "stop",
+          "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
+        },
+        {
+          "role": "bracket",
+          "section": "materials",
+          "rule_ids": ["R-02"],
+          "label": { "en": "Shelf brackets", "de": "Regalträger" },
+          "select": {
+            "variant_groups": ["shelf-bracket", "shelf-bracket-heavy-duty"],
+            "compatible_with_roles": ["board"],
+            "load_rated": true,
+            "prefer": ["max_load_kg", "price_eur"]
+          },
+          "on_none": "stop",
+          "quantity": { "rule_id": "SHELF-Q1", "units": { "var": "bracket_count" } }
+        },
+        {
+          "role": "wall_plug",
+          "section": "materials",
+          "rule_ids": ["R-01", "R-04", "R-07"],
+          "label": { "en": "Wall plugs", "de": "Dübel" },
+          "select": {
+            "variant_groups": ["universal-wall-plug", "heavy-duty-wall-plug"],
+            "compatible_with_roles": ["bracket"],
+            "wall_suitable": true,
+            "load_rated": true,
+            "prefer": ["max_load_kg", "price_eur"]
+          },
+          "on_none": "stop",
+          "quantity": { "rule_id": "SHELF-Q2", "units": { "var": "fixing_points" } }
+        },
+        {
+          "role": "screw",
+          "section": "materials",
+          "rule_ids": ["R-06"],
+          "label": { "en": "Screws", "de": "Schrauben" },
+          "select": {
+            "variant_groups": ["wood-screw"],
+            "compatible_with_roles": ["wall_plug", "bracket"],
+            "load_rated": true,
+            "prefer": ["max_load_kg", "price_eur"]
+          },
+          "on_none": "stop",
+          "quantity": { "rule_id": "SHELF-Q2", "units": { "var": "fixing_points" } }
+        },
+        {
+          "role": "drill_bit",
+          "section": "tools",
+          "rule_ids": ["R-05"],
+          "label": { "en": "Drill bit", "de": "Bohrer" },
+          "select": {
+            "variant_groups": ["masonry-drill-bit"],
+            "compatible_with_roles": ["wall_plug"],
+            "spec_eq_role": { "diameter_mm": "wall_plug" },
+            "wall_suitable": true,
+            "prefer": ["price_eur"]
+          },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
+        },
+        {
+          "role": "drill",
+          "section": "tools",
+          "rule_ids": ["R-09"],
+          "label": { "en": "Drill", "de": "Bohrmaschine" },
+          "select": {
+            "category": ["Power tools"],
+            "use_case_by_wall": {
+              "concrete": "drilling concrete",
+              "brick": "drilling brick",
+              "plasterboard": "drilling plasterboard"
+            },
+            "prefer": ["price_eur"]
+          },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
+        },
+        {
+          "role": "screwdriver",
+          "section": "tools",
+          "rule_ids": ["SHELF-T1"],
+          "label": { "en": "Screwdriver", "de": "Schraubendreher" },
+          "select": { "product_nrs": ["P031"], "compatible_with_roles": ["screw"] },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
+        }
+      ]
+    }
+  ],
+  "common_roles": [
+    {
+      "role": "detector",
+      "section": "tools",
+      "rule_ids": ["R-11"],
+      "label": { "en": "Stud and cable detector", "de": "Leitungssucher" },
+      "select": { "product_nrs": ["P034"] },
+      "on_none": "unresolved",
+      "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
+    },
+    {
+      "role": "spirit_level",
+      "section": "tools",
+      "rule_ids": ["SHELF-T2"],
+      "label": { "en": "Spirit level", "de": "Wasserwaage" },
+      "select": { "product_nrs": ["P032"] },
+      "on_none": "unresolved",
+      "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
+    },
+    {
+      "role": "tape_measure",
+      "section": "tools",
+      "rule_ids": ["SHELF-T2"],
+      "label": { "en": "Tape measure", "de": "Maßband" },
+      "select": { "product_nrs": ["P033"] },
+      "on_none": "unresolved",
+      "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
+    },
+    {
+      "role": "safety_glasses",
+      "section": "safety",
+      "rule_ids": ["R-10"],
+      "label": { "en": "Safety goggles", "de": "Schutzbrille" },
+      "select": { "product_nrs": ["P028"] },
+      "on_none": "unresolved",
+      "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
+    },
+    {
+      "role": "dust_mask",
+      "section": "safety",
+      "rule_ids": ["R-10"],
+      "when": { "wall_in": ["concrete", "brick"] },
+      "label": { "en": "Dust mask", "de": "Staubmaske" },
+      "select": { "product_nrs": ["P029"] },
+      "on_none": "unresolved",
+      "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
+    }
+  ],
+  "rule_texts": {
+    "SHELF-M1": { "en": "Shelf is fixed to the wall with brackets, plugs and screws.", "de": "Regal wird mit Trägern, Dübeln und Schrauben an der Wand befestigt." },
+    "SHELF-Q0": { "en": "1 per project", "de": "1 pro Projekt" },
+    "SHELF-Q1": { "en": "1 bracket per started 50 cm of board, at least 2 (estimate)", "de": "1 Träger je angefangene 50 cm Brett, mindestens 2 (Schätzung)" },
+    "SHELF-Q2": { "en": "2 holes per bracket (estimate - check your bracket)", "de": "2 Löcher je Träger (Schätzung - am Träger prüfen)" },
+    "SHELF-T1": { "en": "Screwdriver that fits the screws", "de": "Schraubendreher passend zu den Schrauben" },
+    "SHELF-T2": { "en": "Measuring and levelling for every mounting job", "de": "Messen und Ausrichten bei jeder Montage" }
+  }
+}

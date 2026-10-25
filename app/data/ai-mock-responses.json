@@ -1,0 +1,15 @@
+{
+  "comment": "Fixed answers for the AI adapter's 'mock' mode (automated tests, demo without AI). 'raw' is the model's raw text, exactly as a model could return it; it is parsed and schema-validated like a real answer (DR-05). The first entry whose 'match' text is contained in the input wins.",
+  "responses": [
+    { "match": "MOCK_SHELF", "raw": "{\"intent\":\"hang_shelf\",\"high_risk\":false,\"facts\":{\"wall_type\":\"concrete\",\"load_kg\":12,\"shelf_length_cm\":80,\"shelf_depth_cm\":25,\"picture_count\":null,\"points_per_picture\":null}}" },
+    { "match": "MOCK_PICTURE", "raw": "{\"intent\":\"hang_picture\",\"high_risk\":false,\"facts\":{\"wall_type\":null,\"load_kg\":3,\"shelf_length_cm\":null,\"shelf_depth_cm\":null,\"picture_count\":2,\"points_per_picture\":null}}" },
+    { "match": "MOCK_HIGH_RISK", "raw": "{\"intent\":\"unsupported\",\"high_risk\":true,\"facts\":{\"wall_type\":null,\"load_kg\":null,\"shelf_length_cm\":null,\"shelf_depth_cm\":null,\"picture_count\":null,\"points_per_picture\":null}}" },
+    { "match": "MOCK_UNSUPPORTED", "raw": "{\"intent\":\"unsupported\",\"high_risk\":false,\"facts\":{\"wall_type\":null,\"load_kg\":null,\"shelf_length_cm\":null,\"shelf_depth_cm\":null,\"picture_count\":null,\"points_per_picture\":null}}" },
+    { "match": "MOCK_INVALID_JSON", "raw": "Sure! Here is the JSON: {intent: hang_shelf" },
+    { "match": "MOCK_EXTRA_FIELD", "raw": "{\"intent\":\"hang_shelf\",\"high_risk\":false,\"products\":[\"P047\"],\"facts\":{\"wall_type\":\"concrete\",\"load_kg\":12,\"shelf_length_cm\":80,\"shelf_depth_cm\":25,\"picture_count\":null,\"points_per_picture\":null}}" },
+    { "match": "MOCK_BAD_VALUE", "raw": "{\"intent\":\"hang_shelf\",\"high_risk\":false,\"facts\":{\"wall_type\":\"safe to drill\",\"load_kg\":-5,\"shelf_length_cm\":80,\"shelf_depth_cm\":25,\"picture_count\":null,\"points_per_picture\":null}}" },
+    { "match": "MOCK_UNKNOWN_INTENT", "raw": "{\"intent\":\"install_ceiling_light\",\"high_risk\":false,\"facts\":{\"wall_type\":null,\"load_kg\":null,\"shelf_length_cm\":null,\"shelf_depth_cm\":null,\"picture_count\":null,\"points_per_picture\":null}}" },
+    { "match": "MOCK_NETWORK_ERROR", "raw": "__network_error__" }
+  ],
+  "default": "{\"intent\":\"unclear\",\"high_risk\":false,\"facts\":{\"wall_type\":null,\"load_kg\":null,\"shelf_length_cm\":null,\"shelf_depth_cm\":null,\"picture_count\":null,\"points_per_picture\":null}}"
+}

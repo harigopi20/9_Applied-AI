@@ -1,0 +1,37 @@
+{
+  "comment": "Safety word lists used by the deterministic rule engine (rules.js). Data, not code (NFR-10). Matching is case-insensitive on normalised text. To be reviewed by the team (SR-10).",
+  "version": "1.0.0",
+  "review": { "status": "pending_team_review", "reviewed_by": null, "review_date": null },
+
+  "clearance_phrases": {
+    "comment": "SR-02 / RB-07: text that would certify a wall or a drilling spot. Any app text containing one of these is rejected.",
+    "en": ["safe to drill", "safe for drilling", "no cables", "no pipes", "free of cables", "free of pipes", "wall is safe", "can drill safely", "drill safely", "guaranteed", "100 %", "100%", "load-bearing enough", "will hold", "certainly holds"],
+    "de": ["sicher bohren", "gefahrlos bohren", "bedenkenlos bohren", "ohne gefahr", "unbedenklich", "keine leitungen", "keine rohre", "frei von leitungen", "wand ist sicher", "garantiert", "hält sicher", "trägt sicher", "tragfähig genug"]
+  },
+
+  "weakening_phrases": {
+    "comment": "SR-07 / RB-08: generated (non-manufacturer) text that would weaken a manufacturer safety note. Such text is discarded; the safety_note is always shown unchanged.",
+    "en": ["not necessary", "not needed", "no need", "unnecessary", "optional", "you can skip", "skip the", "ignore", "not required", "don't bother", "do not bother", "without goggles", "without a mask", "without protection", "no protection"],
+    "de": ["nicht nötig", "nicht notwendig", "nicht erforderlich", "unnötig", "überflüssig", "optional", "weglassen", "ignorieren", "kein muss", "ohne brille", "ohne schutzbrille", "ohne maske", "ohne schutz"]
+  },
+
+  "high_risk_keywords": {
+    "comment": "SR-09 / FR-15: high-risk work is refused with a professional hand-off. Used for typed and spoken text (stage 2/3).",
+    "electrical": {
+      "en": ["electric", "electrical", "wiring", "rewire", "socket", "power outlet", "light switch", "ceiling light", "lamp connection", "fuse", "circuit", "cable installation", "install cable"],
+      "de": ["elektrik", "elektro", "steckdose", "lichtschalter", "deckenlampe", "deckenleuchte", "lampe anschließen", "leitung verlegen", "kabel verlegen", "sicherung", "stromkreis", "verkabel"]
+    },
+    "gas": {
+      "en": ["gas", "gas pipe", "gas boiler", "gas heater", "gas stove"],
+      "de": ["gas", "gasleitung", "gastherme", "gasherd", "gasheizung"]
+    },
+    "load_bearing": {
+      "en": ["load-bearing", "load bearing", "structural wall", "remove a wall", "remove wall", "knock down", "wall breakthrough", "demolish"],
+      "de": ["tragende wand", "tragenden wand", "wand entfernen", "wand einreißen", "durchbruch", "statik", "abreißen"]
+    },
+    "concealed_services": {
+      "en": ["hidden pipe", "hidden cable", "concealed pipe", "concealed cable", "pipe in the wall", "cable in the wall", "water pipe", "heating pipe"],
+      "de": ["verdeckte leitung", "verdeckte rohre", "rohr in der wand", "leitung in der wand", "kabel in der wand", "wasserleitung", "heizungsrohr", "heizungsleitung"]
+    }
+  }
+}

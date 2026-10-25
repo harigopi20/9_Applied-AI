@@ -1,32 +1,246 @@
 # Baumarkt-Buddy 🛠️
-*AI shopping and project assistant for DIY stores – MBA Applied AI group project*
+*Rule-checked shopping assistant for DIY stores – MBA Applied AI group project (vibe coding)*
 
 ## What is it?
-Baumarkt-Buddy is a mobile web app that helps DIY-store customers plan small home projects.
-A customer types a project (e.g. "hang a 20 kg shelf") or takes a photo of a part, and gets:
-- a **shopping list** of the right products
-- a **store map** with the route to each aisle and shelf
-- a **step-by-step guide** for the job
+Baumarkt-Buddy is a mobile web app for DIY-store customers. The customer describes
+a home project – **by typing, by voice or with a project button** – answers at most
+three short questions and gets a **checked shopping list**: materials, tools and
+safety gear with quantity, price, stock and aisle/shelf in the chosen store.
 
-For risky work (electrics, gas, load-bearing walls) the app shows a **"hire a professional"** warning.
+**Safety comes before convenience: when in doubt, the app stops instead of guessing.**
+Dangerous work (electrics, gas, load-bearing walls, hidden pipes and cables) is
+refused with a referral to a professional.
+
+**Release 1 (MVP)** supports two projects – *Hang a shelf* and *Hang a picture* –
+with sample data. Photo entry, saved projects, offline mode, store maps and
+step-by-step guides are planned for later releases
+([R2–R4 requirements](requirements/requirements-R2-R4.md)).
+
+👉 **Live app:** `https://st854d2gpb-create.github.io/9_Applied-AI/` (after GitHub Pages is enabled, see below)
 
 ## Why this idea?
-Real customer problem, our own sample data, low GDPR risk, buildable in 2 weeks, and a clear B2B customer (the DIY store).
+Real customer problem, our own sample data, low GDPR risk, buildable in 2 weeks,
+and a clear B2B customer (the DIY store).
 
 ## How it works
-The AI only recommends products from our own catalogue. Every answer is checked
-(product exists, sizes match, safety rules) before the customer sees it.
-See [diagrams](diagrams/baumarkt-buddy-diagrams.md) for details.
+```mermaid
+flowchart LR
+  A[Type / speak / tap a project] --> B{G0: high-risk?}
+  B -->|yes| X[Stop + professional]
+  B -->|no| C[AI layer: understand only<br/>intent + candidate values]
+  C --> D[Values shown as guesses<br/>max. 3 questions, tap to confirm]
+  D --> E[Rule engine: products, quantities,<br/>compatibility, safety gates]
+  E -->|unknown / unsafe| Y[Safety stop]
+  E --> F[Shopping list + evidence log<br/>aisle/shelf only for the chosen store]
+```
+
+| Layer | File | Responsibility |
+|---|---|---|
+| Input | `app/app.js` | Free text, voice and project buttons. Typed and dictated text use the same path (`submitText`) – no special path for speech |
+| Voice input | `app/speech.js` | Browser Web Speech API → editable transcript; never records, stores or sends audio itself |
+| AI (understanding only) | `app/ai-adapter.js` | Classifies the intent and extracts candidate values as schema-validated JSON. **Never chooses products or decides safety** |
+| AI proxy (optional) | `proxy/` | Cloudflare Worker that keeps the API key server-side and rate-limits |
+| Rule engine (all decisions) | `app/rules.js` | Fact gate, product choice, quantities, compatibility, load limits, notices, evidence log, PLZ check and store search |
+| Data | `app/data.js`, `app/data/` | Loads the Excel file (SheetJS), templates, word lists and the PLZ table – data files, not code |
+| Texts | `app/i18n.js` | All UI texts in English (default) and German |
+| Config | `app/config.js` | Data paths, AI mode, store distance and number of stores shown |
+
+### Safety rules in code
+- **Fact status (SR-01, SR-11):** every value is a *guess* (`observed`, from text or speech), *confirmed by you* (`user-confirmed`, tapped) or *manufacturer data*. Only the last two drive decisions.
+- **Mounting gate (SR-03):** no wall plugs and no final mounting list until wall type **and** load are confirmed.
+- **No certification (SR-02):** the app never says a wall can hold a load or is safe to drill. Every list that goes into the wall shows the **detector-limits notice** – detectors often miss plastic pipes; "nothing found" is no clearance (SR-05).
+- **No adding up (SR-04):** every load-bearing part (board, bracket, plug, screw) must carry the whole load × 1.25 on its own; above 50 kg, or above 25 kg on plasterboard, the app stops.
+- **Fail-safe (SR-06):** unknown, missing or contradictory data → stop with an explanation of what to check.
+- **Manufacturer wins (SR-07):** the product's `safety_note` is shown unchanged; generated text that could weaken it is dropped.
+- **Re-check (SR-08):** changing wall type, load, size or a product variant re-runs all checks.
+- **Scope (SR-09):** high-risk work is refused before the AI is asked – the same for typed and spoken text.
+- **Variants:** a look-alike but wrong screw, plug or drill bit is flagged as "does not fit"; an unclear pack size gives no total.
+- **Store data:** stock and aisle/shelf only from the selected store – never invented, never from another store.
+
+## Using the app
+1. **Start:** notice about AI use, sample data, privacy and the browser speech service.
+2. **Store (optional):** enter a postcode → sample stores within 50 km, nearest first → tap one. Or skip.
+3. **Project:** describe it (type or 🎤) or tap *Hang a shelf* / *Hang a picture*.
+4. **Check:** "Did we understand you correctly?" – recognised values are guesses.
+5. **Questions (max. 3):** wall type, weight, size/number – guesses are pre-filled, you confirm by tapping.
+6. **List:** tick items off, change a variant, change your answers, change or add a store. "Why these products?" opens the evidence log.
+
+## AI adapter modes (`aiMode` in `app/config.js`)
+| Mode | What it does | Cost |
+|---|---|---|
+| `template` **(default – team decision)** | Keyword matching with `data/understanding-lexicon.json`: intents, wall types, units and number words in DE/EN ("zwölf Kilo", "twelve kilos", "80x25 cm") | free |
+| `proxy` | A commercial language model via `proxy/` – built, **not active**. Set `ai.proxyUrl` | API usage |
+| `mock` | Fixed answers from `data/ai-mock-responses.json` for tests and demos; also via `app/index.html?ai=mock` | free |
+
+All modes return the same JSON (`intent`, `high_risk`, `facts`), which is validated
+in code; anything unexpected is discarded. If the AI fails, times out or answers
+invalidly, the app offers the project buttons and keeps the text and the values
+already recognised (NFR-03). Before text goes to the proxy, postcodes, phone numbers
+and e-mail addresses are removed; only `text` and `lang` are sent (NFR-04).
+
+## Voice input (FR-25, FR-27, SR-11)
+First tap on 🎤 → in-app notice about the browser's speech service → "Allow
+microphone" → the browser asks for permission → red recording indicator (stop by
+tap or Esc) → live transcript in the text field → the customer checks or edits it
+and taps **Continue**. Only then is the text processed. Spoken values are guesses
+and are read back in the questions. Language follows the UI (`en-US` / `de-DE`).
+
+| Browser | Voice input | Speech service (may receive the audio) |
+|---|---|---|
+| Chrome (desktop, Android) | yes | Google |
+| Edge | yes | Microsoft |
+| Safari (macOS, iOS) | yes (Siri/dictation must be enabled) | Apple |
+| Firefox | **no** – hint shown; typing and buttons work | – |
+| Other browsers on iOS | depends on the browser | Apple |
+
+Needs HTTPS or `localhost`. Denied, missing or failing microphones show a hint;
+typing and the project buttons always work.
+
+**Manual check with real speech** (automated tests use a simulated speech API):
+| # | Language | Say | Expected |
+|---|---|---|---|
+| S1 | EN | "I want to hang a shelf, twelve kilos, concrete wall, eighty centimetres long" | Shelf; 12 kg, concrete, 80 cm as guesses |
+| S2 | DE | "Ich möchte ein Regal für zwölf Kilo an eine Betonwand hängen, 80 Zentimeter lang" | Regal; 12 kg, Beton, 80 cm als Vermutung |
+| S3 | DE | "Zwei Bilder mit je drei Kilo an die Ziegelwand" | Bild; 3 kg, Ziegel, 2 Bilder |
+| S4 | DE | "Ich will eine Steckdose versetzen" | Stop screen "needs a professional" |
+| S5 | any | Deny the microphone in the browser prompt | Hint; typing and buttons work |
+
+## Store selection by PLZ (FR-29, FR-30)
+- The PLZ is checked in code: exactly 5 digits **and** present in the PLZ table.
+- Valid → stores within `store.maxDistanceKm` (50 km), sorted by straight-line distance, at most `store.maxStoresShown` (5).
+- Invalid, unknown or no store in range → message plus the full store list. **A store is never selected automatically** – not even if only one is in range.
+- Skipped → the complete list with identical checks; aisle, shelf and stock show "not available" plus an "Add postcode" button.
+- The PLZ stays on the device: never sent to the AI, never logged, cleared after the choice.
+- If the PLZ table or store data fail to load, the app continues without a store.
+
+## Run and test locally
+The app loads its data files with `fetch`, so it needs a local web server:
+```bash
+cd app
+python3 -m http.server 8000
+# app:   http://localhost:8000/index.html
+# tests: http://localhost:8000/tests.html   (summary at the top: 62 tests)
+```
+`tests.html` runs all automated tests in the browser against the real data files,
+fixture copies of the catalogue, the AI `mock` mode and a simulated Web Speech API.
+
+## Publish on GitHub Pages
+Settings → Pages → *Deploy from a branch* → `main`, folder `/ (root)` → Save.
+The root `index.html` forwards to `app/`; `.nojekyll` serves files as they are.
+No build step. To use the AI proxy on Pages, add the Pages origin to the proxy's
+`ALLOWED_ORIGINS`.
+
+## Set up the AI proxy (optional)
+See [`proxy/README.md`](proxy/README.md): Cloudflare Worker (free plan), API key as
+Worker secret, CORS allowlist, 10 requests per minute per IP, logs off, structured
+JSON output. Then set `aiMode: "proxy"` and `ai.proxyUrl` in `app/config.js`.
+
+## Data and sources
+All prices, stock levels, stores, aisles and shelves are **sample data** and are
+labelled as such in the app (DR-02, NFR-05).
+
+### `app/data/baumarkt-buddy-data.xlsx` – the only product source (DR-01 … DR-03)
+Built from the team's `data/product_catalogue.csv` and `data/store_map.csv` with
+`python3 tools/build_sample_data.py`.
+
+| Sheet | Columns |
+|---|---|
+| `Products` | `product_nr`, `product_name`, `variant_group`, `category`, `size`, `pack_qty` (pieces per sales unit; empty = unclear), `pack_unit`, `specs` (`key=value;…`, e.g. `diameter_mm=8`), `description`, `material`, `colour`, `price_eur`, `max_load_kg`, `suitable_wall_types`, `compatible_with`, `use_cases`, `requires_professional`, `safety_note`, `data_status`, `data_note` |
+| `Stores` | `store_id`, `store_name`, `plz`, `city`, `lat`, `lon`, `data_status` |
+| `Stock` | `store_id`, `product_nr`, `stock_qty`, `aisle_nr`, `aisle_name`, `shelf_nr`, `data_status` – empty aisle = unknown, shown as "not available" |
+| `Info` | Sample-data notice and build date |
+
+3 sample stores with different data: S01 Berlin (= original `store_map.csv`),
+S02 München (other aisles and stock; no aisle for P036/P049), S03 Hamburg (other
+layout; P060/P061 not stocked). Store coordinates are the centre of the store's PLZ
+from the PLZ table. Added for the sample: `suitable_wall_types` of P051 (picture
+hooks) = brick, plasterboard – **team to verify**.
+
+### Other data files (`app/data/`)
+| File | Content |
+|---|---|
+| `templates/hang-shelf.json`, `templates/hang-picture.json` | The 2 project templates (DR-04): questions, quantity rules, rule IDs, limits, review status (`pending_team_review` – set `status`, `reviewed_by`, `review_date` after the team review, SR-10) |
+| `safety-rules.json` | Clearance phrases (SR-02), weakening phrases (SR-07), high-risk keywords (SR-09) |
+| `understanding-lexicon.json` | Words for the keyword mode (intents, wall types, units, number words DE/EN) |
+| `ai-mock-responses.json` | Fixed AI answers for the `mock` mode and tests |
+| `plz-de.csv` | PLZ reference table (DR-08), see below |
+
+### PLZ reference table `app/data/plz-de.csv` (DR-08)
+| | |
+|---|---|
+| Content | 8,216 German 5-digit postcodes → centre coordinates (`plz,lat,lon`, WGS84) |
+| Source | [OpenGeoDB](https://sourceforge.net/projects/opengeodb/), release 0.2.5a, dump `opengeodb-02513_2007-10-02.sql` ([download](https://sourceforge.net/projects/opengeodb/files/Data/0.2.5a/)) |
+| Licence | Public domain (as stated on the OpenGeoDB SourceForge project page) |
+| Date | Data release 2 Oct 2007; table built 25 Oct 2026 |
+| Method | `python3 -I tools/build_plz_table.py <dump.sql.gz>`: average of the coordinates of all OpenGeoDB locations in Germany that carry the postcode. Postcodes without coordinates are left out – no coordinate is invented. |
+| Limitations | Postcodes created after 2007 are "unknown" (the customer then sees all stores). In large cities many postcodes share the city's coordinates, so distances are approximate. Replace with a current source before real use. |
+
+### Third-party code
+`app/lib/xlsx.mini.min.js` – SheetJS Community Edition 0.18.5 (Apache-2.0,
+`app/lib/SHEETJS-LICENSE.txt`), stored in the repo so the app needs no CDN. 0.18.5 has
+known advisories for *untrusted* files; the app only reads its own data file.
+Newer versions are on cdn.sheetjs.com.
+
+## Requirement → implementation → test (Release 1)
+Tests are in `app/tests.html` (ID in the first column). "Manual" = checked in the
+usability test or by hand.
+
+| Req. | Implementation | Test |
+|---|---|---|
+| **FR-02** free text / buttons | `viewChoose`, `submitText` | FR-02, UC-1 |
+| **FR-25** speech input | `speech.js`, mic button, consent, editable transcript, tap to continue | FR-25 / NFR-04, FR-25 / NFR-02, FR-25 (abort), manual S1–S5 |
+| **FR-03** intent from text | `ai-adapter.js` (3 modes), `validateOutput` | FR-03 / DR-05, NFR-09 |
+| **FR-27** intent from speech | same adapter on the transcript | RB-18 / SR-11, NFR-09 (speech) |
+| **FR-29** PLZ store selection | `checkPlz`, `findStores`, store screen | RB-16 (×2), FR-29 |
+| **FR-30** list without PLZ | store bar "Add postcode", `storeInfo` → "not available" | RB-17, FR-30 / RB-17 (UI) |
+| **FR-04** capture facts | template questions, fact statuses | SR-01 / FR-04 / FR-05 |
+| **FR-05** max. 3 questions | asks only unconfirmed facts | DR-04 / SR-10, SR-01 / FR-04 / FR-05 |
+| **FR-06** structured BOM | sections materials / tools / safety gear | UC-1 |
+| **FR-08** catalogue products only | role pools from the catalogue, G2 check | UC-1, G2 / R-16 |
+| **FR-09** compatibility | `compatible_with`, `specs` checks | RB-03 (×3) |
+| **FR-11** price, stock, aisle | item view, `storeInfo` | RB-15, RB-06 |
+| **FR-15** safety stops | stop and high-risk screens | RB-01, R-08 / TC-R1-14, R-12, SR-09 / G0 |
+| **SR-01** guesses vs facts | `trustedValue`, statuses | SR-11 / RB-18, NFR-07 |
+| **SR-11** speech guesses | `speech:` source, read-back | RB-18 / SR-11 |
+| **SR-02** no certification | notice `no_wall_certification`, clearance phrases | RB-07 (×3) |
+| **SR-03** mounting gate | G1 fact gate | RB-01 / SR-03 |
+| **SR-04** no adding up | per-part load check × safety factor | SR-04 |
+| **SR-05** detector limits | notice `detector_limits` on every wall list | RB-07 / SR-05 |
+| **SR-06** stop when unsure | `safety_blocked`, stores never auto-selected | RB-01, RB-16 / SR-06 |
+| **SR-07** manufacturer wins | `safety_note` unchanged, `guardGeneratedText` | RB-08, RB-08 (UI) |
+| **SR-08** re-check on change | `afterFactsChanged`, variant change | RB-04 / SR-08 (×2) |
+| **SR-09** refuse high-risk | `checkScope` before the AI | SR-09, SR-09 / G0, RB-20 |
+| **SR-10** template review | review fields in templates, status in the list | DR-04 / SR-10, NFR-05 |
+| **NFR-01** mobile-first | one column, ≥ 44 px targets, 320–1280 px checked | manual (responsive audit, usability test) |
+| **NFR-12** list < 2 min | ≤ 3 questions, pre-filled guesses | manual (usability test) |
+| **NFR-02** performance | in-browser rules, no server round trip | NFR-02, NFR-02 (store), FR-25 / NFR-02 |
+| **NFR-03** AI / mic / store failure | template fallback, typing fallback, no-store path | NFR-03 (×2), RB-19 (×2), NFR-03 (store) |
+| **NFR-04** privacy | no login/storage, redaction, PLZ on device, no audio | NFR-04 / NFR-06, NFR-04 / NFR-07, NFR-04 (speech) |
+| **NFR-05** transparency | AI notice per mode, sample/estimate labels, "how this list was made" | NFR-05 |
+| **NFR-06** API key, rate limit | `proxy/` Worker | NFR-04 / NFR-06 (client side); proxy tested with a stubbed API |
+| **NFR-07** untrusted input | `textContent` only, data never interpreted, commands are text | RB-09, NFR-07, NFR-07 (speech) |
+| **NFR-09** German and English | `i18n.js`, `de-DE`/`en-US`, number words | NFR-09 (×2), NFR-09 (speech) |
+| **NFR-10** data in files | Excel, JSON, CSV in `app/data/` | DR-01, DR-04 / SR-10 |
+| **DR-01** single Excel file | `data.js` + SheetJS | DR-01 |
+| **DR-02** sample stock/price | `data_status`, "sample" labels | DR-01, NFR-05 |
+| **DR-03** aisle/shelf per store | `Stock` sheet | RB-06, RB-15 |
+| **DR-04** 2 templates | `templates/*.json` | DR-04 / SR-10 |
+| **DR-05** schema-validated AI | `validateOutput`, structured output in the proxy | DR-05, FR-03 / DR-05 |
+| **DR-07** evidence log | `evidence` per check and product | DR-07 |
+| **DR-08** PLZ table | `plz-de.csv`, `build_plz_table.py` | DR-08 |
+| Release-blocking tests | – | RB-01, RB-03, RB-04, RB-06, RB-07, RB-08, RB-09, RB-13, RB-15, RB-16, RB-17, RB-18, RB-19, RB-20 |
 
 ## Repository structure
 | Folder | Content |
 |---|---|
-| `requirements/` | Requirements |
-| `data/` | Product catalogue (CSV) and store map |
+| `app/` | The web app, its data files (`app/data/`) and `tests.html` |
+| `proxy/` | Optional AI proxy (Cloudflare Worker) |
+| `tools/` | Scripts that build the Excel file and the PLZ table |
+| `requirements/` | Requirements (R1 MVP, R2–R4) |
+| `data/` | Concept, requirements and design documents, team CSV source data |
+| `test/` | Test case descriptions |
 | `diagrams/` | Architecture and planning diagrams |
-| `app/` | App code and AI prompts |
-| `tests/` | Test cases and results |
-| `pitch/` | Pitch deck and demo video link |
+| `pitch/` | Pitch deck |
 
 ## Team
 | Role | Member |
@@ -41,4 +255,6 @@ See [diagrams](diagrams/baumarkt-buddy-diagrams.md) for details.
 2-week MVP sprint starting 19 Oct 2026 → final pitch.
 
 ## Limitations
-Sample catalogue (70 products), invented prices and aisle positions, no live stock data.
+Sample catalogue (70 products), invented prices, stock and aisle positions, 3 sample
+stores, PLZ data from 2007, two project templates not yet reviewed by the team.
+Quantities are estimates. The app does not replace advice from a qualified person.
