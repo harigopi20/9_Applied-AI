@@ -5,7 +5,7 @@
  * project templates (data/templates/*.json, DR-04) and are reviewed there.
  */
 window.BB_CONFIG = Object.freeze({
-  version: "R1-MVP stage 4",
+  version: "R1-MVP",
 
   // NFR-09: English is the default UI language; German via the toggle.
   // Team decision 2026-10-25: English default (NFR-09 text says German default).
