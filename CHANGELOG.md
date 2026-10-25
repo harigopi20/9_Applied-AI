@@ -52,3 +52,7 @@ when they are released to `main`.
   `template`; the proxy is built but not active (option a).
   *Prompt:* "We thought we'd use option 1: dictation only (free) … a) please, then
   continue with stage 2."
+- **2026-10-25 – CODEOWNERS covers `proxy/` and `tools/`:** changes to the AI
+  proxy and the data build script need approval by @st854d2gpb-create.
+  *Why:* the proxy handles the API key setup and rate limits; it is app code.
+  *Prompt:* "Yes, add CODEOWNERS and continue with stage 3."

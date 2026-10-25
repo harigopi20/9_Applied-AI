@@ -8,6 +8,10 @@
 /app/          @st854d2gpb-create
 /APP           @st854d2gpb-create
 
+# AI proxy (holds the API key setup and rate limits)
+/proxy/        @st854d2gpb-create
+/tools/        @st854d2gpb-create
+
 # Deployment, repository settings and working rules
 /.github/      @st854d2gpb-create
 /CLAUDE.md     @st854d2gpb-create
