@@ -30,15 +30,16 @@ See [diagrams](diagrams/baumarkt-buddy-diagrams.md) for details.
 
 ## App (Release 1 MVP – in progress)
 The app lives in [`app/`](app/): a static web app (HTML, CSS, vanilla JavaScript,
-no build step) for GitHub Pages. **Status: stage 1 of 5** – project buttons,
-follow-up questions, rule engine, safety stops and shopping list. Free text with
-AI (stage 2), voice input (stage 3) and PLZ/store selection (stage 4) follow.
+no build step) for GitHub Pages. **Status: stage 2 of 5** – free-text entry and
+project buttons, follow-up questions, rule engine, safety stops and shopping
+list. Voice input (stage 3) and PLZ/store selection (stage 4) follow.
 
 ### Architecture
 | Layer | File | Responsibility |
 |---|---|---|
-| Input | `app/app.js` | Project buttons (stage 1); text and speech deliver the same confirmed text later |
-| AI (understanding only) | `ai-adapter.js` *(stage 2)* | Classify intent, extract candidate values as validated JSON – never decides |
+| Input | `app/app.js` | Free text and project buttons; dictated text (stage 3) uses the same `submitText` path |
+| AI (understanding only) | `app/ai-adapter.js` | Classify intent, extract candidate values as schema-validated JSON – never decides |
+| AI proxy (optional) | `proxy/` | Cloudflare Worker that holds the API key and rate-limits (see `proxy/README.md`) |
 | Rule engine (all decisions) | `app/rules.js` | Fact gate, product choice, quantities, compatibility, load limits, notices, evidence log |
 | Data | `app/data.js`, `app/data/` | Loads the Excel file (SheetJS) and the JSON templates / safety word lists |
 | Texts | `app/i18n.js` | All UI texts in English (default, team decision 2026-10-25 – deviates from "German default" in NFR-09) and German |
@@ -51,6 +52,25 @@ ratings are never added up (SR-04); unknown or missing → stop (SR-06); the
 product `safety_note` is shown unchanged (SR-07); every list that goes into the
 wall shows the detector-limits notice (SR-05); aisle/shelf/stock only from the
 selected store, never invented (RB-06, RB-15).
+
+### AI adapter modes (`aiMode` in `app/config.js`)
+| Mode | What it does | Cost |
+|---|---|---|
+| `template` **(default, team decision)** | Keyword matching with `data/understanding-lexicon.json` (intents, wall types, units, number words DE/EN such as "zwölf Kilo", "twelve kilos") | free |
+| `proxy` | Commercial model via `proxy/` (built, not active). Set `ai.proxyUrl` | API usage |
+| `mock` | Fixed answers from `data/ai-mock-responses.json` for tests and demos; also via `index.html?ai=mock` | free |
+
+All modes return the same JSON schema (`intent`, `high_risk`, `facts`), validated
+in code; invalid answers are discarded. Flow for free text:
+1. G0 high-risk check in code (`checkScope`) – before and independent of the AI (SR-09).
+2. Adapter → project + recognised values, all with status `observed` (“guess”).
+3. "Did we understand you correctly?" screen, then at most 3 questions with the
+   guesses pre-filled; only tapped answers become `user-confirmed` (SR-01, FR-04, FR-05).
+4. Unsupported/unclear text → hint + the two project buttons. AI failure, timeout
+   or invalid answer → project buttons; the text and keyword guesses are kept (NFR-03).
+
+Before anything is sent to the proxy, postcodes (5 digits), phone numbers and
+e-mail addresses are removed from the text (NFR-04). Only `text` and `lang` are sent.
 
 ### Data file `app/data/baumarkt-buddy-data.xlsx` (DR-01 … DR-03)
 Built from `data/product_catalogue.csv` and `data/store_map.csv` with
@@ -67,6 +87,8 @@ Built from `data/product_catalogue.csv` and `data/store_map.csv` with
 aisles and stock; no aisle for P036/P049), S03 Hamburg (other layout; P060/P061
 not stocked). Added for the sample: `suitable_wall_types` of P051 (picture hooks)
 = brick, plasterboard – **team to verify**.
+
+Further data files: `understanding-lexicon.json` (keyword mode), `ai-mock-responses.json` (mock mode).
 
 Project templates (DR-04): `app/data/templates/hang-shelf.json` and
 `hang-picture.json` with rule IDs, quantity rules and review status
@@ -85,6 +107,11 @@ python3 -m http.server 8000
 ### Publish on GitHub Pages
 Settings → Pages → "Deploy from a branch" → `main`, folder `/ (root)`. The app is
 then at `https://<user>.github.io/<repo>/app/`. No build step needed.
+
+### Set up the AI proxy (optional)
+See [`proxy/README.md`](proxy/README.md): Cloudflare Worker (free plan), API key as
+Worker secret, CORS allowlist, 10 requests/minute per IP, logs off. Then set
+`aiMode: "proxy"` and `ai.proxyUrl` in `app/config.js`.
 
 ### Third-party code
 `app/lib/xlsx.mini.min.js` – SheetJS Community Edition 0.18.5 (Apache-2.0,
@@ -109,6 +136,13 @@ own data file. Newer versions are published on cdn.sheetjs.com (replace the file
 | NFR-07 / RB-09 | text via `textContent`, data never interpreted | RB-09 |
 | DR-07 | evidence log per check and product | DR-07 |
 | NFR-02 | – | NFR-02 |
+| FR-02, FR-03, DR-05 | free text, `ai-adapter.js` (3 modes), `validateOutput` | FR-03 / DR-05, DR-05, FR-02 |
+| NFR-03 | fallback to templates, text and guesses kept | NFR-03 (×2) |
+| NFR-04, NFR-06 | `redact`, proxy CORS/rate limit/secret | NFR-04 / NFR-06 |
+| NFR-07 | user text treated as data, guesses never confirmed | NFR-07 |
+| SR-09 (G0) | `checkScope` before the AI | SR-09 / G0 |
+| FR-04, FR-05, SR-01 | recognised screen, pre-filled guesses, ≤ 3 questions | SR-01 / FR-04 / FR-05 |
+| NFR-09 | number words and units DE/EN | NFR-09 |
 
 ## Team
 | Role | Member |

@@ -160,12 +160,14 @@
    */
   async function loadAll(config) {
     const XLSX = root.XLSX;
-    const [workbook, safetyRules, templates] = await Promise.all([
+    const [workbook, safetyRules, templates, lexicon, mockResponses] = await Promise.all([
       fetchWorkbook(config.data.workbook, XLSX),
       fetchJson(config.data.safetyRules),
-      Promise.all(config.data.templates.map(fetchJson))
+      Promise.all(config.data.templates.map(fetchJson)),
+      fetchJson(config.data.lexicon),
+      fetchJson(config.data.mockResponses)
     ]);
-    return Object.assign({}, workbook, { safetyRules, templates });
+    return Object.assign({}, workbook, { safetyRules, templates, lexicon, mockResponses });
   }
 
   root.BBData = Object.freeze({

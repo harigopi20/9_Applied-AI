@@ -5,18 +5,27 @@
  * project templates (data/templates/*.json, DR-04) and are reviewed there.
  */
 window.BB_CONFIG = Object.freeze({
-  version: "R1-MVP stage 1",
+  version: "R1-MVP stage 2",
 
   // NFR-09: English is the default UI language; German via the toggle.
   // Team decision 2026-10-25: English default (NFR-09 text says German default).
   defaultLanguage: "en",
 
-  // AI adapter mode (stage 2): "template" (default, no AI), "proxy", "mock".
+  // AI adapter (ai-adapter.js): "template" (default, no AI, free),
+  // "proxy" (commercial model via proxy/ – team decision: built, not active),
+  // "mock" (fixed test answers). Override for a demo with ?ai=mock in the URL.
   aiMode: "template",
+  ai: {
+    proxyUrl: "",        // e.g. "https://baumarkt-buddy-proxy.<account>.workers.dev/understand"
+    timeoutMs: 8000,     // per attempt; max. 2 attempts, then template fallback (NFR-03)
+    maxTextLength: 500   // longer descriptions are rejected before anything is sent
+  },
 
   data: {
     workbook: "data/baumarkt-buddy-data.xlsx", // DR-01..DR-03 single data file
     safetyRules: "data/safety-rules.json",
+    lexicon: "data/understanding-lexicon.json",
+    mockResponses: "data/ai-mock-responses.json",
     templates: [
       "data/templates/hang-shelf.json",
       "data/templates/hang-picture.json"

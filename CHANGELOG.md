@@ -40,3 +40,15 @@ when they are released to `main`.
   *Why:* NFR-09 in the requirements says "German default"; the team confirmed
   English, so the deviation is recorded.
   *Prompt:* "English is still fine."
+- **2026-10-25 – R1 stage 2: free text, AI adapter, follow-up questions, fallback.**
+  Added `app/ai-adapter.js` with the modes `template` (default, keyword matching,
+  no AI), `mock` (fixed test answers) and `proxy`; strict schema validation of
+  every answer; G0 high-risk check before the AI; "Did we understand you?" screen
+  and pre-filled guesses that must be confirmed; fallback to the templates that
+  keeps the text and recognised values; redaction of PLZ/phone/e-mail. Added the
+  optional Cloudflare Worker in `proxy/` (API key as secret, CORS allowlist,
+  rate limit, logs off, structured JSON output). 10 new tests (42 passing).
+  *Why:* stage 2 of Release 1. Team decision: no paid AI for R1 – default mode is
+  `template`; the proxy is built but not active (option a).
+  *Prompt:* "We thought we'd use option 1: dictation only (free) … a) please, then
+  continue with stage 2."

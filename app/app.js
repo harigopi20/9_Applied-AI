@@ -16,7 +16,13 @@
   const state = {
     data: null,
     error: null,
-    screen: "loading",       // loading | error | start | choose | question | result
+    screen: "loading",       // loading | error | start | choose | recognized | high_risk | question | result
+    ai: null,                // AI adapter (ai-adapter.js), mode from config
+    inputText: "",           // free text – kept on every fallback (NFR-03)
+    chooseNotice: null,      // unsupported | unclear | ai_failed | too_long | empty
+    recognized: null,        // { template, facts } – AI/keyword result, all facts "observed"
+    pendingGuesses: {},      // guesses kept for a template chosen after a fallback
+    busy: false,
     template: null,
     facts: {},
     questionId: null,
@@ -54,7 +60,7 @@
     renderHeader();
     const m = main();
     m.replaceChildren();
-    const screens = { loading: viewLoading, error: viewError, start: viewStart, choose: viewChoose, question: viewQuestion, result: viewResult };
+    const screens = { loading: viewLoading, error: viewError, start: viewStart, choose: viewChoose, recognized: viewRecognized, high_risk: viewHighRisk, question: viewQuestion, result: viewResult };
     m.appendChild(screens[state.screen]());
     document.getElementById("footer-text").textContent = t("footer");
     m.focus({ preventScroll: true });
@@ -91,7 +97,7 @@
     return el("section", { class: "card" }, [
       el("h2", { text: t("notice_title") }),
       el("ul", { class: "notice-list" }, [
-        el("li", { text: t("notice_ai") }),
+        el("li", { "data-notice": "ai", text: t("notice_ai_" + state.ai.mode) }),
         el("li", { text: t("notice_sample") }),
         el("li", { text: t("notice_privacy") }),
         el("li", { class: "muted", text: t("notice_stage") })
@@ -100,18 +106,36 @@
     ]);
   }
 
-  // Project buttons (FR-02, DR-04)
+  // Project entry: free text (FR-02, FR-03) plus project buttons (DR-04)
   function viewChoose() {
     const wrap = el("section", { class: "card" }, [
-      el("h2", { text: t("choose_title") }),
-      el("p", { class: "muted", text: t("choose_help") })
+      el("h2", { text: t("choose_title") })
     ]);
+    if (state.chooseNotice) {
+      wrap.appendChild(el("p", { class: "hint warn-hint", role: "status", "data-notice": state.chooseNotice, text: t("choose_notice_" + state.chooseNotice) }));
+    }
+    const area = el("textarea", {
+      id: "project-text", class: "input textarea", rows: "3", maxlength: String(CFG.ai.maxTextLength),
+      placeholder: t("text_placeholder"), "aria-label": t("text_label")
+    });
+    area.value = state.inputText;
+    area.addEventListener("input", () => { state.inputText = area.value; });
+    const form = el("form", { class: "text-entry", novalidate: true }, [
+      el("label", { for: "project-text", class: "field-label", text: t("text_label") }),
+      area,
+      el("p", { class: "muted small", text: t("text_help") }),
+      el("button", { type: "submit", class: "btn primary block", id: "text-submit", disabled: state.busy,
+        text: state.busy ? t("text_busy") : t("text_submit") })
+    ]);
+    form.addEventListener("submit", (e) => { e.preventDefault(); submitText(area.value); });
+    wrap.appendChild(form);
+    wrap.appendChild(el("p", { class: "muted or", text: t("or_choose") }));
     const grid = el("div", { class: "template-grid" });
     state.data.templates.forEach((tpl) => {
       const reviewed = tpl.review && tpl.review.status === "reviewed";
       grid.appendChild(el("button", {
         class: "btn template", "data-template": tpl.template_id,
-        onclick: () => startTemplate(tpl)
+        onclick: () => startTemplate(tpl, state.pendingGuesses)
       }, [
         el("span", { class: "template-icon", "aria-hidden": "true", text: tpl.icon || "" }),
         el("span", { class: "template-title", text: pick(tpl.title) }),
@@ -123,6 +147,43 @@
     });
     wrap.appendChild(grid);
     return wrap;
+  }
+
+  // What we understood – everything is a guess until confirmed (FR-03, NFR-05, SR-01)
+  function viewRecognized() {
+    const rec = state.recognized;
+    const box = el("section", { class: "card", "data-screen": "recognized" }, [
+      el("h2", { text: t("recognized_title") }),
+      el("p", {}, [el("span", { text: t("recognized_project") + ": " }), el("strong", { text: pick(rec.template.title) }),
+        el("span", { class: "fact-status observed", text: t("status_observed") })])
+    ]);
+    const keys = Object.keys(rec.facts);
+    if (keys.length) {
+      box.appendChild(el("p", { text: t("recognized_values") }));
+      const ul = el("ul", { class: "guess-list" });
+      keys.forEach((k) => ul.appendChild(el("li", { "data-fact": k }, [
+        el("span", { text: t("fact_" + k) + ": " }), el("strong", { text: factLabel(k, rec.facts[k]) }),
+        el("span", { class: "fact-status observed", text: t("status_observed") })
+      ])));
+      box.appendChild(ul);
+    }
+    box.appendChild(el("p", { class: "muted small", text: t("recognized_confirm_note") }));
+    box.appendChild(el("p", { class: "muted small", text: t("recognized_source_" + state.ai.mode) }));
+    box.appendChild(el("div", { class: "actions" }, [
+      el("button", { class: "btn", text: t("recognized_other"), onclick: () => { state.recognized = null; go("choose"); } }),
+      el("button", { class: "btn primary", id: "recognized-continue", text: t("recognized_continue"), onclick: () => startTemplate(rec.template, rec.facts) })
+    ]));
+    return box;
+  }
+
+  // High-risk work: clear stop and professional hand-off (SR-09, FR-15)
+  function viewHighRisk() {
+    return el("section", { class: "card stop", role: "alert", "data-state": "high_risk" }, [
+      el("h2", { text: t("high_risk_title") }),
+      el("p", { class: "stop-main", text: t("high_risk_text") }),
+      el("p", { class: "muted small", text: t("rule") + ": SR-09" }),
+      el("div", { class: "actions" }, [el("button", { class: "btn", text: t("new_project"), onclick: () => { state.inputText = ""; state.chooseNotice = null; go("choose"); } })])
+    ]);
   }
 
   // Follow-up questions: max. 3, only for facts not yet confirmed (FR-04, FR-05)
@@ -167,9 +228,17 @@
 
   /** Renders one field; returns a getter that validates the value in code. */
   function renderField(form, f, inGroup) {
-    const current = state.facts[f.fact] ? state.facts[f.fact].value : null;
+    const fact = state.facts[f.fact];
+    const current = fact ? fact.value : null;
     const box = el("div", { class: "field" });
     if (inGroup) box.appendChild(el("p", { class: "field-label", id: "lbl-" + f.fact, text: pick(f.label) }));
+    // SR-11 read-back: a recognised value is shown as a guess and must be confirmed by tap.
+    if (fact && fact.status === R.STATUS.OBSERVED) {
+      box.appendChild(el("p", { class: "guess", "data-guess": f.fact }, [
+        el("span", { class: "fact-status observed", text: t("status_observed") }),
+        el("span", { text: " " + t("guess_read_back", { value: factLabel(f.fact, fact) }) })
+      ]));
+    }
 
     if (f.type === "choice") {
       let selected = current;
@@ -433,9 +502,15 @@
   // ---------------------------------------------------------------------
   function go(screen) { state.screen = screen; render(); }
 
-  function startTemplate(tpl) {
+  /** Starts a template; guesses (from text) become "observed" facts – never confirmed (SR-01). */
+  function startTemplate(tpl, guesses) {
     state.template = tpl;
     state.facts = {};
+    Object.entries(guesses || {}).forEach(([k, f]) => {
+      if ((tpl.required_facts || []).includes(k)) state.facts[k] = R.makeFact(f.value, R.STATUS.OBSERVED, f.source);
+    });
+    state.recognized = null;
+    state.pendingGuesses = {};
     state.overrides = {};
     state.checked = new Set();
     state.editOnly = false;
@@ -480,7 +555,63 @@
     render();
   }
 
+  /** Turns validated adapter facts into guesses for the template's required facts. */
+  function guessesFor(tpl, facts, source) {
+    const out = {};
+    Object.entries(facts || {}).forEach(([k, v]) => {
+      if (v !== null && (tpl.required_facts || []).includes(k)) out[k] = { value: v, source };
+    });
+    return out;
+  }
+
+  /**
+   * Free text → G0 scope check (code) → AI adapter (understanding only) →
+   * recognised project with guesses, or fallback to the templates (NFR-03).
+   * The same function is used for typed and (stage 3) dictated text.
+   */
+  async function submitText(text, origin) {
+    const clean = String(text || "").trim();
+    state.inputText = String(text || "");
+    state.chooseNotice = null;
+    state.pendingGuesses = {};
+    if (!clean) { state.chooseNotice = "empty"; go("choose"); return state.screen; }
+    if (clean.length > CFG.ai.maxTextLength) { state.chooseNotice = "too_long"; go("choose"); return state.screen; }
+
+    // G0 – deterministic high-risk check BEFORE and independent of the AI (SR-09).
+    if (R.checkScope(clean, state.data.safetyRules).highRisk) { go("high_risk"); return state.screen; }
+
+    state.busy = true;
+    render();
+    let res;
+    try { res = await state.ai.understand(clean, window.BBI18n.getLang()); } catch (_) { res = { ok: false, reason: "error" }; }
+    state.busy = false;
+    const source = (origin || "text") + ":" + (res.source || state.ai.mode);
+    const templates = state.data.templates;
+
+    if (!res.ok) {
+      // NFR-03: AI failed → templates; keep the text and the keyword guesses.
+      const local = window.BBAI.templateUnderstand(clean, state.data.lexicon, templates.map((x) => x.template_id));
+      templates.forEach((tpl) => Object.assign(state.pendingGuesses, guessesFor(tpl, local.facts, (origin || "text") + ":template")));
+      state.chooseNotice = "ai_failed";
+      go("choose");
+      return state.screen;
+    }
+    const out = res.output;
+    if (out.high_risk) { go("high_risk"); return state.screen; }
+    const tpl = templates.find((x) => x.template_id === out.intent);
+    if (!tpl) {
+      state.chooseNotice = out.intent === "unsupported" ? "unsupported" : "unclear";
+      templates.forEach((x) => Object.assign(state.pendingGuesses, guessesFor(x, out.facts, source)));
+      go("choose");
+      return state.screen;
+    }
+    state.recognized = { template: tpl, facts: guessesFor(tpl, out.facts, source) };
+    go("recognized");
+    return state.screen;
+  }
+
   function resetProject() {
+    state.inputText = ""; state.chooseNotice = null; state.pendingGuesses = {}; state.recognized = null;
     state.template = null; state.facts = {}; state.overrides = {}; state.checked = new Set(); state.result = null;
     go("choose");
   }
@@ -490,6 +621,7 @@
     render();
     try {
       state.data = await window.BBData.loadAll(CFG);
+      state.ai = createAdapter(CFG.aiMode);
       state.screen = "start";
     } catch (e) {
       state.error = e && e.message ? e.message : String(e);
@@ -498,8 +630,25 @@
     render();
   }
 
+  /** AI mode from config; "?ai=mock" or "?ai=template" in the URL may override it for demos. */
+  function createAdapter(mode) {
+    const q = new URLSearchParams(window.location.search).get("ai");
+    const m = q === "mock" || q === "template" ? q : mode;
+    return window.BBAI.create({
+      mode: m,
+      lexicon: state.data.lexicon,
+      templateIds: state.data.templates.map((x) => x.template_id),
+      proxyUrl: CFG.ai.proxyUrl,
+      timeoutMs: CFG.ai.timeoutMs,
+      mockResponses: state.data.mockResponses
+    });
+  }
+
   // Exposed for tests.html only (UI-level release-blocking tests).
-  window.BBApp = Object.freeze({ state, viewResult, viewItem, viewQuestion, recompute, startTemplate });
+  window.BBApp = Object.freeze({
+    state, viewResult, viewItem, viewQuestion, viewChoose, viewRecognized, viewHighRisk,
+    recompute, startTemplate, submitText
+  });
 
   document.addEventListener("DOMContentLoaded", () => {
     if (document.body.dataset.autoboot === "false") return; // tests.html drives the app itself

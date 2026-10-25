@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Baumarkt-Buddy – DIY shopping list checked by fixed rules (university prototype, sample data)">
   <!-- NFR-06/NFR-07: no inline scripts, no third-party origins. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://*.workers.dev; object-src 'none'; base-uri 'self'; form-action 'none'">
   <meta name="referrer" content="no-referrer">
   <title>Baumarkt-Buddy</title>
   <link rel="stylesheet" href="style.css">
@@ -32,6 +32,7 @@
   <script src="lib/xlsx.mini.min.js"></script>
   <script src="data.js"></script>
   <script src="rules.js"></script>
+  <script src="ai-adapter.js"></script>
   <script src="i18n.js"></script>
   <script src="app.js"></script>
 </body>

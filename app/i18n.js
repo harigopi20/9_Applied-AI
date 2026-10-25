@@ -23,8 +23,10 @@
 
       // Start / transparency (NFR-04, NFR-05)
       notice_title: "Before you start",
-      notice_ai: "This app uses AI only to understand your project description. Every product, quantity and safety check is decided by fixed, tested rules – not by the AI.",
-      notice_stage: "In this version you choose your project with a button; free text and voice follow in the next stages.",
+      notice_ai_template: "In this version your text is understood by simple keyword matching – no AI model is used. Every product, quantity and safety check is decided by fixed, tested rules.",
+      notice_ai_mock: "AI test mode: your text is answered with fixed sample answers. Every product, quantity and safety check is decided by fixed, tested rules.",
+      notice_ai_proxy: "This app uses AI only to understand your project description. Every product, quantity and safety check is decided by fixed, tested rules – not by the AI.",
+      notice_stage: "Describe your project in your own words or choose a project button. Voice input follows in the next stage.",
       notice_sample: "All prices, stock levels, stores, aisles and shelves are sample data for a university prototype. They are not real offers.",
       notice_privacy: "No login, no personal data. Your answers stay in this browser tab and are deleted when you close it.",
       start: "Start",
@@ -32,6 +34,27 @@
       // Project choice
       choose_title: "What do you want to do?",
       choose_help: "Choose a project.",
+      text_label: "Describe your project",
+      text_placeholder: "e.g. \"I want to hang a 15 kg shelf on a concrete wall, 80 cm long\"",
+      text_help: "Please do not enter personal data. Recognised values are only guesses – you confirm them in the next step.",
+      text_submit: "Continue",
+      text_busy: "Understanding …",
+      or_choose: "… or choose a project:",
+      choose_notice_unsupported: "We can't plan this project yet. Baumarkt-Buddy currently supports these two projects:",
+      choose_notice_unclear: "We could not tell which project you mean. Please choose one:",
+      choose_notice_ai_failed: "We could not understand the text automatically. Your text is kept – please choose your project:",
+      choose_notice_too_long: "Please keep the description short (max. 500 characters).",
+      choose_notice_empty: "Please describe your project or choose a project button.",
+      recognized_title: "Did we understand you correctly?",
+      recognized_project: "Project",
+      recognized_values: "Values we recognised:",
+      recognized_confirm_note: "These are guesses. Nothing is used until you confirm each value in the next questions.",
+      recognized_source_template: "Recognised by keyword matching (no AI).",
+      recognized_source_mock: "Recognised by the AI test mode (fixed sample answers).",
+      recognized_source_proxy: "Recognised by an AI language model. Products and safety are decided by fixed rules.",
+      recognized_continue: "Yes, continue",
+      recognized_other: "No, choose a project",
+      guess_read_back: "We understood: {value}. Please check and confirm.",
       template_unreviewed: "Template not yet reviewed by the team",
       template_reviewed: "Template reviewed",
 
@@ -123,7 +146,7 @@
       high_risk_text: "Work on electrics, gas, load-bearing walls or hidden pipes and cables is dangerous. Baumarkt-Buddy does not plan this work. Please contact a qualified professional (e.g. a licensed electrician or gas fitter).",
       change_answers: "Change my answers",
 
-      footer: "University prototype (MBA Applied AI). Sample data only. AI is used to understand text; decisions are made by fixed rules."
+      footer: "University prototype (MBA Applied AI). Sample data only. AI (if switched on) only helps to understand text; decisions are made by fixed rules."
     },
 
     de: {
@@ -138,14 +161,37 @@
       retry: "Erneut versuchen",
 
       notice_title: "Bevor Sie starten",
-      notice_ai: "Diese App nutzt KI nur, um Ihre Projektbeschreibung zu verstehen. Alle Produkte, Mengen und Sicherheitsprüfungen entscheiden feste, getestete Regeln – nicht die KI.",
-      notice_stage: "In dieser Version wählen Sie Ihr Projekt per Button; Freitext und Sprache folgen in den nächsten Etappen.",
+      notice_ai_template: "In dieser Version wird Ihr Text per einfachem Schlüsselwort-Abgleich verstanden – es wird kein KI-Modell genutzt. Alle Produkte, Mengen und Sicherheitsprüfungen entscheiden feste, getestete Regeln.",
+      notice_ai_mock: "KI-Testmodus: Ihr Text wird mit festen Beispielantworten beantwortet. Alle Produkte, Mengen und Sicherheitsprüfungen entscheiden feste, getestete Regeln.",
+      notice_ai_proxy: "Diese App nutzt KI nur, um Ihre Projektbeschreibung zu verstehen. Alle Produkte, Mengen und Sicherheitsprüfungen entscheiden feste, getestete Regeln – nicht die KI.",
+      notice_stage: "Beschreiben Sie Ihr Projekt in eigenen Worten oder wählen Sie einen Projekt-Button. Spracheingabe folgt in der nächsten Etappe.",
       notice_sample: "Alle Preise, Bestände, Märkte, Gänge und Regale sind Beispieldaten eines Hochschul-Prototyps. Es sind keine echten Angebote.",
       notice_privacy: "Kein Login, keine personenbezogenen Daten. Ihre Angaben bleiben in diesem Browser-Tab und werden beim Schließen gelöscht.",
       start: "Los geht's",
 
       choose_title: "Was möchten Sie machen?",
       choose_help: "Wählen Sie ein Projekt.",
+      text_label: "Beschreiben Sie Ihr Projekt",
+      text_placeholder: "z. B. „Ich möchte ein 15-kg-Regal an eine Betonwand hängen, 80 cm lang“",
+      text_help: "Bitte keine persönlichen Daten eingeben. Erkannte Werte sind nur Vermutungen – Sie bestätigen sie im nächsten Schritt.",
+      text_submit: "Weiter",
+      text_busy: "Wird verstanden …",
+      or_choose: "… oder wählen Sie ein Projekt:",
+      choose_notice_unsupported: "Dieses Projekt können wir noch nicht planen. Baumarkt-Buddy unterstützt derzeit diese zwei Projekte:",
+      choose_notice_unclear: "Wir konnten nicht erkennen, welches Projekt Sie meinen. Bitte wählen Sie:",
+      choose_notice_ai_failed: "Wir konnten den Text nicht automatisch verstehen. Ihr Text bleibt erhalten – bitte wählen Sie Ihr Projekt:",
+      choose_notice_too_long: "Bitte beschreiben Sie das Projekt kurz (max. 500 Zeichen).",
+      choose_notice_empty: "Bitte beschreiben Sie Ihr Projekt oder wählen Sie einen Projekt-Button.",
+      recognized_title: "Haben wir Sie richtig verstanden?",
+      recognized_project: "Projekt",
+      recognized_values: "Erkannte Werte:",
+      recognized_confirm_note: "Das sind Vermutungen. Nichts wird verwendet, bevor Sie jeden Wert in den nächsten Fragen bestätigen.",
+      recognized_source_template: "Erkannt per Schlüsselwort-Abgleich (ohne KI).",
+      recognized_source_mock: "Erkannt im KI-Testmodus (feste Beispielantworten).",
+      recognized_source_proxy: "Erkannt durch ein KI-Sprachmodell. Produkte und Sicherheit entscheiden feste Regeln.",
+      recognized_continue: "Ja, weiter",
+      recognized_other: "Nein, Projekt wählen",
+      guess_read_back: "Wir haben verstanden: {value}. Bitte prüfen und bestätigen.",
       template_unreviewed: "Vorlage noch nicht vom Team geprüft",
       template_reviewed: "Vorlage geprüft",
 
@@ -232,7 +278,7 @@
       high_risk_text: "Arbeiten an Elektrik, Gas, tragenden Wänden oder verdeckten Leitungen sind gefährlich. Baumarkt-Buddy plant diese Arbeiten nicht. Bitte wenden Sie sich an einen Fachbetrieb (z. B. Elektro- oder Gasinstallateur).",
       change_answers: "Antworten ändern",
 
-      footer: "Hochschul-Prototyp (MBA Applied AI). Nur Beispieldaten. KI wird zum Verstehen von Text genutzt; Entscheidungen treffen feste Regeln."
+      footer: "Hochschul-Prototyp (MBA Applied AI). Nur Beispieldaten. KI (falls eingeschaltet) hilft nur beim Verstehen von Text; Entscheidungen treffen feste Regeln."
     }
   };
 

@@ -1,0 +1,60 @@
+{
+  "comment": "Word lists for the AI adapter's 'template' mode (keyword matching without AI) - data, not code (NFR-10). Matching is case-insensitive. Results are only GUESSES (status 'observed') and must be confirmed by the customer (SR-01, SR-11).",
+  "version": "1.0.0",
+
+  "intents": {
+    "hang_shelf": {
+      "en": ["shelf", "shelves", "shelving", "bookshelf", "wall shelf", "floating shelf"],
+      "de": ["regal", "regale", "regalbrett", "wandregal", "bücherregal", "wandbrett", "steckbrett", "hängeregal"]
+    },
+    "hang_picture": {
+      "en": ["picture", "pictures", "painting", "frame", "photo", "poster", "artwork", "canvas"],
+      "de": ["bild", "bilder", "gemälde", "bilderrahmen", "rahmen", "foto", "poster", "leinwand", "kunstdruck"]
+    }
+  },
+
+  "diy_words": {
+    "comment": "Recognised DIY context without a supported template -> 'unsupported' (hint + template buttons).",
+    "en": ["tile", "tiles", "paint", "wallpaper", "floor", "laminate", "door", "window", "cabinet", "mirror", "curtain", "tv", "fence", "garden", "bath", "kitchen", "repair", "drill", "install", "build", "mount", "hang"],
+    "de": ["fliese", "fliesen", "streichen", "tapete", "tapezieren", "boden", "laminat", "tür", "fenster", "schrank", "spiegel", "gardine", "vorhang", "fernseher", "zaun", "garten", "bad", "küche", "reparieren", "bohren", "montieren", "bauen", "aufhängen", "anbringen"]
+  },
+
+  "wall_types": {
+    "concrete": { "en": ["concrete"], "de": ["beton", "betonwand", "stahlbeton"] },
+    "brick": { "en": ["brick", "masonry", "brickwork"], "de": ["ziegel", "ziegelwand", "backstein", "mauerwerk", "ziegelmauer", "klinker"] },
+    "plasterboard": { "en": ["plasterboard", "drywall", "gypsum board", "stud wall", "sheetrock"], "de": ["gipskarton", "rigips", "trockenbau", "trockenbauwand", "gipswand", "leichtbauwand", "ständerwand"] }
+  },
+
+  "units": {
+    "kg": ["kg", "kilo", "kilos", "kilogram", "kilograms", "kilogramm", "kilogramme"],
+    "g": ["g", "gram", "grams", "gramm"],
+    "cm": ["cm", "centimeter", "centimeters", "centimetre", "centimetres", "zentimeter"],
+    "m": ["m", "meter", "meters", "metre", "metres"],
+    "mm": ["mm", "millimeter", "millimeters", "millimetre", "millimetres"]
+  },
+
+  "dimension_words": {
+    "length": { "en": ["long", "length", "wide", "width"], "de": ["lang", "länge", "breit", "breite"] },
+    "depth": { "en": ["deep", "depth"], "de": ["tief", "tiefe"] }
+  },
+
+  "count_words": {
+    "pictures": { "en": ["picture", "pictures", "paintings", "frames", "photos", "posters"], "de": ["bild", "bilder", "gemälde", "rahmen", "fotos", "poster"] },
+    "points": { "en": ["hook", "hooks", "point", "points", "nail", "nails"], "de": ["haken", "punkt", "punkte", "aufhängepunkt", "aufhängepunkte", "nagel", "nägel"] }
+  },
+
+  "number_words": {
+    "en": {
+      "zero": 0, "one": 1, "a": 1, "an": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+      "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19,
+      "twenty": 20, "thirty": 30, "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90, "hundred": 100, "a hundred": 100, "one hundred": 100,
+      "half": 0.5
+    },
+    "de": {
+      "null": 0, "eins": 1, "ein": 1, "eine": 1, "einen": 1, "einem": 1, "zwei": 2, "drei": 3, "vier": 4, "fünf": 5, "sechs": 6, "sieben": 7, "acht": 8, "neun": 9, "zehn": 10,
+      "elf": 11, "zwölf": 12, "dreizehn": 13, "vierzehn": 14, "fünfzehn": 15, "sechzehn": 16, "siebzehn": 17, "achtzehn": 18, "neunzehn": 19,
+      "zwanzig": 20, "dreißig": 30, "vierzig": 40, "fünfzig": 50, "sechzig": 60, "siebzig": 70, "achtzig": 80, "neunzig": 90, "hundert": 100, "einhundert": 100,
+      "halb": 0.5, "halbe": 0.5, "halben": 0.5
+    }
+  }
+}

@@ -1,0 +1,25 @@
+# Baumarkt-Buddy AI proxy – Cloudflare Worker (see proxy/README.md)
+name = "baumarkt-buddy-proxy"
+main = "src/worker.js"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Disable request logs that could contain customer text (NFR-04).
+[observability]
+enabled = false
+
+[vars]
+# Comma-separated origins allowed to call the proxy (your GitHub Pages origin).
+ALLOWED_ORIGINS = "https://st854d2gpb-create.github.io"
+# Model used for classification/extraction. Cheaper option: "claude-haiku-5-5".
+MODEL = "claude-opus-5-5"
+# Fallback limit if the rate-limit binding below is not available.
+RATE_LIMIT_PER_MINUTE = "10"
+
+# NFR-06: 10 requests per minute per client IP.
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "1001"
+simple = { limit = 10, period = 60 }
+
+# Secret (never commit it):  npx wrangler secret put ANTHROPIC_API_KEY

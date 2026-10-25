@@ -103,6 +103,16 @@ main { max-width: 760px; margin: 0 auto; padding: 16px 12px 32px; outline: none;
 .template-review.pending { color: var(--warn); }
 .template-review.ok { color: var(--ok); }
 
+/* Free text entry (FR-02) */
+.text-entry { margin-top: 8px; }
+.textarea { width: 100%; resize: vertical; min-height: 96px; line-height: 1.4; }
+.or { margin: 16px 0 0; font-weight: 600; }
+.warn-hint { background: var(--warn-bg); color: var(--warn); }
+.guess-list { padding-left: 20px; }
+.guess-list li { margin-bottom: 6px; }
+.guess { margin: 0 0 8px; font-size: .92rem; }
+.btn[disabled] { opacity: .6; cursor: wait; }
+
 /* Questions */
 .field { margin: 12px 0; }
 .field-label { font-weight: 700; margin: 0 0 6px; }
