@@ -11,7 +11,7 @@ Summary (same as the pull request):
 - Own neutral toolbox mark instead of the "B"; no logo or mascot of a real company
 - FR-31: unavailable items stay on the list, marked, with referral to the nearest store with stock or "please ask staff"; no substitutes
 - App switched to the team workbook `data/product_catalogue.xlsx` (5 stores) and `data/plz_coordinates.csv`; rule-engine columns added
-- TC-38 without store preselection (team decision); 69 tests passing
+- TC-38 without store preselection (team decision); FR-29, D-11 and TC-38 in the team documents aligned; 69 tests passing
 
 - **2026-10-25 – FR-31: availability in the chosen store and referral; app switched to the team workbook.**
   The app now reads the team's `data/product_catalogue.xlsx` (5 stores, sheet
@@ -31,6 +31,14 @@ Summary (same as the pull request):
   *Why:* team requirement FR-31 (round 5) and DR-01 data merge.
   *Prompt:* "Yes, implement FR-31, TC-38 without preselection."
 
+- **2026-10-25 – Team documents aligned with "no store preselection":** FR-29 text
+  and simple-language column (`requirements/requirements-R1-MVP.md`, plus a round-6
+  team comment), design element D-11 (`data/03-design.md`) and TC-38
+  (`test/01_test_cases.md`) now say: stores listed nearest first, the customer taps
+  one, nothing is preselected (SR-06, RB-16).
+  *Why:* the documents still described an automatic preselection that the team
+  decided against.
+  *Prompt:* "Yes, update the team documents."
 - **2026-10-25 – Design update 2: DIY-store app layout and fonts.**
   `app/style.css` rewritten: white page; orange #FF7313 header band with diagonal
   edge, title in a white box, round language button and toolbox mark; Barlow

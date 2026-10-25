@@ -120,7 +120,7 @@ typing and the project buttons always work.
 - The PLZ is checked in code: exactly 5 digits **and** present in the PLZ table.
 - Valid → stores within `store.maxDistanceKm` (50 km), sorted by straight-line distance, at most `store.maxStoresShown` (5), with address and opening hours.
 - Invalid, unknown or no store in range → message plus the full store list.
-- **A store is never selected automatically** – not even the nearest one or the only one in range; the customer taps it (RB-16, SR-06). *Team decision 25 Oct 2026: TC-38 is implemented without preselection* (the FR-29 text and design D-11 in the team documents still mention a preselection).
+- **A store is never selected automatically** – not even the nearest one or the only one in range; the customer taps it (RB-16, SR-06). *Team decision 25 Oct 2026: no preselection* – FR-29, design D-11 and TC-38 say the same.
 - Skipped → the complete list with identical checks; aisle, shelf and stock show "not available" plus an "Add postcode" button.
 - The PLZ stays on the device: never sent to the AI, never logged, cleared after the choice. Only the PLZ centre coordinates are kept in memory for referral distances (FR-31).
 - If the PLZ table or store data fail to load, the app continues without a store.
