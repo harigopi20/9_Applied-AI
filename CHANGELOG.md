@@ -22,3 +22,16 @@ when they are released to `main`.
   *Why:* documents the vibe-coding process for the final report.
 
 ## Unreleased
+
+- **2026-10-25 – R1 stage 1: data model, rule engine, templates, safety rules, tests.**
+  Added the static app in `app/` (index.html, style.css, app.js, rules.js,
+  data.js, i18n.js, config.js, tests.html), the single sample data file
+  `app/data/baumarkt-buddy-data.xlsx` (Products, Stores, Stock; 3 sample stores)
+  built by `tools/build_sample_data.py`, the templates "Hang a shelf" and
+  "Hang a picture" with rule IDs and review status, safety word lists, vendored
+  SheetJS, and 32 automated tests (RB-01, -03, -04, -06, -07, -08, -09, -13,
+  -15, -17, SR-11 and more). README documents architecture, data schema and testing.
+  *Why:* first stage of Release 1 – deterministic, safety-first core before AI,
+  voice and PLZ are added.
+  *Prompt:* "Build Release 1 (MVP) of Baumarkt-Buddy in stages; stage 1 = data
+  model, Excel loading, rule engine, 2 templates, safety rules and tests (buttons only)."

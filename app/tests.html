@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Baumarkt-Buddy – release-blocking tests</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="tests.css">
+</head>
+<body data-autoboot="false">
+  <main class="tests">
+    <h1>Baumarkt-Buddy – automated tests (R1)</h1>
+    <p class="muted">Runs against the real data files (data/) plus fixture copies of the catalogue. Open via a local web server, see README.</p>
+    <p id="summary" class="summary" data-done="false">Running …</p>
+    <table class="results">
+      <thead><tr><th>ID</th><th>Test</th><th>Result</th><th>Details</th></tr></thead>
+      <tbody id="results"></tbody>
+    </table>
+    <!-- UI-level tests render into this sandbox -->
+    <div id="sandbox" class="sandbox" aria-hidden="true"></div>
+  </main>
+  <script src="config.js"></script>
+  <script src="lib/xlsx.mini.min.js"></script>
+  <script src="data.js"></script>
+  <script src="rules.js"></script>
+  <script src="i18n.js"></script>
+  <script src="app.js"></script>
+  <script src="tests.js"></script>
+</body>
+</html>

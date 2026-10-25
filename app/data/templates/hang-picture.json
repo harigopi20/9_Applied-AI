@@ -1,0 +1,242 @@
+{
+  "template_id": "hang_picture",
+  "version": "1.0.0",
+  "comment": "DR-04 project template. All limits and factors are MOCK values (design DD-3) and must be checked by the team before the demo (SR-10). Methods are tried in order; the first method whose safety-relevant parts all pass is used (R-15).",
+  "review": {
+    "status": "pending_team_review",
+    "reviewed_by": null,
+    "review_date": null,
+    "created": "2026-10-25"
+  },
+  "title": { "en": "Hang a picture", "de": "Bild aufhängen" },
+  "icon": "▣",
+  "safety_factor": 1.25,
+  "max_load_kg": 25,
+  "wall_limits": {},
+  "required_facts": ["wall_type", "load_kg", "picture_count", "points_per_picture"],
+  "questions": [
+    {
+      "id": "Q1",
+      "fact": "wall_type",
+      "type": "choice",
+      "options": ["concrete", "brick", "plasterboard", "unknown"],
+      "text": { "en": "What is the wall made of?", "de": "Woraus besteht die Wand?" },
+      "help": {
+        "en": "If you are not sure, choose \"I don't know\". We will not guess.",
+        "de": "Wenn Sie unsicher sind, wählen Sie „Weiß ich nicht“. Wir raten nicht."
+      }
+    },
+    {
+      "id": "Q2",
+      "fact": "load_kg",
+      "type": "number",
+      "unit": "kg",
+      "min": 0.1,
+      "max": 200,
+      "allow_unknown": true,
+      "text": { "en": "How heavy is one picture, including the frame?", "de": "Wie schwer ist ein Bild inklusive Rahmen?" },
+      "help": {
+        "en": "Round up if in doubt. Weigh it on a bathroom scale if you can.",
+        "de": "Im Zweifel aufrunden. Wenn möglich mit der Personenwaage wiegen."
+      }
+    },
+    {
+      "id": "Q3",
+      "type": "group",
+      "text": { "en": "How many pictures, and how many hanging points each?", "de": "Wie viele Bilder und wie viele Aufhängepunkte je Bild?" },
+      "fields": [
+        {
+          "fact": "picture_count",
+          "type": "number",
+          "unit": "",
+          "min": 1,
+          "max": 20,
+          "integer": true,
+          "label": { "en": "Pictures", "de": "Bilder" }
+        },
+        {
+          "fact": "points_per_picture",
+          "type": "choice",
+          "options": [1, 2],
+          "unit": "",
+          "label": { "en": "Hanging points per picture", "de": "Aufhängepunkte je Bild" }
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "fixing_points": {
+      "rule_id": "PIC-Q1",
+      "comment": "One fixing per hanging point.",
+      "expr": { "mul": [{ "fact": "picture_count" }, { "fact": "points_per_picture" }] }
+    }
+  },
+  "methods": [
+    {
+      "method_id": "hook",
+      "rule_id": "PIC-M1",
+      "penetrates_wall": true,
+      "drilling": false,
+      "label": { "en": "Picture hooks with nails (no drilling)", "de": "Bilderhaken mit Nägeln (ohne Bohren)" },
+      "roles": [
+        {
+          "role": "picture_hook",
+          "section": "materials",
+          "rule_ids": ["R-15", "R-01"],
+          "label": { "en": "Picture hooks", "de": "Bilderhaken" },
+          "select": {
+            "variant_groups": ["picture-hook-set"],
+            "wall_suitable": true,
+            "load_rated": true,
+            "prefer": ["max_load_kg", "price_eur"]
+          },
+          "on_none": "stop",
+          "quantity": { "rule_id": "PIC-Q1", "units": { "var": "fixing_points" } }
+        },
+        {
+          "role": "hammer",
+          "section": "tools",
+          "rule_ids": ["PIC-T1"],
+          "label": { "en": "Hammer", "de": "Hammer" },
+          "select": { "product_nrs": ["P030"], "compatible_with_roles": ["picture_hook"] },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "PIC-Q0", "units": 1 }
+        }
+      ]
+    },
+    {
+      "method_id": "drill",
+      "rule_id": "PIC-M2",
+      "penetrates_wall": true,
+      "drilling": true,
+      "label": { "en": "Drill and fix with wall plugs", "de": "Bohren und mit Dübeln befestigen" },
+      "roles": [
+        {
+          "role": "wall_plug",
+          "section": "materials",
+          "rule_ids": ["R-15", "R-01", "R-04", "R-07"],
+          "label": { "en": "Wall plugs", "de": "Dübel" },
+          "select": {
+            "variant_groups": ["universal-wall-plug", "plasterboard-anchor"],
+            "wall_suitable": true,
+            "load_rated": true,
+            "prefer": ["max_load_kg", "price_eur"]
+          },
+          "on_none": "stop",
+          "quantity": { "rule_id": "PIC-Q1", "units": { "var": "fixing_points" } }
+        },
+        {
+          "role": "screw",
+          "section": "materials",
+          "rule_ids": ["R-06"],
+          "label": { "en": "Screws", "de": "Schrauben" },
+          "select": {
+            "variant_groups": ["wood-screw"],
+            "compatible_with_roles": ["wall_plug"],
+            "load_rated": true,
+            "prefer": ["max_load_kg", "price_eur"]
+          },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "PIC-Q1", "units": { "var": "fixing_points" } }
+        },
+        {
+          "role": "drill_bit",
+          "section": "tools",
+          "rule_ids": ["R-05"],
+          "label": { "en": "Drill bit", "de": "Bohrer" },
+          "select": {
+            "variant_groups": ["masonry-drill-bit"],
+            "compatible_with_roles": ["wall_plug"],
+            "spec_eq_role": { "diameter_mm": "wall_plug" },
+            "wall_suitable": true,
+            "prefer": ["price_eur"]
+          },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "PIC-Q0", "units": 1 }
+        },
+        {
+          "role": "drill",
+          "section": "tools",
+          "rule_ids": ["R-09"],
+          "label": { "en": "Drill", "de": "Bohrmaschine" },
+          "select": {
+            "category": ["Power tools"],
+            "use_case_by_wall": {
+              "concrete": "drilling concrete",
+              "brick": "drilling brick",
+              "plasterboard": "drilling plasterboard"
+            },
+            "prefer": ["price_eur"]
+          },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "PIC-Q0", "units": 1 }
+        },
+        {
+          "role": "screwdriver",
+          "section": "tools",
+          "rule_ids": ["PIC-T1"],
+          "label": { "en": "Screwdriver", "de": "Schraubendreher" },
+          "select": { "product_nrs": ["P031"], "compatible_with_roles": ["screw"] },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "PIC-Q0", "units": 1 }
+        },
+        {
+          "role": "dust_mask",
+          "section": "safety",
+          "rule_ids": ["R-10"],
+          "when": { "wall_in": ["concrete", "brick"] },
+          "label": { "en": "Dust mask", "de": "Staubmaske" },
+          "select": { "product_nrs": ["P029"] },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "PIC-Q0", "units": 1 }
+        }
+      ]
+    }
+  ],
+  "common_roles": [
+    {
+      "role": "detector",
+      "section": "tools",
+      "rule_ids": ["R-11"],
+      "label": { "en": "Stud and cable detector", "de": "Leitungssucher" },
+      "select": { "product_nrs": ["P034"] },
+      "on_none": "unresolved",
+      "quantity": { "rule_id": "PIC-Q0", "units": 1 }
+    },
+    {
+      "role": "spirit_level",
+      "section": "tools",
+      "rule_ids": ["PIC-T2"],
+      "label": { "en": "Spirit level", "de": "Wasserwaage" },
+      "select": { "product_nrs": ["P032"] },
+      "on_none": "unresolved",
+      "quantity": { "rule_id": "PIC-Q0", "units": 1 }
+    },
+    {
+      "role": "tape_measure",
+      "section": "tools",
+      "rule_ids": ["PIC-T2"],
+      "label": { "en": "Tape measure", "de": "Maßband" },
+      "select": { "product_nrs": ["P033"] },
+      "on_none": "unresolved",
+      "quantity": { "rule_id": "PIC-Q0", "units": 1 }
+    },
+    {
+      "role": "safety_glasses",
+      "section": "safety",
+      "rule_ids": ["R-10"],
+      "label": { "en": "Safety goggles", "de": "Schutzbrille" },
+      "select": { "product_nrs": ["P028"] },
+      "on_none": "unresolved",
+      "quantity": { "rule_id": "PIC-Q0", "units": 1 }
+    }
+  ],
+  "rule_texts": {
+    "PIC-M1": { "en": "Light pictures: nail-in picture hooks, if rated for the weight and the wall.", "de": "Leichte Bilder: Bilderhaken zum Einschlagen, wenn für Gewicht und Wand zugelassen." },
+    "PIC-M2": { "en": "Otherwise: drill and use wall plugs rated for the weight and the wall.", "de": "Sonst: bohren und Dübel verwenden, die für Gewicht und Wand zugelassen sind." },
+    "PIC-Q0": { "en": "1 per project", "de": "1 pro Projekt" },
+    "PIC-Q1": { "en": "1 fixing per hanging point (pictures × points)", "de": "1 Befestigung je Aufhängepunkt (Bilder × Punkte)" },
+    "PIC-T1": { "en": "Tool that fits the fixing", "de": "Werkzeug passend zur Befestigung" },
+    "PIC-T2": { "en": "Measuring and levelling for every mounting job", "de": "Messen und Ausrichten bei jeder Montage" }
+  }
+}

@@ -1,0 +1,186 @@
+/*
+ * Baumarkt-Buddy – mobile-first styles (NFR-01).
+ * Touch targets ≥ 44 px, one column on phones, wider layout up to laptop.
+ */
+:root {
+  --bg: #f4f5f2;
+  --card: #ffffff;
+  --text: #1d2321;
+  --muted: #5b6662;
+  --line: #d9ddd8;
+  --brand: #c2410c;
+  --brand-dark: #9a3412;
+  --ok: #166534;
+  --ok-bg: #dcfce7;
+  --warn: #92400e;
+  --warn-bg: #fef3c7;
+  --stop: #991b1b;
+  --stop-bg: #fee2e2;
+  --info-bg: #e0f2fe;
+  --radius: 12px;
+  --touch: 44px;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--text);
+  background: var(--bg);
+  /* Thumb zone: keep content clear of the bottom safe area */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.skip-link { position: absolute; left: -999px; top: 0; }
+.skip-link:focus { left: 8px; top: 8px; background: #fff; padding: 8px; z-index: 10; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+.app-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 16px; background: var(--brand); color: #fff;
+  position: sticky; top: 0; z-index: 5;
+}
+.app-header h1 { margin: 0; font-size: 1.2rem; }
+.tagline { margin: 0; font-size: .8rem; opacity: .9; }
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.badge {
+  font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap;
+  background: #fff; color: var(--brand-dark); border-radius: 999px; padding: 4px 10px;
+}
+.app-header .btn { background: transparent; color: #fff; border-color: rgba(255,255,255,.7); }
+
+main { max-width: 760px; margin: 0 auto; padding: 16px 12px 32px; outline: none; }
+
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 16px; margin-bottom: 16px;
+}
+.card h2 { margin: 0 0 8px; font-size: 1.25rem; }
+.card h3 { margin: 20px 0 8px; font-size: 1.05rem; border-bottom: 2px solid var(--line); padding-bottom: 4px; }
+
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.strong { font-weight: 700; }
+
+/* Buttons – minimum 44 × 44 px (NFR-01) */
+.btn {
+  min-height: var(--touch); min-width: var(--touch);
+  padding: 10px 16px; border-radius: 10px;
+  border: 2px solid var(--line); background: #fff; color: var(--text);
+  font: inherit; font-weight: 600; cursor: pointer;
+}
+.btn:focus-visible, .input:focus-visible, .check:focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
+.btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+.btn.primary:active { background: var(--brand-dark); }
+.btn.block { width: 100%; margin-top: 8px; }
+.btn.small { min-height: var(--touch); padding: 6px 12px; font-size: .9rem; }
+
+.actions { display: flex; gap: 12px; justify-content: space-between; flex-wrap: wrap; margin-top: 16px; }
+.actions .btn { flex: 1 1 140px; }
+
+.notice-list { padding-left: 20px; margin: 0 0 8px; }
+.notice-list li { margin-bottom: 8px; }
+
+/* Project templates */
+.template-grid { display: grid; gap: 12px; grid-template-columns: 1fr; margin-top: 12px; }
+.btn.template {
+  display: grid; grid-template-columns: 48px 1fr; grid-template-rows: auto auto;
+  align-items: center; text-align: left; padding: 14px; min-height: 80px; column-gap: 12px;
+}
+.template-icon { grid-row: 1 / span 2; font-size: 2rem; text-align: center; color: var(--brand); }
+.template-title { font-size: 1.1rem; }
+.template-review { font-size: .78rem; font-weight: 500; }
+.template-review.pending { color: var(--warn); }
+.template-review.ok { color: var(--ok); }
+
+/* Questions */
+.field { margin: 12px 0; }
+.field-label { font-weight: 700; margin: 0 0 6px; }
+.choices { display: grid; gap: 8px; grid-template-columns: 1fr; }
+.btn.choice { text-align: left; }
+.btn.choice.selected { border-color: var(--brand); background: #fff7ed; box-shadow: inset 0 0 0 1px var(--brand); }
+.number-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.input {
+  min-height: var(--touch); font: inherit; padding: 8px 12px;
+  border: 2px solid var(--line); border-radius: 10px; background: #fff; color: var(--text);
+}
+.number-row .input { width: 9em; font-size: 1.2rem; }
+.unit { font-weight: 700; }
+.error { color: var(--stop); font-weight: 600; min-height: 1.2em; margin: 4px 0; }
+
+/* Facts */
+.fact-list { margin: 0; }
+.fact-row {
+  display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center;
+  padding: 8px 0; border-top: 1px solid var(--line);
+}
+.fact-row dt { font-weight: 700; grid-column: 1; }
+.fact-row dd { margin: 0; grid-column: 1; }
+.fact-row .btn { grid-column: 2; grid-row: 1 / span 2; }
+.fact-status { display: inline-block; margin-left: 8px; font-size: .78rem; padding: 2px 8px; border-radius: 999px; }
+.fact-status.user-confirmed { background: var(--ok-bg); color: var(--ok); }
+.fact-status.observed { background: var(--warn-bg); color: var(--warn); }
+.fact-status.manufacturer-supported { background: var(--info-bg); color: #075985; }
+
+/* List */
+.state-banner { padding: 10px 12px; border-radius: 10px; font-weight: 600; }
+.state-banner.ok { background: var(--ok-bg); color: var(--ok); }
+.state-banner.warn { background: var(--warn-bg); color: var(--warn); }
+.hint { background: var(--info-bg); padding: 10px 12px; border-radius: 10px; font-size: .92rem; }
+.notice { font-size: .92rem; color: var(--muted); }
+.notice.safety {
+  color: var(--text); background: var(--warn-bg); border-left: 4px solid var(--warn);
+  padding: 10px 12px; border-radius: 6px;
+}
+
+.items { list-style: none; margin: 0; padding: 0; }
+.item { border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+.item p { margin: 6px 0; }
+.item.done { opacity: .6; }
+.item.done .item-name span:first-child { text-decoration: line-through; }
+.item.status-incompatible, .item.status-unknown_product { border-color: var(--stop); background: var(--stop-bg); }
+.item.status-none { border-color: var(--warn); background: var(--warn-bg); }
+.item-head { display: flex; align-items: flex-start; gap: 10px; }
+.check { width: 28px; height: 28px; margin: 8px; flex: none; accent-color: var(--brand); }
+.item-name { font-weight: 700; min-height: var(--touch); display: flex; flex-wrap: wrap; align-items: center; cursor: pointer; }
+.item-name .muted { font-weight: 400; }
+.tag { display: inline-block; font-size: .72rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; }
+.tag.estimate { background: var(--warn-bg); color: var(--warn); }
+.tag.sample { background: #eee; color: var(--muted); margin-left: 6px; }
+.store-info { font-size: .9rem; color: var(--muted); }
+.safety-note { background: var(--stop-bg); color: var(--stop); padding: 8px 10px; border-radius: 6px; font-size: .92rem; }
+.warn-text { color: var(--stop); font-weight: 600; }
+.variant-label { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+.variant { max-width: 100%; }
+.total { font-size: 1.1rem; padding: 12px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line); }
+
+/* Stop screen (FR-15) */
+.card.stop { border: 2px solid var(--stop); background: var(--stop-bg); }
+.card.stop h2 { color: var(--stop); }
+.stop-main { font-weight: 700; font-size: 1.05rem; }
+
+/* Evidence (DR-07) */
+.evidence { margin-top: 16px; }
+.evidence summary { min-height: var(--touch); display: flex; align-items: center; cursor: pointer; font-weight: 600; }
+.table-wrap { overflow-x: auto; }
+.evidence table { border-collapse: collapse; font-size: .78rem; width: 100%; }
+.evidence th, .evidence td { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; vertical-align: top; }
+
+.app-footer { max-width: 760px; margin: 0 auto; padding: 0 16px 24px; font-size: .8rem; color: var(--muted); }
+
+/* Larger screens: up to laptop width */
+@media (min-width: 640px) {
+  .template-grid { grid-template-columns: 1fr 1fr; }
+  .choices { grid-template-columns: 1fr 1fr; }
+  main { padding: 24px 16px 40px; }
+}
