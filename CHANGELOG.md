@@ -4,6 +4,25 @@ All notable changes to this project are documented here.
 Entries are collected under "Unreleased" and grouped into a milestone
 when they are released to `main`.
 
+## Milestone: Design update – brand orange #FF7313 – 2026-10-25
+Summary (same as the pull request):
+- Brand orange changed to #FF7313 and app look modernised in a clean DIY-store app style
+- Accessible colour use: dark text on orange buttons, darker orange for text
+- Compact phone header with the sample-data badge under the title
+
+- **2026-10-25 – Design: brand orange #FF7313, DIY-store app look.**
+  New colour tokens in `app/style.css` (brand #FF7313, pressed #E85F00, soft
+  #FFF1E6, orange text #B84A00); white header with orange bottom line and
+  brand mark; pill-shaped buttons; white cards with soft shadows on a light
+  grey page; round icon tiles for the project buttons; orange section markers.
+  Dark text on orange (6.4:1) because white on #FF7313 only reaches 2.7:1
+  (WCAG needs 4.5:1). Sample-data badge moved under the title so the phone
+  header fits from 320 px. Only general style cues of DIY-store apps – no logo,
+  name or other brand assets of a real company.
+  *Why:* the team wants the app to look like a familiar DIY-store app.
+  *Prompt:* "Design changes: please change the orange to hex #FF7313 and take
+  the OBI app design as orientation."
+
 ## Milestone: Release 1 (MVP) – Baumarkt-Buddy web app – 2026-10-25
 Summary (same as the pull request):
 - Static web app in `app/` (HTML/CSS/vanilla JS, no build step) for GitHub Pages

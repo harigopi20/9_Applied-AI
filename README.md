@@ -57,6 +57,12 @@ flowchart LR
 - **Variants:** a look-alike but wrong screw, plug or drill bit is flagged as "does not fit"; an unclear pack size gives no total.
 - **Store data:** stock and aisle/shelf only from the selected store – never invented, never from another store.
 
+## Look and feel
+Clean DIY-store app style: white surfaces on a light grey page, pill-shaped buttons,
+cards with soft shadows, brand orange **#FF7313** for actions and accents (tokens at
+the top of `app/style.css`). White text on #FF7313 would fail WCAG contrast (2.7:1),
+so orange buttons carry dark text (6.4:1) and orange text uses #B84A00 (5.2:1).
+
 ## Using the app
 1. **Start:** notice about AI use, sample data, privacy and the browser speech service.
 2. **Store (optional):** enter a postcode → sample stores within 50 km, nearest first → tap one. Or skip.
