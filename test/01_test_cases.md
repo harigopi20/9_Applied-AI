@@ -133,3 +133,57 @@
 | Run | Date | Build | Tests run | Pass | Fail | Blocked | Go / No-go | Approved by |
 |---|---|---|---|---|---|---|---|---|
 | 1 | | P2 | | | | | | |
+
+---
+
+## 7. Release-blocking test cases (RB)
+
+> **Source:** `Requirements_R1_3.xlsx` (moved here from the requirements lists on 25 October 2026). A release is only done when all its RB tests pass.
+
+| Release | RB tests |
+|---|---|
+| Release 1 – MVP | 14 |
+| Release 2 – Extended MVP | 2 |
+| Release 3 – Pilot-ready | 3 |
+| Release 4 – Beyond (not planned) | 1 |
+
+### 7.1 Release 1 – MVP – 14
+
+| ID | Release | MoSCoW | Category | Test (release-blocking case) | Simple language | Linked requirements | Design components |
+|---|---|---|---|---|---|---|---|
+| RB-01 | R1 | Must | Safety | Unknown wall substrate blocks final anchor selection. | Test: unknown wall type means no plugs are suggested. | Gate for UC-1 | DC-23, DC-24 |
+| RB-03 | R1 | Must | Compatibility | Similar-looking but wrong screw/variant is detected or remains unresolved. | Test: a wrong screw size is caught. | Compatibility core | DC-24, DC-25 |
+| RB-04 | R1 | Must | Safety | Increased intended load invalidates affected fixing decisions. | Test: a heavier load changes the parts. | Follows SR-08 | DC-16, DC-24 |
+| RB-06 | R1 | Must | Data | Missing map data never produces a fabricated aisle. | Test: no made-up aisle numbers. | No invented aisle | DC-31, DC-04 |
+| RB-07 | R1 | Must | Safety | Detector limits do not create false clearance for drilling. | Test: the detector never implies "safe to drill". | Detector warning | DC-24, DC-05 |
+| RB-08 | R1 | Must | Safety | Manufacturer manual wins if it conflicts with generated text. | Test: the product's own warning beats AI text. | Follows SR-07 | DC-33, DC-24 |
+| RB-09 | R1 | Must | Security | Malicious instructions embedded in product data are ignored as instructions. | Test: hidden instructions in product data are ignored. | Follows NFR-07 | DC-27 |
+| RB-13 | R1 | Must | Compatibility | Ambiguous pack quantity prevents a misleading basket total. | Test: an unclear pack size doesn't give a wrong total. | Basket total in R1 | DC-24, DC-28 |
+| RB-15 | R1 | Must | Data | Stock and aisle/shelf are only ever shown for the selected store. | Test: never show another store's aisle, shelf or stock. | Follows FR-29 and FR-11; needs at least 2 sample stores with different data. | DC-31, DC-35, DC-04 |
+| RB-16 | R1 | Must | Data | An invalid or unknown PLZ never selects a store; a message and the store list are shown. | Test: a wrong postcode never picks a store. | Follows FR-29, NFR-07 and SR-06. | DC-43 |
+| RB-17 | R1 | Must | Privacy | A skipped or declined PLZ gives a complete list with identical safety checks; no aisle/shelf values are shown or invented. | Test: skipping the postcode still gives a full, safe list without aisle and shelf. | Follows FR-30. | DC-04, DC-13 |
+| RB-18 | R1 | Must | Safety | A misheard spoken load, dimension or wall type is never used without the customer confirming it. | Test: a misheard value (e.g. 60 kg instead of 20 kg) is never used without confirmation. | Follows SR-11 and FR-25. | DC-10, DC-02, DC-23 |
+| RB-19 | R1 | Must | Reliability | A denied or failed microphone leaves typing and templates fully usable. | Test: without microphone access, typing still works. | Follows FR-25 and NFR-03. | DC-10, DC-01, DC-13 |
+| RB-20 | R1 | Must | Safety | A high-risk request made by voice is refused exactly like typed input. | Test: a dangerous job asked by voice is refused like a typed one. | Follows SR-09 and FR-25. | DC-10, DC-22, DC-05 |
+
+### 7.2 Release 2 – Extended MVP – 2
+
+| ID | Release | MoSCoW | Category | Test (release-blocking case) | Simple language | Linked requirements | Design components |
+|---|---|---|---|---|---|---|---|
+| RB-05 | R2 | Must | Data | Stale stock is labelled stale and offers a verification path. | Test: old stock information is marked as old, with a way to check it. | Stock freshness logic in R2 | DC-35, DC-04 |
+| RB-12 | R2 | Must | Offline | Network loss leaves saved checklist readable and removes live-stock certainty. | Test: without internet, the saved list stays readable and stock is marked as uncertain. | Offline checklist arrives in R2 | DC-06 |
+
+### 7.3 Release 3 – Pilot-ready – 3
+
+| ID | Release | MoSCoW | Category | Test (release-blocking case) | Simple language | Linked requirements | Design components |
+|---|---|---|---|---|---|---|---|
+| RB-02 | R3 | Must | Safety | Photo without scale does not produce exact dimensions. | Test: a photo without a size reference never gives exact measurements. | Photo arrives in R3 | DC-09, DC-21, DC-23 |
+| RB-11 | R3 | Must | Shopping | Denied location permission leaves postcode search available. | Test: if location access is denied, searching by postcode still works. | Store search arrives in R3 | DC-12 |
+| RB-14 | R3 | Must | Revalidation | A changed product during shopping triggers revalidation of affected assembly steps. | Test: swapping a product while shopping re-checks the building steps. | Scanner arrives in R3 | DC-11, DC-16 |
+
+### 7.4 Release 4 – Beyond (not planned) – 1
+
+| ID | Release | MoSCoW | Category | Test (release-blocking case) | Simple language | Linked requirements | Design components |
+|---|---|---|---|---|---|---|---|
+| RB-10 | Beyond | Won't | Integration | Retried checkout/reservation action cannot create duplicates. | Test: pressing "reserve" twice never creates two reservations. | Reservation not in scope | DC-40 |
+
