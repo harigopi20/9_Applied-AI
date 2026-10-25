@@ -1,0 +1,13 @@
+# Code owners for Baumarkt-Buddy
+# Changes to the paths below need approval from the listed owner
+# before they can be merged into `main` (when the ruleset requires
+# review from Code Owners). All other folders (requirements, data,
+# diagrams, docs, pitch, test) can be reviewed by any team member.
+
+# App code and AI prompts
+/app/          @st854d2gpb-create
+/APP           @st854d2gpb-create
+
+# Deployment, repository settings and working rules
+/.github/      @st854d2gpb-create
+/CLAUDE.md     @st854d2gpb-create
