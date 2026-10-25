@@ -11,7 +11,7 @@
 | `store_stock.csv` | Export of sheet *Store stock*: aisle, shelf and quantity per product for each store (`<store_id>_aisle_nr`, `_aisle_name`, `_shelf_nr`, `_qty`) | DR-01 |
 | `stores.csv` | Export of sheet *Stores*: 5 OBI stores with address, PLZ, opening hours, coordinates | DR-01, FR-29 |
 | `plz_coordinates.csv` | German PLZ → centre coordinates (8,298 PLZ), used for distance sorting | DR-08 |
-| `product_catalogue.csv`, `store_map.csv` | **Obsolete** – replaced by the files above; kept for reference until the app is switched over | – |
+| `product_catalogue.csv`, `store_map.csv` | **Obsolete** – replaced by the files above; the app reads `product_catalogue.xlsx` since 25 Oct 2026 | – |
 
 ## Stores
 
@@ -34,7 +34,10 @@
 
 ## Editing
 
-Edit `product_catalogue.xlsx`, then export each sheet to its CSV (same column names). Store coordinates are the centre of the store's PLZ (approximate).
+Edit `product_catalogue.xlsx`, then export each sheet to its CSV (same column names).
+The app reads the workbook directly. The *Products* sheet also has the rule-engine
+columns `variant_group`, `pack_qty`, `pack_unit`, `specs`, `data_note` – after adding
+products run `python3 tools/add_rule_columns.py` (fills them and re-exports `products.csv`). Store coordinates are the centre of the store's PLZ (approximate).
 
 ## Source and licence – `plz_coordinates.csv`
 

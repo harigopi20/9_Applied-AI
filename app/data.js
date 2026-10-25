@@ -1,8 +1,8 @@
 /*
  * Baumarkt-Buddy – data loading (data layer).
  *
- * DR-01..DR-03: ONE Excel file (data/baumarkt-buddy-data.xlsx) is the only
- * product source. It is read in the browser with SheetJS (lib/xlsx.mini.min.js).
+ * DR-01: ONE Excel file (data/product_catalogue.xlsx, maintained by the team)
+ * is the only product source. It is read in the browser with SheetJS (lib/xlsx.mini.min.js).
  * DR-04: project templates and safety word lists are JSON files.
  * NFR-10: no product, store or stock data lives in code.
  * NFR-07: everything read here is DATA. Text fields are never interpreted,
@@ -11,8 +11,9 @@
 (function (root) {
   "use strict";
 
-  // Stores/Stock are optional: without them the app runs without a store (FR-30, NFR-03).
+  // Stores and "Store stock" are optional: without them the app runs without a store (FR-30, NFR-03).
   const REQUIRED_SHEETS = ["Products"];
+  const STOCK_SHEET = "Store stock";
   const REQUIRED_PRODUCT_COLUMNS = [
     "product_nr", "product_name", "variant_group", "category", "size",
     "pack_qty", "price_eur", "max_load_kg", "suitable_wall_types",
@@ -105,37 +106,68 @@
     return Object.freeze((rows || []).map((r) => Object.freeze({
       store_id: str(r.store_id),
       name: str(r.store_name),
+      street: str(r.street),
       plz: str(r.plz),
       city: str(r.city),
+      opening_hours: str(r.opening_hours),
       lat: numOrNull(r.lat),
       lon: numOrNull(r.lon),
       data_status: str(r.data_status) || "sample"
-    })).filter((s) => s.store_id));
+    })).filter((s) => /^[A-Z0-9-]{1,20}$/.test(s.store_id) && s.name)); // skips note rows below the table
   }
 
-  // DR-02/DR-03: stock and aisle/shelf keyed by store_id + product_nr.
-  function buildStock(rows) {
+  /**
+   * DR-01 "Store stock" sheet, one row per product with columns per store:
+   * <store_id>_aisle_nr, _aisle_name, _shelf_nr, _qty.
+   * Empty aisle = the store does NOT CARRY the product; qty 0 = OUT OF STOCK.
+   * Rows that are not products (e.g. a legend) are skipped.
+   */
+  function buildStock(rows, stores) {
     const index = new Map();
     (rows || []).forEach((r) => {
-      const key = str(r.store_id) + "|" + str(r.product_nr).toUpperCase();
-      index.set(key, Object.freeze({
-        stock_qty: numOrNull(r.stock_qty),
-        aisle_nr: numOrNull(r.aisle_nr),
-        aisle_name: str(r.aisle_name),
-        shelf_nr: numOrNull(r.shelf_nr)
-      }));
+      const nr = str(r.product_nr).toUpperCase();
+      if (!/^P\d+$/.test(nr)) return;
+      (stores || []).forEach((s) => {
+        const id = s.store_id;
+        const aisle = numOrNull(r[id + "_aisle_nr"]);
+        index.set(id + "|" + nr, Object.freeze({
+          carried: aisle !== null,
+          stock_qty: aisle === null ? null : numOrNull(r[id + "_qty"]),
+          aisle_nr: aisle,
+          aisle_name: aisle === null ? "" : str(r[id + "_aisle_name"]),
+          shelf_nr: aisle === null ? null : numOrNull(r[id + "_shelf_nr"])
+        }));
+      });
     });
     return index;
+  }
+
+  /** Rows of a sheet whose header row starts with `key` (title rows above are skipped). */
+  function sheetRows(XLSX, sheet, key) {
+    if (!sheet) return [];
+    const grid = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null, raw: true });
+    const h = grid.findIndex((row) => row && str(row[0]) === key);
+    if (h < 0) return [];
+    const header = grid[h].map(str);
+    return grid.slice(h + 1)
+      .filter((row) => row && str(row[0]) !== "")
+      .map((row) => {
+        const o = {};
+        header.forEach((name, i) => { if (name) o[name] = row[i] === undefined ? null : row[i]; });
+        return o;
+      });
   }
 
   function parseWorkbook(arrayBuffer, XLSX) {
     const wb = XLSX.read(arrayBuffer, { type: "array" });
     const missing = REQUIRED_SHEETS.filter((s) => !wb.SheetNames.includes(s));
     if (missing.length) throw new Error("Workbook misses sheets: " + missing.join(", "));
-    const rows = (name) => wb.Sheets[name] ? XLSX.utils.sheet_to_json(wb.Sheets[name], { defval: null, raw: true }) : [];
     let stores = [], stock = new Map();
-    try { stores = buildStores(rows("Stores")); stock = buildStock(rows("Stock")); } catch (_) { stores = []; stock = new Map(); }
-    return { catalogue: buildCatalogue(rows("Products")), stores, stock };
+    try {
+      stores = buildStores(sheetRows(XLSX, wb.Sheets.Stores, "store_id"));
+      stock = buildStock(sheetRows(XLSX, wb.Sheets[STOCK_SHEET], "product_nr"), stores);
+    } catch (_) { stores = []; stock = new Map(); }
+    return { catalogue: buildCatalogue(sheetRows(XLSX, wb.Sheets.Products, "product_nr")), stores, stock };
   }
 
   /**
@@ -193,6 +225,6 @@
   }
 
   root.BBData = Object.freeze({
-    buildCatalogue, buildStores, buildStock, parseWorkbook, parsePlzTable, fetchJson, fetchText, fetchWorkbook, loadAll
+    buildCatalogue, buildStores, buildStock, sheetRows, parseWorkbook, parsePlzTable, fetchJson, fetchText, fetchWorkbook, loadAll
   });
 })(typeof window !== "undefined" ? window : globalThis);

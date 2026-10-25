@@ -35,6 +35,7 @@
     recognizer: null,
     plzInput: "",            // FR-29: only in memory, cleared after a store is chosen (NFR-04)
     storeSearch: null,       // result of BBRules.findStores – never selects a store itself
+    storeOrigin: null,       // FR-31: centre of the entered PLZ (coordinates only, in memory)
     storeReturn: "choose",   // where to go after choosing/skipping a store
     template: null,
     facts: {},
@@ -221,11 +222,13 @@
       res.stores.forEach((x) => ul.appendChild(el("li", {}, [
         el("button", { class: "btn store" + (x.store.store_id === state.storeId ? " selected" : ""), "data-store": x.store.store_id, onclick: () => chooseStore(x.store.store_id) }, [
           el("span", { class: "store-name", text: x.store.name }),
-          el("span", { class: "muted small", text: x.store.city + (x.km !== null ? " · " + t("store_km", { km: formatKm(x.km) }) : "") }),
+          el("span", { class: "muted small", text: [x.store.street, (x.store.plz + " " + x.store.city).trim()].filter(Boolean).join(", ") + (x.km !== null ? " · " + t("store_km", { km: formatKm(x.km) }) : "") }),
+          x.store.opening_hours ? el("span", { class: "muted small", text: x.store.opening_hours }) : null,
           el("span", { class: "tag sample", text: t("sample_note") })
         ])
       ])));
       box.appendChild(ul);
+      box.appendChild(el("p", { class: "muted small", "data-store-disclaimer": "1", text: t("store_disclaimer") }));
     }
     box.appendChild(el("div", { class: "actions" }, [
       el("button", { class: "btn", id: "store-skip", text: state.storeId ? t("store_keep") : t("store_skip"), onclick: () => leaveStoreSearch() })
@@ -558,6 +561,13 @@
       : [el("p", { class: "hint", text: t("no_store_hint") }),
         el("button", { class: "btn small", id: "add-plz", text: t("store_add_plz"), onclick: () => openStoreSearch("result") })]));
 
+    // FR-31: summary of items the chosen store cannot supply
+    if (state.storeId) {
+      const missing = r.items.filter((it) => it.product &&
+        R.availability(state.data.stock, state.data.stores, state.storeId, it.product.product_nr, state.storeOrigin, CFG.store).status !== "in_stock").length;
+      if (missing) box.appendChild(el("p", { class: "state-banner warn", "data-missing": String(missing), text: t("avail_summary", { n: missing }) }));
+    }
+
     // Safety notices first (SR-05, SR-02)
     r.notices.filter((n) => n.id !== "estimates").forEach((n) => {
       box.appendChild(el("p", { class: "notice safety", "data-notice": n.id, text: t("notice_" + n.id) }));
@@ -633,12 +643,29 @@
     const s = R.storeInfo(state.data.stock, state.storeId, p.product_nr);
     const na = t("not_available");
     const avail = s.stock_qty === null ? "unknown" : s.stock_qty > 0 ? "in" : "out";
+    const av = R.availability(state.data.stock, state.data.stores, state.storeId, p.product_nr, state.storeOrigin, CFG.store);
+    li.setAttribute("data-availability", av.status);
     li.appendChild(el("p", { class: "store-info", "data-aisle": s.aisle_nr === null ? "none" : String(s.aisle_nr), "data-avail": avail }, [
       el("span", { class: "dot " + avail, "aria-hidden": "true" }),
       el("span", { text: t("stock") + ": " + (s.stock_qty === null ? na : s.stock_qty) + " · " }),
       el("span", { text: t("aisle") + ": " + (s.aisle_nr === null ? na : s.aisle_nr + (s.aisle_name ? " (" + s.aisle_name + ")" : "")) + " · " }),
       el("span", { text: t("shelf") + ": " + (s.shelf_nr === null ? na : s.shelf_nr) })
     ]));
+
+    // FR-31 / RB-21: not available here → stays on the list, marked, with referral or "ask staff"
+    if (av.status === "out_of_stock" || av.status === "not_carried") {
+      const here = state.data.stores.find((x) => x.store_id === state.storeId);
+      const box = el("div", { class: "referral", role: "note", "data-referral": av.referral ? av.referral.store.store_id : "ask_staff" }, [
+        el("p", { class: "referral-here", text: t(av.status === "out_of_stock" ? "avail_out_here" : "avail_not_carried_here", { store: here ? here.name : "" }) })
+      ]);
+      box.appendChild(av.referral
+        ? el("p", { class: "referral-there" }, [
+          el("span", { text: t("avail_referral", { store: av.referral.store.name, km: formatKm(av.referral.km) }) }),
+          el("span", { class: "tag sample", text: t("sample_note") })
+        ])
+        : el("p", { class: "referral-there", text: t("avail_ask_staff") }));
+      li.appendChild(box);
+    }
 
     // Manufacturer note unchanged (SR-07)
     if (i.safety_note) {
@@ -824,6 +851,9 @@
   /** NFR-07: the PLZ is checked in code; NFR-04: it is never logged or sent to the AI. */
   function searchStores(input) {
     state.storeSearch = R.findStores(input, state.data.plzTable, state.data.stores, CFG.store);
+    // FR-31: keep only the PLZ centre (not the PLZ) as origin for referral distances.
+    const check = R.checkPlz(input, state.data.plzTable);
+    state.storeOrigin = check.valid ? check.point : null;
     render();
     return state.storeSearch;
   }

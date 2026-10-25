@@ -296,6 +296,11 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 16px 32px; outline: none; 
 .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; background: #c8c8c8; }
 .dot.in { background: var(--avail); }
 
+.referral { border-left: 5px solid var(--brand); background: var(--brand-soft); padding: 6px 12px; margin: 8px 0; }
+.referral p { margin: 4px 0; }
+.referral-here { font-weight: 600; color: var(--warn); }
+.item[data-availability="out_of_stock"] .dot, .item[data-availability="not_carried"] .dot { background: #c8c8c8; }
+
 .safety-note { background: var(--stop-bg); color: var(--stop); padding: 8px 12px; border-left: 5px solid var(--stop); font-size: .95rem; }
 .warn-text { color: var(--stop); font-weight: 600; }
 .variant-label { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }

@@ -22,11 +22,13 @@ window.BB_CONFIG = Object.freeze({
   },
 
   data: {
-    workbook: "data/baumarkt-buddy-data.xlsx", // DR-01..DR-03 single data file
+    // DR-01: the team's single data workbook in the repo's data/ folder
+    // (serve the repository root locally, see README).
+    workbook: "../data/product_catalogue.xlsx",
     safetyRules: "data/safety-rules.json",
     lexicon: "data/understanding-lexicon.json",
     mockResponses: "data/ai-mock-responses.json",
-    plzTable: "data/plz-de.csv", // DR-08: PLZ → centre coordinates (OpenGeoDB, public domain)
+    plzTable: "../data/plz_coordinates.csv", // DR-08: PLZ → centre (WZB plz_geocoord, Apache-2.0)
     templates: [
       "data/templates/hang-shelf.json",
       "data/templates/hang-picture.json"
