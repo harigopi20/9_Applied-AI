@@ -56,3 +56,14 @@ when they are released to `main`.
   proxy and the data build script need approval by @st854d2gpb-create.
   *Why:* the proxy handles the API key setup and rate limits; it is app code.
   *Prompt:* "Yes, add CODEOWNERS and continue with stage 3."
+- **2026-10-25 – R1 stage 3: voice input (German and English).**
+  Added `app/speech.js` (browser Web Speech API, `de-DE`/`en-US`, interim
+  results) and the microphone button next to the text field: in-app consent
+  naming the browser speech service, recording indicator, stop by tap or Esc,
+  live editable transcript that is only processed after tapping "Continue",
+  spoken values as guesses with read-back, hints for unsupported browsers and
+  denied/failed microphones. Privacy notice on the start screen names the
+  speech services. 10 new tests with a simulated speech API (52 passing),
+  including RB-18, RB-19 and RB-20; manual real-speech checklist in README.
+  *Why:* stage 3 of Release 1 (FR-25, FR-27, SR-11, NFR-04).
+  *Prompt:* "Yes, add CODEOWNERS and continue with stage 3."

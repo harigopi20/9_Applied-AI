@@ -23,6 +23,16 @@
     recognized: null,        // { template, facts } – AI/keyword result, all facts "observed"
     pendingGuesses: {},      // guesses kept for a template chosen after a fallback
     busy: false,
+    speech: {                // FR-25: voice input state (no audio is ever kept)
+      Recognition: undefined, // injectable for tests; undefined = browser API
+      consented: false,       // in-app consent before the first recording (this tab only)
+      askConsent: false,
+      listening: false,
+      transcribed: false,     // text came from speech and still needs the customer's tap
+      error: null,            // message key, see speech.js ERROR_KEYS
+      base: ""                // text that was in the field before recording
+    },
+    recognizer: null,
     template: null,
     facts: {},
     questionId: null,
@@ -100,6 +110,7 @@
         el("li", { "data-notice": "ai", text: t("notice_ai_" + state.ai.mode) }),
         el("li", { text: t("notice_sample") }),
         el("li", { text: t("notice_privacy") }),
+        el("li", { "data-notice": "speech", text: t("notice_speech") }),
         el("li", { class: "muted", text: t("notice_stage") })
       ]),
       el("button", { class: "btn primary block", text: t("start"), onclick: () => go("choose") })
@@ -120,14 +131,24 @@
     });
     area.value = state.inputText;
     area.addEventListener("input", () => { state.inputText = area.value; });
+    const sp = state.speech;
+    const supported = speechSupported();
+    const mic = supported ? el("button", {
+      type: "button", id: "mic-button", class: "btn mic" + (sp.listening ? " recording" : ""),
+      "aria-pressed": sp.listening ? "true" : "false",
+      "aria-label": sp.listening ? t("mic_stop") : t("mic_start"),
+      onclick: micTap
+    }, [el("span", { "aria-hidden": "true", text: sp.listening ? "■" : "🎤" }), el("span", { class: "mic-label", text: sp.listening ? t("mic_stop_short") : t("mic_start_short") })]) : null;
     const form = el("form", { class: "text-entry", novalidate: true }, [
       el("label", { for: "project-text", class: "field-label", text: t("text_label") }),
-      area,
+      el("div", { class: "entry-row" }, [area, mic]),
+      viewSpeechStatus(supported),
       el("p", { class: "muted small", text: t("text_help") }),
-      el("button", { type: "submit", class: "btn primary block", id: "text-submit", disabled: state.busy,
+      el("button", { type: "submit", class: "btn primary block", id: "text-submit", disabled: state.busy || sp.listening,
         text: state.busy ? t("text_busy") : t("text_submit") })
     ]);
-    form.addEventListener("submit", (e) => { e.preventDefault(); submitText(area.value); });
+    // FR-25: dictated text is only processed after this explicit tap.
+    form.addEventListener("submit", (e) => { e.preventDefault(); submitText(area.value, sp.transcribed ? "speech" : "text"); });
     wrap.appendChild(form);
     wrap.appendChild(el("p", { class: "muted or", text: t("or_choose") }));
     const grid = el("div", { class: "template-grid" });
@@ -147,6 +168,35 @@
     });
     wrap.appendChild(grid);
     return wrap;
+  }
+
+  // Voice input status: consent, recording indicator, check hint, errors (FR-25, NFR-04, RB-19)
+  function viewSpeechStatus(supported) {
+    const sp = state.speech;
+    const box = el("div", { class: "speech-status", "aria-live": "polite" });
+    if (!supported) {
+      box.appendChild(el("p", { class: "muted small", "data-speech": "unsupported", text: t("speech_error_unsupported") }));
+      return box;
+    }
+    if (sp.askConsent) {
+      box.appendChild(el("div", { class: "consent", role: "dialog", "aria-labelledby": "consent-title", "data-speech": "consent" }, [
+        el("p", { id: "consent-title", class: "strong", text: t("speech_consent_title") }),
+        el("p", { class: "small", text: t("speech_consent_text") }),
+        el("div", { class: "actions" }, [
+          el("button", { type: "button", class: "btn", id: "consent-decline", text: t("cancel"), onclick: consentDecline }),
+          el("button", { type: "button", class: "btn primary", id: "consent-accept", text: t("speech_consent_accept"), onclick: consentAccept })
+        ])
+      ]));
+    }
+    if (sp.listening) {
+      box.appendChild(el("p", { class: "recording-indicator", role: "status", "data-speech": "listening" }, [
+        el("span", { class: "rec-dot", "aria-hidden": "true" }), el("span", { text: t("speech_listening") })
+      ]));
+    } else if (sp.transcribed) {
+      box.appendChild(el("p", { class: "hint", "data-speech": "check", text: t("speech_check") }));
+    }
+    if (sp.error) box.appendChild(el("p", { class: "hint warn-hint", role: "alert", "data-speech": "error-" + sp.error, text: t("speech_error_" + sp.error) }));
+    return box;
   }
 
   // What we understood – everything is a guess until confirmed (FR-03, NFR-05, SR-01)
@@ -500,7 +550,74 @@
   // ---------------------------------------------------------------------
   // Flow control (orchestrator)
   // ---------------------------------------------------------------------
-  function go(screen) { state.screen = screen; render(); }
+  function go(screen) {
+    if (screen !== "choose") stopRecognizer(true);
+    state.screen = screen;
+    render();
+  }
+
+  // ---------------------------------------------------------------------
+  // Voice input (speech.js) – produces text only, never decisions
+  // ---------------------------------------------------------------------
+  function speechCtor() {
+    return state.speech.Recognition === undefined ? window.BBSpeech.nativeRecognition() : state.speech.Recognition;
+  }
+  function speechSupported() { return !!speechCtor(); }
+
+  function micTap() {
+    const sp = state.speech;
+    if (sp.listening) { stopRecognizer(false); return; }
+    sp.error = null;
+    // NFR-04: explain the browser speech service before the microphone is used.
+    if (!sp.consented) { sp.askConsent = true; render(); return; }
+    startRecognizer();
+  }
+
+  function consentAccept() {
+    state.speech.consented = true;
+    state.speech.askConsent = false;
+    startRecognizer();
+  }
+
+  function consentDecline() {
+    state.speech.askConsent = false;
+    render();
+  }
+
+  function startRecognizer() {
+    const sp = state.speech;
+    sp.base = state.inputText.trim();
+    sp.error = null;
+    state.recognizer = window.BBSpeech.create({
+      Recognition: speechCtor(),
+      lang: window.BBI18n.getLang(),
+      onText: (text) => {
+        // Live transcript into the editable field (interim results).
+        state.inputText = (sp.base ? sp.base + " " : "") + text;
+        const area = document.getElementById("project-text");
+        if (area) area.value = state.inputText;
+        if (text) sp.transcribed = true;
+      },
+      onState: (st) => {
+        sp.listening = st === "listening";
+        if (!sp.listening) state.recognizer = null;
+        render();
+      },
+      onError: (key) => {
+        sp.error = key;
+        sp.listening = false;
+        render();
+      }
+    });
+    if (!state.recognizer.start()) { sp.listening = false; render(); }
+  }
+
+  /** Stops recording; abort=true discards nothing typed, only ends the microphone. */
+  function stopRecognizer(abort) {
+    const r = state.recognizer;
+    if (!r) return;
+    if (abort) r.abort(); else r.stop();
+  }
 
   /** Starts a template; guesses (from text) become "observed" facts – never confirmed (SR-01). */
   function startTemplate(tpl, guesses) {
@@ -528,6 +645,7 @@
   }
 
   function recompute(askNext) {
+    stopRecognizer(true); // leaving the entry screen ends any recording
     const r = R.evaluate(state.template, state.facts, state.data.catalogue, state.data.safetyRules, { overrides: state.overrides });
     state.result = r;
     if (askNext && r.state === "needs_clarification") {
@@ -572,6 +690,7 @@
   async function submitText(text, origin) {
     const clean = String(text || "").trim();
     state.inputText = String(text || "");
+    state.speech.transcribed = false; // the customer's tap confirmed the transcript (FR-25)
     state.chooseNotice = null;
     state.pendingGuesses = {};
     if (!clean) { state.chooseNotice = "empty"; go("choose"); return state.screen; }
@@ -647,16 +766,19 @@
   // Exposed for tests.html only (UI-level release-blocking tests).
   window.BBApp = Object.freeze({
     state, viewResult, viewItem, viewQuestion, viewChoose, viewRecognized, viewHighRisk,
-    recompute, startTemplate, submitText
+    recompute, startTemplate, submitText, micTap, consentAccept, consentDecline
   });
 
   document.addEventListener("DOMContentLoaded", () => {
     if (document.body.dataset.autoboot === "false") return; // tests.html drives the app itself
     window.BBI18n.setLang(CFG.defaultLanguage);
     document.getElementById("lang-toggle").addEventListener("click", () => {
+      stopRecognizer(true); // recognition language follows the UI language
       window.BBI18n.setLang(window.BBI18n.getLang() === "en" ? "de" : "en");
       render();
     });
+    // Recording can always be cancelled with Escape (FR-25).
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") stopRecognizer(false); });
     boot();
   });
 })();

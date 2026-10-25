@@ -30,14 +30,15 @@ See [diagrams](diagrams/baumarkt-buddy-diagrams.md) for details.
 
 ## App (Release 1 MVP – in progress)
 The app lives in [`app/`](app/): a static web app (HTML, CSS, vanilla JavaScript,
-no build step) for GitHub Pages. **Status: stage 2 of 5** – free-text entry and
-project buttons, follow-up questions, rule engine, safety stops and shopping
-list. Voice input (stage 3) and PLZ/store selection (stage 4) follow.
+no build step) for GitHub Pages. **Status: stage 3 of 5** – free text, voice
+input and project buttons, follow-up questions, rule engine, safety stops and
+shopping list. PLZ/store selection (stage 4) follows.
 
 ### Architecture
 | Layer | File | Responsibility |
 |---|---|---|
-| Input | `app/app.js` | Free text and project buttons; dictated text (stage 3) uses the same `submitText` path |
+| Input | `app/app.js` | Free text, voice and project buttons – typed and dictated text use the same `submitText` path |
+| Voice input | `app/speech.js` | Browser Web Speech API → editable transcript; never processes or stores audio |
 | AI (understanding only) | `app/ai-adapter.js` | Classify intent, extract candidate values as schema-validated JSON – never decides |
 | AI proxy (optional) | `proxy/` | Cloudflare Worker that holds the API key and rate-limits (see `proxy/README.md`) |
 | Rule engine (all decisions) | `app/rules.js` | Fact gate, product choice, quantities, compatibility, load limits, notices, evidence log |
@@ -71,6 +72,37 @@ in code; invalid answers are discarded. Flow for free text:
 
 Before anything is sent to the proxy, postcodes (5 digits), phone numbers and
 e-mail addresses are removed from the text (NFR-04). Only `text` and `lang` are sent.
+
+### Voice input (FR-25, FR-27, SR-11)
+Microphone button next to the text field. Flow: first tap → in-app notice about
+the browser's speech service → "Allow microphone" → the browser asks for
+permission → recording indicator (red, "Stop" button, Esc) → live transcript
+(`interimResults`) in the text field → the customer checks/edits the text and
+taps **Continue**. Only then is the text processed – exactly like typed text.
+Recognised values are guesses (source `speech:…`) and are read back in the
+questions for confirmation by tap. Recognition language follows the UI language
+(`en-US` / `de-DE`). Leaving the screen or switching language stops recording.
+
+| Browser | Voice input | Speech service (may receive the audio) |
+|---|---|---|
+| Chrome (desktop, Android) | yes | Google |
+| Edge | yes | Microsoft |
+| Safari (macOS, iOS) | yes (Siri/dictation must be enabled) | Apple |
+| Firefox | **no** – hint shown, typing and buttons work | – |
+| Other browsers on iOS | depends on the browser | Apple |
+
+Needs HTTPS or `localhost` (GitHub Pages is HTTPS). Baumarkt-Buddy itself never
+records, stores or sends audio (`speech.js` uses no `getUserMedia`, storage or
+network calls – checked by a test).
+
+**Manual check with real speech** (the automated tests use a simulated speech API):
+| # | Language | Say | Expected |
+|---|---|---|---|
+| S1 | EN | "I want to hang a shelf, twelve kilos, concrete wall, eighty centimetres long" | Shelf; 12 kg, concrete, 80 cm shown as guesses |
+| S2 | DE | "Ich möchte ein Regal für zwölf Kilo an eine Betonwand hängen, 80 Zentimeter lang" | Regal; 12 kg, Beton, 80 cm als Vermutung |
+| S3 | DE | "Zwei Bilder mit je drei Kilo an die Ziegelwand" | Bild; 3 kg, Ziegel, 2 Bilder |
+| S4 | DE | "Ich will eine Steckdose versetzen" | Stop screen "needs a professional" |
+| S5 | any | deny the microphone in the browser prompt | Hint; typing and buttons work |
 
 ### Data file `app/data/baumarkt-buddy-data.xlsx` (DR-01 … DR-03)
 Built from `data/product_catalogue.csv` and `data/store_map.csv` with
@@ -142,7 +174,12 @@ own data file. Newer versions are published on cdn.sheetjs.com (replace the file
 | NFR-07 | user text treated as data, guesses never confirmed | NFR-07 |
 | SR-09 (G0) | `checkScope` before the AI | SR-09 / G0 |
 | FR-04, FR-05, SR-01 | recognised screen, pre-filled guesses, ≤ 3 questions | SR-01 / FR-04 / FR-05 |
-| NFR-09 | number words and units DE/EN | NFR-09 |
+| NFR-09 | number words and units DE/EN | NFR-09, NFR-09 (speech) |
+| FR-25, NFR-04 | consent, recording indicator, editable transcript, tap to continue | FR-25 / NFR-04, FR-25 / NFR-02, FR-25 (abort), NFR-04 (speech) |
+| SR-11 | spoken values are guesses until confirmed | RB-18 / SR-11 |
+| NFR-03 (speech) | denied/failed/unsupported microphone → typing | RB-19 (×2) |
+| SR-09 (speech) | same G0 check for dictated text | RB-20 |
+| NFR-07 (speech) | spoken commands are only text | NFR-07 (speech) |
 
 ## Team
 | Role | Member |
