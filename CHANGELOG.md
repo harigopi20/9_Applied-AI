@@ -4,24 +4,16 @@ All notable changes to this project are documented here.
 Entries are collected under "Unreleased" and grouped into a milestone
 when they are released to `main`.
 
-## Milestone: App code ownership – 2026-10-25
-- **2026-10-25 – Added .github/CODEOWNERS:** @st854d2gpb-create owns the
-  app code (`app/`, `APP`), deployment and repo config (`.github/`) and
-  `CLAUDE.md`.
-  *Why:* only the project lead should approve changes to the app; the team
-  can keep reviewing requirements, data, docs and pitch among themselves.
-  *Prompt:* "Only I want to approve app changes."
-
-## Milestone: Working rules and change log – 2026-10-25
-- **2026-10-25 – Completed CLAUDE.md:** added Git, pull request and change
-  documentation rules (previously only the merge section was present).
-  *Why:* so every vibe-coding change is committed, described and traceable.
-  *Prompt:* "Create a complete CLAUDE.md adapted to the Claude Code
-  branch/pull-request workflow."
-- **2026-10-25 – Added CHANGELOG.md:** this file.
-  *Why:* documents the vibe-coding process for the final report.
-
-## Unreleased
+## Milestone: Release 1 (MVP) – Baumarkt-Buddy web app – 2026-10-25
+Summary (same as the pull request):
+- Static web app in `app/` (HTML/CSS/vanilla JS, no build step) for GitHub Pages
+- Single Excel data file with products, 3 sample stores and per-store stock/aisles; PLZ table from OpenGeoDB
+- Deterministic rule engine with 2 project templates (hang a shelf, hang a picture) and all R1 safety rules
+- Free-text entry with exchangeable AI adapter (template default, mock, optional proxy) and template fallback
+- Voice input (German/English) with consent, editable transcript and confirmation by tap
+- Optional PLZ store selection that never selects a store automatically; full list without a store
+- English/German UI, transparency notices, evidence log
+- 62 automated tests in `tests.html`, including all 14 release-blocking tests of R1
 
 - **2026-10-25 – R1 stage 1: data model, rule engine, templates, safety rules, tests.**
   Added the static app in `app/` (index.html, style.css, app.js, rules.js,
@@ -79,3 +71,32 @@ when they are released to `main`.
   *Why:* stage 4 of Release 1 (FR-29, FR-30, DR-08, RB-16). Team confirmed
   50 km / 5 stores and OpenGeoDB as PLZ source.
   *Prompt:* "Fine as is, use OpenGeoDB and continue with stage 4."
+- **2026-10-25 – R1 stage 5: polish, transparency, README, GitHub Pages entry.**
+  Responsive audit at 320/390/768/1280 px (header wraps on very small phones,
+  two-column list on laptops, no overflow, all touch targets ≥ 44 px); "How this
+  list was made" note with the template's review status; root `index.html`
+  forwarding to `app/` and `.nojekyll` for GitHub Pages; README rewritten
+  (description, architecture, usage, AI modes, voice support, store selection,
+  local testing, Pages, proxy, data sources incl. PLZ licence, full table
+  requirement → implementation → test). 2 new tests (62 passing).
+  *Why:* stage 5 of Release 1 (NFR-01, NFR-05, NFR-09, delivery).
+  *Prompt:* "Yes, continue with stage 5."
+
+## Milestone: App code ownership – 2026-10-25
+- **2026-10-25 – Added .github/CODEOWNERS:** @st854d2gpb-create owns the
+  app code (`app/`, `APP`), deployment and repo config (`.github/`) and
+  `CLAUDE.md`.
+  *Why:* only the project lead should approve changes to the app; the team
+  can keep reviewing requirements, data, docs and pitch among themselves.
+  *Prompt:* "Only I want to approve app changes."
+
+## Milestone: Working rules and change log – 2026-10-25
+- **2026-10-25 – Completed CLAUDE.md:** added Git, pull request and change
+  documentation rules (previously only the merge section was present).
+  *Why:* so every vibe-coding change is committed, described and traceable.
+  *Prompt:* "Create a complete CLAUDE.md adapted to the Claude Code
+  branch/pull-request workflow."
+- **2026-10-25 – Added CHANGELOG.md:** this file.
+  *Why:* documents the vibe-coding process for the final report.
+
+## Unreleased

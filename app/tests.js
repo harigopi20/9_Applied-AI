@@ -930,6 +930,33 @@
   });
 
   // ---------------------------------------------------------------------
+  // Stage 5 – transparency
+  // ---------------------------------------------------------------------
+  test("NFR-05", "List labels estimates, sample data, rule IDs and states that rules – not AI – made it (EN + DE)", () => {
+    ["en", "de"].forEach((lang) => {
+      window.BBI18n.setLang(lang);
+      const box = renderResult(SHELF(), confirmed(SHELF_OK), null);
+      const items = box.querySelectorAll(".item");
+      assert(items.length > 0);
+      items.forEach((li) => {
+        assert(li.querySelector(".tag.estimate"), "estimate tag");
+        assert(li.querySelector(".tag.sample"), "sample tag");
+        assert(/SHELF-Q\d/.test(li.textContent), "rule id visible");
+      });
+      const tr = box.querySelector('[data-transparency="list"]');
+      assert(tr && tr.textContent.includes(window.BBI18n.t("template_unreviewed")), "review status shown (SR-10)");
+    });
+    window.BBI18n.setLang("en");
+    ["template", "mock", "proxy"].forEach((m) => assert(window.BBI18n.TEXTS.en["notice_ai_" + m] && window.BBI18n.TEXTS.de["notice_ai_" + m], "AI notice for mode " + m));
+  });
+
+  test("NFR-09", "Every UI text exists in English and German", () => {
+    const en = Object.keys(window.BBI18n.TEXTS.en), de = Object.keys(window.BBI18n.TEXTS.de);
+    eq(en.filter((k) => !de.includes(k)), [], "missing in German");
+    eq(de.filter((k) => !en.includes(k)), [], "missing in English");
+  });
+
+  // ---------------------------------------------------------------------
   // Runner
   // ---------------------------------------------------------------------
   async function loadProductRows() {

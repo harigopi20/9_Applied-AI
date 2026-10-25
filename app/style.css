@@ -38,7 +38,7 @@ body {
 }
 
 .skip-link { position: absolute; left: -999px; top: 0; }
-.skip-link:focus { left: 8px; top: 8px; background: #fff; padding: 8px; z-index: 10; }
+.skip-link:focus { left: 8px; top: 8px; background: #fff; padding: 12px; min-height: var(--touch); z-index: 10; }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; overflow: hidden;
@@ -193,7 +193,9 @@ main { max-width: 760px; margin: 0 auto; padding: 16px 12px 32px; outline: none;
 .safety-note { background: var(--stop-bg); color: var(--stop); padding: 8px 10px; border-radius: 6px; font-size: .92rem; }
 .warn-text { color: var(--stop); font-weight: 600; }
 .variant-label { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
-.variant { max-width: 100%; }
+.variant { max-width: 100%; width: 100%; min-width: 0; }
+.item { min-width: 0; overflow-wrap: anywhere; }
+.transparency { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 8px; margin-top: 12px; }
 .total { font-size: 1.1rem; padding: 12px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--line); }
 
 /* Stop screen (FR-15) */
@@ -210,9 +212,23 @@ main { max-width: 760px; margin: 0 auto; padding: 16px 12px 32px; outline: none;
 
 .app-footer { max-width: 760px; margin: 0 auto; padding: 0 16px 24px; font-size: .8rem; color: var(--muted); }
 
+/* Very small phones (≤ 360 px): header wraps instead of overflowing */
+@media (max-width: 360px) {
+  .app-header { flex-wrap: wrap; padding: 10px 12px; }
+  .header-actions { width: 100%; justify-content: space-between; }
+  .tagline { display: none; }
+}
+
 /* Larger screens: up to laptop width */
 @media (min-width: 640px) {
   .template-grid { grid-template-columns: 1fr 1fr; }
   .choices { grid-template-columns: 1fr 1fr; }
   main { padding: 24px 16px 40px; }
+}
+
+/* Laptop: wider content, list items in a readable two-column grid */
+@media (min-width: 1024px) {
+  main, .app-footer { max-width: 900px; }
+  .items { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .items .item { margin-bottom: 0; }
 }
