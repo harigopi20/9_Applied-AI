@@ -58,10 +58,15 @@ flowchart LR
 - **Store data:** stock and aisle/shelf only from the selected store – never invented, never from another store.
 
 ## Look and feel
-Clean DIY-store app style: white surfaces on a light grey page, pill-shaped buttons,
-cards with soft shadows, brand orange **#FF7313** for actions and accents (tokens at
-the top of `app/style.css`). White text on #FF7313 would fail WCAG contrast (2.7:1),
-so orange buttons carry dark text (6.4:1) and orange text uses #B84A00 (5.2:1).
+DIY-store app style: white page, orange header band (**#FF7313**) with a diagonal
+edge and the title in a white box, a round language button, condensed bold
+headlines, black pill buttons and outlined secondary buttons, outlined project
+tiles with line icons, flat product rows with big prices and an availability dot,
+the total in a black price box, and a bottom tab bar (Start · Store · List).
+Only general style cues – no logo, mascot, name or other brand assets of a real
+company. Colour tokens are at the top of `app/style.css`. White text on #FF7313
+would fail WCAG contrast (2.7:1), so text on orange is black and orange text uses
+darker shades (#E05A00 for large bold text, #C85000 for normal text).
 
 ## Using the app
 1. **Start:** notice about AI use, sample data, privacy and the browser speech service.
@@ -182,6 +187,9 @@ hooks) = brick, plasterboard – **team to verify**.
 | Limitations | Postcodes created after 2007 are "unknown" (the customer then sees all stores). In large cities many postcodes share the city's coordinates, so distances are approximate. Replace with a current source before real use. |
 
 ### Third-party code
+Fonts: Barlow and Barlow Condensed (SIL Open Font License 1.1, `app/fonts/OFL-Barlow.txt`),
+self-hosted in `app/fonts/` from the `@fontsource` packages – no request to a font CDN.
+
 `app/lib/xlsx.mini.min.js` – SheetJS Community Edition 0.18.5 (Apache-2.0,
 `app/lib/SHEETJS-LICENSE.txt`), stored in the repo so the app needs no CDN. 0.18.5 has
 known advisories for *untrusted* files; the app only reads its own data file.

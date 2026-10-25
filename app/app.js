@@ -65,6 +65,50 @@
     return node;
   }
 
+  // Line icons (presentation only, static SVG paths – never built from data)
+  const ICONS = {
+    home: ["M3 11.5 12 4l9 7.5", "M5.5 9.5V20h13V9.5"],
+    store: ["M3 9h18", "M4 9l1.5-5h13L20 9", "M5 9v11h14V9", "M9 20v-6h6v6"],
+    list: ["M3 5h2l2.2 10.2a1 1 0 0 0 1 .8h9.6a1 1 0 0 0 1-.8L20 8H6.2", "M9 20.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1", "M17 20.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1"],
+    shelf: ["M3 9h18", "M3 15h18", "M6 9v3", "M18 9v3", "M6 15v3", "M18 15v3"],
+    picture: ["M4 5h16v14H4z", "M4 15l4.5-4.5 4 4 2.5-2.5L20 17"],
+    mic: ["M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z", "M5 11a7 7 0 0 0 14 0", "M12 18v3"],
+    stop: ["M7 7h10v10H7z"]
+  };
+  const ACCENTS = { shelf: "M14 4h6v5h-6z", picture: "M15 7h3v3h-3z", store: "M15 2h6v4h-6z" };
+  function icon(name, accent) {
+    const NS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("class", "icon icon-" + name);
+    if (accent && ACCENTS[name]) {
+      const a = document.createElementNS(NS, "path");
+      a.setAttribute("d", ACCENTS[name]);
+      a.setAttribute("class", "icon-accent");
+      svg.appendChild(a);
+    }
+    (ICONS[name] || []).forEach((d) => {
+      const p = document.createElementNS(NS, "path");
+      p.setAttribute("d", d);
+      svg.appendChild(p);
+    });
+    return svg;
+  }
+
+  /** Price with small cents, e.g. 14,⁹⁹ € (display only; amount from the catalogue). */
+  function priceEl(amount, cls) {
+    const lang = window.BBI18n.getLang();
+    const parts = new Intl.NumberFormat(lang === "de" ? "de-DE" : "en-GB", { style: "currency", currency: "EUR" }).formatToParts(amount);
+    const box = el("span", { class: "price-value" + (cls ? " " + cls : ""), "aria-label": window.BBI18n.formatPrice(amount) });
+    parts.forEach((pt) => {
+      if (pt.type === "fraction") box.appendChild(el("sup", { class: "cents", text: pt.value }));
+      else if (pt.type === "currency") box.appendChild(el("span", { class: "cur", text: pt.value }));
+      else if (pt.type !== "literal" || pt.value.trim()) box.appendChild(el("span", { text: pt.value }));
+    });
+    return box;
+  }
+
   const main = () => document.getElementById("main");
 
   function render() {
@@ -75,6 +119,7 @@
     m.replaceChildren();
     const screens = { loading: viewLoading, error: viewError, start: viewStart, store: viewStore, choose: viewChoose, recognized: viewRecognized, high_risk: viewHighRisk, question: viewQuestion, result: viewResult };
     m.appendChild(screens[state.screen]());
+    renderNav();
     document.getElementById("footer-text").textContent = t("footer");
     m.focus({ preventScroll: true });
     window.scrollTo(0, 0);
@@ -85,8 +130,30 @@
     document.getElementById("app-tagline").textContent = t("app_tagline");
     document.getElementById("sample-badge").textContent = t("sample_badge");
     const btn = document.getElementById("lang-toggle");
-    btn.textContent = t("lang_toggle");
+    btn.textContent = t("lang_toggle_short");
     btn.setAttribute("aria-label", t("lang_toggle_aria"));
+    btn.setAttribute("title", t("lang_toggle"));
+  }
+
+  // Bottom tab bar (NFR-01: one-handed use in the store)
+  function renderNav() {
+    const nav = document.getElementById("tab-bar");
+    if (!nav) return;
+    const hidden = ["loading", "error", "start"].includes(state.screen);
+    nav.hidden = hidden;
+    document.body.classList.toggle("has-nav", !hidden);
+    if (hidden) return;
+    const active = state.screen === "store" ? "store" : state.screen === "result" ? "list" : "home";
+    const items = [
+      { id: "home", label: t("nav_start"), action: resetProject },
+      { id: "store", label: t("nav_store"), action: () => openStoreSearch(state.result ? "result" : "choose") },
+      { id: "list", label: t("nav_list"), action: () => go("result"), disabled: !state.result }
+    ];
+    nav.replaceChildren(...items.map((it) => el("button", {
+      type: "button", class: "tab" + (it.id === active ? " active" : ""), "data-tab": it.id,
+      "aria-current": it.id === active ? "page" : null, disabled: it.disabled,
+      onclick: it.action
+    }, [icon(it.id), el("span", { text: it.label })])));
   }
 
   // ---------------------------------------------------------------------
@@ -191,7 +258,7 @@
       "aria-pressed": sp.listening ? "true" : "false",
       "aria-label": sp.listening ? t("mic_stop") : t("mic_start"),
       onclick: micTap
-    }, [el("span", { "aria-hidden": "true", text: sp.listening ? "■" : "🎤" }), el("span", { class: "mic-label", text: sp.listening ? t("mic_stop_short") : t("mic_start_short") })]) : null;
+    }, [icon(sp.listening ? "stop" : "mic"), el("span", { class: "mic-label", text: sp.listening ? t("mic_stop_short") : t("mic_start_short") })]) : null;
     const form = el("form", { class: "text-entry", novalidate: true }, [
       el("label", { for: "project-text", class: "field-label", text: t("text_label") }),
       el("div", { class: "entry-row" }, [area, mic]),
@@ -211,7 +278,7 @@
         class: "btn template", "data-template": tpl.template_id,
         onclick: () => startTemplate(tpl, state.pendingGuesses)
       }, [
-        el("span", { class: "template-icon", "aria-hidden": "true", text: tpl.icon || "" }),
+        el("span", { class: "template-icon", "aria-hidden": "true" }, [icon(tpl.template_id === "hang_picture" ? "picture" : "shelf", true)]),
         el("span", { class: "template-title", text: pick(tpl.title) }),
         el("span", { class: "template-review " + (reviewed ? "ok" : "pending"),
           text: (reviewed ? t("template_reviewed") : t("template_unreviewed")) +
@@ -508,7 +575,7 @@
     // Total only when every pack size and price is clear (RB-13)
     box.appendChild(el("p", { class: "total", "data-total": r.total.amount === null ? "none" : String(r.total.amount) },
       r.total.amount !== null
-        ? [el("span", { text: t("total") + ": " }), el("strong", { text: window.BBI18n.formatPrice(r.total.amount) })]
+        ? [el("span", { class: "total-label", text: t("total") }), priceEl(r.total.amount, "total-value")]
         : [el("span", { text: t("total_" + r.total.reason) })]));
     box.appendChild(el("p", { class: "notice", text: t("notice_estimates") }));
     // NFR-05 / SR-10: how this list was made and the template's review status
@@ -555,17 +622,19 @@
       el("span", { class: "muted small", text: t("rule") + " " + q.rule_id + " / " + i.rule_ids.join(", ") })
     ]));
 
-    const price = p.price_eur !== null ? t("price_each", { price: window.BBI18n.formatPrice(p.price_eur) }) : t("price_unknown");
-    li.appendChild(el("p", { class: "price" }, [
-      el("span", { text: price }),
-      i.line_price !== null ? el("span", { class: "muted", text: " · " + t("line_total", { price: window.BBI18n.formatPrice(i.line_price) }) }) : null,
-      el("span", { class: "tag sample", text: t("sample_note") })
+    li.appendChild(el("div", { class: "price" }, [
+      p.price_eur !== null ? priceEl(p.price_eur) : el("span", { class: "muted", text: t("price_unknown") }),
+      el("span", { class: "price-unit muted", text: p.price_eur !== null ? " " + t("per_pack") : "" }),
+      el("span", { class: "tag sample", text: t("sample_note") }),
+      i.line_price !== null ? el("span", { class: "line-price muted", text: t("line_total", { price: window.BBI18n.formatPrice(i.line_price) }) }) : null
     ]));
 
     // Store data ONLY for the selected store (RB-06, RB-15, FR-30)
     const s = R.storeInfo(state.data.stock, state.storeId, p.product_nr);
     const na = t("not_available");
-    li.appendChild(el("p", { class: "store-info", "data-aisle": s.aisle_nr === null ? "none" : String(s.aisle_nr) }, [
+    const avail = s.stock_qty === null ? "unknown" : s.stock_qty > 0 ? "in" : "out";
+    li.appendChild(el("p", { class: "store-info", "data-aisle": s.aisle_nr === null ? "none" : String(s.aisle_nr), "data-avail": avail }, [
+      el("span", { class: "dot " + avail, "aria-hidden": "true" }),
       el("span", { text: t("stock") + ": " + (s.stock_qty === null ? na : s.stock_qty) + " · " }),
       el("span", { text: t("aisle") + ": " + (s.aisle_nr === null ? na : s.aisle_nr + (s.aisle_name ? " (" + s.aisle_name + ")" : "")) + " · " }),
       el("span", { text: t("shelf") + ": " + (s.shelf_nr === null ? na : s.shelf_nr) })

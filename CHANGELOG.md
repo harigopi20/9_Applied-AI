@@ -4,6 +4,27 @@ All notable changes to this project are documented here.
 Entries are collected under "Unreleased" and grouped into a milestone
 when they are released to `main`.
 
+## Milestone: Design update 2 – DIY-store app layout and fonts – 2026-10-25
+Summary (same as the pull request):
+- Layout and fonts reworked after screenshots of a DIY-store app: orange header band with diagonal edge, condensed headlines, black pill buttons, outlined tiles, flat product rows, black price box, bottom tab bar
+- Self-hosted Barlow / Barlow Condensed fonts (OFL)
+- Own neutral toolbox mark instead of the "B"; no logo or mascot of a real company
+
+- **2026-10-25 – Design update 2: DIY-store app layout and fonts.**
+  `app/style.css` rewritten: white page; orange #FF7313 header band with diagonal
+  edge, title in a white box, round language button and toolbox mark; Barlow
+  Condensed headlines and buttons, Barlow body text (self-hosted, OFL); black
+  pill primary buttons and outlined secondary buttons; text field in a pill
+  search-field look with a black round microphone button; project buttons as
+  outlined tiles with line icons; flat product rows with big prices and small
+  cents, availability dot (green = in stock); total in a black price box; bottom
+  tab bar Start · Store · List (new `renderNav` in `app.js`). Contrast kept
+  (black on orange, darker orange for text). The requested OBI beaver image was
+  not used: it is a trademark and mascot of a real company.
+  *Why:* the team wants the look of a familiar DIY-store app.
+  *Prompt:* "These are screenshots of the OBI app, please adapt fonts / layout /
+  design accordingly" and "put the beaver / the photo instead of the B".
+
 ## Milestone: Design update – brand orange #FF7313 – 2026-10-25
 Summary (same as the pull request):
 - Brand orange changed to #FF7313 and app look modernised in a clean DIY-store app style
