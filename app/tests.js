@@ -4,8 +4,9 @@
  * (tests.html) against the real data files and fixture copies.
  *
  * Stage 1: rule engine, templates, safety rules, store data, UI rendering.
- * RB-16 (PLZ), RB-18/RB-19/RB-20 (speech, mock Web Speech API) and the
- * AI "mock" mode follow in stages 2–4 and are listed as pending.
+ * Stage 2: free text, AI adapter ("mock" mode, fake proxy), fallback.
+ * Stage 3: voice input with a simulated Web Speech API (RB-18/19/20).
+ * Stage 4: PLZ check and store selection (RB-16, FR-29, FR-30).
  */
 (function () {
   "use strict";
@@ -802,9 +803,131 @@
   });
 
   // ---------------------------------------------------------------------
-  // Later stages
+  // Stage 4 – PLZ and store selection
   // ---------------------------------------------------------------------
-  pending("RB-16", "Invalid/unknown PLZ never selects a store; message + store list", "stage 4");
+  function storeSetup(returnTo) {
+    const s = window.BBApp.state;
+    s.data = D; s.ai = adapter("template"); s.storeId = null; s.result = null;
+    window.BBApp.openStoreSearch(returnTo || "choose");
+    return s;
+  }
+  const renderStore = () => { const box = document.getElementById("sandbox"); box.replaceChildren(window.BBApp.viewStore()); return box; };
+
+  test("DR-08", "PLZ reference table loaded (OpenGeoDB) and store coordinates come from it", () => {
+    assert(D.plzTable && D.plzTable.size > 8000, "postcodes: " + (D.plzTable && D.plzTable.size));
+    D.stores.forEach((st) => {
+      const p = D.plzTable.get(st.plz);
+      assert(p, "store PLZ in table: " + st.plz);
+      eq([st.lat, st.lon], [p.lat, p.lon], st.store_id + " coordinates = PLZ centre");
+    });
+  });
+
+  test("RB-16", "Invalid or unknown PLZ never selects a store; message and the full store list appear", () => {
+    for (const bad of ["", "1234", "123456", "abcde", "80 331", "8033l", "00000", "99999", "<script>"]) {
+      const s = storeSetup();
+      const res = window.BBApp.searchStores(bad);
+      eq(res.status, "invalid", "status for '" + bad + "'");
+      eq(s.storeId, null, "no store selected for '" + bad + "'");
+      const box = renderStore();
+      assert(box.querySelector('[data-store-notice="invalid"]'), "message for '" + bad + "'");
+      eq(box.querySelectorAll("[data-store]").length, D.stores.length, "full store list for '" + bad + "'");
+    }
+  });
+
+  test("RB-16 / SR-06", "Valid PLZ with only one store in range still needs a tap; no store near you → message + full list", () => {
+    const s = storeSetup();
+    const res = window.BBApp.searchStores("10117");
+    eq(res.status, "nearby");
+    eq(res.stores.map((x) => x.store.store_id), ["S01"], "only Berlin within 50 km");
+    eq(s.storeId, null, "not selected automatically");
+    const far = window.BBApp.searchStores("50667"); // Köln
+    eq(far.status, "none_in_range");
+    eq(far.stores.length, D.stores.length, "all stores listed");
+    eq(s.storeId, null);
+    assert(renderStore().querySelector('[data-store-notice="none_in_range"]'));
+  });
+
+  test("FR-29", "Stores are sorted by distance and limited by config; selection only by tap", () => {
+    const cfg = { maxDistanceKm: 1000, maxStoresShown: 2 };
+    const r = R.findStores("37073", D.plzTable, D.stores, cfg); // Göttingen
+    eq(r.stores.length, 2, "maxStoresShown");
+    assert(r.stores[0].km <= r.stores[1].km, "sorted");
+    const all = R.findStores("37073", D.plzTable, D.stores, { maxDistanceKm: 1000, maxStoresShown: 10 });
+    eq(all.stores.map((x) => x.store.store_id), ["S03", "S01", "S02"], "Göttingen: Hamburg, Berlin, München");
+    const km = R.distanceKm({ lat: 52.5167, lon: 13.4 }, { lat: 48.15, lon: 11.5833 });
+    assert(km > 490 && km < 510, "Berlin–München ≈ 504 km, got " + km);
+    const s = storeSetup();
+    window.BBApp.searchStores("80331");
+    const box = renderStore();
+    box.querySelector('[data-store="S02"]').click();
+    eq(s.storeId, "S02", "tap selects the store");
+    eq(s.plzInput, "", "PLZ not kept after selection");
+    eq(s.storeSearch, null);
+  });
+
+  test("NFR-02 (store)", "Store search under 1 second", () => {
+    const t0 = performance.now();
+    for (let i = 0; i < 100; i++) R.findStores("20095", D.plzTable, D.stores, CFG.store);
+    const ms = (performance.now() - t0) / 100;
+    assert(ms < 1000, ms + " ms");
+    return "store search " + ms.toFixed(2) + " ms";
+  });
+
+  test("NFR-04 / NFR-07", "The PLZ is never sent to the AI and never written to the evidence log", async () => {
+    let sent = null;
+    const spy = adapter("proxy", { proxyUrl: "https://proxy.test/understand",
+      fetchImpl: async (u, o) => { sent = o.body; return { ok: true, status: 200, json: async () => ({ output: JSON.parse(D.mockResponses.responses[0].raw) }) }; } });
+    const s = storeSetup();
+    window.BBApp.searchStores("80331");
+    s.ai = spy;
+    await window.BBApp.submitText("Regal 12 kg Beton");
+    assert(sent && !sent.includes("80331"), "request: " + sent);
+    window.BBApp.startTemplate(SHELF(), {});
+    const ev = JSON.stringify(s.result.evidence);
+    assert(!ev.includes("80331"), "PLZ in evidence");
+  });
+
+  test("FR-30 / RB-17 (UI)", "From the list: 'Add postcode' → choose store → same list with that store's aisles", () => {
+    const s = window.BBApp.state;
+    s.data = D; s.storeId = null;
+    window.BBApp.startTemplate(SHELF(), {});
+    Object.keys(SHELF_OK).forEach((k) => { s.facts[k] = R.makeFact(SHELF_OK[k], R.STATUS.CONFIRMED, "test"); });
+    window.BBApp.recompute(true);
+    const before = JSON.stringify(nrs(s.result));
+    const box = document.getElementById("sandbox");
+    box.replaceChildren(window.BBApp.viewResult());
+    assert(box.querySelector("#add-plz"), "Add postcode button");
+    box.querySelector("#add-plz").click();
+    eq(s.screen, "store");
+    window.BBApp.searchStores("20095");
+    window.BBApp.chooseStore("S03");
+    eq(s.screen, "result", "back to the list");
+    box.replaceChildren(window.BBApp.viewResult());
+    eq(box.querySelector("[data-store-bar]").getAttribute("data-store-bar"), "S03");
+    eq(JSON.stringify(nrs(s.result)), before, "identical products and checks");
+    const nr = "P044";
+    eq(box.querySelector('[data-product="' + nr + '"] .store-info').getAttribute("data-aisle"), String(R.storeInfo(D.stock, "S03", nr).aisle_nr));
+  });
+
+  test("NFR-03 (store)", "Missing PLZ table or store sheets → app continues without a store", () => {
+    const r = R.findStores("10117", null, D.stores, CFG.store);
+    eq([r.status, r.reason], ["invalid", "no_table"]);
+    eq(r.stores.length, D.stores.length, "store list still offered");
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(productRows), "Products");
+    const buf = XLSX.write(wb, { type: "array", bookType: "xlsx" });
+    const parsed = window.BBData.parseWorkbook(buf, XLSX);
+    eq(parsed.stores.length, 0);
+    eq(parsed.catalogue.all.length, D.catalogue.all.length, "catalogue still loads");
+    const s = window.BBApp.state;
+    s.data = Object.assign({}, D, { stores: [], stock: new Map() });
+    window.BBApp.openStoreSearch("choose");
+    const box = renderStore();
+    assert(box.querySelector('[data-store-notice="unavailable"]'), "hint");
+    box.querySelector("#store-skip").click();
+    eq(s.screen, "choose", "continue without store");
+    s.data = D;
+  });
 
   // ---------------------------------------------------------------------
   // Runner

@@ -496,6 +496,51 @@
     };
   }
 
+  // ---------------------------------------------------------------------
+  // Store selection by PLZ (FR-29, RB-16, SR-06, NFR-04) – runs on the device
+  // ---------------------------------------------------------------------
+  /**
+   * PLZ check in code: exactly 5 digits AND present in the reference table.
+   * The PLZ is never logged, never put into the evidence log and never sent.
+   */
+  function checkPlz(input, plzTable) {
+    const plz = String(input == null ? "" : input).trim();
+    if (!/^\d{5}$/.test(plz)) return { valid: false, reason: "format" };
+    if (!plzTable) return { valid: false, reason: "no_table" };
+    const point = plzTable.get(plz);
+    if (!point) return { valid: false, reason: "unknown" };
+    return { valid: true, point };
+  }
+
+  /** Straight-line distance in km (haversine). */
+  function distanceKm(a, b) {
+    const R = 6371, rad = Math.PI / 180;
+    const dLat = (b.lat - a.lat) * rad, dLon = (b.lon - a.lon) * rad;
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  /**
+   * Returns the stores to offer. NEVER selects a store (RB-16, SR-06):
+   * the customer always taps one.
+   *  status "nearby"        – valid PLZ, stores within range, sorted by distance
+   *  status "none_in_range" – valid PLZ, nearest store too far → full list
+   *  status "invalid"       – format / unknown PLZ / no table → full list
+   */
+  function findStores(input, plzTable, stores, cfg) {
+    const all = (stores || []).filter((s) => s.store_id).slice()
+      .sort((a, b) => (a.city + a.name).localeCompare(b.city + b.name));
+    const check = checkPlz(input, plzTable);
+    if (!check.valid) return { status: "invalid", reason: check.reason, stores: all.map((s) => ({ store: s, km: null })) };
+    const withKm = all
+      .filter((s) => Number.isFinite(s.lat) && Number.isFinite(s.lon))
+      .map((s) => ({ store: s, km: Math.round(distanceKm(check.point, s) * 10) / 10 }))
+      .sort((a, b) => a.km - b.km || (a.store.store_id < b.store.store_id ? -1 : 1));
+    const near = withKm.filter((x) => x.km <= cfg.maxDistanceKm).slice(0, cfg.maxStoresShown);
+    if (!near.length) return { status: "none_in_range", reason: "too_far", stores: withKm };
+    return { status: "nearby", reason: null, stores: near };
+  }
+
   /** Variants the customer may switch to for a role (same pool as the rule). */
   function variantOptions(template, roleName, catalogue) {
     const all = [].concat(...template.methods.map((m) => m.roles), template.common_roles || []);
@@ -505,7 +550,7 @@
 
   root.BBRules = Object.freeze({
     STATUS, UNKNOWN_VALUE, makeFact, trustedValue,
-    evaluate, storeInfo, variantOptions, compatible,
+    evaluate, storeInfo, variantOptions, compatible, checkPlz, distanceKm, findStores,
     guardGeneratedText, impliesClearance, checkScope, findPhrase
   });
 })(typeof window !== "undefined" ? window : globalThis);

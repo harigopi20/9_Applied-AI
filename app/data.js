@@ -11,7 +11,8 @@
 (function (root) {
   "use strict";
 
-  const REQUIRED_SHEETS = ["Products", "Stores", "Stock"];
+  // Stores/Stock are optional: without them the app runs without a store (FR-30, NFR-03).
+  const REQUIRED_SHEETS = ["Products"];
   const REQUIRED_PRODUCT_COLUMNS = [
     "product_nr", "product_name", "variant_group", "category", "size",
     "pack_qty", "price_eur", "max_load_kg", "suitable_wall_types",
@@ -131,12 +132,30 @@
     const wb = XLSX.read(arrayBuffer, { type: "array" });
     const missing = REQUIRED_SHEETS.filter((s) => !wb.SheetNames.includes(s));
     if (missing.length) throw new Error("Workbook misses sheets: " + missing.join(", "));
-    const rows = (name) => XLSX.utils.sheet_to_json(wb.Sheets[name], { defval: null, raw: true });
-    return {
-      catalogue: buildCatalogue(rows("Products")),
-      stores: buildStores(rows("Stores")),
-      stock: buildStock(rows("Stock"))
-    };
+    const rows = (name) => wb.Sheets[name] ? XLSX.utils.sheet_to_json(wb.Sheets[name], { defval: null, raw: true }) : [];
+    let stores = [], stock = new Map();
+    try { stores = buildStores(rows("Stores")); stock = buildStock(rows("Stock")); } catch (_) { stores = []; stock = new Map(); }
+    return { catalogue: buildCatalogue(rows("Products")), stores, stock };
+  }
+
+  /**
+   * DR-08: PLZ reference table "plz,lat,lon" → Map. Only exact 5-digit
+   * postcodes with valid coordinates are accepted.
+   */
+  function parsePlzTable(csvText) {
+    const map = new Map();
+    String(csvText).split(/\r?\n/).slice(1).forEach((line) => {
+      const [plz, lat, lon] = line.split(",");
+      const la = Number(lat), lo = Number(lon);
+      if (/^\d{5}$/.test(plz) && Number.isFinite(la) && Number.isFinite(lo)) map.set(plz, Object.freeze({ lat: la, lon: lo }));
+    });
+    return map;
+  }
+
+  async function fetchText(url) {
+    const res = await fetch(url, { cache: "no-cache" });
+    if (!res.ok) throw new Error(url + ": HTTP " + res.status);
+    return res.text();
   }
 
   async function fetchJson(url) {
@@ -167,10 +186,13 @@
       fetchJson(config.data.lexicon),
       fetchJson(config.data.mockResponses)
     ]);
-    return Object.assign({}, workbook, { safetyRules, templates, lexicon, mockResponses });
+    // FR-29/NFR-03: the PLZ table is optional – if it fails, the app runs without store search.
+    let plzTable = null;
+    try { plzTable = parsePlzTable(await fetchText(config.data.plzTable)); } catch (_) { plzTable = null; }
+    return Object.assign({}, workbook, { safetyRules, templates, lexicon, mockResponses, plzTable });
   }
 
   root.BBData = Object.freeze({
-    buildCatalogue, buildStores, buildStock, parseWorkbook, fetchJson, fetchWorkbook, loadAll
+    buildCatalogue, buildStores, buildStock, parseWorkbook, parsePlzTable, fetchJson, fetchText, fetchWorkbook, loadAll
   });
 })(typeof window !== "undefined" ? window : globalThis);

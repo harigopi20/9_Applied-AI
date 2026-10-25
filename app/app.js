@@ -33,6 +33,9 @@
       base: ""                // text that was in the field before recording
     },
     recognizer: null,
+    plzInput: "",            // FR-29: only in memory, cleared after a store is chosen (NFR-04)
+    storeSearch: null,       // result of BBRules.findStores – never selects a store itself
+    storeReturn: "choose",   // where to go after choosing/skipping a store
     template: null,
     facts: {},
     questionId: null,
@@ -70,7 +73,7 @@
     renderHeader();
     const m = main();
     m.replaceChildren();
-    const screens = { loading: viewLoading, error: viewError, start: viewStart, choose: viewChoose, recognized: viewRecognized, high_risk: viewHighRisk, question: viewQuestion, result: viewResult };
+    const screens = { loading: viewLoading, error: viewError, start: viewStart, store: viewStore, choose: viewChoose, recognized: viewRecognized, high_risk: viewHighRisk, question: viewQuestion, result: viewResult };
     m.appendChild(screens[state.screen]());
     document.getElementById("footer-text").textContent = t("footer");
     m.focus({ preventScroll: true });
@@ -113,8 +116,58 @@
         el("li", { "data-notice": "speech", text: t("notice_speech") }),
         el("li", { class: "muted", text: t("notice_stage") })
       ]),
-      el("button", { class: "btn primary block", text: t("start"), onclick: () => go("choose") })
+      el("button", { class: "btn primary block", text: t("start"), onclick: () => openStoreSearch("choose") })
     ]);
+  }
+
+  // Optional store selection by PLZ (FR-29, RB-16, NFR-04)
+  function viewStore() {
+    const box = el("section", { class: "card", "data-screen": "store" }, [
+      el("h2", { text: t("store_title") }),
+      el("p", { class: "muted", text: t("store_help") })
+    ]);
+    const hasStores = state.data.stores.length > 0;
+    if (!hasStores) {
+      box.appendChild(el("p", { class: "hint warn-hint", role: "status", "data-store-notice": "unavailable", text: t("store_unavailable") }));
+    } else {
+      const input = el("input", {
+        id: "plz-input", class: "input plz", type: "text", inputmode: "numeric", autocomplete: "off",
+        maxlength: "5", "aria-label": t("store_plz_label"), placeholder: t("store_plz_placeholder")
+      });
+      input.value = state.plzInput;
+      input.addEventListener("input", () => { state.plzInput = input.value; });
+      const form = el("form", { class: "plz-form", novalidate: true }, [
+        el("label", { for: "plz-input", class: "field-label", text: t("store_plz_label") }),
+        el("div", { class: "number-row" }, [input, el("button", { type: "submit", class: "btn primary", id: "plz-submit", text: t("store_search") })]),
+        el("p", { class: "muted small", text: t("store_privacy") })
+      ]);
+      form.addEventListener("submit", (e) => { e.preventDefault(); searchStores(input.value); });
+      box.appendChild(form);
+    }
+    const res = state.storeSearch;
+    if (res && hasStores) {
+      const notice = res.status === "nearby" ? t("store_nearby")
+        : res.status === "none_in_range" ? t("store_none_in_range", { km: CFG.store.maxDistanceKm })
+        : t("store_invalid_" + res.reason);
+      box.appendChild(el("p", { class: "hint" + (res.status === "nearby" ? "" : " warn-hint"), role: "status", "data-store-notice": res.status, text: notice }));
+      const ul = el("ul", { class: "store-list" });
+      res.stores.forEach((x) => ul.appendChild(el("li", {}, [
+        el("button", { class: "btn store" + (x.store.store_id === state.storeId ? " selected" : ""), "data-store": x.store.store_id, onclick: () => chooseStore(x.store.store_id) }, [
+          el("span", { class: "store-name", text: x.store.name }),
+          el("span", { class: "muted small", text: x.store.city + (x.km !== null ? " · " + t("store_km", { km: formatKm(x.km) }) : "") }),
+          el("span", { class: "tag sample", text: t("sample_note") })
+        ])
+      ])));
+      box.appendChild(ul);
+    }
+    box.appendChild(el("div", { class: "actions" }, [
+      el("button", { class: "btn", id: "store-skip", text: state.storeId ? t("store_keep") : t("store_skip"), onclick: () => leaveStoreSearch() })
+    ]));
+    return box;
+  }
+
+  function formatKm(km) {
+    return new Intl.NumberFormat(window.BBI18n.getLang() === "de" ? "de-DE" : "en-GB", { maximumFractionDigits: km < 10 ? 1 : 0 }).format(km);
   }
 
   // Project entry: free text (FR-02, FR-03) plus project buttons (DR-04)
@@ -429,7 +482,14 @@
       text: r.state === "validated" ? t("state_validated") : t("state_incomplete")
     }));
     box.appendChild(el("p", { class: "muted small", text: t("method") + ": " + pick(r.method.label) + " · " + t("rule") + " " + r.method.rule_id }));
-    if (!state.storeId) box.appendChild(el("p", { class: "hint", text: t("no_store_hint") }));
+    // FR-30: without a store the list is complete, only aisle/shelf/stock are "not available".
+    const store = state.storeId ? state.data.stores.find((x) => x.store_id === state.storeId) : null;
+    box.appendChild(el("div", { class: "store-bar", "data-store-bar": store ? store.store_id : "none" }, store
+      ? [el("span", { text: t("store_selected") + ": " }), el("strong", { text: store.name + " (" + store.city + ")" }),
+        el("span", { class: "tag sample", text: t("sample_note") }),
+        el("button", { class: "btn small", id: "change-store", text: t("store_change"), onclick: () => openStoreSearch("result") })]
+      : [el("p", { class: "hint", text: t("no_store_hint") }),
+        el("button", { class: "btn small", id: "add-plz", text: t("store_add_plz"), onclick: () => openStoreSearch("result") })]));
 
     // Safety notices first (SR-05, SR-02)
     r.notices.filter((n) => n.id !== "estimates").forEach((n) => {
@@ -673,6 +733,37 @@
     render();
   }
 
+  // ---------------------------------------------------------------------
+  // Store selection (FR-29): code only, on the device; never automatic
+  // ---------------------------------------------------------------------
+  function openStoreSearch(returnTo) {
+    state.storeReturn = returnTo;
+    state.storeSearch = null;
+    state.plzInput = "";
+    go("store");
+  }
+
+  /** NFR-07: the PLZ is checked in code; NFR-04: it is never logged or sent to the AI. */
+  function searchStores(input) {
+    state.storeSearch = R.findStores(input, state.data.plzTable, state.data.stores, CFG.store);
+    render();
+    return state.storeSearch;
+  }
+
+  /** Only a tap by the customer selects a store (RB-16). */
+  function chooseStore(storeId) {
+    if (!state.data.stores.some((x) => x.store_id === storeId)) return;
+    state.storeId = storeId;
+    leaveStoreSearch();
+  }
+
+  function leaveStoreSearch() {
+    state.plzInput = "";      // the PLZ is not kept
+    state.storeSearch = null;
+    // D-3: a store change only looks up aisle/shelf again – checks stay identical (RB-17).
+    go(state.storeReturn === "result" && state.result ? "result" : "choose");
+  }
+
   /** Turns validated adapter facts into guesses for the template's required facts. */
   function guessesFor(tpl, facts, source) {
     const out = {};
@@ -766,7 +857,8 @@
   // Exposed for tests.html only (UI-level release-blocking tests).
   window.BBApp = Object.freeze({
     state, viewResult, viewItem, viewQuestion, viewChoose, viewRecognized, viewHighRisk,
-    recompute, startTemplate, submitText, micTap, consentAccept, consentDecline
+    recompute, startTemplate, submitText, micTap, consentAccept, consentDecline,
+    viewStore, viewList, openStoreSearch, searchStores, chooseStore, leaveStoreSearch
   });
 
   document.addEventListener("DOMContentLoaded", () => {

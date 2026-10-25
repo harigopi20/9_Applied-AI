@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC_PRODUCTS = ROOT / "data" / "product_catalogue.csv"
 SRC_STOCK = ROOT / "data" / "store_map.csv"
 OUT = ROOT / "app" / "data" / "baumarkt-buddy-data.xlsx"
+PLZ_TABLE = ROOT / "app" / "data" / "plz-de.csv"  # built by tools/build_plz_table.py
 
 PRODUCT_COLUMNS = [
     "product_nr", "product_name", "variant_group", "category", "size",
@@ -134,13 +135,19 @@ def main():
         ws.append([row[c] for c in PRODUCT_COLUMNS])
 
     # ---- Stores -----------------------------------------------------------
-    # Coordinates: approximate city-centre points of the store PLZ area
-    # (sample). Stage 4 checks them against the PLZ reference table (DR-08).
+    # Coordinates are NOT invented: they are the centre point of the store's
+    # PLZ from the PLZ reference table app/data/plz-de.csv (DR-08, OpenGeoDB).
+    with PLZ_TABLE.open(encoding="utf-8") as fh:
+        plz_coords = {r["plz"]: (float(r["lat"]), float(r["lon"])) for r in csv.DictReader(fh)}
     stores = wb.create_sheet("Stores")
     stores.append(["store_id", "store_name", "plz", "city", "lat", "lon", "data_status"])
-    stores.append(["S01", "Sample Store Berlin-Mitte", "10117", "Berlin", 52.5170, 13.3889, "sample"])
-    stores.append(["S02", "Sample Store München-Zentrum", "80331", "München", 48.1374, 11.5755, "sample"])
-    stores.append(["S03", "Sample Store Hamburg-Altstadt", "20095", "Hamburg", 53.5503, 10.0006, "sample"])
+    for sid, name, plz, city in [
+        ("S01", "Sample Store Berlin-Mitte", "10117", "Berlin"),
+        ("S02", "Sample Store München-Zentrum", "80331", "München"),
+        ("S03", "Sample Store Hamburg-Altstadt", "20095", "Hamburg"),
+    ]:
+        lat, lon = plz_coords[plz]
+        stores.append([sid, name, plz, city, lat, lon, "sample"])
 
     # ---- Stock (per store) ------------------------------------------------
     stock = wb.create_sheet("Stock")

@@ -30,9 +30,9 @@ See [diagrams](diagrams/baumarkt-buddy-diagrams.md) for details.
 
 ## App (Release 1 MVP – in progress)
 The app lives in [`app/`](app/): a static web app (HTML, CSS, vanilla JavaScript,
-no build step) for GitHub Pages. **Status: stage 3 of 5** – free text, voice
-input and project buttons, follow-up questions, rule engine, safety stops and
-shopping list. PLZ/store selection (stage 4) follows.
+no build step) for GitHub Pages. **Status: stage 4 of 5** – optional PLZ store
+selection, free text, voice input and project buttons, follow-up questions,
+rule engine, safety stops and shopping list. Polishing (stage 5) follows.
 
 ### Architecture
 | Layer | File | Responsibility |
@@ -104,6 +104,19 @@ network calls – checked by a test).
 | S4 | DE | "Ich will eine Steckdose versetzen" | Stop screen "needs a professional" |
 | S5 | any | deny the microphone in the browser prompt | Hint; typing and buttons work |
 
+### Store selection by PLZ (FR-29, FR-30)
+After the start notice the customer may enter a postcode or skip.
+- The PLZ is checked in code: exactly 5 digits **and** present in the PLZ table.
+- Valid → sample stores within `store.maxDistanceKm` (50 km), sorted by straight-line
+  distance, at most `store.maxStoresShown` (5) – values in `app/config.js`, confirmed by the team.
+- Invalid, unknown or no store in range → message plus the full store list.
+  **A store is never selected automatically** – not even if only one is in range (RB-16, SR-06).
+- Skipped → the full list with identical checks; aisle, shelf and stock show
+  "not available" with an "Add postcode" button (FR-30). The store can be changed
+  from the list at any time; only aisle/shelf/stock are looked up again.
+- The PLZ stays on the device: not sent to the AI, not logged, cleared after the choice (NFR-04).
+- If the PLZ table or the store sheets fail to load, the app continues without a store (NFR-03).
+
 ### Data file `app/data/baumarkt-buddy-data.xlsx` (DR-01 … DR-03)
 Built from `data/product_catalogue.csv` and `data/store_map.csv` with
 `python3 tools/build_sample_data.py`. **All values are sample data.**
@@ -115,12 +128,24 @@ Built from `data/product_catalogue.csv` and `data/store_map.csv` with
 | `Stock` | `store_id`, `product_nr`, `stock_qty`, `aisle_nr`, `aisle_name`, `shelf_nr`, `data_status` (empty aisle = unknown, shown as "not available") |
 | `Info` | Sample-data notice and build date |
 
-3 sample stores: S01 Berlin (= original `store_map.csv`), S02 München (other
+Store coordinates are the centre point of the store's PLZ from the PLZ table
+(not invented). 3 sample stores: S01 Berlin (= original `store_map.csv`), S02 München (other
 aisles and stock; no aisle for P036/P049), S03 Hamburg (other layout; P060/P061
 not stocked). Added for the sample: `suitable_wall_types` of P051 (picture hooks)
 = brick, plasterboard – **team to verify**.
 
-Further data files: `understanding-lexicon.json` (keyword mode), `ai-mock-responses.json` (mock mode).
+Further data files: `understanding-lexicon.json` (keyword mode), `ai-mock-responses.json` (mock mode),
+`plz-de.csv` (PLZ reference table, see below).
+
+### PLZ reference table `app/data/plz-de.csv` (DR-08)
+| | |
+|---|---|
+| Content | 8,216 German 5-digit postcodes → centre coordinates (`plz,lat,lon`, WGS84) |
+| Source | [OpenGeoDB](https://sourceforge.net/projects/opengeodb/), release 0.2.5a, dump `opengeodb-02513_2007-10-02.sql` ([download](https://sourceforge.net/projects/opengeodb/files/Data/0.2.5a/)) |
+| Licence | Public domain (as stated on the OpenGeoDB SourceForge project page) |
+| Data date | 2 Oct 2007 (release); table built 25 Oct 2026 |
+| Method | `python3 -I tools/build_plz_table.py <dump.sql.gz>`: average of the WGS84 coordinates of all OpenGeoDB locations in Germany that carry the postcode. Postcodes without coordinates are left out – no coordinate is invented. |
+| Limitations | Data from 2007: postcodes created later are "unknown" (the customer then gets the full store list). In large cities many postcodes share the city's coordinates, so distances are approximate (straight line). Good enough for sorting sample stores; replace with a current source before real use. |
 
 Project templates (DR-04): `app/data/templates/hang-shelf.json` and
 `hang-picture.json` with rule IDs, quantity rules and review status
@@ -162,7 +187,11 @@ own data file. Newer versions are published on cdn.sheetjs.com (replace the file
 | SR-08 | `afterFactsChanged` → full re-evaluation; variant change | RB-04 |
 | SR-09, FR-15 | `checkScope` + stop screen (used by text/voice in stage 2/3) | SR-09 |
 | FR-06, FR-08, FR-09 | roles, catalogue-only selection, `compatible_with`, `specs` | UC-1, RB-03, G2 |
-| FR-11, FR-30 | `storeInfo` (selected store only) | RB-06, RB-15, RB-17 |
+| FR-11, FR-30 | `storeInfo` (selected store only), store bar with "Add postcode" | RB-06, RB-15, RB-17, FR-30 / RB-17 (UI) |
+| FR-29, SR-06 | `checkPlz`, `findStores` (never selects), store screen | RB-16 (×2), FR-29, NFR-02 (store) |
+| DR-08 | `plz-de.csv`, `tools/build_plz_table.py` | DR-08 |
+| NFR-04 (PLZ) | PLZ only on the device, never sent or logged | NFR-04 / NFR-07 |
+| NFR-03 (store) | optional PLZ table and store sheets | NFR-03 (store) |
 | R-13 | `requires_professional` products excluded | R-13 |
 | RB-13 | `pack_qty` validation, no total when unclear | RB-13 |
 | NFR-07 / RB-09 | text via `textContent`, data never interpreted | RB-09 |

@@ -5,7 +5,7 @@
  * project templates (data/templates/*.json, DR-04) and are reviewed there.
  */
 window.BB_CONFIG = Object.freeze({
-  version: "R1-MVP stage 3",
+  version: "R1-MVP stage 4",
 
   // NFR-09: English is the default UI language; German via the toggle.
   // Team decision 2026-10-25: English default (NFR-09 text says German default).
@@ -26,13 +26,14 @@ window.BB_CONFIG = Object.freeze({
     safetyRules: "data/safety-rules.json",
     lexicon: "data/understanding-lexicon.json",
     mockResponses: "data/ai-mock-responses.json",
+    plzTable: "data/plz-de.csv", // DR-08: PLZ → centre coordinates (OpenGeoDB, public domain)
     templates: [
       "data/templates/hang-shelf.json",
       "data/templates/hang-picture.json"
     ]
   },
 
-  // FR-29 (stage 4) – TBD by the team (design DD-6). Placeholder values.
+  // FR-29 – confirmed by the team 2026-10-25 (design DD-6).
   store: {
     maxDistanceKm: 50,   // "no store near you" when the nearest store is farther
     maxStoresShown: 5    // number of stores listed after a valid PLZ

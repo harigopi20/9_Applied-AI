@@ -67,3 +67,15 @@ when they are released to `main`.
   including RB-18, RB-19 and RB-20; manual real-speech checklist in README.
   *Why:* stage 3 of Release 1 (FR-25, FR-27, SR-11, NFR-04).
   *Prompt:* "Yes, add CODEOWNERS and continue with stage 3."
+- **2026-10-25 – R1 stage 4: PLZ and store selection, path without a store.**
+  Added the PLZ reference table `app/data/plz-de.csv` (8,216 postcodes, OpenGeoDB
+  0.2.5a, public domain) built by `tools/build_plz_table.py`; store coordinates
+  in the Excel file now come from this table. New optional store screen: PLZ
+  checked in code (5 digits + in table), stores within 50 km sorted by distance
+  (max. 5), otherwise message + full list; a store is only ever selected by tap.
+  Shopping list shows the chosen store with "Change store", or "Add postcode"
+  without one. PLZ stays on the device. Missing PLZ table or store sheets → app
+  continues without a store. 8 new tests (60 passing, none pending).
+  *Why:* stage 4 of Release 1 (FR-29, FR-30, DR-08, RB-16). Team confirmed
+  50 km / 5 stores and OpenGeoDB as PLZ source.
+  *Prompt:* "Fine as is, use OpenGeoDB and continue with stage 4."
