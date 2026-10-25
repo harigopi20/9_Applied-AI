@@ -41,7 +41,7 @@ AI (stage 2), voice input (stage 3) and PLZ/store selection (stage 4) follow.
 | AI (understanding only) | `ai-adapter.js` *(stage 2)* | Classify intent, extract candidate values as validated JSON – never decides |
 | Rule engine (all decisions) | `app/rules.js` | Fact gate, product choice, quantities, compatibility, load limits, notices, evidence log |
 | Data | `app/data.js`, `app/data/` | Loads the Excel file (SheetJS) and the JSON templates / safety word lists |
-| Texts | `app/i18n.js` | All UI texts in English (default) and German |
+| Texts | `app/i18n.js` | All UI texts in English (default, team decision 2026-10-25 – deviates from "German default" in NFR-09) and German |
 | Config | `app/config.js` | Data paths, AI mode, store distance / number (TBD by the team) |
 
 Safety principles in code: only values **confirmed by tap** or **manufacturer data**

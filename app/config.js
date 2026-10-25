@@ -8,6 +8,7 @@ window.BB_CONFIG = Object.freeze({
   version: "R1-MVP stage 1",
 
   // NFR-09: English is the default UI language; German via the toggle.
+  // Team decision 2026-10-25: English default (NFR-09 text says German default).
   defaultLanguage: "en",
 
   // AI adapter mode (stage 2): "template" (default, no AI), "proxy", "mock".

@@ -35,3 +35,8 @@ when they are released to `main`.
   voice and PLZ are added.
   *Prompt:* "Build Release 1 (MVP) of Baumarkt-Buddy in stages; stage 1 = data
   model, Excel loading, rule engine, 2 templates, safety rules and tests (buttons only)."
+- **2026-10-25 – Documented language decision:** English stays the default UI
+  language, German via the toggle (config.js comment, README).
+  *Why:* NFR-09 in the requirements says "German default"; the team confirmed
+  English, so the deviation is recorded.
+  *Prompt:* "English is still fine."
