@@ -4,8 +4,8 @@
 |---|---|
 | **Document** | `docs/03-design.md` |
 | **V-model phase** | 3 – Design |
-| **Version** | 0.1 (draft, scope-neutral) |
-| **Date** | 23 October 2026 |
+| **Version** | 0.3 (speech input moved to R1) |
+| **Date** | 25 October 2026 |
 | **Inputs** | [`docs/01-concept.md`](01-concept.md) · [`requirements/baumarkt-buddy-product-requirements.md`](../requirements/baumarkt-buddy-product-requirements.md) v1.0 · [`diagrams/`](../diagrams/) |
 | **Owner / approver** | App builder · reviewed by Quality & Responsible AI |
 | **Verified by** | Phase 5 – integration and unit tests (`test/`) |
@@ -56,7 +56,7 @@ flowchart LR
 
 | External actor | Interaction | Boundary rule |
 |---|---|---|
-| Customer | Text, answers, (later) photo/voice; receives list | No login; minimal personal data |
+| Customer | Text or voice, answers, (later) photo; receives list | No login; minimal personal data; audio not stored |
 | AI model provider | Receives minimal context; returns JSON | Output always schema-validated |
 | Store data | Read-only lookups | Mock data labelled "mock" |
 | Retailer APIs | Later increment | Not in prototype |
@@ -120,6 +120,76 @@ flowchart TB
 | **G2 Catalogue check** | Code | Every product ID exists in the catalogue | Accept unknown IDs |
 | **G4 Output check** | Code | JSON schema valid; else retry (max. 2) → fallback | Pass invalid output |
 | **Data layer** | Files | Catalogue, store map, templates, evidence log | Contain logic |
+| **Store selection (PLZ)** | UI + Code | Optional PLZ, validate, sort stores by distance on the device | Send the PLZ to the AI or server; block the flow when skipped |
+| **Speech input** | UI | Speech to editable text in the browser; customer confirms before use | Store audio; use spoken values without confirmation |
+
+### 4.2 Store selection by PLZ (added in v0.2 – FR-29 Should, FR-30 Must)
+
+The customer may enter a postcode (PLZ) at the start to pick a nearby sample store. Skipping is always possible: product choice, compatibility and safety checks are identical; only aisle and shelf are missing.
+
+```mermaid
+flowchart TD
+  S[Start] --> Q{PLZ entered?}
+  Q -->|skip| P[Describe project]
+  Q -->|yes| V{PLZ check: 5 digits and in PLZ table?}
+  V -->|no| M[Message + full store list]
+  V -->|yes| D[Distance to each store, calculated on the device]
+  D --> N{Store within range?}
+  N -->|no| M
+  N -->|yes| L[Stores sorted by distance]
+  L --> C[Customer picks store]
+  M --> C
+  M -->|skip| P
+  C --> P
+  P --> G[Questions, G0-G4 and rule engine unchanged]
+  G --> O{Store chosen?}
+  O -->|yes| A[List with aisle/shelf of the chosen store]
+  O -->|no| B[Full list, aisle/shelf not available, button Add a PLZ]
+```
+
+| # | Design element | Layer | Component |
+|---|---|---|---|
+| D-1 | Store selection screen: PLZ field, store list (name, city, km), "skip", "no store near you" message | L1 | DC-12 (moved from R3 to R1, PLZ only) |
+| D-2 | List screen: state "no store selected" + "Add a PLZ" button | L1 | DC-04 |
+| D-3 | Project state holds the chosen store (optional); store change → aisle/shelf looked up again | L2 | DC-13, DC-14 |
+| D-4 | PLZ validator + distance calculation (straight-line km) and sorting – deterministic code, runs in the browser | L4 | **DC-43 (new)** |
+| D-5 | PLZ reference table (PLZ → coordinates, open data); Stores sheet in the single data file | L5 | **DC-42 (new)**, DC-31 |
+| D-6 | Stock and aisle/shelf keyed by store ID | L5 | DC-31, DC-35 |
+| D-7 | Data model: entity STORE; PROJECT → STORE (0..1) | §7.2 | – |
+| D-8 | Output: `store_id`, `store_status`; aisle/shelf empty without a store | §8 | – |
+| D-9 | Privacy: the PLZ never leaves the device, is not sent to the AI and is not logged | Cross-cutting | DC-37 |
+| D-10 | Unit tests: validator, distance sorting; RB-15, RB-16, RB-17 | §12 | – |
+
+**AI layer (L3): no change.** The AI never receives the PLZ or the store.
+
+### 4.3 Speech input (added in v0.3 – FR-25, FR-27, SR-11 Must in R1)
+
+The customer can describe the project by voice instead of typing. Speech is turned into text in the browser; from then on it is exactly the same flow as typed input. Typing always remains available.
+
+```mermaid
+flowchart TD
+  M[Tap microphone] --> P{Microphone allowed?}
+  P -->|no / error| T[Type instead]
+  P -->|yes| S[Speech to text in the browser, DE/EN]
+  S --> E[Transcript shown as editable text]
+  E --> C[Customer checks / corrects and sends]
+  T --> I
+  C --> I[Intake agent, G0-G4 and rule engine unchanged]
+  I --> F[Spoken load, size, wall type read back: e.g. '20 kg - correct?']
+  F --> L[Shopping list]
+```
+
+| # | Design element | Layer | Component |
+|---|---|---|---|
+| S-1 | Microphone button, recording indicator, editable transcript box | L1 | DC-10 (moved from R3 to R1) |
+| S-2 | Read-back of spoken safety values (load, size, wall type) – reuses the fact confirmation view | L1 | DC-02 |
+| S-3 | Transcript passed into the same flow; microphone error → fall back to typing | L2 | DC-13 |
+| S-4 | Facts from speech get status `observed` until the customer confirms them | L4 | DC-23 |
+| S-5 | Spoken instructions treated as data (prompt-injection guard) | L4 | DC-27 |
+| S-6 | Privacy: microphone only with permission; audio not stored; speech service named in the privacy notice | Cross-cutting | DC-37 |
+| S-7 | Tests: RB-18 (misheard value confirmed), RB-19 (microphone denied → typing works), RB-20 (high-risk by voice refused) | §12 | – |
+
+**AI layer (L3): no change.** The intake agent receives text, as before.
 
 ---
 
@@ -193,6 +263,8 @@ All values below are **mock values for the prototype** and must be confirmed by 
 | `data/product_catalogue.csv` | 70 products | `product_nr`, `product_name`, `category`, `size`, `price_eur`, `max_load_kg`, `suitable_wall_types`, `compatible_with`, `requires_professional`, `safety_note`, `aisle_nr`, `shelf_nr` |
 | `data/store_map.csv` | Placement and stock | `aisle_nr`, `aisle_name`, `shelf_nr`, `product_nr`, `qty_on_shelf` |
 | `data/templates/*.json` *(to be created)* | Project templates | `project_type`, `required_facts`, `questions`, `bom_roles`, `quantity_rules`, `review_status` |
+| Stores sheet in the single data file *(new, v0.2)* | Sample stores | `store_id`, `store_name`, `plz`, `city`, `lat`, `lon`; stock and aisle/shelf per `store_id` |
+| PLZ reference table *(new, v0.2, DR-08)* | German PLZ → centre coordinates | `plz`, `lat`, `lon`; source, licence and date documented |
 
 ### 7.2 Core entities
 
@@ -204,13 +276,16 @@ erDiagram
   BOM_LINE }o--|| PRODUCT : "maps to"
   PRODUCT ||--o| STORE_LOCATION : "placed at"
   BOM_LINE ||--o{ EVIDENCE : "justified by"
+  PROJECT }o--o| STORE : "optionally at"
+  STORE ||--o{ STORE_LOCATION : has
 
   PROJECT { string id string type string state string language }
   FACT { string name string value string unit string status }
   TEMPLATE { string type string required_facts string review_status }
   BOM_LINE { string role string product_nr int quantity string basis }
   PRODUCT { string product_nr string name float price_eur float max_load_kg }
-  STORE_LOCATION { int aisle_nr int shelf_nr int qty_on_shelf }
+  STORE { string store_id string name string plz string city float lat float lon }
+  STORE_LOCATION { string store_id int aisle_nr int shelf_nr int qty_on_shelf }
   EVIDENCE { string rule_id string inputs string source datetime time }
 ```
 
@@ -250,6 +325,8 @@ The AI never returns free text to the UI. Each agent returns JSON that is valida
 ```json
 {
   "state": "products_validated",
+  "store_id": "S01",
+  "store_status": "selected",
   "lines": [
     { "role": "bracket", "product_nr": "P0xx", "quantity": 2, "basis": "R-02, R-14",
       "price_eur": 0.0, "aisle_nr": 0, "shelf_nr": 0, "data_label": "mock" }
@@ -314,7 +391,9 @@ Rule: a failed service call never advances a state; any change to material, dime
 | G0–G4 gates + rule engine (R-01…R-16) | ● | ● | ● |
 | Clarification (max. 3 questions) | ● | ● | ● |
 | BOM + catalogue match + aisle/shelf | ● | ● | ● |
-| Voice entry | ○ | ● | ● |
+| Optional PLZ store selection (on device) | ● | ● | ● |
+| Device location (GPS) / store QR code | – | – | ○ |
+| Voice entry (speech to text) | ● | ● | ● |
 | Photo entry (candidate detection only) | – | ○ | ● |
 | Alternatives, offline checklist, export | – | ● | ● |
 | Assembly guidance | – | ○ | ● |
@@ -333,6 +412,8 @@ Rule: a failed service call never advances a state; any change to material, dime
 | AI contracts (section 8) | Contract / schema tests | Invalid JSON never reaches UI |
 | State model (section 9) | State-transition tests | Load change invalidates validated BOM |
 | End-to-end pipeline | System tests / exit tests T1–T5 | UC-1 full list with aisle and shelf |
+| Store selection (§4.2) | Unit + release-blocking tests | Invalid PLZ selects no store (RB-16); skipped PLZ gives full list (RB-17); only the selected store's aisle/shelf (RB-15) |
+| Speech input (§4.3) | Release-blocking + UI tests | Misheard value confirmed (RB-18); microphone denied → typing (RB-19); high-risk by voice refused (RB-20) |
 
 ---
 
@@ -344,7 +425,11 @@ Rule: a failed service call never advances a state; any change to material, dime
 | DD-2 | R-07 capacity source without a manufacturer system rating | Show *Data unavailable*; reviewer to confirm |
 | DD-3 | Safety factors and limits (1.25×, 25 kg, 50 kg) | Keep as mock values; reviewer to confirm |
 | DD-4 | Where the orchestrator runs (browser vs. backend) | Backend/edge, to keep API keys and rules off the client |
-| DD-5 | Speech-to-text (if voice is in scope) | Browser Web Speech API first (GDPR) |
+| DD-5 | Speech-to-text service | Browser Web Speech API (in R1). Not available in Firefox → typing; audio may be processed by the browser vendor → named in the privacy notice |
+| DD-6 | Distance for "no store near you" and max. stores shown | TBD (team) |
+| DD-7 | Number of sample stores | TBD – at least 2 with different data to test RB-15 |
+| DD-8 | Stock and price display without a store | TBD (team) |
+| DD-9 | PLZ data source and licence | Open data; data team chooses |
 
 ---
 
