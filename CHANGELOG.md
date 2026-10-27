@@ -6,6 +6,29 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Sliding door dimensions and second door leaf – 2026-10-27
+Summary (same as the pull request):
+- Sliding door leaf must overlap the opening (+3 cm per side and at the top, assumption) and fit the free wall beside the opening; opening height is checked
+- New question "free wall beside the opening"; stop ST-04 when there is not enough wall
+- New sample door leaf P105 (100 × 213.5 cm); P097 gets its height as a spec
+- Size stops show "needed vs. available" in cm (also shelf boards) and hand off to store staff only
+- 95 tests passing
+
+- **2026-10-27 – Sliding door: realistic dimensions and a second door leaf.**
+  The door leaf now has to be at least opening + 6 cm wide and opening + 3 cm tall
+  (3 cm overlap per side and at the top – assumption, team to check); the opening
+  height is checked at last; a new question asks for the free wall beside the
+  opening (the leaf must fit there, otherwise stop ST-04 with the needed width). New
+  sample leaf P105 (1000 x 2135 mm, 30 kg, 179 €, stock in all 5 stores, team to
+  verify); P097 got the spec `height_mm=2035` from its size. Size stops now show
+  "needed vs. available" in the unit of the question (cm, German number format) –
+  also for shelf boards – and hand off to store staff only (no extra
+  "qualified professional" line). Engine: `spec_lte`, `size_check` per role.
+  4 new/updated tests (95 passing).
+  *Why:* the sliding-door stop mixed cm and mm, ignored the height and allowed leaves
+  without overlap.
+  *Prompt:* "The dimension differences make little sense – implement it, with a second door leaf."
+
 ## Milestone: 120 cm shelf boards and clear size stop – 2026-10-27
 Summary (same as the pull request):
 - Stop screen names a size problem (part and catalogue sizes) instead of blaming the load

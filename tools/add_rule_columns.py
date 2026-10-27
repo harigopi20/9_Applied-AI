@@ -42,6 +42,7 @@ NEW_COLUMNS = ["variant_group", "pack_qty", "pack_unit", "specs", "data_note"]
 SPECS = {
     "P001": "volume_l=10", "P002": "volume_l=5", "P003": "volume_l=2.5", "P004": "volume_l=2.5",
     "P076": "volume_l=2.5",
+    "P097": "height_mm=2035",
     "P035": "diameter_mm=6", "P036": "diameter_mm=8", "P037": "diameter_mm=10",
     "P043": "diameter_mm=6", "P044": "diameter_mm=8", "P045": "diameter_mm=10",
     "P046": "thread=M5", "P047": "thread=M8;length_mm=80",

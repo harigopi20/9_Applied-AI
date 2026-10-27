@@ -613,7 +613,7 @@
     // Stop rules from the project catalogue bring their own text ({limit} filled in by code).
     // A part that only fails because of its size: name the part and the catalogue sizes.
     const size = b.reason === "no_suitable_system" && b.cause && b.cause.kind === "size" ? b.cause : null;
-    const own = size ? t("stop_no_size", { part: pick(size.label), sizes: size.sizes.join(" · ") })
+    const own = size ? sizeText(size)
       : b.message ? pick(b.message).split("{limit}").join(b.limit_kg === null || b.limit_kg === undefined ? "–" : String(b.limit_kg)) : null;
     const mainText = own || {
       fact_unknown: t("stop_fact_unknown", { facts: factNames }),
@@ -634,6 +634,29 @@
     box.appendChild(el("p", { class: "muted small", text: t("rule") + ": " + b.rule_id }));
     box.appendChild(viewEvidence(r));
     return box;
+  }
+
+  /**
+   * Size stop: "you need … – our catalogue has …" in the unit of the question
+   * (role.size_check), numbers formatted for the UI language.
+   */
+  function sizeText(size) {
+    const lang = window.BBI18n.getLang();
+    let part = pick(size.label);
+    if (lang === "en") part = part.charAt(0).toLowerCase() + part.slice(1);
+    const n = size.need;
+    if (!n || !n.available.length) return t("stop_no_size", { part, sizes: size.sizes.join(" · ") });
+    const num = (v) => new Intl.NumberFormat(lang === "de" ? "de-DE" : "en-GB", { maximumFractionDigits: 1 }).format(v);
+    const u = n.unit ? " " + n.unit : "";
+    const need = [];
+    n.dims.forEach((d) => {
+      const label = pick(d.label);
+      if (d.eq !== null) need.push(t("size_eq", { label, value: num(d.eq) + u }));
+      if (d.min !== null) need.push(t("size_min", { label, value: num(d.min) + u }));
+      if (d.max !== null) need.push(t("size_max", { label, value: num(d.max) + u }));
+    });
+    const available = n.available.map((a) => a.map(num).join(" × ") + u).join(" · ");
+    return t("stop_need_size", { part, need: need.join(", "), available });
   }
 
   // Shopping list (FR-06, FR-08, FR-09, FR-11, FR-30)

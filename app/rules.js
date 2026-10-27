@@ -308,6 +308,12 @@
       add("spec " + key + " ≥", want !== undefined && typeof p.specs[key] === "number" && p.specs[key] >= want,
         p.specs[key] + " vs " + want, "FR-08");
     });
+    Object.entries(s.spec_lte || {}).forEach(([key, e]) => {
+      let want;
+      try { want = evalExpr(e, ctx); } catch (_) { want = undefined; }
+      add("spec " + key + " ≤", want !== undefined && typeof p.specs[key] === "number" && p.specs[key] <= want,
+        p.specs[key] + " vs " + want, "FR-08");
+    });
 
     if (s.use_case_by_wall) {
       const uc = s.use_case_by_wall[wall];
@@ -376,7 +382,7 @@
         "template:" + ctx.template.template_id, reasons);
       const candidates = evaluated.map((e) => ({ product_nr: e.p.product_nr, size: e.p.size,
         failed: e.checks.filter((c) => !c.ok).map((c) => c.check) }));
-      return Object.assign(base, { status: "none", product: null, checks: [], reasons, candidates });
+      return Object.assign(base, { status: "none", product: null, checks: [], reasons, candidates, size: sizeNeed(role, ctx, pool) });
     }
     const checks = evaluated.find((e) => e.p === chosen).checks;
     log(ctx, (role.rule_ids || []).join(","), "select " + role.role, chosen.product_nr + " – all checks passed",
@@ -496,7 +502,8 @@
         items.push(item);
       }
       if (failed) {
-        failures.push({ method_id: method.method_id, role: failed.role, label: failed.label, reasons: failed.reasons, candidates: failed.candidates || [] });
+        failures.push({ method_id: method.method_id, role: failed.role, label: failed.label, reasons: failed.reasons,
+          candidates: failed.candidates || [], size: failed.size || null });
         log(ctx, method.rule_id, "method " + method.method_id, "not possible: no " + failed.role, tplSource);
         continue;
       }
@@ -508,6 +515,8 @@
       result.state = "safety_blocked";
       result.blocked = { reason: "no_suitable_system", rule_id: "R-07", failures, message: template.no_system_message || null,
         cause: sizeCause(failures[failures.length - 1]) };
+      // A size problem goes to store staff, not to a specialist company.
+      if (result.blocked.cause) result.blocked.hand_off = "staff";
       return finalise(result);
     }
 
@@ -622,7 +631,29 @@
     const sizeOnly = failure.candidates.some((c) => c.failed.length > 0 && c.failed.every((x) => /^spec /.test(x)));
     if (!sizeOnly) return null;
     const sizes = Array.from(new Set(failure.candidates.map((c) => c.size).filter(Boolean)));
-    return { kind: "size", role: failure.role, label: failure.label, sizes };
+    return { kind: "size", role: failure.role, label: failure.label, sizes, need: failure.size || null };
+  }
+
+  /**
+   * "Needed vs. available" in the unit of the question (role.size_check, e.g. cm):
+   * required minimum/maximum per dimension from spec_gte / spec_lte / spec_eq, and
+   * the catalogue products' dimensions. Numbers only – the UI formats them.
+   */
+  function sizeNeed(role, ctx, pool) {
+    const sc = role.size_check;
+    if (!sc) return null;
+    const s = role.select || {};
+    const f = sc.factor || 1;
+    const val = (e) => { try { return round(evalExpr(e, ctx) * f); } catch (_) { return null; } };
+    const dims = sc.dims.map((d) => ({
+      spec: d.spec, label: d.label,
+      min: s.spec_gte && s.spec_gte[d.spec] ? val(s.spec_gte[d.spec]) : null,
+      max: s.spec_lte && s.spec_lte[d.spec] ? val(s.spec_lte[d.spec]) : null,
+      eq: s.spec_eq && s.spec_eq[d.spec] ? val(s.spec_eq[d.spec]) : null
+    }));
+    const available = pool.map((p) => sc.dims.map((d) => (typeof p.specs[d.spec] === "number" ? round(p.specs[d.spec] * f) : null)))
+      .filter((a) => a.every((x) => x !== null));
+    return { unit: sc.unit || "", dims, available };
   }
 
   /** Used-item checklist (C-7): any ticked defect other than "none". */

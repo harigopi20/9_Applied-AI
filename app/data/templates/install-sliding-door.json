@@ -1,14 +1,15 @@
 {
   "template_id": "install_sliding_door",
   "project_id": "PRJ-08",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "comment": "DR-04 template from the project catalogue PRJ-08 (draft). Sliding door on a rail mounted on the wall above the opening. Moving load: only concrete or solid brick (ST-13). Team review pending (SR-10).",
   "review": {
     "status": "pending_team_review",
     "reviewed_by": null,
     "review_date": null,
     "created": "2026-10-27",
-    "source": "data/project_catalogue.xlsx (draft v1, 27 Oct 2026)"
+    "source": "data/project_catalogue.xlsx (draft v1, 27 Oct 2026)",
+    "updated": "2026-10-27"
   },
   "title": {
     "en": "Install a sliding door",
@@ -43,6 +44,7 @@
     "wall_type",
     "opening_width_cm",
     "opening_height_cm",
+    "free_wall_cm",
     "load_kg",
     "condition"
   ],
@@ -76,8 +78,8 @@
         "de": "Ihre Tür"
       },
       "help": {
-        "en": "Door weight: for the door leaf from the list it is 25 kg (product data). Round up if in doubt.",
-        "de": "Türgewicht: Beim Türblatt aus der Liste sind es 25 kg (Produktdaten). Im Zweifel aufrunden."
+        "en": "Measure the opening inside the frame or wall edges. Free wall = the wall beside the opening on the side the door slides to. Door weight: door leaves from the list weigh 25 kg (90 cm) or 30 kg (100 cm). Round up if in doubt.",
+        "de": "Öffnung innen zwischen Zarge oder Wandkanten messen. Freie Wand = Wand neben der Öffnung auf der Seite, zu der die Tür aufgeschoben wird. Türgewicht: Türblätter aus der Liste wiegen 25 kg (90 cm) oder 30 kg (100 cm). Im Zweifel aufrunden."
       },
       "fields": [
         {
@@ -100,6 +102,17 @@
           "label": {
             "en": "Height of the opening",
             "de": "Höhe der Öffnung"
+          }
+        },
+        {
+          "fact": "free_wall_cm",
+          "type": "number",
+          "unit": "cm",
+          "min": 0,
+          "max": 500,
+          "label": {
+            "en": "Free wall beside the opening",
+            "de": "Freie Wand neben der Öffnung"
           }
         },
         {
@@ -182,6 +195,42 @@
         "en": "A sliding door puts a moving load on the wall. Please ask OBI staff.",
         "de": "Eine Schiebetür belastet die Wand in Bewegung. Bitte OBI-Personal fragen."
       }
+    },
+    {
+      "id": "free_wall",
+      "rule_id": "ST-04",
+      "hand_off": "staff",
+      "when": {
+        "lt": [
+          {
+            "fact": "free_wall_cm"
+          },
+          {
+            "add": [
+              {
+                "fact": "opening_width_cm"
+              },
+              6
+            ]
+          }
+        ]
+      },
+      "limit": {
+        "add": [
+          {
+            "fact": "opening_width_cm"
+          },
+          6
+        ]
+      },
+      "message": {
+        "en": "There is not enough free wall beside the opening: the door needs at least {limit} cm of wall to slide open.",
+        "de": "Neben der Öffnung ist nicht genug freie Wand: Die Tür braucht mindestens {limit} cm Wand zum Aufschieben."
+      },
+      "help": {
+        "en": "The door leaf is 6 cm wider than the opening so that it overlaps 3 cm on each side.",
+        "de": "Das Türblatt ist 6 cm breiter als die Öffnung, damit es je Seite 3 cm überlappt."
+      }
     }
   ],
   "warnings": [
@@ -224,7 +273,8 @@
           "role": "leaf",
           "section": "materials",
           "rule_ids": [
-            "SLIDE-L1"
+            "SLIDE-L1",
+            "SLIDE-L3"
           ],
           "label": {
             "en": "Sliding door leaf",
@@ -236,15 +286,24 @@
             ],
             "spec_gte": {
               "width_mm": {
+                "var": "leaf_min_width_mm"
+              },
+              "height_mm": {
+                "var": "leaf_min_height_mm"
+              }
+            },
+            "spec_lte": {
+              "width_mm": {
                 "mul": [
                   {
-                    "fact": "opening_width_cm"
+                    "fact": "free_wall_cm"
                   },
                   10
                 ]
               }
             },
             "prefer": [
+              "spec.width_mm",
               "price_eur"
             ]
           },
@@ -254,7 +313,27 @@
             "units": 1
           },
           "ownable": true,
-          "load_bearing": true
+          "load_bearing": true,
+          "size_check": {
+            "unit": "cm",
+            "factor": 0.1,
+            "dims": [
+              {
+                "spec": "width_mm",
+                "label": {
+                  "en": "width",
+                  "de": "Breite"
+                }
+              },
+              {
+                "spec": "height_mm",
+                "label": {
+                  "en": "height",
+                  "de": "Höhe"
+                }
+              }
+            ]
+          }
         },
         {
           "role": "rail",
@@ -733,8 +812,8 @@
       "de": "1 Griff je Seite (2 pro Tür)"
     },
     "SLIDE-L1": {
-      "en": "door leaf at least as wide as the opening",
-      "de": "Türblatt mindestens so breit wie die Öffnung"
+      "en": "door leaf ≥ opening + 3 cm overlap on each side and at the top (assumption, team to check)",
+      "de": "Türblatt ≥ Öffnung + 3 cm Überlappung je Seite und oben (Annahme, Team prüft)"
     },
     "SLIDE-L2": {
       "en": "rail ≥ 2 × door width, rated door width ≥ leaf width",
@@ -747,6 +826,46 @@
     "SLIDE-T2": {
       "en": "Measuring and levelling for every mounting job",
       "de": "Messen und Ausrichten bei jeder Montage"
+    },
+    "SLIDE-L3": {
+      "en": "door leaf not wider than the free wall beside the opening",
+      "de": "Türblatt nicht breiter als die freie Wand neben der Öffnung"
+    }
+  },
+  "variables": {
+    "leaf_min_width_mm": {
+      "rule_id": "SLIDE-L1",
+      "comment": "opening width + 2 × 3 cm overlap (assumption, team to check)",
+      "expr": {
+        "mul": [
+          {
+            "add": [
+              {
+                "fact": "opening_width_cm"
+              },
+              6
+            ]
+          },
+          10
+        ]
+      }
+    },
+    "leaf_min_height_mm": {
+      "rule_id": "SLIDE-L1",
+      "comment": "opening height + 3 cm overlap at the top (assumption, team to check)",
+      "expr": {
+        "mul": [
+          {
+            "add": [
+              {
+                "fact": "opening_height_cm"
+              },
+              3
+            ]
+          },
+          10
+        ]
+      }
     }
   }
 }

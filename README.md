@@ -149,7 +149,7 @@ repository's `data/` folder – so serve the **repository root**:
 ```bash
 python3 -m http.server 8000          # in the repository root
 # app:   http://localhost:8000/app/
-# tests: http://localhost:8000/app/tests.html   (summary at the top: 93 tests)
+# tests: http://localhost:8000/app/tests.html   (summary at the top: 95 tests)
 ```
 `tests.html` runs all automated tests in the browser against the real data files,
 fixture copies of the catalogue, the AI `mock` mode and a simulated Web Speech API.
@@ -284,7 +284,7 @@ usability test or by hand.
 2-week MVP sprint starting 19 Oct 2026 → final pitch.
 
 ## Limitations
-Sample catalogue (104 products), invented prices, stock and aisle positions, 5 sample
+Sample catalogue (105 products), invented prices, stock and aisle positions, 5 sample
 stores in a fictional partnership scenario (addresses and opening hours to be verified
 by the team), approximate PLZ distances, 9 project templates not yet reviewed by the team.
 Open points from the project catalogue: wall type "wood" is not offered yet (no wood
@@ -293,4 +293,9 @@ fixings in the catalogue); the load help "estimate for me" (C-7) is not built �
 separate question screen; cavity anchors and anchor bolts are assumed to bring their
 own screw; the sliding-door plug (10 mm, 50 kg) limits the door to 40 kg although the
 catalogue allows 60 kg (every part must carry the whole load × 1.25, SR-04).
+Sliding door sizes: the door leaf must be at least 6 cm wider and 3 cm taller than
+the opening (3 cm overlap per side and at the top) and must fit the free wall beside
+the opening – the overlap values are common DIY rules of thumb (**assumption, team
+to check**). With the two sample leaves (90 × 203.5 cm, 100 × 213.5 cm) openings up
+to 94 × 210 cm are covered. Size stops show "needed vs. available" in cm.
 Quantities are estimates. The app does not replace advice from a qualified person.
