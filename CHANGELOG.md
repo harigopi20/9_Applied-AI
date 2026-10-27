@@ -6,6 +6,12 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Saved test results and automatic test runs – 2026-10-27
+Summary (same as the pull request):
+- `tools/run_tests.js` runs `app/tests.html` headless and saves `test/results/<date>_<commit>.md` / `.json`
+- GitHub Actions workflow *Tests* on every pull request into `main`, push to `main` and on demand (run summary + artifact)
+- First saved result: 97/97 PASS; README and test document §8 explain where results are stored
+
 - **2026-10-27 – Test results are saved as files and run automatically on GitHub.**
   New `tools/run_tests.js` (with `tools/package.json`, Playwright 1.63.0): serves the
   repository itself, runs `app/tests.html` in headless Chromium and writes
