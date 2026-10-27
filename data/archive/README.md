@@ -1,0 +1,1 @@
+This folder contains obsolete data files, that are not relevant for the current project scope. 
