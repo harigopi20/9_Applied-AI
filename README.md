@@ -25,7 +25,7 @@ refused with a referral to a professional.
 *Basic* projects ask no wall or load questions; the high-risk filter, catalogue
 check, product warnings and stop rules always run. Photo entry, saved projects,
 offline mode, store maps and step-by-step guides are planned for later releases
-([R2–R4 requirements](requirements/requirements-R2-R4.md)).
+([R2–R4 requirements](requirements/requirements-R2-R4_2026-10-27.md)).
 
 👉 **Live app:** `https://st854d2gpb-create.github.io/9_Applied-AI/` (after GitHub Pages is enabled, see below)
 
@@ -149,7 +149,7 @@ repository's `data/` folder – so serve the **repository root**:
 ```bash
 python3 -m http.server 8000          # in the repository root
 # app:   http://localhost:8000/app/
-# tests: http://localhost:8000/app/tests.html   (summary at the top: 95 tests)
+# tests: http://localhost:8000/app/tests.html   (summary at the top: 97 tests)
 ```
 `tests.html` runs all automated tests in the browser against the real data files,
 fixture copies of the catalogue, the AI `mock` mode and a simulated Web Speech API.
@@ -265,9 +265,9 @@ usability test or by hand.
 | `app/` | The web app, its data files (`app/data/`) and `tests.html` |
 | `proxy/` | Optional AI proxy (Cloudflare Worker) |
 | `tools/` | Script that adds the rule-engine columns to the team workbook |
-| `requirements/` | Requirements (R1 MVP, R2–R4) |
+| `requirements/` | Requirements (R1 MVP, R2–R4); current version: files with `_2026-10-27` (after the vibe coding session), older versions kept |
 | `data/` | Team data workbook (`product_catalogue.xlsx`) with CSV exports, PLZ table, concept and design documents |
-| `test/` | Test case descriptions |
+| `test/` | Test case descriptions; current version: `01_test_cases_2026-10-27.md` |
 | `diagrams/` | Architecture and planning diagrams |
 | `pitch/` | Pitch deck |
 

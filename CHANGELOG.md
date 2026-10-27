@@ -6,6 +6,22 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-10-27 – Requirements and test cases updated to the current app (new dated files).**
+  New files `requirements/requirements-R1-MVP_2026-10-27.md`,
+  `requirements/requirements-R2-R4_2026-10-27.md` and `test/01_test_cases_2026-10-27.md`
+  (originals kept). R1: 49 requirements (41 Must / 8 Should) – 9 projects (DR-04), stop
+  rules and size stops (FR-15), FR-07 moved from R2, new FR-32 (how-to links), FR-33
+  (used-item defects), SR-13 … SR-16 from the project catalogue (all new rows
+  *Proposed*, team to confirm). R2–R4: FR-07 removed, R1 parts of FR-10/12/14/16 noted,
+  open points of the session listed. Test cases v1.1: new TC-080 … TC-099 for the
+  project catalogue, automated suite documented with its results, traceability 49/49,
+  RB-21 linked to FR-31, RB-23 added (proposed). Two automated tests added so that
+  every "Auto" reference is real: SR-14 / RB-23 (unknown load stops) and SR-16 / SR-09
+  (high-risk filter in Basic projects) – 97 passing. Archive data not used.
+  *Why:* the documents still described 2 projects and 70 products.
+  *Prompt:* "Update the R1, R2–R4 requirements and the test cases to the vibe coding
+  session and the current app; save under the same names plus today's date."
+
 ## Milestone: Sliding door dimensions and second door leaf – 2026-10-27
 Summary (same as the pull request):
 - Sliding door leaf must overlap the opening (+3 cm per side and at the top, assumption) and fit the free wall beside the opening; opening height is checked
