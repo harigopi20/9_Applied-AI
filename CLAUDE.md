@@ -10,7 +10,7 @@
   followed by 2–3 lines (why, which request/prompt triggered it).
 - When a feature or milestone is finished and working, open a pull request
   into `main` and tell me it is ready for review. I merge it myself.
-- do nat use any information or data which is in stored in archives 
+- do not use any information or data which is stored in archives 
 
 ## Pull Requests and Merging
 - The pull request description must summarize all changes on the branch:
