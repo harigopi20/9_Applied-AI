@@ -1336,6 +1336,27 @@
     } finally { window.BBI18n.setLang("en"); }
   });
 
+  test("SR-14 / RB-23", "Load 'I don't know' → stop (fact unknown) in every project with a load question; no plugs, no list", () => {
+    const cases = [
+      [SHELF(), Object.assign({}, SHELF_OK)],
+      [PIC(), { wall_type: "concrete", picture_count: 1, points_per_picture: 1 }],
+      [CAB(), Object.assign({}, CAB_OK)],
+      [SLIDE(), Object.assign({}, SLIDE_OK)]
+    ];
+    cases.forEach(([t, f]) => {
+      const r = run(t, confirmed(Object.assign(f, { load_kg: R.UNKNOWN_VALUE })));
+      eq([r.state, r.blocked.reason, r.items.length], ["safety_blocked", "fact_unknown", 0], t.template_id);
+      assert(r.blocked.facts.includes("load_kg"), t.template_id + " names the load");
+    });
+  });
+
+  test("SR-16 / SR-09", "Basic projects get the high-risk filter too: 'paint the wall and move the socket' → professional stop", () => {
+    ["Ich will die Wand streichen und die Steckdose versetzen", "I want to paint the wall and move the socket"].forEach((txt) => {
+      const sc = R.checkScope(txt, D.safetyRules);
+      assert(sc.highRisk && sc.categories.includes("electrical"), txt);
+    });
+  });
+
   // ---------------- UI
   function questionSetup(template, qid, facts) {
     const s = window.BBApp.state;
