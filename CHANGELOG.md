@@ -6,6 +6,15 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-10-27 – Stop screen names a size problem instead of blaming the load.**
+  A 100 cm shelf with 10 kg was stopped with "no product combination rated for this
+  load and wall", although the only reason was the board length (catalogue boards are
+  80 cm). If a part fails only on its size checks, the stop now says which part and
+  lists the catalogue sizes (EN + DE); real load problems keep the old text. New test
+  R-07 (size), 92 passing.
+  *Why:* the message was misleading for customers.
+  *Prompt:* "A shelf with 10 kg and 20 cm deep is over the limit? That makes no sense."
+
 ## Milestone: Product catalogue v2 and project catalogue – 9 projects – 2026-10-27
 Summary (same as the pull request):
 - Product catalogue v2 (102 products, German names) and project catalogue (draft v1) added to `data/`

@@ -1277,6 +1277,22 @@
     assert(v.ok, "schema accepts new intent and wall type: " + (v.errors || []).join(","));
   });
 
+  test("R-07 (size)", "Shelf 100 cm × 20 cm, 10 kg: stop names the board size (80 cm boards), not the load (EN + DE)", () => {
+    const r = run(SHELF(), confirmed({ wall_type: "concrete", load_kg: 10, shelf_length_cm: 100, shelf_depth_cm: 20 }));
+    eq([r.blocked.reason, r.blocked.cause && r.blocked.cause.kind, r.blocked.cause.role], ["no_suitable_system", "size", "board"]);
+    assert(r.blocked.cause.sizes.some((x) => x.includes("800 x 200")), "available sizes listed");
+    try {
+      ["en", "de"].forEach((lang) => {
+        window.BBI18n.setLang(lang);
+        const box = renderResult(SHELF(), confirmed({ wall_type: "concrete", load_kg: 10, shelf_length_cm: 100, shelf_depth_cm: 20 }), null);
+        const txt = box.querySelector(".stop-main").textContent;
+        assert(txt.includes("800 x 200") && !txt.includes(window.BBI18n.t("stop_no_suitable_system")), lang + ": " + txt);
+      });
+    } finally { window.BBI18n.setLang("en"); }
+    const heavy = run(SHELF(), confirmed(Object.assign({}, SHELF_OK, { load_kg: 30 })));
+    eq(heavy.blocked.cause, null, "a real load problem keeps the load message");
+  });
+
   // ---------------- UI
   function questionSetup(template, qid, facts) {
     const s = window.BBApp.state;
