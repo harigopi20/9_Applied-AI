@@ -6,6 +6,14 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Requirements and test cases updated to the current app – 2026-10-27
+Summary (same as the pull request):
+- New dated files `requirements-R1-MVP_2026-10-27.md`, `requirements-R2-R4_2026-10-27.md`, `01_test_cases_2026-10-27.md` (originals kept)
+- R1: 49 requirements – 9 projects, stop rules and size stops, FR-07 moved from R2, new FR-32, FR-33, SR-13 … SR-16 (proposed, team to confirm)
+- R2–R4: FR-07 removed, R1 parts of FR-10/12/14/16 noted, open points of the session listed
+- Test cases v1.1: TC-080 … TC-099, automated suite and results documented, traceability 49/49, RB-23 proposed
+- 2 new automated tests (unknown load, high-risk filter in Basic projects); 97 passing
+
 - **2026-10-27 – Requirements and test cases updated to the current app (new dated files).**
   New files `requirements/requirements-R1-MVP_2026-10-27.md`,
   `requirements/requirements-R2-R4_2026-10-27.md` and `test/01_test_cases_2026-10-27.md`
