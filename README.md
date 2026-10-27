@@ -284,7 +284,7 @@ usability test or by hand.
 2-week MVP sprint starting 19 Oct 2026 → final pitch.
 
 ## Limitations
-Sample catalogue (103 products), invented prices, stock and aisle positions, 5 sample
+Sample catalogue (104 products), invented prices, stock and aisle positions, 5 sample
 stores in a fictional partnership scenario (addresses and opening hours to be verified
 by the team), approximate PLZ distances, 9 project templates not yet reviewed by the team.
 Open points from the project catalogue: wall type "wood" is not offered yet (no wood

@@ -1277,14 +1277,16 @@
     assert(v.ok, "schema accepts new intent and wall type: " + (v.errors || []).join(","));
   });
 
-  test("R-07 (size)", "Shelf 100 cm × 20 cm, 10 kg: stop names the board size (80 cm boards), not the load (EN + DE)", () => {
-    const r = run(SHELF(), confirmed({ wall_type: "concrete", load_kg: 10, shelf_length_cm: 100, shelf_depth_cm: 20 }));
+  test("R-07 (size)", "Board missing in the requested size (catalogue copy without P104): stop names the size, not the load (EN + DE)", () => {
+    const cat = fixture((byId, rows) => { rows.splice(rows.findIndex((r) => r.product_nr === "P104"), 1); });
+    const F = confirmed({ wall_type: "concrete", load_kg: 10, shelf_length_cm: 100, shelf_depth_cm: 20 });
+    const r = run(SHELF(), F, cat);
     eq([r.blocked.reason, r.blocked.cause && r.blocked.cause.kind, r.blocked.cause.role], ["no_suitable_system", "size", "board"]);
     assert(r.blocked.cause.sizes.some((x) => x.includes("800 x 200")), "available sizes listed");
     try {
       ["en", "de"].forEach((lang) => {
         window.BBI18n.setLang(lang);
-        const box = renderResult(SHELF(), confirmed({ wall_type: "concrete", load_kg: 10, shelf_length_cm: 100, shelf_depth_cm: 20 }), null);
+        const box = renderResult(SHELF(), F, null, cat);
         const txt = box.querySelector(".stop-main").textContent;
         assert(txt.includes("800 x 200") && !txt.includes(window.BBI18n.t("stop_no_suitable_system")), lang + ": " + txt);
       });
@@ -1293,11 +1295,14 @@
     eq(heavy.blocked.cause, null, "a real load problem keeps the load message");
   });
 
-  test("PRJ-01 / P103", "Shelf 100 cm × 25 cm, 10 kg → 120 cm board P103 with 3 brackets and 6 plugs; 80 cm still uses P064", () => {
+  test("PRJ-01 / P103 / P104", "Shelf 100 cm, 10 kg → 120 cm board (P103 25 cm deep, P104 20 cm deep) with 3 brackets; 80 cm keeps P064 / P063", () => {
     const r = run(SHELF(), confirmed({ wall_type: "concrete", load_kg: 10, shelf_length_cm: 100, shelf_depth_cm: 25 }));
     eq(r.state, "validated");
     eq([item(r, "board").product.product_nr, units(r, "bracket"), units(r, "wall_plug")], ["P103", 3, 6]);
     eq(item(run(SHELF(), confirmed(SHELF_OK)), "board").product.product_nr, "P064");
+    const r20 = run(SHELF(), confirmed({ wall_type: "concrete", load_kg: 10, shelf_length_cm: 100, shelf_depth_cm: 20 }));
+    eq([r20.state, item(r20, "board").product.product_nr, units(r20, "bracket")], ["validated", "P104", 3]);
+    eq(item(run(SHELF(), confirmed(Object.assign({}, SHELF_OK, { shelf_depth_cm: 20, load_kg: 10 }))), "board").product.product_nr, "P063", "80 cm still P063");
   });
 
   // ---------------- UI

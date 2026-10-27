@@ -14,8 +14,17 @@ Summary (same as the pull request):
 - Rule engine: stop rules ST-01…ST-14 and warnings from the templates, conditions, new quantity rules, plasterboard cabinet table, projects without load questions, "I already have this" (C-8, SR-15)
 - UI: grouped project buttons with safety level, checklist questions, catalogue stop texts, OBI how-to links, German product names
 - Stop screen names a size problem (part and catalogue sizes) instead of blaming the load
-- New 120 cm shelf board P103 (sample values) – shelves up to 120 cm with 3 brackets
+- New 120 cm shelf boards P103 (25 cm deep) and P104 (20 cm deep), sample values – shelves up to 120 cm with 3 brackets
 - Lexicon, AI schema and proxy know the new projects and wall types; 93 tests passing
+
+- **2026-10-27 – Second 120 cm shelf board P104 (20 cm deep).**
+  P104 *Shelf board 1200 x 200 x 18 mm* (rated 20 kg like P063, 17.99 €, brackets
+  P058/P059, stock in all 5 stores – sample values, team to verify) added to the
+  workbook (stock row inserted above the legend); CSVs re-exported. Shelves of
+  81–120 cm now work in both depths. Test R-07 (size) uses a catalogue copy without
+  P104, because the real catalogue no longer has a size gap up to 120 cm (93 passing).
+  *Why:* 20 cm deep shelves above 80 cm still stopped.
+  *Prompt:* "Yes, also add a 120 cm board with 20 cm depth."
 
 - **2026-10-27 – New 120 cm shelf board P103 in the product catalogue.**
   `data/product_catalogue.xlsx` gets P103 *Shelf board 1200 x 250 x 18 mm* (rated
