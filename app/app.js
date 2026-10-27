@@ -112,6 +112,11 @@
 
   const main = () => document.getElementById("main");
 
+  /** Product name in the UI language (catalogue v2 has product_name_de); text from data, never translated by code. */
+  function productName(p) {
+    return window.BBI18n.getLang() === "de" && p.name_de ? p.name_de : p.name;
+  }
+
   function render() {
     if (!document.getElementById("main")) return; // headless use in tests.html
     document.documentElement.lang = window.BBI18n.getLang();
@@ -615,7 +620,7 @@
       el("input", { type: "checkbox", id, class: "check", checked: state.checked.has(p.product_nr),
         onchange: (e) => { e.target.checked ? state.checked.add(p.product_nr) : state.checked.delete(p.product_nr); li.classList.toggle("done", e.target.checked); } }),
       el("label", { for: id, class: "item-name" }, [
-        el("span", { text: p.name }), el("span", { class: "muted", text: " · " + p.size }),
+        el("span", { text: productName(p) }), el("span", { class: "muted", text: " · " + p.size }),
         el("span", { class: "sr-only", text: " – " + t("checked_off") })
       ])
     ]);
@@ -687,7 +692,7 @@
       const sel = el("select", { class: "input variant", "aria-label": t("change_variant") + " – " + pick(i.label),
         onchange: (e) => { state.overrides[i.role] = e.target.value; recompute(); } });
       variants.forEach((v) => {
-        const o = el("option", { value: v.product_nr, text: v.name + " · " + v.size + " (" + v.product_nr + ")" });
+        const o = el("option", { value: v.product_nr, text: productName(v) + " · " + v.size + " (" + v.product_nr + ")" });
         if (v.product_nr === p.product_nr) o.selected = true;
         sel.appendChild(o);
       });

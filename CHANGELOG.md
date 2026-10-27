@@ -4,6 +4,22 @@ All notable changes to this project are documented here.
 Entries are collected under "Unreleased" and grouped into a milestone
 when they are released to `main`.
 
+## Unreleased
+
+- **2026-10-27 – Product catalogue v2 and project catalogue added to the repository.**
+  `data/product_catalogue.xlsx` replaced by the team's v2 (102 products P001–P102,
+  German names `product_name_de`/`category_de`, stock for the new products in all
+  5 stores, sheets *Read Me* and *Translations*). New `data/project_catalogue.xlsx`
+  (draft v1, 9 projects, team review pending). `tools/add_rule_columns.py` now only
+  fills **empty** rule-engine cells (it used to overwrite `specs`/`pack_qty`, which
+  would have destroyed v2 values such as `coverage_m2_per_l` and the 2-pc hinge
+  set), adds `volume_l` to the wall paints, and exports all three CSVs
+  (`products.csv`, `store_stock.csv`, `stores.csv`). The app shows the German product
+  name in German mode. Tests: fixture product number moved from P097 (now a real
+  product) to P997; DR-01 count raised to ≥ 100; new test for German names (70 passing).
+  *Why:* the team delivered updated catalogues that belong in git (DR-01, DR-04).
+  *Prompt:* "I have an updated project and product catalogue – push them and update the app."
+
 ## Milestone: Design update 2 and store availability (FR-31) – 2026-10-25
 Summary (same as the pull request):
 - Layout and fonts reworked after screenshots of a DIY-store app: orange header band with diagonal edge, condensed headlines, black pill buttons, outlined tiles, flat product rows, black price box, bottom tab bar
@@ -167,5 +183,3 @@ Summary (same as the pull request):
   branch/pull-request workflow."
 - **2026-10-25 – Added CHANGELOG.md:** this file.
   *Why:* documents the vibe-coding process for the final report.
-
-## Unreleased

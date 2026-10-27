@@ -1,7 +1,8 @@
 /*
  * Baumarkt-Buddy – UI texts in English (default) and German (NFR-09).
  * Product names, sizes and safety notes come from the catalogue and are
- * shown exactly as delivered (SR-07); they are not translated.
+ * shown exactly as delivered (SR-07); they are not translated by code
+ * (German product names come from the catalogue column product_name_de).
  *
  * Safety texts (detector, no certification) are checked by RB-07 tests:
  * they must never contain a clearance phrase from data/safety-rules.json.

@@ -80,8 +80,8 @@
   // ---------------------------------------------------------------------
   // Data (DR-01..DR-04, SR-10)
   // ---------------------------------------------------------------------
-  test("DR-01", "Single Excel file loads with ~70 products, stores and stock", () => {
-    assert(D.catalogue.all.length >= 60, "products: " + D.catalogue.all.length);
+  test("DR-01", "Single Excel file loads with ~100 products (v2), stores and stock", () => {
+    assert(D.catalogue.all.length >= 100, "products: " + D.catalogue.all.length);
     assert(D.stores.length >= 2, "at least 2 stores");
     assert(D.stock.size > 100, "stock rows");
     assert(D.stores.every((s) => s.data_status === "sample"), "stores labelled sample (NFR-05)");
@@ -144,11 +144,11 @@
 
   test("RB-03", "Cheaper look-alike screw (same name/size, no compatibility data) is never auto-selected", () => {
     const cat = fixture((byId, rows) => {
-      rows.push(Object.assign({}, byId.P049, { product_nr: "P097", price_eur: 0.99, compatible_with: "" }));
+      rows.push(Object.assign({}, byId.P049, { product_nr: "P997", price_eur: 0.99, compatible_with: "" }));
     });
     const r = run(SHELF(), confirmed(SHELF_OK), cat);
     eq(item(r, "screw").product.product_nr, "P049");
-    const r2 = run(SHELF(), confirmed(SHELF_OK), cat, { overrides: { screw: "P097" } });
+    const r2 = run(SHELF(), confirmed(SHELF_OK), cat, { overrides: { screw: "P997" } });
     eq(item(r2, "screw").status, "incompatible", "look-alike flagged when chosen");
   });
 
@@ -244,6 +244,19 @@
       eq(li.getAttribute("data-aisle"), "none");
       assert(li.textContent.includes(window.BBI18n.t("not_available")), "not available text");
     });
+  });
+
+  test("NFR-09 / DR-01 v2", "German mode shows product_name_de from the catalogue; English mode the English name", () => {
+    const p = D.catalogue.get("P044");
+    assert(p.name_de, "P044 has a German name");
+    try {
+      window.BBI18n.setLang("de");
+      let box = renderResult(SHELF(), confirmed(SHELF_OK), null);
+      assert(box.querySelector('[data-product="P044"] .item-name').textContent.includes(p.name_de), "German name shown");
+      window.BBI18n.setLang("en");
+      box = renderResult(SHELF(), confirmed(SHELF_OK), null);
+      assert(box.querySelector('[data-product="P044"] .item-name').textContent.includes(p.name), "English name shown");
+    } finally { window.BBI18n.setLang("en"); }
   });
 
   // ---------------------------------------------------------------------

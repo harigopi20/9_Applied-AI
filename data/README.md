@@ -6,10 +6,11 @@
 
 | File | Content | Requirement |
 |---|---|---|
-| `product_catalogue.xlsx` | Master workbook for the team – 3 sheets: **Products**, **Store stock**, **Stores** | DR-01 |
-| `products.csv` | Export of sheet *Products*: 70 products, written once for all stores (size, load, wall types, compatibility, safety note, price) | DR-01 |
+| `product_catalogue.xlsx` | Master workbook for the team (v2, 27 Oct 2026) – sheets: **Read Me**, **Products**, **Store stock**, **Stores**, **Translations** | DR-01 |
+| `products.csv` | Export of sheet *Products*: 102 products (P001–P102), written once for all stores (name EN/DE, size, load, wall types, compatibility, safety note, price) | DR-01 |
 | `store_stock.csv` | Export of sheet *Store stock*: aisle, shelf and quantity per product for each store (`<store_id>_aisle_nr`, `_aisle_name`, `_shelf_nr`, `_qty`) | DR-01 |
 | `stores.csv` | Export of sheet *Stores*: 5 OBI stores with address, PLZ, opening hours, coordinates | DR-01, FR-29 |
+| `project_catalogue.xlsx` | Project catalogue (draft v1, 27 Oct 2026, team review pending) – 9 projects with questions, limits, items, stop rules, how-to links and sources | DR-04 |
 | `plz_coordinates.csv` | German PLZ → centre coordinates (8,298 PLZ), used for distance sorting | DR-08 |
 | `product_catalogue.csv`, `store_map.csv` | **Obsolete** – replaced by the files above; the app reads `product_catalogue.xlsx` since 25 Oct 2026 | – |
 
@@ -34,10 +35,20 @@
 
 ## Editing
 
-Edit `product_catalogue.xlsx`, then export each sheet to its CSV (same column names).
-The app reads the workbook directly. The *Products* sheet also has the rule-engine
-columns `variant_group`, `pack_qty`, `pack_unit`, `specs`, `data_note` – after adding
-products run `python3 tools/add_rule_columns.py` (fills them and re-exports `products.csv`). Store coordinates are the centre of the store's PLZ (approximate).
+Edit `product_catalogue.xlsx`, then run `python3 tools/add_rule_columns.py`. The
+script fills only **empty** rule-engine cells (`variant_group`, `pack_qty`,
+`pack_unit`, missing `specs` keys such as `volume_l` for paint) – values the team
+wrote are never overwritten – and exports *Products*, *Store stock* and *Stores* to
+`products.csv`, `store_stock.csv` and `stores.csv`. The app reads the workbook
+directly (columns by header name, so extra columns such as `product_name_de` are
+fine; the app shows `product_name_de` in German mode). Store coordinates are the
+centre of the store's PLZ (approximate).
+
+**Project catalogue:** `project_catalogue.xlsx` is the team's reviewed source for
+the projects. The app does not read it directly (its rules are written as text);
+each project is translated into a JSON template in `app/data/templates/`
+(`project_id` PRJ-01 … PRJ-09). When the catalogue changes, update the matching
+template and its tests.
 
 ## Source and licence – `plz_coordinates.csv`
 
