@@ -19,7 +19,8 @@ Summary (same as the pull request):
   exit code 1 on a failed test. New workflow `.github/workflows/tests.yml` runs it on
   every pull request into `main`, every push to `main` and on demand – result in the
   run summary, files as artifact `test-results` (90 days). `.gitignore` for
-  `tools/node_modules/`. README and test document §8 explain where results are stored.
+  `tools/node_modules/` and `tools/package-lock.json` (otherwise every CI run was
+  marked `-dirty`). README and test document §8 explain where results are stored.
   *Why:* results were only visible in the open browser tab and in hand-written logs.
   *Prompt:* "Where are test results stored? – Yes, implement the runner script and CI."
 

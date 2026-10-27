@@ -1,2 +1,3 @@
-# Test runner dependencies (npm install --prefix tools)
+# Test runner dependencies (npm install --prefix tools) – not part of the repository
 tools/node_modules/
+tools/package-lock.json
