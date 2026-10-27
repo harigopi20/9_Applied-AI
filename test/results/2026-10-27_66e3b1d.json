@@ -1,0 +1,598 @@
+{
+  "date": "2026-10-27T21:35:14.639Z",
+  "commit": "66e3b1d",
+  "branch": "claude/determined-knuth-icw6oa",
+  "uncommitted_changes": false,
+  "browser": "Chromium 153.0.8010.12 (headless, Playwright)",
+  "finished": true,
+  "summary": "ALL PASSED – 97 passed, 0 failed, 0 pending",
+  "passed": 97,
+  "failed": 0,
+  "pending": 0,
+  "total": 97,
+  "page_errors": [],
+  "tests": [
+    {
+      "id": "DR-01",
+      "name": "Single Excel file loads with ~100 products (v2), stores and stock",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "DR-04 / SR-10",
+      "name": "9 templates (PRJ-01 … PRJ-09) with rule IDs, quantity rules and review status/date fields",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "UC-1",
+      "name": "Hang a 20 kg shelf on concrete → validated list with materials, tools, safety gear",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-01",
+      "name": "Unknown wall type → stop, no wall plugs suggested (shelf and picture)",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-01 / SR-03",
+      "name": "Wall type not answered → no list, question asked first",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-03",
+      "name": "Customer picks the 4 × 40 screw (fits 6 mm plugs) for 8 mm plugs → detected as incompatible",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-03",
+      "name": "Cheaper look-alike screw (same name/size, no compatibility data) is never auto-selected",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-03",
+      "name": "Drill bit with wrong diameter is not accepted for the plug",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "G2 / R-16",
+      "name": "Unknown product number is rejected, never shown as a product",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-04",
+      "name": "Picture on brick: 5 kg → nail hooks; 10 kg → hooks invalid, drilled wall plugs",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-04 / SR-08",
+      "name": "Shelf: 10 kg → brackets P058; 18 kg → previous choice invalid, safety stop",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-04 / SR-08",
+      "name": "Product override kept across a load change is re-checked",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "SR-04",
+      "name": "4 plugs rated 15 kg each never carry 30 kg; every part must carry the whole load",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "R-08 / TC-R1-14",
+      "name": "40 kg on plasterboard → blocked with alternative",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "R-12",
+      "name": "Load over 50 kg → blocked, professional",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "R-13",
+      "name": "Products that require a professional are never selected",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-06",
+      "name": "NUE-REG does not carry P059 (empty aisle) → aisle, shelf and stock stay empty",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-06 (UI)",
+      "name": "Rendered list for NUE-REG shows 'not available' for the missing aisle, never a number",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "NFR-09 / DR-01 v2",
+      "name": "German mode shows product_name_de from the catalogue; English mode the English name",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-07",
+      "name": "Detector and wall notices (EN + DE) contain no clearance phrase and state the limits",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-07 / SR-05",
+      "name": "Every drilling or nailing list carries the detector notice",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-07",
+      "name": "Generated text claiming 'safe to drill' is discarded",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-08",
+      "name": "Hint 'goggles not necessary' is dropped; safety_note shown unchanged",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-08 (UI)",
+      "name": "Rendered list shows the safety_note text exactly as in the catalogue",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-09",
+      "name": "Injected instructions in product data change nothing and render as plain text",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-13",
+      "name": "Unclear pack size (empty, 0, 2.5, text) → no pack count, no total",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-13 (UI)",
+      "name": "Rendered list shows 'no total' text instead of an amount",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-15",
+      "name": "Stores have different data; each list shows only its own store's aisle and stock",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-17",
+      "name": "Without store: identical products, checks and total; aisle/shelf/stock 'not available'",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "SR-11 / RB-18",
+      "name": "Values with status 'observed' (from text/speech) are not used until confirmed by tap",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "SR-09",
+      "name": "Electrics, gas, load-bearing walls and hidden pipes are detected (EN + DE)",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "DR-07",
+      "name": "Every chosen product has an evidence entry with catalogue source and rule ID",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "NFR-02",
+      "name": "Catalogue lookup < 1 s and list generation < 5 s",
+      "status": "pass",
+      "details": "list in 0.2 ms"
+    },
+    {
+      "id": "FR-03 / DR-05",
+      "name": "Mock mode: valid answer → intent + values, all as guesses",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "DR-05",
+      "name": "Invalid answers are discarded: no JSON, extra field (product IDs), bad values, unknown intent",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "NFR-03",
+      "name": "Invalid AI answer → templates offered, typed text and recognised values kept (as guesses)",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "NFR-03",
+      "name": "AI network error / timeout / HTTP 500 in proxy mode → fallback, max. 2 attempts",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "NFR-04 / NFR-06",
+      "name": "Proxy request carries only redacted text and language – no PLZ, no catalogue",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "SR-09 / G0",
+      "name": "High-risk text is refused before and independent of the AI (even if the AI says 'shelf')",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "SR-01 / FR-04 / FR-05",
+      "name": "Recognised values are asked back pre-filled as guesses; max. 3 questions; list only after confirmation",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "NFR-07",
+      "name": "Instructions in user text are data: 'confirmed' claims do not confirm anything",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "FR-02",
+      "name": "Unsupported or unclear text → hint and the template buttons",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "NFR-09",
+      "name": "Numbers and units in German and English (words and digits)",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "FR-25 / NFR-04",
+      "name": "Microphone only after explicit consent; language de-DE / en-US; interim results on",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "FR-25 / NFR-02",
+      "name": "Live transcript appears in the editable field at once; nothing is processed before the tap",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-18 / SR-11",
+      "name": "Misheard load (60 kg instead of 20 kg) is shown as a guess and never used without confirmation",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-19",
+      "name": "Microphone denied → hint; typing and project buttons keep working",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-19",
+      "name": "Unsupported browser, missing microphone, network error and start failure all fall back to typing",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-20",
+      "name": "High-risk request by voice is refused exactly like typed input",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "NFR-07 (speech)",
+      "name": "Spoken 'commands' are only text: nothing is sent, confirmed or skipped",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "FR-25",
+      "name": "Leaving the screen or switching language ends the recording (abort)",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "NFR-09 (speech)",
+      "name": "Dictated numbers and units in German and English",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "NFR-04 (speech)",
+      "name": "speech.js never records, stores or sends audio itself",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "DR-08",
+      "name": "PLZ reference table loaded and store coordinates match their PLZ centre",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-16",
+      "name": "Invalid or unknown PLZ never selects a store; message and the full store list appear",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-16 / SR-06",
+      "name": "Valid PLZ with only one store in range still needs a tap; no store near you → message + full list",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "FR-29",
+      "name": "Stores are sorted by distance and limited by config; selection only by tap",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "NFR-02 (store)",
+      "name": "Store search under 1 second",
+      "status": "pass",
+      "details": "store search 0.01 ms"
+    },
+    {
+      "id": "NFR-04 / NFR-07",
+      "name": "The PLZ is never sent to the AI and never written to the evidence log",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "FR-30 / RB-17 (UI)",
+      "name": "From the list: 'Add postcode' → choose store → same list with that store's aisles",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "NFR-03 (store)",
+      "name": "Missing PLZ table or store sheets → app continues without a store",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "TC-34 / FR-31",
+      "name": "P044 out of stock in Erlangen-Ost → stays on the list, referral to Erlangen West",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "TC-35 / RB-21",
+      "name": "Product not carried in any store → 'please ask staff', no substitute",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "TC-36 / FR-31",
+      "name": "Nürnberg-Leyh has everything → aisles of that store, no referral text",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "TC-37 / FR-31",
+      "name": "Referral names the nearest store with qty > 0; a store with qty 0 is never suggested",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-21",
+      "name": "An unavailable part is never removed or replaced: same items, products and total in every store",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-15 (FR-31 exception)",
+      "name": "A referral shows only the other store's name and distance – never its aisle, shelf or stock",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "TC-38 / RB-16",
+      "name": "Valid PLZ 91056: stores sorted by distance, Erlangen West first – but NOT preselected (team decision)",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "NFR-05",
+      "name": "List labels estimates, sample data, rule IDs and states that rules – not AI – made it (EN + DE)",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "NFR-09",
+      "name": "Every UI text exists in English and German",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "DR-04 (catalogue)",
+      "name": "Stop rules use the catalogue IDs ST-01…ST-14; how-to links only for PRJ-05…09, https and allow-listed",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "PRJ-02",
+      "name": "Wall cabinet on concrete: 30 kg → 1 rail + 4 heavy-duty plugs; 45 kg and 110 cm → 2 rails + 8 anchor bolts, no extra screws",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "PRJ-02 / ST-03",
+      "name": "Plasterboard cabinet limit from the table: 70 × 35 cm → 16.5 kg (next smaller width, next larger depth)",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "PRJ-02 / ST-02 / ST-04",
+      "name": "Cabinet: aerated concrete, width > 120, depth > 60, height < 30 or > 100 → stop with catalogue text",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "PRJ-04",
+      "name": "Anti-tip: 1 kit up to 90 cm, 2 above; plasterboard only with cavity anchors (P046)",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "PRJ-05",
+      "name": "Paint 14 m × 2.5 m: 35 m² × 2 coats ÷ 7 m²/l = 10 l → 1 × 10 l; colour paint 2.5 l → 4 buckets; no wall or load questions",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "PRJ-05 / ST-07 / ST-08 / ST-09",
+      "name": "Paint: small mould → remover, anti-mould paint and gloves; large mould, allergy or old coating → professional",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "PRJ-09",
+      "name": "Wallpaper: 14 m × 2.5 m → 27 strips, 3 per roll → 9 rolls, 2 packs of paste; pattern repeat lengthens the strips",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "PRJ-09 / ST-10",
+      "name": "Wallpaper: damp wall stops, old wallpaper only warns",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "PRJ-06",
+      "name": "Glass door: hinge set rated ≥ 1.25 × door weight from the catalogue; own ESG door is not counted; ST-11 stops",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "PRJ-07",
+      "name": "Lock: type and size must match (PZ 55/72 → P093 + cylinder, WC 55/78 → P092); other sizes and outer doors stop",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "PRJ-08",
+      "name": "Sliding door on concrete: leaf ≥ opening, rail ≥ 2 × leaf; plug count 'per rail instructions' → no total; ST-13, R-12",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "C-8 / SR-15",
+      "name": "Owned parts: tools and brackets can be ticked off, plugs and screws never; defect → part stays on the list (ST-06)",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "SR-06 (fail safe)",
+      "name": "A stop rule that cannot be evaluated stops; an unknown condition in a stop rule stops",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "RB-01 (new walls)",
+      "name": "Shelf: solid brick uses brick plugs; brick of unknown type max. 25 kg; aerated concrete → ST-02",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "FR-02 / FR-03 (catalogue)",
+      "name": "Keywords find the new projects and wall types (EN + DE); 'solid brick' wins over 'brick'",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "R-07 (size)",
+      "name": "Board missing in the requested size (catalogue copy without P104): stop names the size, not the load (EN + DE)",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "PRJ-01 / P103 / P104",
+      "name": "Shelf 100 cm, 10 kg → 120 cm board (P103 25 cm deep, P104 20 cm deep) with 3 brackets; 80 cm keeps P064 / P063",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "PRJ-08 (dimensions)",
+      "name": "Sliding door: leaf ≥ opening + 3 cm overlap per side and at the top; leaf ≤ free wall; 90 or 100 cm leaf",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "PRJ-08 (UI)",
+      "name": "Size stop in cm: needed vs. available (EN + DE number format), one hand-off to store staff",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "SR-14 / RB-23",
+      "name": "Load 'I don't know' → stop (fact unknown) in every project with a load question; no plugs, no list",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "SR-16 / SR-09",
+      "name": "Basic projects get the high-risk filter too: 'paint the wall and move the socket' → professional stop",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "C-7 (UI)",
+      "name": "Checklist question: nothing ticked → error; 'none' → [] confirmed; a defect is stored as ticked",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "C-8 (UI)",
+      "name": "'I already have this' takes a tool off the total; no button for plugs and screws; 'need it' brings it back",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "ST rules (UI)",
+      "name": "Stop screen shows the catalogue text and hand-off (EN + DE), never a list",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "NFR-07 (how-to links)",
+      "name": "How-to links: https + allow-listed host only, open in a new tab without referrer; German content labelled in EN",
+      "status": "pass",
+      "details": ""
+    },
+    {
+      "id": "DR-04 (UI)",
+      "name": "Project buttons: 9 projects in 3 groups with icon and safety level",
+      "status": "pass",
+      "details": ""
+    }
+  ]
+}
