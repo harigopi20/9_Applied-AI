@@ -1087,7 +1087,7 @@
   const WP_OK = { wall_width_m: 14, room_height_m: 2.5, pattern_repeat_cm: 0, mould: "none", health: "no", wall_state: [] };
   const GLASS_OK = { frame: "yes", leaf_size: "standard", din_side: "left", glass: "new" };
   const LOCK_OK = { door_type: "interior", lock_type: "PZ", din_side: "left", backset_mm: 55, distance_mm: 72 };
-  const SLIDE_OK = { wall_type: "concrete", opening_width_cm: 80, opening_height_cm: 200, load_kg: 25, condition: [] };
+  const SLIDE_OK = { wall_type: "concrete", opening_width_cm: 80, opening_height_cm: 200, free_wall_cm: 120, load_kg: 25, condition: [] };
   const units = (r, role) => item(r, role).quantity.units;
   const stopOf = (r) => r.blocked && r.blocked.rule_id;
 
@@ -1228,7 +1228,7 @@
     ["brick", "plasterboard"].forEach((w) => eq(stopOf(run(SLIDE(), confirmed(Object.assign({}, SLIDE_OK, { wall_type: w })))), "ST-13", w));
     eq(stopOf(run(SLIDE(), confirmed(Object.assign({}, SLIDE_OK, { wall_type: "aerated_concrete" })))), "ST-02");
     eq(run(SLIDE(), confirmed(Object.assign({}, SLIDE_OK, { load_kg: 70 }))).blocked.reason, "load_over_limit");
-    eq(run(SLIDE(), confirmed(Object.assign({}, SLIDE_OK, { opening_width_cm: 95 }))).blocked.reason, "no_suitable_system", "leaf 900 mm too narrow");
+    eq(run(SLIDE(), confirmed(Object.assign({}, SLIDE_OK, { opening_width_cm: 95 }))).blocked.reason, "no_suitable_system", "95 cm + 6 cm overlap is wider than both leaves");
   });
 
   test("C-8 / SR-15", "Owned parts: tools and brackets can be ticked off, plugs and screws never; defect → part stays on the list (ST-06)", () => {
@@ -1288,7 +1288,7 @@
         window.BBI18n.setLang(lang);
         const box = renderResult(SHELF(), F, null, cat);
         const txt = box.querySelector(".stop-main").textContent;
-        assert(txt.includes("800 x 200") && !txt.includes(window.BBI18n.t("stop_no_suitable_system")), lang + ": " + txt);
+        assert(txt.includes("80 × 20 cm") && txt.includes("100 cm") && !txt.includes(window.BBI18n.t("stop_no_suitable_system")), lang + ": " + txt);
       });
     } finally { window.BBI18n.setLang("en"); }
     const heavy = run(SHELF(), confirmed(Object.assign({}, SHELF_OK, { load_kg: 30 })));
@@ -1303,6 +1303,37 @@
     const r20 = run(SHELF(), confirmed({ wall_type: "concrete", load_kg: 10, shelf_length_cm: 100, shelf_depth_cm: 20 }));
     eq([r20.state, item(r20, "board").product.product_nr, units(r20, "bracket")], ["validated", "P104", 3]);
     eq(item(run(SHELF(), confirmed(Object.assign({}, SHELF_OK, { shelf_depth_cm: 20, load_kg: 10 }))), "board").product.product_nr, "P063", "80 cm still P063");
+  });
+
+  test("PRJ-08 (dimensions)", "Sliding door: leaf ≥ opening + 3 cm overlap per side and at the top; leaf ≤ free wall; 90 or 100 cm leaf", () => {
+    const sl = (x) => run(SLIDE(), confirmed(Object.assign({}, SLIDE_OK, x)));
+    eq(item(sl({}), "leaf").product.product_nr, "P097", "80 × 200 → 90 × 203.5");
+    eq(item(sl({ opening_width_cm: 84 }), "leaf").product.product_nr, "P097", "84 + 6 = 90 still fits");
+    eq(item(sl({ opening_width_cm: 85, load_kg: 30 }), "leaf").product.product_nr, "P105", "85 + 6 = 91 → 100 cm leaf");
+    eq(item(sl({ opening_height_cm: 201, load_kg: 30 }), "leaf").product.product_nr, "P105", "201 + 3 = 204 > 203.5 → taller leaf");
+    let r = sl({ opening_width_cm: 91, free_wall_cm: 90 });
+    eq([stopOf(r), r.blocked.limit_kg, r.blocked.hand_off], ["ST-04", 97, "staff"], "not enough wall to slide open");
+    r = sl({ opening_width_cm: 95, opening_height_cm: 212, load_kg: 30 });
+    eq([r.blocked.reason, r.blocked.cause.kind, r.blocked.hand_off], ["no_suitable_system", "size", "staff"]);
+    const need = r.blocked.cause.need;
+    eq(need.dims.map((d) => [d.min, d.max]), [[101, 120], [215, null]]);
+    eq(need.available, [[90, 203.5], [100, 213.5]]);
+  });
+
+  test("PRJ-08 (UI)", "Size stop in cm: needed vs. available (EN + DE number format), one hand-off to store staff", () => {
+    const F = confirmed(Object.assign({}, SLIDE_OK, { opening_width_cm: 91, opening_height_cm: 212, load_kg: 30 }));
+    try {
+      window.BBI18n.setLang("en");
+      let box = renderResult(SLIDE(), F, null);
+      let txt = box.querySelector(".stop-main").textContent;
+      eq(txt, "For your measurements you need a sliding door leaf with width at least 97 cm, width at most 120 cm, height at least 215 cm. Our catalogue has: 90 × 203.5 cm · 100 × 213.5 cm.");
+      eq(box.querySelector("[data-handoff]").getAttribute("data-handoff"), "staff");
+      assert(!txt.includes("mm"), "no mm in the customer text (the evidence log keeps the technical spec names)");
+      window.BBI18n.setLang("de");
+      box = renderResult(SLIDE(), F, null);
+      txt = box.querySelector(".stop-main").textContent;
+      assert(txt.includes("Höhe mind. 215 cm") && txt.includes("90 × 203,5 cm"), txt);
+    } finally { window.BBI18n.setLang("en"); }
   });
 
   // ---------------- UI

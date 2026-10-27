@@ -160,6 +160,14 @@
             "load_rated": true,
             "prefer": ["max_load_kg", "price_eur"]
           },
+          "size_check": {
+            "unit": "cm",
+            "factor": 0.1,
+            "dims": [
+              { "spec": "length_mm", "label": { "en": "length", "de": "Länge" } },
+              { "spec": "depth_mm", "label": { "en": "depth", "de": "Tiefe" } }
+            ]
+          },
           "on_none": "stop",
           "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
         },
