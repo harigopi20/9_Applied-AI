@@ -20,6 +20,25 @@ when they are released to `main`.
   *Why:* the team delivered updated catalogues that belong in git (DR-01, DR-04).
   *Prompt:* "I have an updated project and product catalogue – push them and update the app."
 
+- **2026-10-27 – App updated to the project catalogue: 9 projects (PRJ-01…PRJ-09).**
+  New templates in `app/data/templates/`: wall cabinet (incl. the plasterboard limit
+  table), anti-tip kit, paint a wall (litres from coverage, mould checks), glass door
+  (hinge rating from the door weight), interior door lock (type and size must match),
+  sliding door (rail ≥ 2 × leaf, moving load only on concrete/solid brick) and nonwoven
+  wallpaper (roll calculation). Shelf and picture aligned: wall types *solid brick*,
+  *brick (type unknown)* (max. 25 kg for shelves) and *aerated concrete* (stop ST-02),
+  shelf length > 120 cm stops (ST-04), used-item defect checklist. Rule engine: stop
+  rules and warnings from the templates (fail safe if a value is missing), conditions,
+  new quantity expressions (add/sub/div/floor/ceil/min/table/"unclear"), projects
+  without load or wall questions, "I already have this" for allowed parts (C-8, never
+  plugs/screws, refused for defective load-bearing parts – ST-06, SR-15). UI: grouped
+  project buttons with icons and safety level, checklist questions, catalogue stop
+  texts with hand-off, OBI how-to links (https + allow-listed hosts only, English
+  subtitles requested in EN mode). Keyword lexicon, AI schema and proxy prompt know the
+  new projects and wall types. 91 tests passing (21 new).
+  *Why:* the team's project catalogue defines the 9 Release-1 projects (DR-04).
+  *Prompt:* "push them and update the app."
+
 ## Milestone: Design update 2 and store availability (FR-31) – 2026-10-25
 Summary (same as the pull request):
 - Layout and fonts reworked after screenshots of a DIY-store app: orange header band with diagonal edge, condensed headlines, black pill buttons, outlined tiles, flat product rows, black price box, bottom tab bar

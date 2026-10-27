@@ -1,6 +1,6 @@
 {
   "comment": "Word lists for the AI adapter's 'template' mode (keyword matching without AI) - data, not code (NFR-10). Matching is case-insensitive. Results are only GUESSES (status 'observed') and must be confirmed by the customer (SR-01, SR-11).",
-  "version": "1.0.0",
+  "version": "1.1.0",
 
   "intents": {
     "hang_shelf": {
@@ -10,6 +10,34 @@
     "hang_picture": {
       "en": ["picture", "pictures", "painting", "frame", "photo", "poster", "artwork", "canvas"],
       "de": ["bild", "bilder", "gemälde", "bilderrahmen", "rahmen", "foto", "poster", "leinwand", "kunstdruck"]
+    },
+    "hang_wall_cabinet": {
+      "en": ["wall cabinet", "cabinet", "cupboard", "kitchen cabinet", "wall unit"],
+      "de": ["hängeschrank", "oberschrank", "wandschrank", "küchenschrank", "hängeschränke"]
+    },
+    "anchor_shelf_anti_tip": {
+      "en": ["anti tip", "tip over", "tipping over", "anti tipping", "secure furniture", "anchor furniture"],
+      "de": ["kippsicherung", "kippsicher", "umkippen", "kippschutz", "kippen"]
+    },
+    "paint_wall": {
+      "en": ["paint", "repaint", "wall paint", "paint the wall", "paint walls"],
+      "de": ["streichen", "anstreichen", "wandfarbe", "wand streichen", "wände streichen", "malern"]
+    },
+    "install_glass_door": {
+      "en": ["glass door"],
+      "de": ["glastür", "ganzglastür", "glastüre"]
+    },
+    "change_interior_door_lock": {
+      "en": ["lock", "door lock", "mortise lock"],
+      "de": ["schloss", "türschloss", "einsteckschloss", "zimmertürschloss"]
+    },
+    "install_sliding_door": {
+      "en": ["sliding door", "barn door"],
+      "de": ["schiebetür", "schiebetüre", "schiebetüren"]
+    },
+    "hang_nonwoven_wallpaper": {
+      "en": ["wallpaper", "wallpapering", "nonwoven wallpaper"],
+      "de": ["tapete", "tapeten", "tapezieren", "vliestapete", "neu tapezieren"]
     }
   },
 
@@ -22,7 +50,15 @@
   "wall_types": {
     "concrete": { "en": ["concrete"], "de": ["beton", "betonwand", "stahlbeton"] },
     "brick": { "en": ["brick", "masonry", "brickwork"], "de": ["ziegel", "ziegelwand", "backstein", "mauerwerk", "ziegelmauer", "klinker"] },
-    "plasterboard": { "en": ["plasterboard", "drywall", "gypsum board", "stud wall", "sheetrock"], "de": ["gipskarton", "rigips", "trockenbau", "trockenbauwand", "gipswand", "leichtbauwand", "ständerwand"] }
+    "plasterboard": { "en": ["plasterboard", "drywall", "gypsum board", "stud wall", "sheetrock"], "de": ["gipskarton", "rigips", "trockenbau", "trockenbauwand", "gipswand", "leichtbauwand", "ständerwand"] },
+    "solid_brick": { "en": ["solid brick"], "de": ["vollziegel", "vollstein", "vollziegelwand"] },
+    "aerated_concrete": { "en": ["aerated concrete", "aircrete", "ytong"], "de": ["porenbeton", "gasbeton", "ytong"] }
+  },
+
+  "wall_type_overrides": {
+    "comment": "A more specific wall word wins over the general one it contains (\"solid brick\" also contains \"brick\").",
+    "solid_brick": ["brick"],
+    "aerated_concrete": ["concrete"]
   },
 
   "units": {

@@ -1,0 +1,480 @@
+{
+  "template_id": "change_interior_door_lock",
+  "project_id": "PRJ-07",
+  "version": "1.0.0",
+  "comment": "DR-04 template from the project catalogue PRJ-07 (draft). Replace the mortise lock of an interior door; interior doors only (ST-12). Lock sizes 55/72 (BB, PZ) and 55/78 (WC) from S-04. Team review pending (SR-10).",
+  "review": {
+    "status": "pending_team_review",
+    "reviewed_by": null,
+    "review_date": null,
+    "created": "2026-10-27",
+    "source": "data/project_catalogue.xlsx (draft v1, 27 Oct 2026)"
+  },
+  "title": {
+    "en": "Change the lock of an interior door",
+    "de": "Zimmertürschloss wechseln"
+  },
+  "icon": "lock",
+  "group": {
+    "en": "Doors & locks",
+    "de": "Türen & Schlösser"
+  },
+  "safety_level": "basic",
+  "safety_factor": 1.25,
+  "wall_limits": {},
+  "required_facts": [
+    "door_type",
+    "lock_type",
+    "din_side",
+    "backset_mm",
+    "distance_mm"
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "type": "group",
+      "text": {
+        "en": "Your door",
+        "de": "Ihre Tür"
+      },
+      "fields": [
+        {
+          "fact": "door_type",
+          "type": "choice",
+          "options": [
+            "interior",
+            "apartment_entrance",
+            "front_door",
+            "fire_door"
+          ],
+          "option_labels": {
+            "interior": {
+              "en": "Interior door",
+              "de": "Zimmertür"
+            },
+            "apartment_entrance": {
+              "en": "Apartment entrance door",
+              "de": "Wohnungseingangstür"
+            },
+            "front_door": {
+              "en": "Front door",
+              "de": "Haustür"
+            },
+            "fire_door": {
+              "en": "Fire door",
+              "de": "Brandschutztür"
+            }
+          },
+          "label": {
+            "en": "Door type",
+            "de": "Türart"
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q2",
+      "type": "group",
+      "text": {
+        "en": "Your lock",
+        "de": "Ihr Schloss"
+      },
+      "help": {
+        "en": "Backset = from the faceplate to the centre of the handle. Distance = from the centre of the handle to the centre of the keyhole.",
+        "de": "Dornmaß = vom Stulp bis Mitte Drücker. Entfernung = von Mitte Drücker bis Mitte Schlüsselloch."
+      },
+      "fields": [
+        {
+          "fact": "lock_type",
+          "type": "choice",
+          "options": [
+            "BB",
+            "WC",
+            "PZ"
+          ],
+          "option_labels": {
+            "BB": {
+              "en": "Bit key (BB)",
+              "de": "Buntbart (BB)"
+            },
+            "WC": {
+              "en": "Bathroom (WC)",
+              "de": "Bad (WC)"
+            },
+            "PZ": {
+              "en": "Profile cylinder (PZ)",
+              "de": "Profilzylinder (PZ)"
+            }
+          },
+          "label": {
+            "en": "Lock type",
+            "de": "Schlossart"
+          }
+        },
+        {
+          "fact": "din_side",
+          "type": "choice",
+          "options": [
+            "left",
+            "right"
+          ],
+          "option_labels": {
+            "left": {
+              "en": "DIN left",
+              "de": "DIN links"
+            },
+            "right": {
+              "en": "DIN right",
+              "de": "DIN rechts"
+            }
+          },
+          "label": {
+            "en": "Opening side",
+            "de": "Öffnungsrichtung"
+          }
+        },
+        {
+          "fact": "backset_mm",
+          "type": "number",
+          "unit": "mm",
+          "min": 20,
+          "max": 120,
+          "label": {
+            "en": "Backset",
+            "de": "Dornmaß"
+          }
+        },
+        {
+          "fact": "distance_mm",
+          "type": "number",
+          "unit": "mm",
+          "min": 20,
+          "max": 150,
+          "label": {
+            "en": "Distance",
+            "de": "Entfernung"
+          }
+        }
+      ]
+    }
+  ],
+  "stops": [
+    {
+      "id": "door_type",
+      "rule_id": "ST-12",
+      "hand_off": "staff_or_professional",
+      "when": {
+        "fact_in": {
+          "fact": "door_type",
+          "values": [
+            "apartment_entrance",
+            "front_door",
+            "fire_door"
+          ]
+        }
+      },
+      "message": {
+        "en": "Locks for these doors have special safety requirements. Please ask OBI staff or a locksmith.",
+        "de": "Schlösser für diese Türen haben besondere Sicherheitsanforderungen. Bitte OBI-Personal oder Schlüsseldienst fragen."
+      }
+    },
+    {
+      "id": "lock_size",
+      "rule_id": "ST-04",
+      "hand_off": "staff",
+      "when": {
+        "any": [
+          {
+            "lt": [
+              {
+                "fact": "backset_mm"
+              },
+              55
+            ]
+          },
+          {
+            "gt": [
+              {
+                "fact": "backset_mm"
+              },
+              55
+            ]
+          },
+          {
+            "all": [
+              {
+                "fact_in": {
+                  "fact": "lock_type",
+                  "values": [
+                    "BB",
+                    "PZ"
+                  ]
+                }
+              },
+              {
+                "any": [
+                  {
+                    "lt": [
+                      {
+                        "fact": "distance_mm"
+                      },
+                      72
+                    ]
+                  },
+                  {
+                    "gt": [
+                      {
+                        "fact": "distance_mm"
+                      },
+                      72
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "all": [
+              {
+                "fact_in": {
+                  "fact": "lock_type",
+                  "values": [
+                    "WC"
+                  ]
+                }
+              },
+              {
+                "any": [
+                  {
+                    "lt": [
+                      {
+                        "fact": "distance_mm"
+                      },
+                      78
+                    ]
+                  },
+                  {
+                    "gt": [
+                      {
+                        "fact": "distance_mm"
+                      },
+                      78
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "message": {
+        "en": "This lock size is outside this guide. Please take the old lock to OBI staff.",
+        "de": "Diese Schlossgröße liegt außerhalb dieser Anleitung. Bitte das alte Schloss zum OBI-Personal mitnehmen."
+      },
+      "help": {
+        "en": "Usual interior door locks: backset 55 mm, distance 72 mm (bathroom: 78 mm).",
+        "de": "Übliche Zimmertürschlösser: Dornmaß 55 mm, Entfernung 72 mm (Bad: 78 mm)."
+      }
+    }
+  ],
+  "no_system_message": {
+    "en": "Our catalogue has no lock of this type and size.",
+    "de": "Unser Katalog hat kein Schloss dieser Art und Größe."
+  },
+  "methods": [
+    {
+      "method_id": "replace_lock",
+      "rule_id": "LOCK-M1",
+      "penetrates_wall": false,
+      "drilling": false,
+      "label": {
+        "en": "Replace the mortise lock",
+        "de": "Einsteckschloss tauschen"
+      },
+      "roles": [
+        {
+          "role": "lock",
+          "section": "materials",
+          "rule_ids": [
+            "S-04",
+            "FR-08"
+          ],
+          "label": {
+            "en": "Mortise lock",
+            "de": "Einsteckschloss"
+          },
+          "select": {
+            "variant_groups": [
+              "interior-door-lock-bit-key-bb",
+              "bathroom-door-lock-wc",
+              "interior-door-lock-for-profile-cylinder-pz"
+            ],
+            "spec_eq_fact": {
+              "type": "lock_type"
+            },
+            "spec_eq": {
+              "backset_mm": {
+                "fact": "backset_mm"
+              },
+              "distance_mm": {
+                "fact": "distance_mm"
+              }
+            },
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "stop",
+          "quantity": {
+            "rule_id": "LOCK-Q0",
+            "units": 1
+          }
+        },
+        {
+          "role": "cylinder",
+          "section": "materials",
+          "rule_ids": [
+            "LOCK-C1"
+          ],
+          "label": {
+            "en": "Profile cylinder",
+            "de": "Profilzylinder"
+          },
+          "select": {
+            "product_nrs": [
+              "P094"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "LOCK-Q0",
+            "units": 1
+          },
+          "ownable": true,
+          "when": {
+            "fact_in": {
+              "fact": "lock_type",
+              "values": [
+                "PZ"
+              ]
+            }
+          }
+        },
+        {
+          "role": "handle",
+          "section": "materials",
+          "rule_ids": [
+            "LOCK-C2"
+          ],
+          "label": {
+            "en": "Door handle set",
+            "de": "Drückergarnitur"
+          },
+          "select": {
+            "variant_groups": [
+              "door-handle-set"
+            ],
+            "compatible_with_roles": [
+              "lock"
+            ],
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "LOCK-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "screwdriver",
+          "section": "tools",
+          "rule_ids": [
+            "LOCK-Q0"
+          ],
+          "label": {
+            "en": "Screwdriver set",
+            "de": "Schraubendreher-Set"
+          },
+          "select": {
+            "product_nrs": [
+              "P031"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "LOCK-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "folding_rule",
+          "section": "tools",
+          "rule_ids": [
+            "LOCK-Q0"
+          ],
+          "label": {
+            "en": "Folding rule",
+            "de": "Zollstock"
+          },
+          "select": {
+            "product_nrs": [
+              "P101"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "LOCK-Q0",
+            "units": 1
+          },
+          "ownable": true
+        }
+      ]
+    }
+  ],
+  "common_roles": [],
+  "howto": [
+    {
+      "type": "video",
+      "title": {
+        "en": "Changing the lock of an interior door",
+        "de": "Türschloss wechseln an der Innentür"
+      },
+      "url": "https://www.youtube.com/watch?v=W1FQbSbzknc",
+      "publisher": "OBI HowTo",
+      "lang": "de",
+      "note": "channel to verify (Q-2)"
+    },
+    {
+      "type": "article",
+      "title": {
+        "en": "Installing interior doors – step 8 lock",
+        "de": "Innentüren einbauen – Schritt 8 Türschloss"
+      },
+      "url": "https://www.obi.ch/magazin/bauen/fenster-tueren/innentueren-einbauen",
+      "publisher": "OBI Magazin",
+      "lang": "de"
+    }
+  ],
+  "rule_texts": {
+    "LOCK-M1": {
+      "en": "The new lock must match type, backset and distance of the old one.",
+      "de": "Das neue Schloss muss Art, Dornmaß und Entfernung des alten haben."
+    },
+    "LOCK-Q0": {
+      "en": "1 per door",
+      "de": "1 pro Tür"
+    },
+    "LOCK-C1": {
+      "en": "only for profile cylinder locks (PZ)",
+      "de": "nur für Profilzylinderschlösser (PZ)"
+    },
+    "LOCK-C2": {
+      "en": "if the old handles are worn – otherwise tick \"I have this\"",
+      "de": "wenn die alten Drücker abgenutzt sind – sonst „Habe ich schon“ wählen"
+    }
+  }
+}

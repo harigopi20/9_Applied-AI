@@ -29,10 +29,20 @@ window.BB_CONFIG = Object.freeze({
     lexicon: "data/understanding-lexicon.json",
     mockResponses: "data/ai-mock-responses.json",
     plzTable: "../data/plz_coordinates.csv", // DR-08: PLZ → centre (WZB plz_geocoord, Apache-2.0)
+    // DR-04: one template per project of data/project_catalogue.xlsx (PRJ-01 … PRJ-09), in catalogue order.
     templates: [
       "data/templates/hang-shelf.json",
-      "data/templates/hang-picture.json"
-    ]
+      "data/templates/hang-wall-cabinet.json",
+      "data/templates/hang-picture.json",
+      "data/templates/anchor-shelf-anti-tip.json",
+      "data/templates/paint-wall.json",
+      "data/templates/install-glass-door.json",
+      "data/templates/change-interior-door-lock.json",
+      "data/templates/install-sliding-door.json",
+      "data/templates/hang-nonwoven-wallpaper.json"
+    ],
+    // How-to links (project catalogue sheet "How-to links") may only point to these hosts (NFR-07).
+    howtoHosts: ["www.youtube.com", "www.obi.de", "www.obi.ch"]
   },
 
   // FR-29 – confirmed by the team 2026-10-25 (design DD-6).

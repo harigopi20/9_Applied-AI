@@ -25,7 +25,7 @@
   // Output schema (DR-05) – the only shape any mode may return
   // -------------------------------------------------------------------
   const FACT_RULES = Object.freeze({
-    wall_type: { type: "enum", values: ["concrete", "brick", "plasterboard"] },
+    wall_type: { type: "enum", values: ["concrete", "solid_brick", "brick", "plasterboard", "aerated_concrete"] },
     load_kg: { type: "number", min: 0.01, max: 1000 },
     shelf_length_cm: { type: "number", min: 1, max: 1000 },
     shelf_depth_cm: { type: "number", min: 1, max: 200 },
@@ -154,7 +154,9 @@
     if (hits.length === 0 && hasAny(raw, langLists(lex.diy_words))) intent = "unsupported";
 
     // Wall type (only if exactly one is mentioned)
-    const walls = Object.keys(lex.wall_types).filter((w) => hasAny(raw, langLists(lex.wall_types[w])));
+    let walls = Object.keys(lex.wall_types).filter((w) => hasAny(raw, langLists(lex.wall_types[w])));
+    const over = lex.wall_type_overrides || {};
+    walls = walls.filter((w) => !walls.some((o) => Array.isArray(over[o]) && over[o].includes(w)));
     if (walls.length === 1) facts.wall_type = walls[0];
 
     const dimWord = (tok) => {

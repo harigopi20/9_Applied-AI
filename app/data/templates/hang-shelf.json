@@ -1,31 +1,77 @@
 {
   "template_id": "hang_shelf",
-  "version": "1.0.0",
+  "project_id": "PRJ-01",
+  "version": "1.1.0",
   "comment": "DR-04 project template. All limits and factors are MOCK values (design DD-3) and must be checked by the team before the demo (SR-10). The rule engine (rules.js) interprets this file; no product decision is made by the AI.",
   "review": {
     "status": "pending_team_review",
     "reviewed_by": null,
     "review_date": null,
-    "created": "2026-10-25"
+    "created": "2026-10-25",
+    "updated": "2026-10-27",
+    "source": "data/project_catalogue.xlsx (draft v1, 27 Oct 2026)"
   },
   "title": { "en": "Hang a shelf", "de": "Regal aufhängen" },
-  "icon": "▤",
+  "icon": "shelf",
+  "group": { "en": "Wall mounting", "de": "Wandmontage" },
+  "safety_level": "mounting_full",
   "safety_factor": 1.25,
   "max_load_kg": 50,
   "wall_limits": {
-    "plasterboard": { "max_load_kg": 25, "rule_id": "R-08" }
+    "plasterboard": { "max_load_kg": 25, "rule_id": "R-08" },
+    "brick": { "max_load_kg": 25, "rule_id": "ST-03" }
   },
+  "wall_matches": {
+    "concrete": ["concrete"],
+    "solid_brick": ["solid brick", "brick"],
+    "brick": ["brick"],
+    "plasterboard": ["plasterboard"]
+  },
+  "defect_fact": "condition",
+  "stops": [
+    {
+      "id": "aerated_concrete",
+      "rule_id": "ST-02",
+      "when": { "wall_in": ["aerated_concrete"] },
+      "hand_off": "staff",
+      "message": {
+        "en": "Aerated concrete needs special plugs that are not in our catalogue. Please ask OBI staff.",
+        "de": "Porenbeton braucht Spezialdübel, die nicht in unserem Katalog sind. Bitte OBI-Personal fragen."
+      }
+    },
+    {
+      "id": "size",
+      "rule_id": "ST-04",
+      "when": { "gt": [{ "fact": "shelf_length_cm" }, 120] },
+      "hand_off": "staff",
+      "message": {
+        "en": "This size is outside this guide. Please ask OBI staff.",
+        "de": "Diese Größe liegt außerhalb dieser Anleitung. Bitte OBI-Personal fragen."
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "id": "used_item_defect",
+      "rule_id": "ST-06",
+      "when": { "fact_in": { "fact": "condition", "values": ["cracks", "swollen_chipboard", "bent_metal", "missing_parts"] } },
+      "text": {
+        "en": "You reported a defect on a used part. Please replace this part – a damaged part must not carry a load.",
+        "de": "Sie haben einen Mangel an einem gebrauchten Teil angegeben. Bitte dieses Teil ersetzen – ein beschädigtes Teil darf keine Last tragen."
+      }
+    }
+  ],
   "required_facts": ["wall_type", "load_kg", "shelf_length_cm", "shelf_depth_cm"],
   "questions": [
     {
       "id": "Q1",
       "fact": "wall_type",
       "type": "choice",
-      "options": ["concrete", "brick", "plasterboard", "unknown"],
+      "options": ["concrete", "solid_brick", "brick", "plasterboard", "aerated_concrete", "unknown"],
       "text": { "en": "What is the wall made of?", "de": "Woraus besteht die Wand?" },
       "help": {
-        "en": "If you are not sure, choose \"I don't know\". We will not guess.",
-        "de": "Wenn Sie unsicher sind, wählen Sie „Weiß ich nicht“. Wir raten nicht."
+        "en": "If you are not sure, choose \"I don't know\". We will not guess. Aerated concrete is often called Ytong.",
+        "de": "Wenn Sie unsicher sind, wählen Sie „Weiß ich nicht“. Wir raten nicht. Porenbeton heißt oft Ytong."
       }
     },
     {
@@ -64,6 +110,20 @@
           "options": [20, 25, "unknown"],
           "unit": "cm",
           "label": { "en": "Depth", "de": "Tiefe" }
+        },
+        {
+          "fact": "condition",
+          "type": "multi",
+          "optional": true,
+          "options": ["cracks", "swollen_chipboard", "bent_metal", "missing_parts"],
+          "option_labels": {
+            "cracks": { "en": "Cracks", "de": "Risse" },
+            "swollen_chipboard": { "en": "Swollen chipboard", "de": "Aufgequollene Spanplatte" },
+            "bent_metal": { "en": "Bent metal", "de": "Verbogenes Metall" },
+            "missing_parts": { "en": "Missing parts", "de": "Fehlende Teile" }
+          },
+          "none_label": { "en": "None of these / new parts", "de": "Nichts davon / neue Teile" },
+          "label": { "en": "Using an old board or brackets? Tick any defect", "de": "Altes Brett oder alte Träger? Mängel ankreuzen" }
         }
       ]
     }
@@ -89,7 +149,7 @@
       "label": { "en": "Drill and fix with wall plugs", "de": "Bohren und mit Dübeln befestigen" },
       "roles": [
         {
-          "role": "board",
+          "role": "board", "ownable": true, "load_bearing": true,
           "section": "materials",
           "rule_ids": ["R-03"],
           "label": { "en": "Shelf board", "de": "Regalbrett" },
@@ -104,7 +164,7 @@
           "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
         },
         {
-          "role": "bracket",
+          "role": "bracket", "ownable": true, "load_bearing": true,
           "section": "materials",
           "rule_ids": ["R-02"],
           "label": { "en": "Shelf brackets", "de": "Regalträger" },
@@ -147,7 +207,7 @@
           "quantity": { "rule_id": "SHELF-Q2", "units": { "var": "fixing_points" } }
         },
         {
-          "role": "drill_bit",
+          "role": "drill_bit", "ownable": true,
           "section": "tools",
           "rule_ids": ["R-05"],
           "label": { "en": "Drill bit", "de": "Bohrer" },
@@ -162,7 +222,7 @@
           "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
         },
         {
-          "role": "drill",
+          "role": "drill", "ownable": true,
           "section": "tools",
           "rule_ids": ["R-09"],
           "label": { "en": "Drill", "de": "Bohrmaschine" },
@@ -170,6 +230,7 @@
             "category": ["Power tools"],
             "use_case_by_wall": {
               "concrete": "drilling concrete",
+              "solid_brick": "drilling brick",
               "brick": "drilling brick",
               "plasterboard": "drilling plasterboard"
             },
@@ -179,7 +240,7 @@
           "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
         },
         {
-          "role": "screwdriver",
+          "role": "screwdriver", "ownable": true,
           "section": "tools",
           "rule_ids": ["SHELF-T1"],
           "label": { "en": "Screwdriver", "de": "Schraubendreher" },
@@ -192,7 +253,7 @@
   ],
   "common_roles": [
     {
-      "role": "detector",
+      "role": "detector", "ownable": true,
       "section": "tools",
       "rule_ids": ["R-11"],
       "label": { "en": "Stud and cable detector", "de": "Leitungssucher" },
@@ -201,7 +262,7 @@
       "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
     },
     {
-      "role": "spirit_level",
+      "role": "spirit_level", "ownable": true,
       "section": "tools",
       "rule_ids": ["SHELF-T2"],
       "label": { "en": "Spirit level", "de": "Wasserwaage" },
@@ -210,7 +271,7 @@
       "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
     },
     {
-      "role": "tape_measure",
+      "role": "tape_measure", "ownable": true,
       "section": "tools",
       "rule_ids": ["SHELF-T2"],
       "label": { "en": "Tape measure", "de": "Maßband" },
@@ -219,7 +280,7 @@
       "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
     },
     {
-      "role": "safety_glasses",
+      "role": "safety_glasses", "ownable": true,
       "section": "safety",
       "rule_ids": ["R-10"],
       "label": { "en": "Safety goggles", "de": "Schutzbrille" },
@@ -228,10 +289,10 @@
       "quantity": { "rule_id": "SHELF-Q0", "units": 1 }
     },
     {
-      "role": "dust_mask",
+      "role": "dust_mask", "ownable": true,
       "section": "safety",
       "rule_ids": ["R-10"],
-      "when": { "wall_in": ["concrete", "brick"] },
+      "when": { "wall_in": ["concrete", "solid_brick", "brick"] },
       "label": { "en": "Dust mask", "de": "Staubmaske" },
       "select": { "product_nrs": ["P029"] },
       "on_none": "unresolved",

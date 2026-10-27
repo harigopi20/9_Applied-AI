@@ -1,0 +1,872 @@
+{
+  "template_id": "paint_wall",
+  "project_id": "PRJ-05",
+  "version": "1.0.0",
+  "comment": "DR-04 template from the project catalogue PRJ-05 (draft). Indoor walls, 2 coats, incl. small mould treatment. Basic level: no wall or load questions. Team review pending (SR-10).",
+  "review": {
+    "status": "pending_team_review",
+    "reviewed_by": null,
+    "review_date": null,
+    "created": "2026-10-27",
+    "source": "data/project_catalogue.xlsx (draft v1, 27 Oct 2026)"
+  },
+  "title": {
+    "en": "Paint a wall",
+    "de": "Wand streichen"
+  },
+  "icon": "paint",
+  "group": {
+    "en": "Decorating",
+    "de": "Renovieren"
+  },
+  "safety_level": "basic",
+  "safety_factor": 1.25,
+  "wall_limits": {},
+  "required_facts": [
+    "wall_width_m",
+    "room_height_m",
+    "surface",
+    "mould",
+    "health",
+    "old_coating"
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "type": "group",
+      "text": {
+        "en": "Your room",
+        "de": "Ihr Raum"
+      },
+      "help": {
+        "en": "Add up the widths of all walls you want to paint.",
+        "de": "Zählen Sie die Breiten aller Wände zusammen, die Sie streichen möchten."
+      },
+      "fields": [
+        {
+          "fact": "wall_width_m",
+          "type": "number",
+          "unit": "m",
+          "min": 0.5,
+          "max": 200,
+          "label": {
+            "en": "Total width of the walls",
+            "de": "Gesamtbreite der Wände"
+          }
+        },
+        {
+          "fact": "room_height_m",
+          "type": "number",
+          "unit": "m",
+          "min": 1.5,
+          "max": 6,
+          "label": {
+            "en": "Room height",
+            "de": "Raumhöhe"
+          }
+        },
+        {
+          "fact": "surface",
+          "type": "choice",
+          "options": [
+            "new",
+            "painted",
+            "wallpaper"
+          ],
+          "option_labels": {
+            "new": {
+              "en": "New plaster or plasterboard",
+              "de": "Neuer Putz oder Gipskarton"
+            },
+            "painted": {
+              "en": "Painted",
+              "de": "Gestrichen"
+            },
+            "wallpaper": {
+              "en": "Wallpaper",
+              "de": "Tapete"
+            }
+          },
+          "label": {
+            "en": "Surface",
+            "de": "Untergrund"
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q2",
+      "type": "group",
+      "text": {
+        "en": "Condition",
+        "de": "Zustand"
+      },
+      "fields": [
+        {
+          "fact": "mould",
+          "type": "choice",
+          "options": [
+            "none",
+            "small",
+            "large"
+          ],
+          "option_labels": {
+            "none": {
+              "en": "None",
+              "de": "Keiner"
+            },
+            "small": {
+              "en": "Small, surface only (< 0.5 m²)",
+              "de": "Klein, nur oberflächlich (< 0,5 m²)"
+            },
+            "large": {
+              "en": "Larger or deep in the wall",
+              "de": "Größer oder tief in der Wand"
+            }
+          },
+          "label": {
+            "en": "Mould on the wall?",
+            "de": "Schimmel an der Wand?"
+          }
+        },
+        {
+          "fact": "health",
+          "type": "choice",
+          "label": {
+            "en": "Mould allergy or respiratory illness in the household?",
+            "de": "Schimmelallergie oder Atemwegserkrankung im Haushalt?"
+          },
+          "options": [
+            "no",
+            "yes"
+          ],
+          "option_labels": {
+            "no": {
+              "en": "No",
+              "de": "Nein"
+            },
+            "yes": {
+              "en": "Yes",
+              "de": "Ja"
+            }
+          }
+        },
+        {
+          "fact": "old_coating",
+          "type": "choice",
+          "label": {
+            "en": "Building before 1993 and old coating to sand or strip?",
+            "de": "Gebäude vor 1993 und alte Beschichtung abschleifen oder entfernen?"
+          },
+          "options": [
+            "no",
+            "yes"
+          ],
+          "option_labels": {
+            "no": {
+              "en": "No",
+              "de": "Nein"
+            },
+            "yes": {
+              "en": "Yes",
+              "de": "Ja"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "stops": [
+    {
+      "id": "area",
+      "rule_id": "ST-04",
+      "hand_off": "staff",
+      "message": {
+        "en": "This size is outside this guide. Please ask OBI staff.",
+        "de": "Diese Größe liegt außerhalb dieser Anleitung. Bitte OBI-Personal fragen."
+      },
+      "when": {
+        "gt": [
+          {
+            "mul": [
+              {
+                "fact": "wall_width_m"
+              },
+              {
+                "fact": "room_height_m"
+              }
+            ]
+          },
+          60
+        ]
+      },
+      "help": {
+        "en": "This guide covers up to 60 m² of wall.",
+        "de": "Diese Anleitung gilt für bis zu 60 m² Wandfläche."
+      }
+    },
+    {
+      "id": "working_height",
+      "rule_id": "ST-04",
+      "hand_off": "staff",
+      "message": {
+        "en": "This size is outside this guide. Please ask OBI staff.",
+        "de": "Diese Größe liegt außerhalb dieser Anleitung. Bitte OBI-Personal fragen."
+      },
+      "when": {
+        "gt": [
+          {
+            "fact": "room_height_m"
+          },
+          2.5
+        ]
+      },
+      "help": {
+        "en": "This guide covers working heights up to 2.5 m (step ladder and pole).",
+        "de": "Diese Anleitung gilt für Arbeitshöhen bis 2,5 m (Stufenleiter und Teleskopstange)."
+      }
+    },
+    {
+      "id": "mould_large",
+      "rule_id": "ST-07",
+      "hand_off": "professional",
+      "when": {
+        "fact_in": {
+          "fact": "mould",
+          "values": [
+            "large"
+          ]
+        }
+      },
+      "message": {
+        "en": "Larger mould must be removed by a specialist company.",
+        "de": "Größerer Schimmelbefall gehört in die Hände eines Fachbetriebs."
+      }
+    },
+    {
+      "id": "mould_health",
+      "rule_id": "ST-08",
+      "hand_off": "professional",
+      "when": {
+        "all": [
+          {
+            "fact_in": {
+              "fact": "mould",
+              "values": [
+                "small"
+              ]
+            }
+          },
+          {
+            "fact_in": {
+              "fact": "health",
+              "values": [
+                "yes"
+              ]
+            }
+          }
+        ]
+      },
+      "message": {
+        "en": "Please do not remove the mould yourself; ask a specialist.",
+        "de": "Bitte entfernen Sie den Schimmel nicht selbst; fragen Sie einen Fachbetrieb."
+      }
+    },
+    {
+      "id": "old_coating",
+      "rule_id": "ST-09",
+      "hand_off": "professional",
+      "when": {
+        "fact_in": {
+          "fact": "old_coating",
+          "values": [
+            "yes"
+          ]
+        }
+      },
+      "message": {
+        "en": "Old coatings may contain harmful substances. Please have them checked before sanding.",
+        "de": "Alte Beschichtungen können Schadstoffe enthalten. Bitte vor dem Schleifen prüfen lassen."
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "id": "switch_covers",
+      "rule_id": "ST-14",
+      "text": {
+        "en": "Removing switch or socket covers: switch off the circuit first. Only remove cover frames – never touch the wiring.",
+        "de": "Schalter- oder Steckdosenabdeckungen abnehmen: zuerst die Sicherung ausschalten. Nur Abdeckrahmen abnehmen – nie an die Leitungen."
+      }
+    }
+  ],
+  "variables": {
+    "area_m2": {
+      "rule_id": "PAINT-Q1",
+      "expr": {
+        "mul": [
+          {
+            "fact": "wall_width_m"
+          },
+          {
+            "fact": "room_height_m"
+          }
+        ]
+      }
+    },
+    "litres": {
+      "rule_id": "PAINT-Q1",
+      "comment": "area × 2 coats ÷ coverage (catalogue specs coverage_m2_per_l)",
+      "expr": {
+        "div": [
+          {
+            "mul": [
+              {
+                "var": "area_m2"
+              },
+              2
+            ]
+          },
+          {
+            "spec": "paint.coverage_m2_per_l"
+          }
+        ]
+      }
+    }
+  },
+  "methods": [
+    {
+      "method_id": "roller",
+      "rule_id": "PAINT-M1",
+      "penetrates_wall": false,
+      "drilling": false,
+      "label": {
+        "en": "Roller, 2 coats",
+        "de": "Rolle, 2 Anstriche"
+      },
+      "roles": [
+        {
+          "role": "paint",
+          "section": "materials",
+          "rule_ids": [
+            "PAINT-Q1"
+          ],
+          "label": {
+            "en": "Wall paint",
+            "de": "Wandfarbe"
+          },
+          "select": {
+            "variant_groups": [
+              "interior-wall-paint-matt",
+              "colour-wall-paint"
+            ],
+            "prefer": [
+              "-spec.volume_l",
+              "price_eur"
+            ]
+          },
+          "on_none": "stop",
+          "ownable": true,
+          "quantity": {
+            "rule_id": "PAINT-Q1",
+            "units": {
+              "ceil": {
+                "div": [
+                  {
+                    "var": "litres"
+                  },
+                  {
+                    "spec": "paint.volume_l"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "role": "mould_paint",
+          "section": "materials",
+          "rule_ids": [
+            "PAINT-Q2",
+            "S-03"
+          ],
+          "label": {
+            "en": "Anti-mould wall paint",
+            "de": "Anti-Schimmel-Wandfarbe"
+          },
+          "select": {
+            "product_nrs": [
+              "P076"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "PAINT-Q2",
+            "units": {
+              "ceil": {
+                "div": [
+                  {
+                    "div": [
+                      {
+                        "mul": [
+                          0.5,
+                          2
+                        ]
+                      },
+                      {
+                        "spec": "mould_paint.coverage_m2_per_l"
+                      }
+                    ]
+                  },
+                  {
+                    "spec": "mould_paint.volume_l"
+                  }
+                ]
+              }
+            }
+          },
+          "ownable": true,
+          "when": {
+            "fact_in": {
+              "fact": "mould",
+              "values": [
+                "small"
+              ]
+            }
+          }
+        },
+        {
+          "role": "primer",
+          "section": "materials",
+          "rule_ids": [
+            "PAINT-C1"
+          ],
+          "label": {
+            "en": "Deep primer",
+            "de": "Tiefengrund"
+          },
+          "select": {
+            "product_nrs": [
+              "P074"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "PAINT-Q0",
+            "units": 1
+          },
+          "ownable": true,
+          "when": {
+            "fact_in": {
+              "fact": "surface",
+              "values": [
+                "new"
+              ]
+            }
+          }
+        },
+        {
+          "role": "filler",
+          "section": "materials",
+          "rule_ids": [
+            "PAINT-C2"
+          ],
+          "label": {
+            "en": "Wall filler",
+            "de": "Spachtelmasse"
+          },
+          "select": {
+            "product_nrs": [
+              "P012"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "PAINT-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "mould_remover",
+          "section": "materials",
+          "rule_ids": [
+            "S-03"
+          ],
+          "label": {
+            "en": "Mould remover, chlorine-free",
+            "de": "Schimmelentferner, chlorfrei"
+          },
+          "select": {
+            "product_nrs": [
+              "P075"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "PAINT-Q0",
+            "units": 1
+          },
+          "ownable": true,
+          "when": {
+            "fact_in": {
+              "fact": "mould",
+              "values": [
+                "small"
+              ]
+            }
+          }
+        },
+        {
+          "role": "sanding",
+          "section": "materials",
+          "rule_ids": [
+            "PAINT-Q0"
+          ],
+          "label": {
+            "en": "Sanding paper set",
+            "de": "Schleifpapier-Set"
+          },
+          "select": {
+            "product_nrs": [
+              "P013"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "PAINT-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "tape",
+          "section": "materials",
+          "rule_ids": [
+            "PAINT-Q3"
+          ],
+          "label": {
+            "en": "Masking tape",
+            "de": "Malerkrepp"
+          },
+          "select": {
+            "product_nrs": [
+              "P010"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "PAINT-Q3",
+            "units": {
+              "ceil_div": [
+                {
+                  "mul": [
+                    {
+                      "fact": "wall_width_m"
+                    },
+                    2
+                  ]
+                },
+                15
+              ]
+            }
+          },
+          "ownable": true
+        },
+        {
+          "role": "roller",
+          "section": "tools",
+          "rule_ids": [
+            "PAINT-Q0"
+          ],
+          "label": {
+            "en": "Paint roller set",
+            "de": "Farbrollen-Set"
+          },
+          "select": {
+            "product_nrs": [
+              "P008"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "PAINT-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "brush",
+          "section": "tools",
+          "rule_ids": [
+            "PAINT-Q0"
+          ],
+          "label": {
+            "en": "Flat brush set",
+            "de": "Flachpinsel-Set"
+          },
+          "select": {
+            "product_nrs": [
+              "P009"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "PAINT-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "tray",
+          "section": "tools",
+          "rule_ids": [
+            "PAINT-Q0"
+          ],
+          "label": {
+            "en": "Paint tray",
+            "de": "Farbwanne"
+          },
+          "select": {
+            "product_nrs": [
+              "P071"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "PAINT-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "pole",
+          "section": "tools",
+          "rule_ids": [
+            "PAINT-C3"
+          ],
+          "label": {
+            "en": "Telescopic pole",
+            "de": "Teleskopstange"
+          },
+          "select": {
+            "product_nrs": [
+              "P072"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "PAINT-Q0",
+            "units": 1
+          },
+          "ownable": true,
+          "when": {
+            "gt": [
+              {
+                "fact": "room_height_m"
+              },
+              2.0
+            ]
+          }
+        },
+        {
+          "role": "drop_cloth",
+          "section": "tools",
+          "rule_ids": [
+            "PAINT-Q0"
+          ],
+          "label": {
+            "en": "Drop cloth",
+            "de": "Abdeckfolie"
+          },
+          "select": {
+            "product_nrs": [
+              "P011"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "PAINT-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "bucket",
+          "section": "tools",
+          "rule_ids": [
+            "PAINT-Q0"
+          ],
+          "label": {
+            "en": "Bucket",
+            "de": "Eimer"
+          },
+          "select": {
+            "product_nrs": [
+              "P086"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "PAINT-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "ladder",
+          "section": "tools",
+          "rule_ids": [
+            "PAINT-Q0"
+          ],
+          "label": {
+            "en": "Step ladder",
+            "de": "Stufenleiter"
+          },
+          "select": {
+            "product_nrs": [
+              "P073"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "PAINT-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "dust_mask",
+          "section": "safety",
+          "rule_ids": [
+            "R-10"
+          ],
+          "label": {
+            "en": "Dust mask FFP2",
+            "de": "Atemschutzmaske FFP2"
+          },
+          "select": {
+            "product_nrs": [
+              "P029"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "PAINT-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "safety_glasses",
+          "section": "safety",
+          "rule_ids": [
+            "R-10"
+          ],
+          "label": {
+            "en": "Safety goggles",
+            "de": "Schutzbrille"
+          },
+          "select": {
+            "product_nrs": [
+              "P028"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "PAINT-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "gloves",
+          "section": "safety",
+          "rule_ids": [
+            "S-03"
+          ],
+          "label": {
+            "en": "Nitrile gloves",
+            "de": "Nitril-Schutzhandschuhe"
+          },
+          "select": {
+            "product_nrs": [
+              "P077"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "PAINT-Q0",
+            "units": 1
+          },
+          "ownable": true,
+          "when": {
+            "fact_in": {
+              "fact": "mould",
+              "values": [
+                "small"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "common_roles": [],
+  "howto": [
+    {
+      "type": "video",
+      "title": {
+        "en": "Painting walls with clean edges",
+        "de": "Wand streichen mit sauberen Kanten"
+      },
+      "url": "https://www.youtube.com/watch?v=lJyGbd93C7c",
+      "publisher": "OBI HowTo",
+      "lang": "de"
+    },
+    {
+      "type": "article",
+      "title": {
+        "en": "Painting walls – step by step",
+        "de": "Wände streichen – Schritt für Schritt"
+      },
+      "url": "https://www.obi.de/magazin/bauen/waende-streichen",
+      "publisher": "OBI Magazin",
+      "lang": "de"
+    }
+  ],
+  "rule_texts": {
+    "PAINT-M1": {
+      "en": "Indoor walls, 2 coats with a roller.",
+      "de": "Innenwände, 2 Anstriche mit der Rolle."
+    },
+    "PAINT-Q0": {
+      "en": "1 per project",
+      "de": "1 pro Projekt"
+    },
+    "PAINT-Q1": {
+      "en": "litres = wall width × room height × 2 coats ÷ coverage (7 m²/l), rounded up to whole buckets",
+      "de": "Liter = Wandbreite × Raumhöhe × 2 Anstriche ÷ Ergiebigkeit (7 m²/l), auf ganze Eimer aufgerundet"
+    },
+    "PAINT-Q2": {
+      "en": "treated area (max. 0.5 m²) × 2 coats ÷ 7 m²/l, rounded up to whole cans",
+      "de": "behandelte Fläche (max. 0,5 m²) × 2 Anstriche ÷ 7 m²/l, auf ganze Dosen aufgerundet"
+    },
+    "PAINT-Q3": {
+      "en": "1 roll per started 15 m of edges (ceiling and floor line = 2 × wall width)",
+      "de": "1 Rolle je angefangene 15 m Kante (Decken- und Bodenlinie = 2 × Wandbreite)"
+    },
+    "PAINT-C1": {
+      "en": "for absorbent surfaces (new plaster or plasterboard)",
+      "de": "für saugende Untergründe (neuer Putz oder Gipskarton)"
+    },
+    "PAINT-C2": {
+      "en": "for holes or cracks",
+      "de": "für Löcher oder Risse"
+    },
+    "PAINT-C3": {
+      "en": "rooms higher than 2.0 m",
+      "de": "Räume höher als 2,0 m"
+    }
+  }
+}
