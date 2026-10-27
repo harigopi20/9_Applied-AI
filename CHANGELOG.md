@@ -6,6 +6,16 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-10-27 – New 120 cm shelf board P103 in the product catalogue.**
+  `data/product_catalogue.xlsx` gets P103 *Shelf board 1200 x 250 x 18 mm* (rated
+  25 kg, 19.99 €, compatible with brackets P059/P060, stock in all 5 stores – price,
+  rating and stock are sample values, team to verify); CSVs re-exported. Shelves of
+  81–120 cm with 25 cm depth now get a list with 3 brackets (project catalogue PRJ-01:
+  3 brackets up to 120 cm). 20 cm deep shelves above 80 cm still stop with the size
+  message. New test PRJ-01 / P103 (93 passing).
+  *Why:* 100–120 cm shelves were impossible with the 80 cm boards only.
+  *Prompt:* "Add a 120 cm shelf board with a load rating."
+
 - **2026-10-27 – Stop screen names a size problem instead of blaming the load.**
   A 100 cm shelf with 10 kg was stopped with "no product combination rated for this
   load and wall", although the only reason was the board length (catalogue boards are

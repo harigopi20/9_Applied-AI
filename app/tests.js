@@ -1293,6 +1293,13 @@
     eq(heavy.blocked.cause, null, "a real load problem keeps the load message");
   });
 
+  test("PRJ-01 / P103", "Shelf 100 cm × 25 cm, 10 kg → 120 cm board P103 with 3 brackets and 6 plugs; 80 cm still uses P064", () => {
+    const r = run(SHELF(), confirmed({ wall_type: "concrete", load_kg: 10, shelf_length_cm: 100, shelf_depth_cm: 25 }));
+    eq(r.state, "validated");
+    eq([item(r, "board").product.product_nr, units(r, "bracket"), units(r, "wall_plug")], ["P103", 3, 6]);
+    eq(item(run(SHELF(), confirmed(SHELF_OK)), "board").product.product_nr, "P064");
+  });
+
   // ---------------- UI
   function questionSetup(template, qid, facts) {
     const s = window.BBApp.state;
