@@ -611,7 +611,10 @@
     ]);
     const factNames = (b.facts || []).map((k) => factName(k)).join(", ");
     // Stop rules from the project catalogue bring their own text ({limit} filled in by code).
-    const own = b.message ? pick(b.message).split("{limit}").join(b.limit_kg === null || b.limit_kg === undefined ? "–" : String(b.limit_kg)) : null;
+    // A part that only fails because of its size: name the part and the catalogue sizes.
+    const size = b.reason === "no_suitable_system" && b.cause && b.cause.kind === "size" ? b.cause : null;
+    const own = size ? t("stop_no_size", { part: pick(size.label), sizes: size.sizes.join(" · ") })
+      : b.message ? pick(b.message).split("{limit}").join(b.limit_kg === null || b.limit_kg === undefined ? "–" : String(b.limit_kg)) : null;
     const mainText = own || {
       fact_unknown: t("stop_fact_unknown", { facts: factNames }),
       load_over_limit: t("stop_load_over_limit", { load: b.load_kg, limit: b.limit_kg }),
@@ -619,7 +622,7 @@
       no_suitable_system: t("stop_no_suitable_system"),
       invalid_value: t("stop_invalid_value")
     }[b.reason];
-    const help = b.help ? pick(b.help) : {
+    const help = size ? t("stop_no_size_help") : b.help ? pick(b.help) : {
       fact_unknown: t("stop_fact_unknown_help"),
       wall_limit: t("stop_wall_limit_help"),
       no_suitable_system: t("stop_no_suitable_system_help")

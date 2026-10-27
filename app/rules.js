@@ -374,7 +374,9 @@
         e.checks.filter((c) => !c.ok).map((c) => c.check + " (" + c.detail + ")").join("; "));
       log(ctx, (role.rule_ids || []).join(","), "select " + role.role, "no suitable catalogue product",
         "template:" + ctx.template.template_id, reasons);
-      return Object.assign(base, { status: "none", product: null, checks: [], reasons });
+      const candidates = evaluated.map((e) => ({ product_nr: e.p.product_nr, size: e.p.size,
+        failed: e.checks.filter((c) => !c.ok).map((c) => c.check) }));
+      return Object.assign(base, { status: "none", product: null, checks: [], reasons, candidates });
     }
     const checks = evaluated.find((e) => e.p === chosen).checks;
     log(ctx, (role.rule_ids || []).join(","), "select " + role.role, chosen.product_nr + " – all checks passed",
@@ -494,7 +496,7 @@
         items.push(item);
       }
       if (failed) {
-        failures.push({ method_id: method.method_id, role: failed.role, reasons: failed.reasons });
+        failures.push({ method_id: method.method_id, role: failed.role, label: failed.label, reasons: failed.reasons, candidates: failed.candidates || [] });
         log(ctx, method.rule_id, "method " + method.method_id, "not possible: no " + failed.role, tplSource);
         continue;
       }
@@ -504,7 +506,8 @@
     }
     if (!chosen) {
       result.state = "safety_blocked";
-      result.blocked = { reason: "no_suitable_system", rule_id: "R-07", failures, message: template.no_system_message || null };
+      result.blocked = { reason: "no_suitable_system", rule_id: "R-07", failures, message: template.no_system_message || null,
+        cause: sizeCause(failures[failures.length - 1]) };
       return finalise(result);
     }
 
@@ -608,6 +611,18 @@
     }
     log(ctx, "SR-03", "final state", result.state + (result.total.reason ? " (" + result.total.reason + ")" : ""), tplSource);
     return finalise(result);
+  }
+
+  /**
+   * If a part fails ONLY because of its size (e.g. 100 cm shelf, boards are 80 cm),
+   * the stop must say so – not blame the load. Returns {kind:"size", label, sizes} or null.
+   */
+  function sizeCause(failure) {
+    if (!failure || !failure.candidates || !failure.candidates.length) return null;
+    const sizeOnly = failure.candidates.some((c) => c.failed.length > 0 && c.failed.every((x) => /^spec /.test(x)));
+    if (!sizeOnly) return null;
+    const sizes = Array.from(new Set(failure.candidates.map((c) => c.size).filter(Boolean)));
+    return { kind: "size", role: failure.role, label: failure.label, sizes };
   }
 
   /** Used-item checklist (C-7): any ticked defect other than "none". */

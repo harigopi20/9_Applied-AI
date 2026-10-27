@@ -6,6 +6,40 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: 120 cm shelf boards and clear size stop – 2026-10-27
+Summary (same as the pull request):
+- Stop screen names a size problem (part and catalogue sizes) instead of blaming the load
+- New 120 cm shelf boards P103 (25 cm deep) and P104 (20 cm deep), sample values – shelves up to 120 cm with 3 brackets
+- 93 tests passing
+
+- **2026-10-27 – Second 120 cm shelf board P104 (20 cm deep).**
+  P104 *Shelf board 1200 x 200 x 18 mm* (rated 20 kg like P063, 17.99 €, brackets
+  P058/P059, stock in all 5 stores – sample values, team to verify) added to the
+  workbook (stock row inserted above the legend); CSVs re-exported. Shelves of
+  81–120 cm now work in both depths. Test R-07 (size) uses a catalogue copy without
+  P104, because the real catalogue no longer has a size gap up to 120 cm (93 passing).
+  *Why:* 20 cm deep shelves above 80 cm still stopped.
+  *Prompt:* "Yes, also add a 120 cm board with 20 cm depth."
+
+- **2026-10-27 – New 120 cm shelf board P103 in the product catalogue.**
+  `data/product_catalogue.xlsx` gets P103 *Shelf board 1200 x 250 x 18 mm* (rated
+  25 kg, 19.99 €, compatible with brackets P059/P060, stock in all 5 stores – price,
+  rating and stock are sample values, team to verify); CSVs re-exported. Shelves of
+  81–120 cm with 25 cm depth now get a list with 3 brackets (project catalogue PRJ-01:
+  3 brackets up to 120 cm). 20 cm deep shelves above 80 cm still stop with the size
+  message. New test PRJ-01 / P103 (93 passing).
+  *Why:* 100–120 cm shelves were impossible with the 80 cm boards only.
+  *Prompt:* "Add a 120 cm shelf board with a load rating."
+
+- **2026-10-27 – Stop screen names a size problem instead of blaming the load.**
+  A 100 cm shelf with 10 kg was stopped with "no product combination rated for this
+  load and wall", although the only reason was the board length (catalogue boards are
+  80 cm). If a part fails only on its size checks, the stop now says which part and
+  lists the catalogue sizes (EN + DE); real load problems keep the old text. New test
+  R-07 (size), 92 passing.
+  *Why:* the message was misleading for customers.
+  *Prompt:* "A shelf with 10 kg and 20 cm deep is over the limit? That makes no sense."
+
 ## Milestone: Product catalogue v2 and project catalogue – 9 projects – 2026-10-27
 Summary (same as the pull request):
 - Product catalogue v2 (102 products, German names) and project catalogue (draft v1) added to `data/`

@@ -7,7 +7,7 @@
 | File | Content | Requirement |
 |---|---|---|
 | `product_catalogue.xlsx` | Master workbook for the team (v2, 27 Oct 2026) – sheets: **Read Me**, **Products**, **Store stock**, **Stores**, **Translations** | DR-01 |
-| `products.csv` | Export of sheet *Products*: 102 products (P001–P102), written once for all stores (name EN/DE, size, load, wall types, compatibility, safety note, price) | DR-01 |
+| `products.csv` | Export of sheet *Products*: 104 products (P001–P104; P103/P104 = 120 cm shelf boards 25/20 cm deep, added 27 Oct 2026, sample values), written once for all stores (name EN/DE, size, load, wall types, compatibility, safety note, price) | DR-01 |
 | `store_stock.csv` | Export of sheet *Store stock*: aisle, shelf and quantity per product for each store (`<store_id>_aisle_nr`, `_aisle_name`, `_shelf_nr`, `_qty`) | DR-01 |
 | `stores.csv` | Export of sheet *Stores*: 5 OBI stores with address, PLZ, opening hours, coordinates | DR-01, FR-29 |
 | `project_catalogue.xlsx` | Project catalogue (draft v1, 27 Oct 2026, team review pending) – 9 projects with questions, limits, items, stop rules, how-to links and sources | DR-04 |

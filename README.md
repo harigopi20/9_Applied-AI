@@ -149,7 +149,7 @@ repository's `data/` folder – so serve the **repository root**:
 ```bash
 python3 -m http.server 8000          # in the repository root
 # app:   http://localhost:8000/app/
-# tests: http://localhost:8000/app/tests.html   (summary at the top: 91 tests)
+# tests: http://localhost:8000/app/tests.html   (summary at the top: 93 tests)
 ```
 `tests.html` runs all automated tests in the browser against the real data files,
 fixture copies of the catalogue, the AI `mock` mode and a simulated Web Speech API.
@@ -284,7 +284,7 @@ usability test or by hand.
 2-week MVP sprint starting 19 Oct 2026 → final pitch.
 
 ## Limitations
-Sample catalogue (102 products), invented prices, stock and aisle positions, 5 sample
+Sample catalogue (104 products), invented prices, stock and aisle positions, 5 sample
 stores in a fictional partnership scenario (addresses and opening hours to be verified
 by the team), approximate PLZ distances, 9 project templates not yet reviewed by the team.
 Open points from the project catalogue: wall type "wood" is not offered yet (no wood
