@@ -6,16 +6,11 @@ when they are released to `main`.
 
 ## Unreleased
 
-## Milestone: Product catalogue v2 and project catalogue – 9 projects – 2026-10-27
+## Milestone: 120 cm shelf boards and clear size stop – 2026-10-27
 Summary (same as the pull request):
-- Product catalogue v2 (102 products, German names) and project catalogue (draft v1) added to `data/`
-- `tools/add_rule_columns.py` only fills empty cells (keeps team values) and exports all three CSVs
-- 7 new project templates (wall cabinet, anti-tip, paint, glass door, door lock, sliding door, wallpaper); shelf and picture aligned with the catalogue
-- Rule engine: stop rules ST-01…ST-14 and warnings from the templates, conditions, new quantity rules, plasterboard cabinet table, projects without load questions, "I already have this" (C-8, SR-15)
-- UI: grouped project buttons with safety level, checklist questions, catalogue stop texts, OBI how-to links, German product names
 - Stop screen names a size problem (part and catalogue sizes) instead of blaming the load
 - New 120 cm shelf boards P103 (25 cm deep) and P104 (20 cm deep), sample values – shelves up to 120 cm with 3 brackets
-- Lexicon, AI schema and proxy know the new projects and wall types; 93 tests passing
+- 93 tests passing
 
 - **2026-10-27 – Second 120 cm shelf board P104 (20 cm deep).**
   P104 *Shelf board 1200 x 200 x 18 mm* (rated 20 kg like P063, 17.99 €, brackets
@@ -44,6 +39,15 @@ Summary (same as the pull request):
   R-07 (size), 92 passing.
   *Why:* the message was misleading for customers.
   *Prompt:* "A shelf with 10 kg and 20 cm deep is over the limit? That makes no sense."
+
+## Milestone: Product catalogue v2 and project catalogue – 9 projects – 2026-10-27
+Summary (same as the pull request):
+- Product catalogue v2 (102 products, German names) and project catalogue (draft v1) added to `data/`
+- `tools/add_rule_columns.py` only fills empty cells (keeps team values) and exports all three CSVs
+- 7 new project templates (wall cabinet, anti-tip, paint, glass door, door lock, sliding door, wallpaper); shelf and picture aligned with the catalogue
+- Rule engine: stop rules ST-01…ST-14 and warnings from the templates, conditions, new quantity rules, plasterboard cabinet table, projects without load questions, "I already have this" (C-8, SR-15)
+- UI: grouped project buttons with safety level, checklist questions, catalogue stop texts, OBI how-to links, German product names
+- Lexicon, AI schema and proxy know the new projects and wall types; 91 tests passing
 
 - **2026-10-27 – Product catalogue v2 and project catalogue added to the repository.**
   `data/product_catalogue.xlsx` replaced by the team's v2 (102 products P001–P102,
