@@ -6,6 +6,14 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Sliding door dimensions and second door leaf – 2026-10-27
+Summary (same as the pull request):
+- Sliding door leaf must overlap the opening (+3 cm per side and at the top, assumption) and fit the free wall beside the opening; opening height is checked
+- New question "free wall beside the opening"; stop ST-04 when there is not enough wall
+- New sample door leaf P105 (100 × 213.5 cm); P097 gets its height as a spec
+- Size stops show "needed vs. available" in cm (also shelf boards) and hand off to store staff only
+- 95 tests passing
+
 - **2026-10-27 – Sliding door: realistic dimensions and a second door leaf.**
   The door leaf now has to be at least opening + 6 cm wide and opening + 3 cm tall
   (3 cm overlap per side and at the top – assumption, team to check); the opening
