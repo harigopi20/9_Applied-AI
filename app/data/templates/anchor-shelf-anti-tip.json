@@ -1,0 +1,548 @@
+{
+  "template_id": "anchor_shelf_anti_tip",
+  "project_id": "PRJ-04",
+  "version": "1.0.0",
+  "comment": "DR-04 template from the project catalogue PRJ-04 (draft). Secures free-standing furniture against tipping. No load question: the kit takes only the tipping force (team decision 27 Oct 2026). Team review pending (SR-10).",
+  "review": {
+    "status": "pending_team_review",
+    "reviewed_by": null,
+    "review_date": null,
+    "created": "2026-10-27",
+    "source": "data/project_catalogue.xlsx (draft v1, 27 Oct 2026)"
+  },
+  "title": {
+    "en": "Anchor a shelf to the wall (anti-tip)",
+    "de": "Regal kippsicher befestigen"
+  },
+  "icon": "anchor",
+  "group": {
+    "en": "Wall mounting",
+    "de": "Wandmontage"
+  },
+  "safety_level": "mounting_full",
+  "safety_factor": 1.25,
+  "wall_limits": {},
+  "wall_matches": {
+    "concrete": [
+      "concrete"
+    ],
+    "solid_brick": [
+      "solid brick",
+      "brick"
+    ],
+    "brick": [
+      "brick"
+    ],
+    "plasterboard": [
+      "plasterboard"
+    ]
+  },
+  "required_facts": [
+    "wall_type",
+    "furniture_width_cm",
+    "furniture_height_cm"
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "fact": "wall_type",
+      "type": "choice",
+      "options": [
+        "concrete",
+        "solid_brick",
+        "brick",
+        "plasterboard",
+        "aerated_concrete",
+        "unknown"
+      ],
+      "text": {
+        "en": "What is the wall made of?",
+        "de": "Woraus besteht die Wand?"
+      },
+      "help": {
+        "en": "If you are not sure, choose \"I don't know\". We will not guess. Aerated concrete is often called Ytong.",
+        "de": "Wenn Sie unsicher sind, wählen Sie „Weiß ich nicht“. Wir raten nicht. Porenbeton heißt oft Ytong."
+      }
+    },
+    {
+      "id": "Q2",
+      "type": "group",
+      "text": {
+        "en": "Your furniture",
+        "de": "Ihr Möbelstück"
+      },
+      "fields": [
+        {
+          "fact": "furniture_width_cm",
+          "type": "number",
+          "unit": "cm",
+          "min": 10,
+          "max": 400,
+          "label": {
+            "en": "Width",
+            "de": "Breite"
+          }
+        },
+        {
+          "fact": "furniture_height_cm",
+          "type": "number",
+          "unit": "cm",
+          "min": 30,
+          "max": 300,
+          "label": {
+            "en": "Height",
+            "de": "Höhe"
+          }
+        }
+      ]
+    }
+  ],
+  "stops": [
+    {
+      "id": "aerated_concrete",
+      "rule_id": "ST-02",
+      "when": {
+        "wall_in": [
+          "aerated_concrete"
+        ]
+      },
+      "hand_off": "staff",
+      "message": {
+        "en": "Aerated concrete needs special plugs that are not in our catalogue. Please ask OBI staff.",
+        "de": "Porenbeton braucht Spezialdübel, die nicht in unserem Katalog sind. Bitte OBI-Personal fragen."
+      }
+    }
+  ],
+  "variables": {
+    "kit_count": {
+      "rule_id": "TIP-Q1",
+      "comment": "1 kit up to 90 cm wide, 2 above (team decision 27 Oct 2026).",
+      "expr": {
+        "min": [
+          2,
+          {
+            "ceil_div": [
+              {
+                "fact": "furniture_width_cm"
+              },
+              90
+            ]
+          }
+        ]
+      }
+    },
+    "plug_count": {
+      "rule_id": "TIP-Q2",
+      "expr": {
+        "mul": [
+          {
+            "var": "kit_count"
+          },
+          2
+        ]
+      }
+    },
+    "screw_count": {
+      "rule_id": "TIP-Q3",
+      "expr": {
+        "mul": [
+          {
+            "var": "kit_count"
+          },
+          4
+        ]
+      }
+    }
+  },
+  "methods": [
+    {
+      "method_id": "kit",
+      "rule_id": "TIP-M1",
+      "penetrates_wall": true,
+      "drilling": true,
+      "label": {
+        "en": "Anti-tip kit screwed to the wall",
+        "de": "Kippsicherung an der Wand verschraubt"
+      },
+      "roles": [
+        {
+          "role": "kit",
+          "section": "materials",
+          "rule_ids": [
+            "TIP-M1"
+          ],
+          "label": {
+            "en": "Anti-tip kit",
+            "de": "Kippsicherung"
+          },
+          "select": {
+            "variant_groups": [
+              "anti-tip-kit-for-furniture"
+            ],
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "stop",
+          "quantity": {
+            "rule_id": "TIP-Q1",
+            "units": {
+              "var": "kit_count"
+            }
+          },
+          "ownable": true,
+          "load_bearing": true
+        },
+        {
+          "role": "wall_plug",
+          "section": "materials",
+          "rule_ids": [
+            "R-01",
+            "R-04"
+          ],
+          "label": {
+            "en": "Wall plugs",
+            "de": "Dübel"
+          },
+          "when": {
+            "wall_in": [
+              "concrete",
+              "solid_brick",
+              "brick"
+            ]
+          },
+          "select": {
+            "variant_groups": [
+              "universal-wall-plug"
+            ],
+            "compatible_with_roles": [
+              "kit"
+            ],
+            "wall_suitable": true,
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "stop",
+          "quantity": {
+            "rule_id": "TIP-Q2",
+            "units": {
+              "var": "plug_count"
+            }
+          }
+        },
+        {
+          "role": "wall_plug",
+          "section": "materials",
+          "rule_ids": [
+            "R-01",
+            "R-04",
+            "TIP-L1"
+          ],
+          "label": {
+            "en": "Cavity anchors",
+            "de": "Hohlraumdübel"
+          },
+          "when": {
+            "wall_in": [
+              "plasterboard"
+            ]
+          },
+          "select": {
+            "variant_groups": [
+              "plasterboard-anchor"
+            ],
+            "compatible_with_roles": [
+              "kit"
+            ],
+            "wall_suitable": true,
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "stop",
+          "quantity": {
+            "rule_id": "TIP-Q2",
+            "units": {
+              "var": "plug_count"
+            }
+          }
+        },
+        {
+          "role": "screw",
+          "section": "materials",
+          "rule_ids": [
+            "R-06"
+          ],
+          "label": {
+            "en": "Screws",
+            "de": "Schrauben"
+          },
+          "when": {
+            "wall_in": [
+              "concrete",
+              "solid_brick",
+              "brick"
+            ]
+          },
+          "select": {
+            "variant_groups": [
+              "wood-screw"
+            ],
+            "compatible_with_roles": [
+              "wall_plug",
+              "kit"
+            ],
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "TIP-Q3",
+            "units": {
+              "var": "screw_count"
+            }
+          }
+        },
+        {
+          "role": "screw",
+          "section": "materials",
+          "rule_ids": [
+            "R-06",
+            "TIP-L1"
+          ],
+          "label": {
+            "en": "Screws (into the furniture)",
+            "de": "Schrauben (ins Möbel)"
+          },
+          "when": {
+            "wall_in": [
+              "plasterboard"
+            ]
+          },
+          "select": {
+            "variant_groups": [
+              "wood-screw"
+            ],
+            "compatible_with_roles": [
+              "kit"
+            ],
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "TIP-Q4",
+            "units": {
+              "var": "plug_count"
+            }
+          }
+        },
+        {
+          "role": "drill",
+          "section": "tools",
+          "rule_ids": [
+            "R-09"
+          ],
+          "label": {
+            "en": "Drill",
+            "de": "Bohrmaschine"
+          },
+          "select": {
+            "category": [
+              "Power tools"
+            ],
+            "use_case_by_wall": {
+              "concrete": "drilling concrete",
+              "solid_brick": "drilling brick",
+              "brick": "drilling brick",
+              "plasterboard": "drilling plasterboard"
+            },
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "TIP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "drill_bit",
+          "section": "tools",
+          "rule_ids": [
+            "R-05"
+          ],
+          "label": {
+            "en": "Drill bit",
+            "de": "Bohrer"
+          },
+          "when": {
+            "wall_in": [
+              "concrete",
+              "solid_brick",
+              "brick"
+            ]
+          },
+          "select": {
+            "variant_groups": [
+              "masonry-drill-bit"
+            ],
+            "compatible_with_roles": [
+              "wall_plug"
+            ],
+            "wall_suitable": true,
+            "prefer": [
+              "price_eur"
+            ],
+            "spec_eq_role": {
+              "diameter_mm": "wall_plug"
+            }
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "TIP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "drill_bit_set",
+          "section": "tools",
+          "rule_ids": [
+            "R-05"
+          ],
+          "label": {
+            "en": "Drill bit set",
+            "de": "Bohrer-Set"
+          },
+          "when": {
+            "wall_in": [
+              "plasterboard"
+            ]
+          },
+          "select": {
+            "product_nrs": [
+              "P038"
+            ],
+            "compatible_with_roles": [
+              "drill"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "TIP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        }
+      ]
+    }
+  ],
+  "common_roles": [
+    {
+      "role": "detector",
+      "section": "tools",
+      "rule_ids": [
+        "R-11"
+      ],
+      "label": {
+        "en": "Stud and cable detector",
+        "de": "Leitungssucher"
+      },
+      "select": {
+        "product_nrs": [
+          "P034"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "TIP-Q0",
+        "units": 1
+      },
+      "ownable": true
+    },
+    {
+      "role": "screwdriver",
+      "section": "tools",
+      "rule_ids": [
+        "TIP-T1"
+      ],
+      "label": {
+        "en": "Screwdriver set",
+        "de": "Schraubendreher-Set"
+      },
+      "select": {
+        "product_nrs": [
+          "P031"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "TIP-Q0",
+        "units": 1
+      },
+      "ownable": true
+    },
+    {
+      "role": "safety_glasses",
+      "section": "safety",
+      "rule_ids": [
+        "R-10"
+      ],
+      "label": {
+        "en": "Safety goggles",
+        "de": "Schutzbrille"
+      },
+      "select": {
+        "product_nrs": [
+          "P028"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "TIP-Q0",
+        "units": 1
+      },
+      "ownable": true
+    }
+  ],
+  "rule_texts": {
+    "TIP-M1": {
+      "en": "Free-standing furniture is held against tipping by straps fixed to the wall.",
+      "de": "Freistehende Möbel werden mit an der Wand befestigten Gurten gegen Kippen gesichert."
+    },
+    "TIP-Q0": {
+      "en": "1 per project",
+      "de": "1 pro Projekt"
+    },
+    "TIP-Q1": {
+      "en": "1 kit up to 90 cm furniture width, 2 above",
+      "de": "1 Set bis 90 cm Möbelbreite, darüber 2"
+    },
+    "TIP-Q2": {
+      "en": "2 plugs per kit",
+      "de": "2 Dübel je Set"
+    },
+    "TIP-Q3": {
+      "en": "4 screws per kit (2 into the wall, 2 into the furniture)",
+      "de": "4 Schrauben je Set (2 in die Wand, 2 ins Möbel)"
+    },
+    "TIP-Q4": {
+      "en": "2 screws per kit into the furniture (the cavity anchor brings its own screw – assumption, team to check)",
+      "de": "2 Schrauben je Set ins Möbel (der Hohlraumdübel hat eine eigene Schraube – Annahme, Team prüft)"
+    },
+    "TIP-L1": {
+      "en": "Plasterboard: only with cavity anchors (project catalogue, Limits PRJ-04)",
+      "de": "Gipskarton: nur mit Hohlraumdübeln (Projektkatalog, Grenzwerte PRJ-04)"
+    },
+    "TIP-T1": {
+      "en": "Screwdriver that fits the screws",
+      "de": "Schraubendreher passend zu den Schrauben"
+    }
+  }
+}

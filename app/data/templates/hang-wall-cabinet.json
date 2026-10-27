@@ -1,0 +1,838 @@
+{
+  "template_id": "hang_wall_cabinet",
+  "project_id": "PRJ-02",
+  "version": "1.0.0",
+  "comment": "DR-04 template from the project catalogue PRJ-02 (draft). Closed wall cabinet on a hanging rail, max. 60 cm deep. Limits: sheet Limits + Plasterboard cabinet (S-01, S-02, S-08). Team review pending (SR-10).",
+  "review": {
+    "status": "pending_team_review",
+    "reviewed_by": null,
+    "review_date": null,
+    "created": "2026-10-27",
+    "source": "data/project_catalogue.xlsx (draft v1, 27 Oct 2026)"
+  },
+  "title": {
+    "en": "Hang a wall cabinet",
+    "de": "Hängeschrank aufhängen"
+  },
+  "icon": "cabinet",
+  "group": {
+    "en": "Wall mounting",
+    "de": "Wandmontage"
+  },
+  "safety_level": "mounting_full",
+  "safety_factor": 1.25,
+  "max_load_kg": 50,
+  "wall_limits": {
+    "brick": {
+      "max_load_kg": 25,
+      "rule_id": "ST-03"
+    }
+  },
+  "wall_matches": {
+    "concrete": [
+      "concrete"
+    ],
+    "solid_brick": [
+      "solid brick",
+      "brick"
+    ],
+    "brick": [
+      "brick"
+    ],
+    "plasterboard": [
+      "plasterboard"
+    ]
+  },
+  "defect_fact": "condition",
+  "required_facts": [
+    "wall_type",
+    "cabinet_width_cm",
+    "cabinet_depth_cm",
+    "cabinet_height_cm",
+    "load_kg",
+    "condition"
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "fact": "wall_type",
+      "type": "choice",
+      "options": [
+        "concrete",
+        "solid_brick",
+        "brick",
+        "plasterboard",
+        "aerated_concrete",
+        "unknown"
+      ],
+      "text": {
+        "en": "What is the wall made of?",
+        "de": "Woraus besteht die Wand?"
+      },
+      "help": {
+        "en": "If you are not sure, choose \"I don't know\". We will not guess. Aerated concrete is often called Ytong.",
+        "de": "Wenn Sie unsicher sind, wählen Sie „Weiß ich nicht“. Wir raten nicht. Porenbeton heißt oft Ytong."
+      }
+    },
+    {
+      "id": "Q2",
+      "type": "group",
+      "text": {
+        "en": "About your cabinet",
+        "de": "Zu Ihrem Hängeschrank"
+      },
+      "help": {
+        "en": "Weight = cabinet plus everything inside. Round up if in doubt; weigh the empty cabinet on a bathroom scale.",
+        "de": "Gewicht = Schrank plus Inhalt. Im Zweifel aufrunden; den leeren Schrank mit der Personenwaage wiegen."
+      },
+      "fields": [
+        {
+          "fact": "cabinet_width_cm",
+          "type": "number",
+          "unit": "cm",
+          "min": 10,
+          "max": 400,
+          "label": {
+            "en": "Width",
+            "de": "Breite"
+          }
+        },
+        {
+          "fact": "cabinet_depth_cm",
+          "type": "number",
+          "unit": "cm",
+          "min": 10,
+          "max": 200,
+          "label": {
+            "en": "Depth",
+            "de": "Tiefe"
+          }
+        },
+        {
+          "fact": "cabinet_height_cm",
+          "type": "number",
+          "unit": "cm",
+          "min": 10,
+          "max": 300,
+          "label": {
+            "en": "Height",
+            "de": "Höhe"
+          }
+        },
+        {
+          "fact": "load_kg",
+          "type": "number",
+          "unit": "kg",
+          "min": 0.5,
+          "max": 500,
+          "allow_unknown": true,
+          "label": {
+            "en": "Total weight incl. contents",
+            "de": "Gesamtgewicht inkl. Inhalt"
+          }
+        },
+        {
+          "fact": "condition",
+          "type": "multi",
+          "options": [
+            "cracks",
+            "swollen_chipboard",
+            "bent_metal",
+            "missing_parts"
+          ],
+          "option_labels": {
+            "cracks": {
+              "en": "Cracks",
+              "de": "Risse"
+            },
+            "swollen_chipboard": {
+              "en": "Swollen chipboard",
+              "de": "Aufgequollene Spanplatte"
+            },
+            "bent_metal": {
+              "en": "Bent metal",
+              "de": "Verbogenes Metall"
+            },
+            "missing_parts": {
+              "en": "Missing parts",
+              "de": "Fehlende Teile"
+            }
+          },
+          "none_label": {
+            "en": "None of these / new item",
+            "de": "Nichts davon / neues Teil"
+          },
+          "label": {
+            "en": "Used item? Tick any defect",
+            "de": "Gebraucht? Mängel ankreuzen"
+          }
+        }
+      ]
+    }
+  ],
+  "stops": [
+    {
+      "id": "aerated_concrete",
+      "rule_id": "ST-02",
+      "when": {
+        "wall_in": [
+          "aerated_concrete"
+        ]
+      },
+      "hand_off": "staff",
+      "message": {
+        "en": "Aerated concrete needs special plugs that are not in our catalogue. Please ask OBI staff.",
+        "de": "Porenbeton braucht Spezialdübel, die nicht in unserem Katalog sind. Bitte OBI-Personal fragen."
+      }
+    },
+    {
+      "id": "size",
+      "rule_id": "ST-04",
+      "hand_off": "staff",
+      "message": {
+        "en": "This size is outside this guide. Please ask OBI staff.",
+        "de": "Diese Größe liegt außerhalb dieser Anleitung. Bitte OBI-Personal fragen."
+      },
+      "when": {
+        "any": [
+          {
+            "gt": [
+              {
+                "fact": "cabinet_width_cm"
+              },
+              120
+            ]
+          },
+          {
+            "gt": [
+              {
+                "fact": "cabinet_depth_cm"
+              },
+              60
+            ]
+          },
+          {
+            "lt": [
+              {
+                "fact": "cabinet_height_cm"
+              },
+              30
+            ]
+          },
+          {
+            "gt": [
+              {
+                "fact": "cabinet_height_cm"
+              },
+              100
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "plasterboard_table",
+      "rule_id": "ST-03",
+      "hand_off": "staff",
+      "when": {
+        "all": [
+          {
+            "wall_in": [
+              "plasterboard"
+            ]
+          },
+          {
+            "any": [
+              {
+                "lt": [
+                  {
+                    "fact": "cabinet_width_cm"
+                  },
+                  40
+                ]
+              },
+              {
+                "gt": [
+                  {
+                    "fact": "load_kg"
+                  },
+                  {
+                    "table": {
+                      "rows": [
+                        400,
+                        600,
+                        800,
+                        1000,
+                        1200
+                      ],
+                      "row": {
+                        "mul": [
+                          {
+                            "fact": "cabinet_width_cm"
+                          },
+                          10
+                        ]
+                      },
+                      "row_pick": "floor",
+                      "cols": [
+                        300,
+                        400,
+                        500,
+                        600
+                      ],
+                      "col": {
+                        "mul": [
+                          {
+                            "fact": "cabinet_depth_cm"
+                          },
+                          10
+                        ]
+                      },
+                      "col_pick": "ceil",
+                      "values": [
+                        [
+                          12.5,
+                          11,
+                          9.5,
+                          8
+                        ],
+                        [
+                          18.75,
+                          16.5,
+                          14.25,
+                          12
+                        ],
+                        [
+                          25,
+                          22,
+                          19,
+                          16
+                        ],
+                        [
+                          25,
+                          25,
+                          23.75,
+                          20
+                        ],
+                        [
+                          25,
+                          25,
+                          25,
+                          24
+                        ]
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "limit": {
+        "table": {
+          "rows": [
+            400,
+            600,
+            800,
+            1000,
+            1200
+          ],
+          "row": {
+            "mul": [
+              {
+                "fact": "cabinet_width_cm"
+              },
+              10
+            ]
+          },
+          "row_pick": "floor",
+          "cols": [
+            300,
+            400,
+            500,
+            600
+          ],
+          "col": {
+            "mul": [
+              {
+                "fact": "cabinet_depth_cm"
+              },
+              10
+            ]
+          },
+          "col_pick": "ceil",
+          "values": [
+            [
+              12.5,
+              11,
+              9.5,
+              8
+            ],
+            [
+              18.75,
+              16.5,
+              14.25,
+              12
+            ],
+            [
+              25,
+              22,
+              19,
+              16
+            ],
+            [
+              25,
+              25,
+              23.75,
+              20
+            ],
+            [
+              25,
+              25,
+              25,
+              24
+            ]
+          ]
+        }
+      },
+      "message": {
+        "en": "This is above what we can plan safely on plasterboard for this cabinet size ({limit} kg). Please ask OBI staff.",
+        "de": "Das liegt über dem, was wir auf Gipskarton für diese Schrankgröße sicher planen können ({limit} kg). Bitte OBI-Personal fragen."
+      },
+      "help": {
+        "en": "The limit is half of the manufacturer's value for 12.5 mm boards, because we cannot check the layers, board type or stud spacing.",
+        "de": "Der Grenzwert ist die Hälfte des Herstellerwerts für 12,5-mm-Platten, weil wir Lagen, Plattentyp und Ständerabstand nicht prüfen können."
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "id": "used_item_defect",
+      "rule_id": "ST-06",
+      "when": {
+        "fact_in": {
+          "fact": "condition",
+          "values": [
+            "cracks",
+            "swollen_chipboard",
+            "bent_metal",
+            "missing_parts"
+          ]
+        }
+      },
+      "text": {
+        "en": "You reported a defect on a used part. Please replace this part – a damaged part must not carry a load.",
+        "de": "Sie haben einen Mangel an einem gebrauchten Teil angegeben. Bitte dieses Teil ersetzen – ein beschädigtes Teil darf keine Last tragen."
+      }
+    }
+  ],
+  "no_system_message": {
+    "en": "Our catalogue has no rail and plug combination rated for this weight and wall (we never add up plug ratings).",
+    "de": "Unser Katalog hat keine Kombination aus Schiene und Dübeln, die für dieses Gewicht und diese Wand zugelassen ist (wir addieren nie Dübelwerte)."
+  },
+  "variables": {
+    "rail_count": {
+      "rule_id": "CAB-Q1",
+      "comment": "1 rail up to 100 cm cabinet width, 2 above.",
+      "expr": {
+        "ceil_div": [
+          {
+            "fact": "cabinet_width_cm"
+          },
+          100
+        ]
+      }
+    },
+    "fixing_points": {
+      "rule_id": "CAB-Q2",
+      "comment": "4 plugs per rail.",
+      "expr": {
+        "mul": [
+          {
+            "var": "rail_count"
+          },
+          4
+        ]
+      }
+    }
+  },
+  "methods": [
+    {
+      "method_id": "rail",
+      "rule_id": "CAB-M1",
+      "penetrates_wall": true,
+      "drilling": true,
+      "label": {
+        "en": "Hanging rail with wall plugs",
+        "de": "Aufhängeschiene mit Dübeln"
+      },
+      "roles": [
+        {
+          "role": "rail",
+          "section": "materials",
+          "rule_ids": [
+            "R-07"
+          ],
+          "label": {
+            "en": "Cabinet hanging rail set",
+            "de": "Schrankaufhängeschiene"
+          },
+          "select": {
+            "variant_groups": [
+              "cabinet-hanging-rail-set"
+            ],
+            "load_rated": true,
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "stop",
+          "quantity": {
+            "rule_id": "CAB-Q1",
+            "units": {
+              "var": "rail_count"
+            }
+          },
+          "ownable": true,
+          "load_bearing": true
+        },
+        {
+          "role": "wall_plug",
+          "section": "materials",
+          "rule_ids": [
+            "R-01",
+            "R-04",
+            "R-07"
+          ],
+          "label": {
+            "en": "Wall plugs",
+            "de": "Dübel"
+          },
+          "select": {
+            "variant_groups": [
+              "universal-wall-plug",
+              "heavy-duty-wall-plug",
+              "plasterboard-anchor",
+              "heavy-duty-anchor-bolt"
+            ],
+            "compatible_with_roles": [
+              "rail"
+            ],
+            "wall_suitable": true,
+            "load_rated": true,
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "stop",
+          "quantity": {
+            "rule_id": "CAB-Q2",
+            "units": {
+              "var": "fixing_points"
+            }
+          }
+        },
+        {
+          "role": "screw",
+          "section": "materials",
+          "rule_ids": [
+            "R-06"
+          ],
+          "label": {
+            "en": "Screws",
+            "de": "Schrauben"
+          },
+          "when": {
+            "not": {
+              "role_in": {
+                "role": "wall_plug",
+                "product_nrs": [
+                  "P046",
+                  "P047"
+                ]
+              }
+            }
+          },
+          "select": {
+            "variant_groups": [
+              "wood-screw"
+            ],
+            "compatible_with_roles": [
+              "wall_plug",
+              "rail"
+            ],
+            "load_rated": true,
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "stop",
+          "quantity": {
+            "rule_id": "CAB-Q2",
+            "units": {
+              "var": "fixing_points"
+            }
+          }
+        },
+        {
+          "role": "drill",
+          "section": "tools",
+          "rule_ids": [
+            "R-09"
+          ],
+          "label": {
+            "en": "Drill",
+            "de": "Bohrmaschine"
+          },
+          "select": {
+            "category": [
+              "Power tools"
+            ],
+            "use_case_by_wall": {
+              "concrete": "drilling concrete",
+              "solid_brick": "drilling brick",
+              "brick": "drilling brick",
+              "plasterboard": "drilling plasterboard"
+            },
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "CAB-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "drill_bit",
+          "section": "tools",
+          "rule_ids": [
+            "R-05"
+          ],
+          "label": {
+            "en": "Drill bit",
+            "de": "Bohrer"
+          },
+          "when": {
+            "wall_in": [
+              "concrete",
+              "solid_brick",
+              "brick"
+            ]
+          },
+          "select": {
+            "variant_groups": [
+              "masonry-drill-bit"
+            ],
+            "compatible_with_roles": [
+              "wall_plug"
+            ],
+            "wall_suitable": true,
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "CAB-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "drill_bit_set",
+          "section": "tools",
+          "rule_ids": [
+            "R-05"
+          ],
+          "label": {
+            "en": "Drill bit set",
+            "de": "Bohrer-Set"
+          },
+          "when": {
+            "wall_in": [
+              "plasterboard"
+            ]
+          },
+          "select": {
+            "product_nrs": [
+              "P038"
+            ],
+            "compatible_with_roles": [
+              "drill"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "CAB-Q0",
+            "units": 1
+          },
+          "ownable": true
+        }
+      ]
+    }
+  ],
+  "common_roles": [
+    {
+      "role": "detector",
+      "section": "tools",
+      "rule_ids": [
+        "R-11"
+      ],
+      "label": {
+        "en": "Stud and cable detector",
+        "de": "Leitungssucher"
+      },
+      "select": {
+        "product_nrs": [
+          "P034"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "CAB-Q0",
+        "units": 1
+      },
+      "ownable": true
+    },
+    {
+      "role": "spirit_level",
+      "section": "tools",
+      "rule_ids": [
+        "CAB-T2"
+      ],
+      "label": {
+        "en": "Spirit level",
+        "de": "Wasserwaage"
+      },
+      "select": {
+        "product_nrs": [
+          "P032"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "CAB-Q0",
+        "units": 1
+      },
+      "ownable": true
+    },
+    {
+      "role": "tape_measure",
+      "section": "tools",
+      "rule_ids": [
+        "CAB-T2"
+      ],
+      "label": {
+        "en": "Tape measure",
+        "de": "Maßband"
+      },
+      "select": {
+        "product_nrs": [
+          "P033"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "CAB-Q0",
+        "units": 1
+      },
+      "ownable": true
+    },
+    {
+      "role": "screwdriver",
+      "section": "tools",
+      "rule_ids": [
+        "CAB-T1"
+      ],
+      "label": {
+        "en": "Screwdriver set",
+        "de": "Schraubendreher-Set"
+      },
+      "select": {
+        "product_nrs": [
+          "P031"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "CAB-Q0",
+        "units": 1
+      },
+      "ownable": true
+    },
+    {
+      "role": "safety_glasses",
+      "section": "safety",
+      "rule_ids": [
+        "R-10"
+      ],
+      "label": {
+        "en": "Safety goggles",
+        "de": "Schutzbrille"
+      },
+      "select": {
+        "product_nrs": [
+          "P028"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "CAB-Q0",
+        "units": 1
+      },
+      "ownable": true
+    },
+    {
+      "role": "dust_mask",
+      "section": "safety",
+      "rule_ids": [
+        "R-10"
+      ],
+      "label": {
+        "en": "Dust mask FFP2",
+        "de": "Atemschutzmaske FFP2"
+      },
+      "select": {
+        "product_nrs": [
+          "P029"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "CAB-Q0",
+        "units": 1
+      },
+      "ownable": true
+    }
+  ],
+  "rule_texts": {
+    "CAB-M1": {
+      "en": "Cabinet hangs on a wall rail; every part must carry the whole weight × 1.25.",
+      "de": "Schrank hängt an einer Wandschiene; jedes Teil muss das ganze Gewicht × 1,25 tragen."
+    },
+    "CAB-Q0": {
+      "en": "1 per project",
+      "de": "1 pro Projekt"
+    },
+    "CAB-Q1": {
+      "en": "1 rail per cabinet up to 100 cm wide, 2 above",
+      "de": "1 Schiene je Schrank bis 100 cm Breite, darüber 2"
+    },
+    "CAB-Q2": {
+      "en": "4 plugs and screws per rail (cavity anchors and anchor bolts bring their own screw – assumption, team to check)",
+      "de": "4 Dübel und Schrauben je Schiene (Hohlraumdübel und Schwerlastanker haben eine eigene Schraube – Annahme, Team prüft)"
+    },
+    "CAB-T1": {
+      "en": "Screwdriver that fits the screws",
+      "de": "Schraubendreher passend zu den Schrauben"
+    },
+    "CAB-T2": {
+      "en": "Measuring and levelling for every mounting job",
+      "de": "Messen und Ausrichten bei jeder Montage"
+    }
+  }
+}

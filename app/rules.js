@@ -121,12 +121,78 @@
         v = Math.ceil(evalExpr(expr.ceil_div[0], ctx) / evalExpr(expr.ceil_div[1], ctx));
       } else if ("max" in expr) {
         v = Math.max.apply(null, expr.max.map((e) => evalExpr(e, ctx)));
+      } else if ("min" in expr) {
+        v = Math.min.apply(null, expr.min.map((e) => evalExpr(e, ctx)));
+      } else if ("add" in expr) {
+        v = expr.add.reduce((acc, e) => acc + evalExpr(e, ctx), 0);
+      } else if ("sub" in expr) {
+        v = evalExpr(expr.sub[0], ctx) - evalExpr(expr.sub[1], ctx);
+      } else if ("div" in expr) {
+        v = evalExpr(expr.div[0], ctx) / evalExpr(expr.div[1], ctx);
+      } else if ("floor" in expr) {
+        v = Math.floor(evalExpr(expr.floor, ctx) + 1e-9); // 1e-9: 5.9999999 from float maths counts as 6
+      } else if ("ceil" in expr) {
+        v = Math.ceil(evalExpr(expr.ceil, ctx) - 1e-9);
+      } else if ("table" in expr) {
+        v = tableLookup(expr.table, ctx);
+      } else if ("unclear" in expr) {
+        // Quantity the data does not give (e.g. "per rail instructions") → "unclear", no total (RB-13).
+        throw new MissingValue("unclear: " + expr.unclear);
       } else {
         throw new Error("Unknown expression: " + JSON.stringify(expr)); // fail safe
       }
     } else throw new Error("Invalid expression");
     if (!Number.isFinite(v)) throw new MissingValue("not a number");
     return v;
+  }
+
+  /**
+   * Table lookup, e.g. the plasterboard cabinet limits (PRJ-02, sheet
+   * "Plasterboard cabinet"). pick "floor" = next smaller key, "ceil" = next
+   * larger key (the less favourable value, as the manufacturer advises).
+   * Outside the table → MissingValue (callers treat that as "not allowed").
+   */
+  function tableLookup(t, ctx) {
+    const pickKey = (keys, x, mode) => {
+      const sorted = keys.slice().sort((a, b) => a - b);
+      const k = mode === "ceil" ? sorted.find((v) => v >= x) : sorted.filter((v) => v <= x).pop();
+      if (k === undefined) throw new MissingValue("outside table");
+      return keys.indexOf(k);
+    };
+    const r = pickKey(t.rows, evalExpr(t.row, ctx), t.row_pick);
+    const c = pickKey(t.cols, evalExpr(t.col, ctx), t.col_pick);
+    const v = t.values[r] && t.values[r][c];
+    if (typeof v !== "number") throw new MissingValue("no table value");
+    return v;
+  }
+
+  // ---------------------------------------------------------------------
+  // Conditions for stop rules, warnings and optional roles (explicit, no eval)
+  // ---------------------------------------------------------------------
+  /**
+   * Returns true/false. Throws MissingValue if a needed value is missing –
+   * stop rules treat that as "stop" (fail safe), optional roles as "not added".
+   */
+  function condTrue(c, ctx) {
+    if (!c || typeof c !== "object") throw new Error("Invalid condition");
+    if ("all" in c) return c.all.every((x) => condTrue(x, ctx));
+    if ("any" in c) return c.any.some((x) => condTrue(x, ctx));
+    if ("not" in c) return !condTrue(c.not, ctx);
+    if ("wall_in" in c) return c.wall_in.includes(trustedValue(ctx.facts, "wall_type"));
+    if ("fact_in" in c) {
+      // Choice facts: value in list. Checklist facts (arrays): any ticked value in list.
+      const v = trustedValue(ctx.facts, c.fact_in.fact);
+      if (v === undefined) throw new MissingValue("fact " + c.fact_in.fact);
+      return Array.isArray(v) ? v.some((x) => c.fact_in.values.includes(x)) : c.fact_in.values.includes(v);
+    }
+    if ("role_in" in c) {
+      const it = ctx.resolved[c.role_in.role];
+      return !!(it && it.product && c.role_in.product_nrs.includes(it.product.product_nr));
+    }
+    const ops = { gt: (a, b) => a > b, gte: (a, b) => a >= b, lt: (a, b) => a < b, lte: (a, b) => a <= b };
+    const op = Object.keys(ops).find((k) => k in c);
+    if (op) return ops[op](evalExpr(c[op][0], ctx), evalExpr(c[op][1], ctx));
+    throw new Error("Unknown condition: " + JSON.stringify(c)); // fail safe
   }
 
   function computeVar(name, ctx) {
@@ -182,7 +248,9 @@
     const checks = [];
     const add = (check, ok, detail, ruleId) => checks.push({ check, ok, detail, rule_id: ruleId });
     const wall = trustedValue(ctx.facts, "wall_type");
-    const load = Number(trustedValue(ctx.facts, "load_kg"));
+    // Load from the customer's answer, or from catalogue data (e.g. glass door weight, PRJ-06).
+    let load = Number(trustedValue(ctx.facts, "load_kg"));
+    if (s.load_expr) { try { load = evalExpr(s.load_expr, ctx); } catch (_) { load = NaN; } }
 
     // R-13: products that require a professional are never offered.
     add("requires_professional", !p.requires_professional,
@@ -207,7 +275,9 @@
     });
 
     if (s.wall_suitable) {
-      add("wall_type", typeof wall === "string" && p.suitable_wall_types.includes(wall),
+      // Template maps an answer to the catalogue's wall words, e.g. solid_brick → "solid brick", "brick".
+      const accepted = (ctx.template.wall_matches && ctx.template.wall_matches[wall]) || [wall];
+      add("wall_type", typeof wall === "string" && accepted.some((w) => p.suitable_wall_types.includes(w)),
         "wall=" + wall + "; product: " + (p.suitable_wall_types.join(", ") || "no data"), "R-04");
     }
 
@@ -226,6 +296,12 @@
       try { want = evalExpr(e, ctx); } catch (_) { want = undefined; }
       add("spec " + key, want !== undefined && p.specs[key] === want, p.specs[key] + " vs " + want, "FR-08");
     });
+    Object.entries(s.spec_eq_fact || {}).forEach(([key, fact]) => {
+      // Text specs that must match a confirmed answer, e.g. lock type BB/WC/PZ (PRJ-07).
+      const want = trustedValue(ctx.facts, fact);
+      add("spec " + key + " = " + fact, want !== undefined && String(p.specs[key]).toLowerCase() === String(want).toLowerCase(),
+        p.specs[key] + " vs " + want, "FR-08");
+    });
     Object.entries(s.spec_gte || {}).forEach(([key, e]) => {
       let want;
       try { want = evalExpr(e, ctx); } catch (_) { want = undefined; }
@@ -242,11 +318,19 @@
 
   function round(n) { return Math.round(n * 100) / 100; }
 
+  /** prefer: ["price_eur"] ascending; "-spec.volume_l" = descending, "spec.x" = from specs. */
   function sortByPrefer(list, prefer) {
+    const value = (p, key) => {
+      const v = key.startsWith("spec.") ? p.specs[key.slice(5)] : p[key];
+      return typeof v === "number" ? v : null;
+    };
     return list.slice().sort((a, b) => {
-      for (const key of prefer || []) {
-        const va = a[key] === null ? Infinity : a[key];
-        const vb = b[key] === null ? Infinity : b[key];
+      for (const raw of prefer || []) {
+        const desc = raw.startsWith("-");
+        const key = desc ? raw.slice(1) : raw;
+        let va = value(a, key), vb = value(b, key);
+        va = va === null ? Infinity : desc ? -va : va;
+        vb = vb === null ? Infinity : desc ? -vb : vb;
         if (va !== vb) return va - vb;
       }
       return a.product_nr < b.product_nr ? -1 : 1; // deterministic tie-break
@@ -255,8 +339,7 @@
 
   function conditionMet(role, ctx) {
     if (!role.when) return true;
-    if (role.when.wall_in) return role.when.wall_in.includes(trustedValue(ctx.facts, "wall_type"));
-    return false; // unknown condition -> fail safe (role not silently added)
+    try { return condTrue(role.when, ctx); } catch (_) { return false; } // fail safe: role not silently added
   }
 
   /**
@@ -307,7 +390,8 @@
    * @param facts      { key: {value, status, source} }
    * @param catalogue  from BBData.buildCatalogue
    * @param safetyRules data/safety-rules.json
-   * @param options    { overrides: {role: product_nr}, generatedHints: {role: text} }
+   * @param options    { overrides: {role: product_nr}, generatedHints: {role: text},
+   *                     owned: [role, …] – parts the customer already has (C-8, SR-15) }
    */
   function evaluate(template, facts, catalogue, safetyRules, options) {
     options = options || {};
@@ -349,22 +433,40 @@
       return finalise(result);
     }
 
-    // --- Value sanity and hard limits (R-12, R-08) --------------------------
+    // --- Stop rules of the project (DR-04 project catalogue, sheet "Stop rules") --
+    // A rule whose values cannot be evaluated stops as well (fail safe).
+    for (const stop of template.stops || []) {
+      let hit;
+      try { hit = condTrue(stop.when, ctx); } catch (e) { hit = true; }
+      if (!hit) continue;
+      let limit = null;
+      if (stop.limit) { try { limit = round(evalExpr(stop.limit, ctx)); } catch (_) { limit = null; } }
+      result.state = "safety_blocked";
+      result.blocked = {
+        reason: "stop_rule", rule_id: stop.rule_id, stop_id: stop.id || stop.rule_id,
+        message: stop.message, help: stop.help || null, hand_off: stop.hand_off || "staff", limit_kg: limit
+      };
+      log(ctx, stop.rule_id, "stop rule " + (stop.id || stop.rule_id), "stop → " + (stop.hand_off || "staff"), tplSource);
+      return finalise(result);
+    }
+
+    // --- Value sanity and hard limits (R-12, R-08) – only for projects with a load question
+    const needsLoad = (template.required_facts || []).includes("load_kg");
     const load = Number(trustedValue(facts, "load_kg"));
     const wall = trustedValue(facts, "wall_type");
-    if (!Number.isFinite(load) || load <= 0) {
+    if (needsLoad && (!Number.isFinite(load) || load <= 0)) {
       result.state = "safety_blocked";
       result.blocked = { reason: "invalid_value", rule_id: "SR-06", facts: ["load_kg"] };
       return finalise(result);
     }
-    if (load > template.max_load_kg) {
+    if (needsLoad && load > template.max_load_kg) {
       result.state = "safety_blocked";
       result.blocked = { reason: "load_over_limit", rule_id: "R-12", limit_kg: template.max_load_kg, load_kg: load };
       log(ctx, "R-12", "load limit", load + " kg > " + template.max_load_kg + " kg → professional", tplSource);
       return finalise(result);
     }
     const wl = (template.wall_limits || {})[wall];
-    if (wl && load > wl.max_load_kg) {
+    if (needsLoad && wl && load > wl.max_load_kg) {
       result.state = "safety_blocked";
       result.blocked = { reason: "wall_limit", rule_id: wl.rule_id, wall, limit_kg: wl.max_load_kg, load_kg: load };
       log(ctx, wl.rule_id, "wall limit " + wall, load + " kg > " + wl.max_load_kg + " kg", tplSource);
@@ -402,7 +504,7 @@
     }
     if (!chosen) {
       result.state = "safety_blocked";
-      result.blocked = { reason: "no_suitable_system", rule_id: "R-07", failures };
+      result.blocked = { reason: "no_suitable_system", rule_id: "R-07", failures, message: template.no_system_message || null };
       return finalise(result);
     }
 
@@ -413,7 +515,29 @@
       penetrates_wall: !!chosen.method.penetrates_wall
     };
     const hints = options.generatedHints || {};
+    // C-8 / SR-15: parts the customer already has. Plugs and screws are always new
+    // (role.ownable false). A used load-bearing part with a reported defect is not
+    // accepted – it stays on the list (ST-06).
+    const ownedWanted = new Set(options.owned || []);
+    const defect = template.defect_fact ? defectReported(facts, template.defect_fact) : false;
+    const roleDefs = {};
+    chosen.method.roles.concat(template.common_roles || []).forEach((r) => { roleDefs[r.role] = r; });
     result.items = chosen.items.map((it) => {
+      const def = roleDefs[it.role] || {};
+      let autoOwned = false;
+      if (def.owned_when) { try { autoOwned = condTrue(def.owned_when, ctx); } catch (_) { autoOwned = false; } }
+      const ownable = !!def.ownable;
+      const loadBearing = !!def.load_bearing;
+      let owned = false, ownedRefused = false;
+      if (autoOwned || (ownable && ownedWanted.has(it.role))) {
+        if (loadBearing && defect) ownedRefused = true;
+        else owned = true;
+      }
+      if (owned || ownedRefused) {
+        log(ctx, ownedRefused ? "ST-06" : "C-8", "customer has " + it.role,
+          ownedRefused ? "not accepted – defect reported, new part stays on the list" : "taken off the list (not counted)",
+          "fact:customer");
+      }
       const q = { rule_id: it.quantityRule.rule_id, units: null, packs: null, pack_qty: null, clear: false, estimate: true };
       try { q.units = evalExpr(it.quantityRule.units, ctx); } catch (_) { q.units = null; }
       if (it.product) {
@@ -433,6 +557,9 @@
       return {
         role: it.role, section: it.section, label: it.label, rule_ids: it.rule_ids,
         status: it.status, on_none: it.on_none, overridden: !!it.overridden,
+        ownable, load_bearing: loadBearing, owned, owned_auto: owned && autoOwned, owned_refused: ownedRefused,
+        // SR-15: an owned load-bearing part must be rated for the whole load × factor.
+        required_rating_kg: loadBearing && Number.isFinite(load) && needsLoad ? round(load * template.safety_factor) : null,
         product: it.product,
         // SR-07: shown unchanged, straight from the catalogue.
         safety_note: it.product ? it.product.safety_note : "",
@@ -450,25 +577,43 @@
       result.notices.push({ id: "detector_limits", rule_id: "SR-05" });
       result.notices.push({ id: "no_wall_certification", rule_id: "SR-02" });
     }
+    if (result.items.some((i) => i.owned_refused)) result.notices.push({ id: "owned_defect", rule_id: "ST-06" });
+    if (result.items.some((i) => i.owned && i.load_bearing && i.required_rating_kg !== null)) result.notices.push({ id: "owned_load_bearing", rule_id: "SR-15" });
+    // Project warnings that do not stop (e.g. ST-14 switch covers), text from the template.
+    (template.warnings || []).forEach((w) => {
+      let on;
+      try { on = w.when ? condTrue(w.when, ctx) : true; } catch (_) { on = true; } // missing value → show the warning
+      if (on) {
+        result.notices.push({ id: w.id, rule_id: w.rule_id, text: w.text });
+        log(ctx, w.rule_id, "warning " + w.id, "shown", tplSource);
+      }
+    });
 
-    // --- State and total (RB-13) --------------------------------------------
-    const notOk = result.items.filter((i) => i.status !== "ok");
-    const unclear = result.items.filter((i) => i.status === "ok" && !i.quantity.clear);
+    // --- State and total (RB-13) – parts the customer has are not counted -----
+    const buy = result.items.filter((i) => !i.owned);
+    const notOk = buy.filter((i) => i.status !== "ok");
+    const unclear = buy.filter((i) => i.status === "ok" && !i.quantity.clear);
     if (notOk.some((i) => i.status === "incompatible" || i.status === "unknown_product")) {
       result.state = "incomplete";
       result.total.reason = "incompatible";
     } else if (notOk.length) {
       result.state = "incomplete";
       result.total.reason = "unresolved_items";
-    } else if (unclear.length || result.items.some((i) => i.line_price === null)) {
+    } else if (unclear.length || buy.some((i) => i.line_price === null)) {
       result.state = "validated";
       result.total.reason = "unclear_pack";
     } else {
       result.state = "validated";
-      result.total.amount = round(result.items.reduce((s, i) => s + i.line_price, 0));
+      result.total.amount = round(buy.reduce((s, i) => s + i.line_price, 0));
     }
     log(ctx, "SR-03", "final state", result.state + (result.total.reason ? " (" + result.total.reason + ")" : ""), tplSource);
     return finalise(result);
+  }
+
+  /** Used-item checklist (C-7): any ticked defect other than "none". */
+  function defectReported(facts, key) {
+    const v = trustedValue(facts, key);
+    return Array.isArray(v) ? v.some((x) => x !== "none") : false;
   }
 
   function finalise(result) {

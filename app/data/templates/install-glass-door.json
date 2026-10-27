@@ -1,0 +1,433 @@
+{
+  "template_id": "install_glass_door",
+  "project_id": "PRJ-06",
+  "version": "1.0.0",
+  "comment": "DR-04 template from the project catalogue PRJ-06 (draft). Glass door into an existing frame with glass-door hinge seats; no wall drilling. Hinge rating checked against the door weight from the catalogue. Team review pending (SR-10).",
+  "review": {
+    "status": "pending_team_review",
+    "reviewed_by": null,
+    "review_date": null,
+    "created": "2026-10-27",
+    "source": "data/project_catalogue.xlsx (draft v1, 27 Oct 2026)"
+  },
+  "title": {
+    "en": "Install a glass door",
+    "de": "Glastür einbauen"
+  },
+  "icon": "glass_door",
+  "group": {
+    "en": "Doors & locks",
+    "de": "Türen & Schlösser"
+  },
+  "safety_level": "mounting_full",
+  "safety_factor": 1.25,
+  "wall_limits": {},
+  "required_facts": [
+    "frame",
+    "leaf_size",
+    "din_side",
+    "glass"
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "type": "group",
+      "text": {
+        "en": "Your door frame",
+        "de": "Ihre Zarge"
+      },
+      "fields": [
+        {
+          "fact": "frame",
+          "type": "choice",
+          "options": [
+            "yes",
+            "no",
+            "dont_know"
+          ],
+          "option_labels": {
+            "yes": {
+              "en": "Yes",
+              "de": "Ja"
+            },
+            "no": {
+              "en": "No",
+              "de": "Nein"
+            },
+            "dont_know": {
+              "en": "I don't know",
+              "de": "Weiß ich nicht"
+            }
+          },
+          "label": {
+            "en": "Frame present, undamaged, with seats for glass-door hinges?",
+            "de": "Zarge vorhanden, unbeschädigt, mit Bandaufnahmen für Glastüren?"
+          }
+        },
+        {
+          "fact": "leaf_size",
+          "type": "choice",
+          "options": [
+            "standard",
+            "other"
+          ],
+          "option_labels": {
+            "standard": {
+              "en": "Standard 834 × 1972 mm",
+              "de": "Standard 834 × 1972 mm"
+            },
+            "other": {
+              "en": "Other size",
+              "de": "Andere Größe"
+            }
+          },
+          "label": {
+            "en": "Door size",
+            "de": "Türgröße"
+          }
+        },
+        {
+          "fact": "din_side",
+          "type": "choice",
+          "options": [
+            "left",
+            "right"
+          ],
+          "option_labels": {
+            "left": {
+              "en": "DIN left",
+              "de": "DIN links"
+            },
+            "right": {
+              "en": "DIN right",
+              "de": "DIN rechts"
+            }
+          },
+          "label": {
+            "en": "Opening side",
+            "de": "Öffnungsrichtung"
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q2",
+      "type": "group",
+      "text": {
+        "en": "Your door",
+        "de": "Ihre Tür"
+      },
+      "fields": [
+        {
+          "fact": "glass",
+          "type": "choice",
+          "options": [
+            "new",
+            "own_esg",
+            "own_not_esg"
+          ],
+          "option_labels": {
+            "new": {
+              "en": "New door from the list",
+              "de": "Neue Tür aus der Liste"
+            },
+            "own_esg": {
+              "en": "Own door, marked as toughened safety glass (ESG)",
+              "de": "Eigene Tür mit ESG-Kennzeichnung"
+            },
+            "own_not_esg": {
+              "en": "Own door, no ESG marking",
+              "de": "Eigene Tür ohne ESG-Kennzeichnung"
+            }
+          },
+          "label": {
+            "en": "Which door?",
+            "de": "Welche Tür?"
+          }
+        }
+      ]
+    }
+  ],
+  "stops": [
+    {
+      "id": "frame_or_glass",
+      "rule_id": "ST-11",
+      "hand_off": "staff",
+      "when": {
+        "any": [
+          {
+            "fact_in": {
+              "fact": "frame",
+              "values": [
+                "no",
+                "dont_know"
+              ]
+            }
+          },
+          {
+            "fact_in": {
+              "fact": "leaf_size",
+              "values": [
+                "other"
+              ]
+            }
+          },
+          {
+            "fact_in": {
+              "fact": "glass",
+              "values": [
+                "own_not_esg"
+              ]
+            }
+          }
+        ]
+      },
+      "message": {
+        "en": "This needs a new frame or a special door. Please ask OBI staff.",
+        "de": "Dafür braucht es eine neue Zarge oder eine Sondertür. Bitte OBI-Personal fragen."
+      }
+    }
+  ],
+  "no_system_message": {
+    "en": "Our catalogue has no hinge set rated for this door.",
+    "de": "Unser Katalog hat kein Bänder-Set, das für diese Tür zugelassen ist."
+  },
+  "methods": [
+    {
+      "method_id": "hinges",
+      "rule_id": "GLASS-M1",
+      "penetrates_wall": false,
+      "drilling": false,
+      "label": {
+        "en": "Glass door on glass-door hinges in the existing frame",
+        "de": "Glastür mit Glastürbändern in der vorhandenen Zarge"
+      },
+      "roles": [
+        {
+          "role": "glass_door",
+          "section": "materials",
+          "rule_ids": [
+            "S-06",
+            "S-08"
+          ],
+          "label": {
+            "en": "Glass door (ESG 8 mm)",
+            "de": "Ganzglastür (ESG 8 mm)"
+          },
+          "select": {
+            "variant_groups": [
+              "glass-door-toughened-safety-glass-8-mm"
+            ],
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "stop",
+          "quantity": {
+            "rule_id": "GLASS-Q0",
+            "units": 1
+          },
+          "load_bearing": true,
+          "owned_when": {
+            "fact_in": {
+              "fact": "glass",
+              "values": [
+                "own_esg"
+              ]
+            }
+          }
+        },
+        {
+          "role": "hinges",
+          "section": "materials",
+          "rule_ids": [
+            "R-07"
+          ],
+          "label": {
+            "en": "Glass door hinge set",
+            "de": "Glastürbänder (Set)"
+          },
+          "select": {
+            "variant_groups": [
+              "glass-door-hinge-set"
+            ],
+            "compatible_with_roles": [
+              "glass_door"
+            ],
+            "load_rated": true,
+            "load_expr": {
+              "spec": "glass_door.weight_kg"
+            },
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "stop",
+          "quantity": {
+            "rule_id": "GLASS-Q1",
+            "units": 2
+          },
+          "ownable": true,
+          "load_bearing": true
+        },
+        {
+          "role": "handle",
+          "section": "materials",
+          "rule_ids": [
+            "GLASS-Q0"
+          ],
+          "label": {
+            "en": "Glass door handle set with latch",
+            "de": "Glastürbeschlag mit Falle"
+          },
+          "select": {
+            "variant_groups": [
+              "glass-door-handle-set-with-latch"
+            ],
+            "compatible_with_roles": [
+              "glass_door"
+            ],
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "GLASS-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "screwdriver",
+          "section": "tools",
+          "rule_ids": [
+            "GLASS-Q0"
+          ],
+          "label": {
+            "en": "Screwdriver set",
+            "de": "Schraubendreher-Set"
+          },
+          "select": {
+            "product_nrs": [
+              "P031"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "GLASS-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "spirit_level",
+          "section": "tools",
+          "rule_ids": [
+            "GLASS-Q0"
+          ],
+          "label": {
+            "en": "Spirit level",
+            "de": "Wasserwaage"
+          },
+          "select": {
+            "product_nrs": [
+              "P032"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "GLASS-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "tape_measure",
+          "section": "tools",
+          "rule_ids": [
+            "GLASS-Q0"
+          ],
+          "label": {
+            "en": "Tape measure",
+            "de": "Maßband"
+          },
+          "select": {
+            "product_nrs": [
+              "P033"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "GLASS-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "cut_gloves",
+          "section": "safety",
+          "rule_ids": [
+            "GLASS-Q2"
+          ],
+          "label": {
+            "en": "Cut-resistant gloves",
+            "de": "Schnittschutzhandschuhe"
+          },
+          "select": {
+            "product_nrs": [
+              "P090"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "GLASS-Q2",
+            "units": 2
+          },
+          "ownable": true
+        }
+      ]
+    }
+  ],
+  "common_roles": [],
+  "howto": [
+    {
+      "type": "video",
+      "title": {
+        "en": "Installing and adjusting a glass door",
+        "de": "Glastür einbauen und einstellen"
+      },
+      "url": "https://www.youtube.com/watch?v=8EoXpjIg0SI",
+      "publisher": "OBI HowTo",
+      "lang": "de"
+    },
+    {
+      "type": "article",
+      "title": {
+        "en": "Installing interior doors (standard doors, fits only partly)",
+        "de": "Innentüren einbauen (Standardtüren, passt nur teilweise)"
+      },
+      "url": "https://www.obi.ch/magazin/bauen/fenster-tueren/innentueren-einbauen",
+      "publisher": "OBI Magazin",
+      "lang": "de"
+    }
+  ],
+  "rule_texts": {
+    "GLASS-M1": {
+      "en": "Toughened safety glass only; the hinges must carry the door weight × 1.25.",
+      "de": "Nur Einscheibensicherheitsglas (ESG); die Bänder müssen das Türgewicht × 1,25 tragen."
+    },
+    "GLASS-Q0": {
+      "en": "1 per door",
+      "de": "1 pro Tür"
+    },
+    "GLASS-Q1": {
+      "en": "1 set (2 hinges) per door",
+      "de": "1 Set (2 Bänder) pro Tür"
+    },
+    "GLASS-Q2": {
+      "en": "2 pairs – carry the door with two people",
+      "de": "2 Paar – die Tür zu zweit tragen"
+    }
+  }
+}

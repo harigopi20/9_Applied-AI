@@ -1,0 +1,752 @@
+{
+  "template_id": "install_sliding_door",
+  "project_id": "PRJ-08",
+  "version": "1.0.0",
+  "comment": "DR-04 template from the project catalogue PRJ-08 (draft). Sliding door on a rail mounted on the wall above the opening. Moving load: only concrete or solid brick (ST-13). Team review pending (SR-10).",
+  "review": {
+    "status": "pending_team_review",
+    "reviewed_by": null,
+    "review_date": null,
+    "created": "2026-10-27",
+    "source": "data/project_catalogue.xlsx (draft v1, 27 Oct 2026)"
+  },
+  "title": {
+    "en": "Install a sliding door",
+    "de": "Schiebetür montieren"
+  },
+  "icon": "sliding_door",
+  "group": {
+    "en": "Doors & locks",
+    "de": "Türen & Schlösser"
+  },
+  "safety_level": "mounting_full",
+  "safety_factor": 1.25,
+  "max_load_kg": 60,
+  "wall_limits": {},
+  "wall_matches": {
+    "concrete": [
+      "concrete"
+    ],
+    "solid_brick": [
+      "solid brick",
+      "brick"
+    ],
+    "brick": [
+      "brick"
+    ],
+    "plasterboard": [
+      "plasterboard"
+    ]
+  },
+  "defect_fact": "condition",
+  "required_facts": [
+    "wall_type",
+    "opening_width_cm",
+    "opening_height_cm",
+    "load_kg",
+    "condition"
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "fact": "wall_type",
+      "type": "choice",
+      "options": [
+        "concrete",
+        "solid_brick",
+        "brick",
+        "plasterboard",
+        "aerated_concrete",
+        "unknown"
+      ],
+      "text": {
+        "en": "What is the wall above the opening made of?",
+        "de": "Woraus besteht die Wand über der Öffnung?"
+      },
+      "help": {
+        "en": "If you are not sure, choose \"I don't know\". We will not guess. Aerated concrete is often called Ytong.",
+        "de": "Wenn Sie unsicher sind, wählen Sie „Weiß ich nicht“. Wir raten nicht. Porenbeton heißt oft Ytong."
+      }
+    },
+    {
+      "id": "Q2",
+      "type": "group",
+      "text": {
+        "en": "Your door",
+        "de": "Ihre Tür"
+      },
+      "help": {
+        "en": "Door weight: for the door leaf from the list it is 25 kg (product data). Round up if in doubt.",
+        "de": "Türgewicht: Beim Türblatt aus der Liste sind es 25 kg (Produktdaten). Im Zweifel aufrunden."
+      },
+      "fields": [
+        {
+          "fact": "opening_width_cm",
+          "type": "number",
+          "unit": "cm",
+          "min": 30,
+          "max": 300,
+          "label": {
+            "en": "Width of the opening",
+            "de": "Breite der Öffnung"
+          }
+        },
+        {
+          "fact": "opening_height_cm",
+          "type": "number",
+          "unit": "cm",
+          "min": 100,
+          "max": 300,
+          "label": {
+            "en": "Height of the opening",
+            "de": "Höhe der Öffnung"
+          }
+        },
+        {
+          "fact": "load_kg",
+          "type": "number",
+          "unit": "kg",
+          "min": 0.5,
+          "max": 300,
+          "allow_unknown": true,
+          "label": {
+            "en": "Weight of the door leaf",
+            "de": "Gewicht des Türblatts"
+          }
+        },
+        {
+          "fact": "condition",
+          "type": "multi",
+          "options": [
+            "cracks",
+            "swollen_chipboard",
+            "bent_metal",
+            "missing_parts"
+          ],
+          "option_labels": {
+            "cracks": {
+              "en": "Cracks",
+              "de": "Risse"
+            },
+            "swollen_chipboard": {
+              "en": "Swollen chipboard",
+              "de": "Aufgequollene Spanplatte"
+            },
+            "bent_metal": {
+              "en": "Bent metal",
+              "de": "Verbogenes Metall"
+            },
+            "missing_parts": {
+              "en": "Missing parts",
+              "de": "Fehlende Teile"
+            }
+          },
+          "none_label": {
+            "en": "None of these / new item",
+            "de": "Nichts davon / neues Teil"
+          },
+          "label": {
+            "en": "Used item? Tick any defect",
+            "de": "Gebraucht? Mängel ankreuzen"
+          }
+        }
+      ]
+    }
+  ],
+  "stops": [
+    {
+      "id": "aerated_concrete",
+      "rule_id": "ST-02",
+      "when": {
+        "wall_in": [
+          "aerated_concrete"
+        ]
+      },
+      "hand_off": "staff",
+      "message": {
+        "en": "Aerated concrete needs special plugs that are not in our catalogue. Please ask OBI staff.",
+        "de": "Porenbeton braucht Spezialdübel, die nicht in unserem Katalog sind. Bitte OBI-Personal fragen."
+      }
+    },
+    {
+      "id": "moving_load_wall",
+      "rule_id": "ST-13",
+      "hand_off": "staff",
+      "when": {
+        "wall_in": [
+          "brick",
+          "plasterboard"
+        ]
+      },
+      "message": {
+        "en": "A sliding door puts a moving load on the wall. Please ask OBI staff.",
+        "de": "Eine Schiebetür belastet die Wand in Bewegung. Bitte OBI-Personal fragen."
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "id": "used_item_defect",
+      "rule_id": "ST-06",
+      "when": {
+        "fact_in": {
+          "fact": "condition",
+          "values": [
+            "cracks",
+            "swollen_chipboard",
+            "bent_metal",
+            "missing_parts"
+          ]
+        }
+      },
+      "text": {
+        "en": "You reported a defect on a used part. Please replace this part – a damaged part must not carry a load.",
+        "de": "Sie haben einen Mangel an einem gebrauchten Teil angegeben. Bitte dieses Teil ersetzen – ein beschädigtes Teil darf keine Last tragen."
+      }
+    }
+  ],
+  "no_system_message": {
+    "en": "Our catalogue has no rail, door leaf and plug combination for this opening, weight and wall (we never add up plug ratings).",
+    "de": "Unser Katalog hat keine Kombination aus Schiene, Türblatt und Dübeln für diese Öffnung, dieses Gewicht und diese Wand (wir addieren nie Dübelwerte)."
+  },
+  "methods": [
+    {
+      "method_id": "rail",
+      "rule_id": "SLIDE-M1",
+      "penetrates_wall": true,
+      "drilling": true,
+      "label": {
+        "en": "Wall-mounted rail above the opening",
+        "de": "Laufschiene an der Wand über der Öffnung"
+      },
+      "roles": [
+        {
+          "role": "leaf",
+          "section": "materials",
+          "rule_ids": [
+            "SLIDE-L1"
+          ],
+          "label": {
+            "en": "Sliding door leaf",
+            "de": "Schiebetürblatt"
+          },
+          "select": {
+            "variant_groups": [
+              "wooden-sliding-door-leaf"
+            ],
+            "spec_gte": {
+              "width_mm": {
+                "mul": [
+                  {
+                    "fact": "opening_width_cm"
+                  },
+                  10
+                ]
+              }
+            },
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "stop",
+          "quantity": {
+            "rule_id": "SLIDE-Q0",
+            "units": 1
+          },
+          "ownable": true,
+          "load_bearing": true
+        },
+        {
+          "role": "rail",
+          "section": "materials",
+          "rule_ids": [
+            "R-07",
+            "SLIDE-L2"
+          ],
+          "label": {
+            "en": "Sliding door rail system",
+            "de": "Schiebetürsystem mit Laufschiene"
+          },
+          "select": {
+            "variant_groups": [
+              "sliding-door-rail-system"
+            ],
+            "compatible_with_roles": [
+              "leaf"
+            ],
+            "load_rated": true,
+            "spec_gte": {
+              "max_door_width_mm": {
+                "spec": "leaf.width_mm"
+              },
+              "rail_length_mm": {
+                "mul": [
+                  {
+                    "spec": "leaf.width_mm"
+                  },
+                  2
+                ]
+              }
+            },
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "stop",
+          "quantity": {
+            "rule_id": "SLIDE-Q0",
+            "units": 1
+          },
+          "ownable": true,
+          "load_bearing": true
+        },
+        {
+          "role": "wall_plug",
+          "section": "materials",
+          "rule_ids": [
+            "R-01",
+            "R-04",
+            "R-07"
+          ],
+          "label": {
+            "en": "Wall plugs",
+            "de": "Dübel"
+          },
+          "select": {
+            "variant_groups": [
+              "heavy-duty-wall-plug",
+              "heavy-duty-anchor-bolt"
+            ],
+            "compatible_with_roles": [
+              "rail"
+            ],
+            "wall_suitable": true,
+            "load_rated": true,
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "stop",
+          "quantity": {
+            "rule_id": "SLIDE-Q1",
+            "units": {
+              "unclear": "per rail instructions"
+            }
+          }
+        },
+        {
+          "role": "screw",
+          "section": "materials",
+          "rule_ids": [
+            "R-06"
+          ],
+          "label": {
+            "en": "Screws",
+            "de": "Schrauben"
+          },
+          "select": {
+            "variant_groups": [
+              "wood-screw"
+            ],
+            "compatible_with_roles": [
+              "wall_plug",
+              "rail"
+            ],
+            "load_rated": true,
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "stop",
+          "quantity": {
+            "rule_id": "SLIDE-Q1",
+            "units": {
+              "unclear": "per rail instructions"
+            }
+          }
+        },
+        {
+          "role": "floor_guide",
+          "section": "materials",
+          "rule_ids": [
+            "SLIDE-Q0"
+          ],
+          "label": {
+            "en": "Floor guide",
+            "de": "Bodenführung"
+          },
+          "select": {
+            "variant_groups": [
+              "floor-guide-for-sliding-door"
+            ],
+            "compatible_with_roles": [
+              "rail"
+            ],
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "SLIDE-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "pull_handle",
+          "section": "materials",
+          "rule_ids": [
+            "SLIDE-Q0"
+          ],
+          "label": {
+            "en": "Flush pull handle",
+            "de": "Griffmuschel"
+          },
+          "select": {
+            "variant_groups": [
+              "flush-pull-handle-for-sliding-door"
+            ],
+            "compatible_with_roles": [
+              "leaf"
+            ],
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "SLIDE-Q2",
+            "units": 2
+          },
+          "ownable": true
+        },
+        {
+          "role": "drill",
+          "section": "tools",
+          "rule_ids": [
+            "R-09"
+          ],
+          "label": {
+            "en": "Drill",
+            "de": "Bohrmaschine"
+          },
+          "select": {
+            "category": [
+              "Power tools"
+            ],
+            "use_case_by_wall": {
+              "concrete": "drilling concrete",
+              "solid_brick": "drilling brick",
+              "brick": "drilling brick",
+              "plasterboard": "drilling plasterboard"
+            },
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "SLIDE-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "drill_bit",
+          "section": "tools",
+          "rule_ids": [
+            "R-05"
+          ],
+          "label": {
+            "en": "Drill bit",
+            "de": "Bohrer"
+          },
+          "when": {
+            "wall_in": [
+              "concrete",
+              "solid_brick",
+              "brick"
+            ]
+          },
+          "select": {
+            "variant_groups": [
+              "masonry-drill-bit"
+            ],
+            "compatible_with_roles": [
+              "wall_plug"
+            ],
+            "wall_suitable": true,
+            "prefer": [
+              "price_eur"
+            ],
+            "spec_eq_role": {
+              "diameter_mm": "wall_plug"
+            }
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "SLIDE-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "drill_bit_set",
+          "section": "tools",
+          "rule_ids": [
+            "R-05"
+          ],
+          "label": {
+            "en": "Drill bit set",
+            "de": "Bohrer-Set"
+          },
+          "when": {
+            "wall_in": [
+              "plasterboard"
+            ]
+          },
+          "select": {
+            "product_nrs": [
+              "P038"
+            ],
+            "compatible_with_roles": [
+              "drill"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "SLIDE-Q0",
+            "units": 1
+          },
+          "ownable": true
+        }
+      ]
+    }
+  ],
+  "common_roles": [
+    {
+      "role": "detector",
+      "section": "tools",
+      "rule_ids": [
+        "R-11"
+      ],
+      "label": {
+        "en": "Stud and cable detector",
+        "de": "Leitungssucher"
+      },
+      "select": {
+        "product_nrs": [
+          "P034"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "SLIDE-Q0",
+        "units": 1
+      },
+      "ownable": true
+    },
+    {
+      "role": "spirit_level",
+      "section": "tools",
+      "rule_ids": [
+        "SLIDE-T2"
+      ],
+      "label": {
+        "en": "Spirit level",
+        "de": "Wasserwaage"
+      },
+      "select": {
+        "product_nrs": [
+          "P032"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "SLIDE-Q0",
+        "units": 1
+      },
+      "ownable": true
+    },
+    {
+      "role": "tape_measure",
+      "section": "tools",
+      "rule_ids": [
+        "SLIDE-T2"
+      ],
+      "label": {
+        "en": "Tape measure",
+        "de": "Maßband"
+      },
+      "select": {
+        "product_nrs": [
+          "P033"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "SLIDE-Q0",
+        "units": 1
+      },
+      "ownable": true
+    },
+    {
+      "role": "screwdriver",
+      "section": "tools",
+      "rule_ids": [
+        "SLIDE-T1"
+      ],
+      "label": {
+        "en": "Screwdriver set",
+        "de": "Schraubendreher-Set"
+      },
+      "select": {
+        "product_nrs": [
+          "P031"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "SLIDE-Q0",
+        "units": 1
+      },
+      "ownable": true
+    },
+    {
+      "role": "safety_glasses",
+      "section": "safety",
+      "rule_ids": [
+        "R-10"
+      ],
+      "label": {
+        "en": "Safety goggles",
+        "de": "Schutzbrille"
+      },
+      "select": {
+        "product_nrs": [
+          "P028"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "SLIDE-Q0",
+        "units": 1
+      },
+      "ownable": true
+    },
+    {
+      "role": "dust_mask",
+      "section": "safety",
+      "rule_ids": [
+        "R-10"
+      ],
+      "label": {
+        "en": "Dust mask FFP2",
+        "de": "Atemschutzmaske FFP2"
+      },
+      "select": {
+        "product_nrs": [
+          "P029"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "SLIDE-Q0",
+        "units": 1
+      },
+      "ownable": true
+    },
+    {
+      "role": "ladder",
+      "section": "tools",
+      "rule_ids": [
+        "SLIDE-Q0"
+      ],
+      "label": {
+        "en": "Step ladder",
+        "de": "Stufenleiter"
+      },
+      "select": {
+        "product_nrs": [
+          "P073"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "SLIDE-Q0",
+        "units": 1
+      },
+      "ownable": true
+    },
+    {
+      "role": "work_gloves",
+      "section": "safety",
+      "rule_ids": [
+        "SLIDE-Q0"
+      ],
+      "label": {
+        "en": "Work gloves",
+        "de": "Arbeitshandschuhe"
+      },
+      "select": {
+        "product_nrs": [
+          "P027"
+        ]
+      },
+      "on_none": "unresolved",
+      "quantity": {
+        "rule_id": "SLIDE-Q0",
+        "units": 1
+      },
+      "ownable": true
+    }
+  ],
+  "howto": [
+    {
+      "type": "video",
+      "title": {
+        "en": "Installing a sliding door",
+        "de": "Schiebetür einbauen"
+      },
+      "url": "https://www.youtube.com/watch?v=Aft_7gZ_DfM",
+      "publisher": "OBI HowTo",
+      "lang": "de",
+      "note": "channel to verify (Q-2)"
+    }
+  ],
+  "rule_texts": {
+    "SLIDE-M1": {
+      "en": "Rail above the opening on a solid wall; rail and plugs must each carry the door weight × 1.25.",
+      "de": "Schiene über der Öffnung an einer massiven Wand; Schiene und Dübel müssen jeweils das Türgewicht × 1,25 tragen."
+    },
+    "SLIDE-Q0": {
+      "en": "1 per door",
+      "de": "1 pro Tür"
+    },
+    "SLIDE-Q1": {
+      "en": "number as in the rail's mounting instructions",
+      "de": "Anzahl laut Montageanleitung der Schiene"
+    },
+    "SLIDE-Q2": {
+      "en": "1 handle per side (2 per door)",
+      "de": "1 Griff je Seite (2 pro Tür)"
+    },
+    "SLIDE-L1": {
+      "en": "door leaf at least as wide as the opening",
+      "de": "Türblatt mindestens so breit wie die Öffnung"
+    },
+    "SLIDE-L2": {
+      "en": "rail ≥ 2 × door width, rated door width ≥ leaf width",
+      "de": "Schiene ≥ 2 × Türbreite, zugelassene Türbreite ≥ Türblattbreite"
+    },
+    "SLIDE-T1": {
+      "en": "Screwdriver that fits the screws",
+      "de": "Schraubendreher passend zu den Schrauben"
+    },
+    "SLIDE-T2": {
+      "en": "Measuring and levelling for every mounting job",
+      "de": "Messen und Ausrichten bei jeder Montage"
+    }
+  }
+}

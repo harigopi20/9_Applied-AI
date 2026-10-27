@@ -87,9 +87,11 @@
     assert(D.stores.every((s) => s.data_status === "sample"), "stores labelled sample (NFR-05)");
   });
 
-  test("DR-04 / SR-10", "Exactly 2 templates with rule IDs, quantity rules and review status/date fields", () => {
-    eq(D.templates.map((t) => t.template_id).sort(), ["hang_picture", "hang_shelf"]);
+  test("DR-04 / SR-10", "9 templates (PRJ-01 … PRJ-09) with rule IDs, quantity rules and review status/date fields", () => {
+    eq(D.templates.map((t) => t.project_id), ["PRJ-01", "PRJ-02", "PRJ-03", "PRJ-04", "PRJ-05", "PRJ-06", "PRJ-07", "PRJ-08", "PRJ-09"]);
+    eq(new Set(D.templates.map((t) => t.template_id)).size, 9, "unique template ids");
     D.templates.forEach((t) => {
+      assert(["basic", "mounting_light", "mounting_full"].includes(t.safety_level), "safety level of " + t.template_id);
       assert(t.review && "status" in t.review && "review_date" in t.review, "review fields in " + t.template_id);
       t.methods.concat([{ roles: t.common_roles }]).forEach((m) => m.roles.forEach((r) => {
         assert(r.rule_ids && r.rule_ids.length, "rule_ids for " + r.role);
@@ -501,7 +503,7 @@
     eq(s.pendingGuesses.wall_type.value, "concrete");
     const box = document.getElementById("sandbox");
     box.replaceChildren(window.BBApp.viewChoose());
-    eq(box.querySelectorAll("[data-template]").length, 2, "both template buttons");
+    eq(box.querySelectorAll("[data-template]").length, D.templates.length, "all template buttons");
     eq(box.querySelector("#project-text").value, text, "text still in the field");
     window.BBApp.startTemplate(SHELF(), s.pendingGuesses);
     eq(s.facts.load_kg.status, R.STATUS.OBSERVED, "kept value is only a guess");
@@ -561,7 +563,8 @@
       assert(box.querySelector("[data-guess]"), "guess read-back shown on question " + s.questionId);
       const q = SHELF().questions.find((x) => x.id === s.questionId);
       (q.type === "group" ? q.fields.map((f) => f.fact) : [q.fact]).forEach((k) => {
-        s.facts[k] = R.makeFact(s.facts[k].value, R.STATUS.CONFIRMED, "question:" + q.id);
+        // Facts without a guess (e.g. the optional used-item checklist) are answered "none".
+        s.facts[k] = R.makeFact(s.facts[k] ? s.facts[k].value : [], R.STATUS.CONFIRMED, "question:" + q.id);
       });
       window.BBApp.recompute(true);
     }
@@ -578,7 +581,7 @@
     assert(Object.values(s.facts).every((f) => f.status === R.STATUS.OBSERVED), "all guesses");
   });
 
-  test("FR-02", "Unsupported or unclear text → hint and the two template buttons", async () => {
+  test("FR-02", "Unsupported or unclear text → hint and the template buttons", async () => {
     eq((await appSubmit("Ich will mein Bad fliesen", adapter("template"))).chooseNotice, "unsupported");
     eq((await appSubmit("Hallo", adapter("template"))).chooseNotice, "unclear");
     eq((await appSubmit("MOCK_UNSUPPORTED", adapter("mock"))).chooseNotice, "unsupported");
@@ -739,7 +742,7 @@
     box.replaceChildren(window.BBApp.viewChoose());
     assert(box.querySelector('[data-speech="error-denied"]'), "understandable hint");
     assert(!box.querySelector("#text-submit").disabled, "typing still possible");
-    eq(box.querySelectorAll("[data-template]").length, 2, "template buttons still there");
+    eq(box.querySelectorAll("[data-template]").length, D.templates.length, "template buttons still there");
     await window.BBApp.submitText("Bild aufhängen 3 kg");
     eq(s.screen, "recognized", "typed text works");
     window.BBApp.startTemplate(SHELF());
@@ -1067,6 +1070,303 @@
     const en = Object.keys(window.BBI18n.TEXTS.en), de = Object.keys(window.BBI18n.TEXTS.de);
     eq(en.filter((k) => !de.includes(k)), [], "missing in German");
     eq(de.filter((k) => !en.includes(k)), [], "missing in English");
+  });
+
+  // ---------------------------------------------------------------------
+  // Project catalogue v1 (DR-04, data/project_catalogue.xlsx): PRJ-02 … PRJ-09
+  // ---------------------------------------------------------------------
+  const CAB = () => tpl("hang_wall_cabinet");
+  const TIP = () => tpl("anchor_shelf_anti_tip");
+  const PAINT = () => tpl("paint_wall");
+  const GLASS = () => tpl("install_glass_door");
+  const LOCK = () => tpl("change_interior_door_lock");
+  const SLIDE = () => tpl("install_sliding_door");
+  const WP = () => tpl("hang_nonwoven_wallpaper");
+  const CAB_OK = { wall_type: "concrete", cabinet_width_cm: 80, cabinet_depth_cm: 35, cabinet_height_cm: 60, load_kg: 30, condition: [] };
+  const PAINT_OK = { wall_width_m: 14, room_height_m: 2.5, surface: "painted", mould: "none", health: "no", old_coating: "no" };
+  const WP_OK = { wall_width_m: 14, room_height_m: 2.5, pattern_repeat_cm: 0, mould: "none", health: "no", wall_state: [] };
+  const GLASS_OK = { frame: "yes", leaf_size: "standard", din_side: "left", glass: "new" };
+  const LOCK_OK = { door_type: "interior", lock_type: "PZ", din_side: "left", backset_mm: 55, distance_mm: 72 };
+  const SLIDE_OK = { wall_type: "concrete", opening_width_cm: 80, opening_height_cm: 200, load_kg: 25, condition: [] };
+  const units = (r, role) => item(r, role).quantity.units;
+  const stopOf = (r) => r.blocked && r.blocked.rule_id;
+
+  test("DR-04 (catalogue)", "Stop rules use the catalogue IDs ST-01…ST-14; how-to links only for PRJ-05…09, https and allow-listed", () => {
+    D.templates.forEach((t) => {
+      (t.stops || []).forEach((st) => assert(/^ST-(0[1-9]|1[0-4])$/.test(st.rule_id), t.template_id + " stop " + st.rule_id));
+      (t.stops || []).forEach((st) => assert(st.message && st.message.en && st.message.de, "EN+DE stop text " + st.rule_id));
+      const links = t.howto || [];
+      if (["PRJ-01", "PRJ-02", "PRJ-03", "PRJ-04"].includes(t.project_id)) eq(links.length, 0, t.project_id + " has no links (team decision)");
+      else assert(links.length > 0, t.project_id + " has links");
+      links.forEach((h) => {
+        const u = new URL(h.url);
+        eq(u.protocol, "https:");
+        assert(CFG.data.howtoHosts.includes(u.hostname), "host " + u.hostname);
+      });
+    });
+  });
+
+  test("PRJ-02", "Wall cabinet on concrete: 30 kg → 1 rail + 4 heavy-duty plugs; 45 kg and 110 cm → 2 rails + 8 anchor bolts, no extra screws", () => {
+    let r = run(CAB(), confirmed(CAB_OK));
+    eq(r.state, "validated");
+    eq([item(r, "rail").product.product_nr, units(r, "rail")], ["P102", 1]);
+    eq([item(r, "wall_plug").product.product_nr, units(r, "wall_plug")], ["P045", 4]);
+    eq(item(r, "screw").product.product_nr, "P050");
+    r = run(CAB(), confirmed(Object.assign({}, CAB_OK, { cabinet_width_cm: 110, load_kg: 45 })));
+    eq(r.state, "validated");
+    eq(units(r, "rail"), 2, "2 rails above 100 cm");
+    eq([item(r, "wall_plug").product.product_nr, units(r, "wall_plug")], ["P047", 8]);
+    eq(item(r, "screw"), undefined, "anchor bolt brings its own screw");
+  });
+
+  test("PRJ-02 / ST-03", "Plasterboard cabinet limit from the table: 70 × 35 cm → 16.5 kg (next smaller width, next larger depth)", () => {
+    const pb = (w, d, kg) => run(CAB(), confirmed(Object.assign({}, CAB_OK, { wall_type: "plasterboard", cabinet_width_cm: w, cabinet_depth_cm: d, load_kg: kg })));
+    let r = pb(70, 35, 20);
+    eq([r.state, stopOf(r), r.blocked.limit_kg], ["safety_blocked", "ST-03", 16.5]);
+    r = pb(80, 30, 10);
+    eq(r.state, "validated", "10 kg fits");
+    eq(item(r, "wall_plug").product.product_nr, "P046");
+    eq(stopOf(pb(35, 30, 5)), "ST-03", "narrower than the table → stop");
+  });
+
+  test("PRJ-02 / ST-02 / ST-04", "Cabinet: aerated concrete, width > 120, depth > 60, height < 30 or > 100 → stop with catalogue text", () => {
+    const c = (x) => run(CAB(), confirmed(Object.assign({}, CAB_OK, x)));
+    eq(stopOf(c({ wall_type: "aerated_concrete" })), "ST-02");
+    [{ cabinet_width_cm: 121 }, { cabinet_depth_cm: 61 }, { cabinet_height_cm: 25 }, { cabinet_height_cm: 101 }].forEach((x) => {
+      const r = c(x);
+      eq([r.state, stopOf(r)], ["safety_blocked", "ST-04"], JSON.stringify(x));
+      assert(r.blocked.message.de.includes("außerhalb"), "German text");
+    });
+  });
+
+  test("PRJ-04", "Anti-tip: 1 kit up to 90 cm, 2 above; plasterboard only with cavity anchors (P046)", () => {
+    let r = run(TIP(), confirmed({ wall_type: "brick", furniture_width_cm: 120, furniture_height_cm: 180 }));
+    eq(r.state, "validated");
+    eq([units(r, "kit"), units(r, "wall_plug"), units(r, "screw")], [2, 4, 8]);
+    r = run(TIP(), confirmed({ wall_type: "plasterboard", furniture_width_cm: 80, furniture_height_cm: 180 }));
+    eq([item(r, "wall_plug").product.product_nr, units(r, "kit"), units(r, "screw")], ["P046", 1, 2]);
+    eq(stopOf(run(TIP(), confirmed({ wall_type: "aerated_concrete", furniture_width_cm: 80, furniture_height_cm: 180 }))), "ST-02");
+    eq(run(TIP(), confirmed({ wall_type: "unknown", furniture_width_cm: 80, furniture_height_cm: 180 })).blocked.reason, "fact_unknown");
+  });
+
+  test("PRJ-05", "Paint 14 m × 2.5 m: 35 m² × 2 coats ÷ 7 m²/l = 10 l → 1 × 10 l; colour paint 2.5 l → 4 buckets; no wall or load questions", () => {
+    let r = run(PAINT(), confirmed(PAINT_OK));
+    eq(r.state, "validated");
+    eq([item(r, "paint").product.product_nr, units(r, "paint")], ["P001", 1]);
+    eq(units(r, "tape"), 2, "2 rolls for 28 m of edges");
+    assert(item(r, "pole"), "pole for rooms above 2.0 m");
+    assert(!item(r, "primer"), "no deep primer on painted walls");
+    assert(!r.notices.some((n) => n.id === "detector_limits"), "no drilling notices");
+    assert(r.notices.some((n) => n.id === "switch_covers" && n.rule_id === "ST-14"), "ST-14 warning");
+    assert(!PAINT().required_facts.includes("wall_type") && !PAINT().required_facts.includes("load_kg"), "Basic level");
+    r = run(PAINT(), confirmed(PAINT_OK), null, { overrides: { paint: "P003" } });
+    eq([item(r, "paint").status, units(r, "paint")], ["ok", 4]);
+    r = run(PAINT(), confirmed(Object.assign({}, PAINT_OK, { room_height_m: 2.0, surface: "new" })));
+    assert(!item(r, "pole") && item(r, "primer"), "no pole at 2.0 m, primer on new plaster");
+  });
+
+  test("PRJ-05 / ST-07 / ST-08 / ST-09", "Paint: small mould → remover, anti-mould paint and gloves; large mould, allergy or old coating → professional", () => {
+    const p = (x) => run(PAINT(), confirmed(Object.assign({}, PAINT_OK, x)));
+    const r = p({ mould: "small" });
+    eq(r.state, "validated");
+    ["mould_remover", "mould_paint", "gloves"].forEach((role) => assert(item(r, role), role));
+    eq([stopOf(p({ mould: "large" })), p({ mould: "large" }).blocked.hand_off], ["ST-07", "professional"]);
+    eq(stopOf(p({ mould: "small", health: "yes" })), "ST-08");
+    eq(p({ mould: "none", health: "yes" }).state, "validated", "allergy without mould is no stop");
+    eq(stopOf(p({ old_coating: "yes" })), "ST-09");
+    eq(stopOf(p({ wall_width_m: 30 })), "ST-04", "over 60 m²");
+    eq(stopOf(p({ room_height_m: 2.6 })), "ST-04", "over 2.5 m");
+  });
+
+  test("PRJ-09", "Wallpaper: 14 m × 2.5 m → 27 strips, 3 per roll → 9 rolls, 2 packs of paste; pattern repeat lengthens the strips", () => {
+    let r = run(WP(), confirmed(WP_OK));
+    eq(r.state, "validated");
+    eq([units(r, "wallpaper"), units(r, "paste")], [9, 2]);
+    r = run(WP(), confirmed(Object.assign({}, WP_OK, { wall_width_m: 5, room_height_m: 2.4, pattern_repeat_cm: 64 })));
+    eq(units(r, "wallpaper"), 4, "5 m: 10 strips of 3.14 m (repeat 64 cm) → 3 per roll → 4 rolls");
+    r = run(WP(), confirmed(Object.assign({}, WP_OK, { wall_width_m: 5, room_height_m: 2.4, pattern_repeat_cm: 100 })));
+    eq(units(r, "wallpaper"), 5, "5 m: 10 strips of 3.5 m (repeat 100 cm) → 2 per roll → 5 rolls");
+  });
+
+  test("PRJ-09 / ST-10", "Wallpaper: damp wall stops, old wallpaper only warns", () => {
+    eq(stopOf(run(WP(), confirmed(Object.assign({}, WP_OK, { wall_state: ["damp"] })))), "ST-10");
+    const r = run(WP(), confirmed(Object.assign({}, WP_OK, { wall_state: ["old_wallpaper"] })));
+    eq(r.state, "validated");
+    assert(r.notices.some((n) => n.id === "old_wallpaper"), "warning shown");
+  });
+
+  test("PRJ-06", "Glass door: hinge set rated ≥ 1.25 × door weight from the catalogue; own ESG door is not counted; ST-11 stops", () => {
+    let r = run(GLASS(), confirmed(GLASS_OK));
+    eq(r.state, "validated");
+    const load = item(r, "hinges").checks.find((c) => c.check === "load");
+    assert(load && load.ok && load.detail.includes("41.25 kg required"), "33 kg × 1.25 checked: " + (load && load.detail));
+    eq(units(r, "cut_gloves"), 2);
+    const own = run(GLASS(), confirmed(Object.assign({}, GLASS_OK, { glass: "own_esg" })));
+    assert(item(own, "glass_door").owned && item(own, "glass_door").owned_auto, "own door marked as owned");
+    eq(own.total.amount, Math.round((r.total.amount - item(r, "glass_door").line_price) * 100) / 100, "door not in total");
+    [{ frame: "no" }, { frame: "dont_know" }, { leaf_size: "other" }, { glass: "own_not_esg" }].forEach((x) =>
+      eq(stopOf(run(GLASS(), confirmed(Object.assign({}, GLASS_OK, x)))), "ST-11", JSON.stringify(x)));
+  });
+
+  test("PRJ-07", "Lock: type and size must match (PZ 55/72 → P093 + cylinder, WC 55/78 → P092); other sizes and outer doors stop", () => {
+    let r = run(LOCK(), confirmed(LOCK_OK));
+    eq(r.state, "validated");
+    eq([item(r, "lock").product.product_nr, item(r, "cylinder").product.product_nr], ["P093", "P094"]);
+    r = run(LOCK(), confirmed(Object.assign({}, LOCK_OK, { lock_type: "WC", distance_mm: 78 })));
+    eq([item(r, "lock").product.product_nr, item(r, "cylinder")], ["P092", undefined]);
+    eq(stopOf(run(LOCK(), confirmed(Object.assign({}, LOCK_OK, { lock_type: "WC" })))), "ST-04", "WC needs 78 mm");
+    eq(stopOf(run(LOCK(), confirmed(Object.assign({}, LOCK_OK, { backset_mm: 60 })))), "ST-04");
+    ["apartment_entrance", "front_door", "fire_door"].forEach((d) =>
+      eq(stopOf(run(LOCK(), confirmed(Object.assign({}, LOCK_OK, { door_type: d })))), "ST-12", d));
+  });
+
+  test("PRJ-08", "Sliding door on concrete: leaf ≥ opening, rail ≥ 2 × leaf; plug count 'per rail instructions' → no total; ST-13, R-12", () => {
+    const r = run(SLIDE(), confirmed(SLIDE_OK));
+    eq(r.state, "validated");
+    eq(nrs(r).slice(0, 4), ["leaf:P097", "rail:P096", "wall_plug:P045", "screw:P050"]);
+    eq([item(r, "wall_plug").quantity.clear, r.total.amount, r.total.reason], [false, null, "unclear_pack"]);
+    ["brick", "plasterboard"].forEach((w) => eq(stopOf(run(SLIDE(), confirmed(Object.assign({}, SLIDE_OK, { wall_type: w })))), "ST-13", w));
+    eq(stopOf(run(SLIDE(), confirmed(Object.assign({}, SLIDE_OK, { wall_type: "aerated_concrete" })))), "ST-02");
+    eq(run(SLIDE(), confirmed(Object.assign({}, SLIDE_OK, { load_kg: 70 }))).blocked.reason, "load_over_limit");
+    eq(run(SLIDE(), confirmed(Object.assign({}, SLIDE_OK, { opening_width_cm: 95 }))).blocked.reason, "no_suitable_system", "leaf 900 mm too narrow");
+  });
+
+  test("C-8 / SR-15", "Owned parts: tools and brackets can be ticked off, plugs and screws never; defect → part stays on the list (ST-06)", () => {
+    const base = run(SHELF(), confirmed(SHELF_OK));
+    const r = run(SHELF(), confirmed(SHELF_OK), null, { owned: ["drill", "bracket", "wall_plug", "screw"] });
+    eq([item(r, "drill").owned, item(r, "bracket").owned, item(r, "wall_plug").owned, item(r, "screw").owned], [true, true, false, false]);
+    eq(r.total.amount, Math.round((base.total.amount - item(base, "drill").line_price - item(base, "bracket").line_price) * 100) / 100);
+    eq(item(r, "bracket").required_rating_kg, 25, "20 kg × 1.25");
+    assert(r.notices.some((n) => n.id === "owned_load_bearing"), "SR-15 notice");
+    const d = run(SHELF(), confirmed(Object.assign({ condition: ["bent_metal"] }, SHELF_OK)), null, { owned: ["bracket", "drill"] });
+    eq([item(d, "bracket").owned, item(d, "bracket").owned_refused, item(d, "drill").owned], [false, true, true]);
+    assert(d.notices.some((n) => n.id === "owned_defect") && d.notices.some((n) => n.id === "used_item_defect"), "ST-06 notices");
+  });
+
+  test("SR-06 (fail safe)", "A stop rule that cannot be evaluated stops; an unknown condition in a stop rule stops", () => {
+    const t = JSON.parse(JSON.stringify(PAINT()));
+    t.stops = [{ id: "x", rule_id: "ST-04", hand_off: "staff", message: { en: "x", de: "x" }, when: { gt: [{ fact: "not_asked" }, 1] } }];
+    eq(stopOf(run(t, confirmed(PAINT_OK))), "ST-04", "missing value");
+    t.stops[0].when = { weird_op: 1 };
+    eq(stopOf(run(t, confirmed(PAINT_OK))), "ST-04", "unknown condition");
+  });
+
+  test("RB-01 (new walls)", "Shelf: solid brick uses brick plugs; brick of unknown type max. 25 kg; aerated concrete → ST-02", () => {
+    const sh = (x) => run(SHELF(), confirmed(Object.assign({}, SHELF_OK, x)));
+    const r = sh({ wall_type: "solid_brick" });
+    eq(r.state, "validated");
+    eq(item(r, "drill").product.product_nr, "P040");
+    eq([sh({ wall_type: "brick", load_kg: 18 }).state, sh({ wall_type: "brick", load_kg: 26 }).blocked.rule_id], ["validated", "ST-03"]);
+    eq(stopOf(sh({ wall_type: "aerated_concrete" })), "ST-02");
+    eq(stopOf(sh({ shelf_length_cm: 130 })), "ST-04");
+  });
+
+  test("FR-02 / FR-03 (catalogue)", "Keywords find the new projects and wall types (EN + DE); 'solid brick' wins over 'brick'", () => {
+    const u = (txt) => window.BBAI.templateUnderstand(txt, D.lexicon, IDS());
+    eq(u("Ich will mein Wohnzimmer streichen").intent, "paint_wall");
+    eq(u("I want to hang a painting").intent, "hang_picture", "'painting' is still a picture");
+    eq(u("Schiebetür über der Tür montieren").intent, "install_sliding_door");
+    eq(u("Vliestapete tapezieren").intent, "hang_nonwoven_wallpaper");
+    eq(u("Zimmertürschloss wechseln").intent, "change_interior_door_lock");
+    eq(u("Glastür einbauen").intent, "install_glass_door");
+    eq(u("Hängeschrank in der Küche aufhängen").intent, "hang_wall_cabinet");
+    eq(u("Kippsicherung für den Kleiderschrank").intent, "anchor_shelf_anti_tip");
+    eq(u("shelf on a solid brick wall").facts.wall_type, "solid_brick");
+    eq(u("Regal an Porenbeton").facts.wall_type, "aerated_concrete");
+    const v = window.BBAI.validateOutput({ intent: "paint_wall", high_risk: false, facts: Object.assign({}, u("x").facts, { wall_type: "aerated_concrete" }) }, IDS());
+    assert(v.ok, "schema accepts new intent and wall type: " + (v.errors || []).join(","));
+  });
+
+  // ---------------- UI
+  function questionSetup(template, qid, facts) {
+    const s = window.BBApp.state;
+    s.data = D; s.template = template; s.facts = facts || {}; s.overrides = {}; s.owned = new Set();
+    s.questionId = qid; s.editOnly = false; s.screen = "question";
+    const box = document.getElementById("sandbox");
+    box.replaceChildren(window.BBApp.viewQuestion());
+    return { s, box };
+  }
+
+  test("C-7 (UI)", "Checklist question: nothing ticked → error; 'none' → [] confirmed; a defect is stored as ticked", () => {
+    const pre = confirmed({ wall_type: "concrete" });
+    let { s, box } = questionSetup(CAB(), "Q2", Object.assign({}, pre));
+    const fill = (b) => {
+      b.querySelector("#in-cabinet_width_cm").value = "80";
+      b.querySelector("#in-cabinet_depth_cm").value = "35";
+      b.querySelector("#in-cabinet_height_cm").value = "60";
+      b.querySelector("#in-load_kg").value = "30";
+    };
+    fill(box);
+    box.querySelector("form").requestSubmit();
+    eq(s.facts.condition, undefined, "not stored without an answer");
+    assert(box.querySelector(".error").textContent.includes(window.BBI18n.t("choose_option_multi")), "error shown");
+    box.querySelector('[data-value="none"]').click();
+    box.querySelector("form").requestSubmit();
+    eq([s.facts.condition.value, s.facts.condition.status], [[], R.STATUS.CONFIRMED]);
+    eq(s.result.state, "validated");
+    ({ s, box } = questionSetup(CAB(), "Q2", Object.assign({}, pre)));
+    fill(box);
+    box.querySelector('[data-value="cracks"]').click();
+    box.querySelector("form").requestSubmit();
+    eq(s.facts.condition.value, ["cracks"]);
+  });
+
+  test("C-8 (UI)", "'I already have this' takes a tool off the total; no button for plugs and screws; 'need it' brings it back", () => {
+    const s = window.BBApp.state;
+    s.data = D; s.template = SHELF(); s.facts = confirmed(SHELF_OK); s.overrides = {}; s.owned = new Set(); s.storeId = null;
+    window.BBApp.recompute(false);
+    const box = document.getElementById("sandbox");
+    box.replaceChildren(window.BBApp.viewResult());
+    const before = s.result.total.amount;
+    assert(!box.querySelector('[data-role="wall_plug"] .owned-toggle') && !box.querySelector('[data-role="screw"] .owned-toggle'), "no button for plugs/screws");
+    box.querySelector('[data-role="drill"] .owned-toggle').click();
+    box.replaceChildren(window.BBApp.viewResult());
+    assert(box.querySelector('[data-role="drill"]').classList.contains("owned"), "drill marked as owned");
+    assert(s.result.total.amount < before, "total lower");
+    box.querySelector('[data-role="drill"] .owned-toggle').click();
+    eq(s.result.total.amount, before, "back in the total");
+  });
+
+  test("ST rules (UI)", "Stop screen shows the catalogue text and hand-off (EN + DE), never a list", () => {
+    try {
+      ["en", "de"].forEach((lang) => {
+        window.BBI18n.setLang(lang);
+        const box = renderResult(PAINT(), confirmed(Object.assign({}, PAINT_OK, { mould: "large" })), null);
+        const stop = box.querySelector('[data-state="safety_blocked"]');
+        assert(stop.textContent.includes(PAINT().stops.find((x) => x.rule_id === "ST-07").message[lang]), "catalogue text " + lang);
+        eq(stop.querySelector("[data-handoff]").getAttribute("data-handoff"), "professional");
+        eq(box.querySelectorAll(".item").length, 0, "no list");
+        const cab = renderResult(CAB(), confirmed(Object.assign({}, CAB_OK, { wall_type: "plasterboard", cabinet_width_cm: 70, load_kg: 20 })), null);
+        assert(cab.querySelector(".stop-main").textContent.includes(lang === "de" ? "16.5 kg" : "16.5 kg"), "limit filled in");
+      });
+    } finally { window.BBI18n.setLang("en"); }
+  });
+
+  test("NFR-07 (how-to links)", "How-to links: https + allow-listed host only, open in a new tab without referrer; German content labelled in EN", () => {
+    const t = JSON.parse(JSON.stringify(PAINT()));
+    t.howto.push({ type: "video", title: { en: "bad", de: "bad" }, url: "javascript:alert(1)", lang: "de" });
+    t.howto.push({ type: "video", title: { en: "bad2", de: "bad2" }, url: "https://evil.example.com/x", lang: "de" });
+    const box = renderResult(t, confirmed(PAINT_OK), null);
+    const links = box.querySelectorAll(".howto a");
+    eq(links.length, 2, "only the 2 catalogue links");
+    links.forEach((a) => {
+      assert(a.href.startsWith("https://"), a.href);
+      eq([a.getAttribute("target"), a.getAttribute("rel")], ["_blank", "noopener noreferrer"]);
+    });
+    assert(links[0].href.includes("cc_lang_pref=en"), "English subtitles requested in EN mode");
+    assert(box.querySelector(".howto").textContent.includes(window.BBI18n.t("howto_german_article")), "German article labelled");
+    assert(!renderResult(SHELF(), confirmed(SHELF_OK), null).querySelector(".howto"), "no links for PRJ-01");
+  });
+
+  test("DR-04 (UI)", "Project buttons: 9 projects in 3 groups with icon and safety level", () => {
+    const s = window.BBApp.state;
+    s.data = D; s.chooseNotice = null; s.inputText = ""; s.busy = false; s.pendingGuesses = {};
+    const box = document.getElementById("sandbox");
+    box.replaceChildren(window.BBApp.viewChoose());
+    eq(box.querySelectorAll("[data-template]").length, 9);
+    eq(box.querySelectorAll(".template-group").length, 3);
+    eq(box.querySelectorAll(".template-level").length, 9);
+    eq(box.querySelectorAll("[data-template] svg.icon").length, 9);
   });
 
   // ---------------------------------------------------------------------

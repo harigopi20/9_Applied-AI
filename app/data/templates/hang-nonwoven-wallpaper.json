@@ -1,0 +1,895 @@
+{
+  "template_id": "hang_nonwoven_wallpaper",
+  "project_id": "PRJ-09",
+  "version": "1.0.0",
+  "comment": "DR-04 template from the project catalogue PRJ-09 (draft). Paste-the-wall method, plain or patterned. Basic level. Team review pending (SR-10).",
+  "review": {
+    "status": "pending_team_review",
+    "reviewed_by": null,
+    "review_date": null,
+    "created": "2026-10-27",
+    "source": "data/project_catalogue.xlsx (draft v1, 27 Oct 2026)"
+  },
+  "title": {
+    "en": "Hang nonwoven wallpaper",
+    "de": "Vliestapete tapezieren"
+  },
+  "icon": "wallpaper",
+  "group": {
+    "en": "Decorating",
+    "de": "Renovieren"
+  },
+  "safety_level": "basic",
+  "safety_factor": 1.25,
+  "wall_limits": {},
+  "required_facts": [
+    "wall_width_m",
+    "room_height_m",
+    "pattern_repeat_cm",
+    "mould",
+    "health",
+    "wall_state"
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "type": "group",
+      "text": {
+        "en": "Your room",
+        "de": "Ihr Raum"
+      },
+      "help": {
+        "en": "Add up the widths of all walls you want to wallpaper. The pattern repeat is printed on the roll label (0 = plain).",
+        "de": "Zählen Sie die Breiten aller Wände zusammen, die Sie tapezieren möchten. Der Rapport steht auf dem Rollenetikett (0 = uni)."
+      },
+      "fields": [
+        {
+          "fact": "wall_width_m",
+          "type": "number",
+          "unit": "m",
+          "min": 0.5,
+          "max": 200,
+          "label": {
+            "en": "Total width of the walls",
+            "de": "Gesamtbreite der Wände"
+          }
+        },
+        {
+          "fact": "room_height_m",
+          "type": "number",
+          "unit": "m",
+          "min": 1.5,
+          "max": 6,
+          "label": {
+            "en": "Room height",
+            "de": "Raumhöhe"
+          }
+        },
+        {
+          "fact": "pattern_repeat_cm",
+          "type": "number",
+          "unit": "cm",
+          "min": 0,
+          "max": 100,
+          "label": {
+            "en": "Pattern repeat (0 = plain)",
+            "de": "Rapport (0 = uni)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q2",
+      "type": "group",
+      "text": {
+        "en": "Condition",
+        "de": "Zustand"
+      },
+      "fields": [
+        {
+          "fact": "mould",
+          "type": "choice",
+          "options": [
+            "none",
+            "small",
+            "large"
+          ],
+          "option_labels": {
+            "none": {
+              "en": "None",
+              "de": "Keiner"
+            },
+            "small": {
+              "en": "Small, surface only (< 0.5 m²)",
+              "de": "Klein, nur oberflächlich (< 0,5 m²)"
+            },
+            "large": {
+              "en": "Larger or deep in the wall",
+              "de": "Größer oder tief in der Wand"
+            }
+          },
+          "label": {
+            "en": "Mould on the wall?",
+            "de": "Schimmel an der Wand?"
+          }
+        },
+        {
+          "fact": "health",
+          "type": "choice",
+          "label": {
+            "en": "Mould allergy or respiratory illness in the household?",
+            "de": "Schimmelallergie oder Atemwegserkrankung im Haushalt?"
+          },
+          "options": [
+            "no",
+            "yes"
+          ],
+          "option_labels": {
+            "no": {
+              "en": "No",
+              "de": "Nein"
+            },
+            "yes": {
+              "en": "Yes",
+              "de": "Ja"
+            }
+          }
+        },
+        {
+          "fact": "wall_state",
+          "type": "multi",
+          "options": [
+            "damp",
+            "old_wallpaper"
+          ],
+          "option_labels": {
+            "damp": {
+              "en": "Damp wall",
+              "de": "Feuchte Wand"
+            },
+            "old_wallpaper": {
+              "en": "Old wallpaper still on the wall",
+              "de": "Alte Tapete noch an der Wand"
+            }
+          },
+          "none_label": {
+            "en": "None of these",
+            "de": "Nichts davon"
+          },
+          "label": {
+            "en": "Anything of this on the wall?",
+            "de": "Trifft etwas davon zu?"
+          }
+        }
+      ]
+    }
+  ],
+  "stops": [
+    {
+      "id": "working_height",
+      "rule_id": "ST-04",
+      "hand_off": "staff",
+      "message": {
+        "en": "This size is outside this guide. Please ask OBI staff.",
+        "de": "Diese Größe liegt außerhalb dieser Anleitung. Bitte OBI-Personal fragen."
+      },
+      "when": {
+        "gt": [
+          {
+            "fact": "room_height_m"
+          },
+          2.5
+        ]
+      },
+      "help": {
+        "en": "This guide covers working heights up to 2.5 m (step ladder and pole).",
+        "de": "Diese Anleitung gilt für Arbeitshöhen bis 2,5 m (Stufenleiter und Teleskopstange)."
+      }
+    },
+    {
+      "id": "mould_large",
+      "rule_id": "ST-07",
+      "hand_off": "professional",
+      "when": {
+        "fact_in": {
+          "fact": "mould",
+          "values": [
+            "large"
+          ]
+        }
+      },
+      "message": {
+        "en": "Larger mould must be removed by a specialist company.",
+        "de": "Größerer Schimmelbefall gehört in die Hände eines Fachbetriebs."
+      }
+    },
+    {
+      "id": "mould_health",
+      "rule_id": "ST-08",
+      "hand_off": "professional",
+      "when": {
+        "all": [
+          {
+            "fact_in": {
+              "fact": "mould",
+              "values": [
+                "small"
+              ]
+            }
+          },
+          {
+            "fact_in": {
+              "fact": "health",
+              "values": [
+                "yes"
+              ]
+            }
+          }
+        ]
+      },
+      "message": {
+        "en": "Please do not remove the mould yourself; ask a specialist.",
+        "de": "Bitte entfernen Sie den Schimmel nicht selbst; fragen Sie einen Fachbetrieb."
+      }
+    },
+    {
+      "id": "damp",
+      "rule_id": "ST-10",
+      "hand_off": "professional",
+      "when": {
+        "fact_in": {
+          "fact": "wall_state",
+          "values": [
+            "damp"
+          ]
+        }
+      },
+      "message": {
+        "en": "Please find and fix the cause of the damp first.",
+        "de": "Bitte zuerst die Ursache der Feuchtigkeit finden und beheben."
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "id": "old_wallpaper",
+      "rule_id": "WP-W1",
+      "when": {
+        "fact_in": {
+          "fact": "wall_state",
+          "values": [
+            "old_wallpaper"
+          ]
+        }
+      },
+      "text": {
+        "en": "Remove the old wallpaper completely before you start – nonwoven wallpaper does not hold on old wallpaper.",
+        "de": "Alte Tapete vorher vollständig entfernen – Vliestapete hält nicht auf alter Tapete."
+      }
+    },
+    {
+      "id": "switch_covers",
+      "rule_id": "ST-14",
+      "text": {
+        "en": "Removing switch or socket covers: switch off the circuit first. Only remove cover frames – never touch the wiring.",
+        "de": "Schalter- oder Steckdosenabdeckungen abnehmen: zuerst die Sicherung ausschalten. Nur Abdeckrahmen abnehmen – nie an die Leitungen."
+      }
+    }
+  ],
+  "variables": {
+    "strip_length_m": {
+      "rule_id": "WP-Q1",
+      "comment": "room height + 10 cm trimming + pattern repeat",
+      "expr": {
+        "add": [
+          {
+            "fact": "room_height_m"
+          },
+          0.1,
+          {
+            "div": [
+              {
+                "fact": "pattern_repeat_cm"
+              },
+              100
+            ]
+          }
+        ]
+      }
+    },
+    "strips_per_roll": {
+      "rule_id": "WP-Q1",
+      "expr": {
+        "floor": {
+          "div": [
+            {
+              "spec": "wallpaper.roll_length_m"
+            },
+            {
+              "var": "strip_length_m"
+            }
+          ]
+        }
+      }
+    },
+    "strips": {
+      "rule_id": "WP-Q1",
+      "expr": {
+        "ceil": {
+          "div": [
+            {
+              "fact": "wall_width_m"
+            },
+            {
+              "spec": "wallpaper.roll_width_m"
+            }
+          ]
+        }
+      }
+    },
+    "rolls": {
+      "rule_id": "WP-Q1",
+      "expr": {
+        "ceil": {
+          "div": [
+            {
+              "var": "strips"
+            },
+            {
+              "var": "strips_per_roll"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "methods": [
+    {
+      "method_id": "paste_the_wall",
+      "rule_id": "WP-M1",
+      "penetrates_wall": false,
+      "drilling": false,
+      "label": {
+        "en": "Paste-the-wall method",
+        "de": "Wandklebetechnik"
+      },
+      "roles": [
+        {
+          "role": "wallpaper",
+          "section": "materials",
+          "rule_ids": [
+            "WP-Q1"
+          ],
+          "label": {
+            "en": "Nonwoven wallpaper",
+            "de": "Vliestapete"
+          },
+          "select": {
+            "variant_groups": [
+              "nonwoven-wallpaper-paintable"
+            ],
+            "prefer": [
+              "price_eur"
+            ]
+          },
+          "on_none": "stop",
+          "ownable": true,
+          "quantity": {
+            "rule_id": "WP-Q1",
+            "units": {
+              "var": "rolls"
+            }
+          }
+        },
+        {
+          "role": "paste",
+          "section": "materials",
+          "rule_ids": [
+            "WP-Q2"
+          ],
+          "label": {
+            "en": "Wallpaper paste",
+            "de": "Vliestapetenkleister"
+          },
+          "select": {
+            "product_nrs": [
+              "P079"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q2",
+            "units": {
+              "ceil": {
+                "div": [
+                  {
+                    "var": "rolls"
+                  },
+                  {
+                    "spec": "paste.rolls_per_pack"
+                  }
+                ]
+              }
+            }
+          },
+          "ownable": true
+        },
+        {
+          "role": "wallpaper_primer",
+          "section": "materials",
+          "rule_ids": [
+            "WP-C1"
+          ],
+          "label": {
+            "en": "Wallpaper primer",
+            "de": "Tapetengrund"
+          },
+          "select": {
+            "product_nrs": [
+              "P080"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "primer",
+          "section": "materials",
+          "rule_ids": [
+            "WP-C2"
+          ],
+          "label": {
+            "en": "Deep primer",
+            "de": "Tiefengrund"
+          },
+          "select": {
+            "product_nrs": [
+              "P074"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "filler",
+          "section": "materials",
+          "rule_ids": [
+            "WP-C3"
+          ],
+          "label": {
+            "en": "Wall filler",
+            "de": "Spachtelmasse"
+          },
+          "select": {
+            "product_nrs": [
+              "P012"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "mould_remover",
+          "section": "materials",
+          "rule_ids": [
+            "S-03"
+          ],
+          "label": {
+            "en": "Mould remover, chlorine-free",
+            "de": "Schimmelentferner, chlorfrei"
+          },
+          "select": {
+            "product_nrs": [
+              "P075"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true,
+          "when": {
+            "fact_in": {
+              "fact": "mould",
+              "values": [
+                "small"
+              ]
+            }
+          }
+        },
+        {
+          "role": "sanding",
+          "section": "materials",
+          "rule_ids": [
+            "WP-Q0"
+          ],
+          "label": {
+            "en": "Sanding paper set",
+            "de": "Schleifpapier-Set"
+          },
+          "select": {
+            "product_nrs": [
+              "P013"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "paste_roller",
+          "section": "tools",
+          "rule_ids": [
+            "WP-Q0"
+          ],
+          "label": {
+            "en": "Paste roller",
+            "de": "Kleisterrolle"
+          },
+          "select": {
+            "product_nrs": [
+              "P081"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "brush",
+          "section": "tools",
+          "rule_ids": [
+            "WP-Q0"
+          ],
+          "label": {
+            "en": "Wallpaper smoothing brush",
+            "de": "Tapezierbürste"
+          },
+          "select": {
+            "product_nrs": [
+              "P082"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "seam_roller",
+          "section": "tools",
+          "rule_ids": [
+            "WP-Q0"
+          ],
+          "label": {
+            "en": "Seam roller",
+            "de": "Nahtroller"
+          },
+          "select": {
+            "product_nrs": [
+              "P083"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "spatula",
+          "section": "tools",
+          "rule_ids": [
+            "WP-Q0"
+          ],
+          "label": {
+            "en": "Wallpaper trimming spatula",
+            "de": "Tapezierspachtel"
+          },
+          "select": {
+            "product_nrs": [
+              "P084"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "cutter",
+          "section": "tools",
+          "rule_ids": [
+            "WP-Q0"
+          ],
+          "label": {
+            "en": "Cutter knife",
+            "de": "Cuttermesser"
+          },
+          "select": {
+            "product_nrs": [
+              "P085"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "spirit_level",
+          "section": "tools",
+          "rule_ids": [
+            "WP-Q0"
+          ],
+          "label": {
+            "en": "Spirit level",
+            "de": "Wasserwaage"
+          },
+          "select": {
+            "product_nrs": [
+              "P032"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "folding_rule",
+          "section": "tools",
+          "rule_ids": [
+            "WP-Q0"
+          ],
+          "label": {
+            "en": "Folding rule",
+            "de": "Zollstock"
+          },
+          "select": {
+            "product_nrs": [
+              "P101"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "drop_cloth",
+          "section": "tools",
+          "rule_ids": [
+            "WP-Q0"
+          ],
+          "label": {
+            "en": "Drop cloth",
+            "de": "Abdeckfolie"
+          },
+          "select": {
+            "product_nrs": [
+              "P011"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "bucket",
+          "section": "tools",
+          "rule_ids": [
+            "WP-Q0"
+          ],
+          "label": {
+            "en": "Bucket",
+            "de": "Eimer"
+          },
+          "select": {
+            "product_nrs": [
+              "P086"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "ladder",
+          "section": "tools",
+          "rule_ids": [
+            "WP-Q0"
+          ],
+          "label": {
+            "en": "Step ladder",
+            "de": "Stufenleiter"
+          },
+          "select": {
+            "product_nrs": [
+              "P073"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "dust_mask",
+          "section": "safety",
+          "rule_ids": [
+            "R-10"
+          ],
+          "label": {
+            "en": "Dust mask FFP2",
+            "de": "Atemschutzmaske FFP2"
+          },
+          "select": {
+            "product_nrs": [
+              "P029"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "safety_glasses",
+          "section": "safety",
+          "rule_ids": [
+            "R-10"
+          ],
+          "label": {
+            "en": "Safety goggles",
+            "de": "Schutzbrille"
+          },
+          "select": {
+            "product_nrs": [
+              "P028"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true
+        },
+        {
+          "role": "gloves",
+          "section": "safety",
+          "rule_ids": [
+            "S-03"
+          ],
+          "label": {
+            "en": "Nitrile gloves",
+            "de": "Nitril-Schutzhandschuhe"
+          },
+          "select": {
+            "product_nrs": [
+              "P077"
+            ]
+          },
+          "on_none": "unresolved",
+          "quantity": {
+            "rule_id": "WP-Q0",
+            "units": 1
+          },
+          "ownable": true,
+          "when": {
+            "fact_in": {
+              "fact": "mould",
+              "values": [
+                "small"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "common_roles": [],
+  "howto": [
+    {
+      "type": "video",
+      "title": {
+        "en": "How to hang nonwoven wallpaper with a pattern",
+        "de": "Vliestapete mit Muster richtig tapezieren"
+      },
+      "url": "https://www.youtube.com/watch?v=eaISsf3Uu6A",
+      "publisher": "OBI HowTo",
+      "lang": "de"
+    },
+    {
+      "type": "video",
+      "title": {
+        "en": "Hanging renovation fleece (preparing the wall)",
+        "de": "Renoviervlies tapezieren (Wand vorbereiten)"
+      },
+      "url": "https://www.youtube.com/watch?v=JcjeHX1OG_Y",
+      "publisher": "OBI HowTo",
+      "lang": "de"
+    },
+    {
+      "type": "article",
+      "title": {
+        "en": "Wallpapering (incl. nonwoven wallpaper)",
+        "de": "Tapezieren (inkl. Vliestapete)"
+      },
+      "url": "https://www.obi.de/magazin/wohnen/innengestaltung/wandgestaltung/tapezieren",
+      "publisher": "OBI Magazin",
+      "lang": "de"
+    }
+  ],
+  "rule_texts": {
+    "WP-M1": {
+      "en": "Paste goes on the wall, dry strips are hung (nonwoven wallpaper).",
+      "de": "Kleister an die Wand, trockene Bahnen anlegen (Vliestapete)."
+    },
+    "WP-Q0": {
+      "en": "1 per project",
+      "de": "1 pro Projekt"
+    },
+    "WP-Q1": {
+      "en": "strips per roll = ⌊10.05 m ÷ (room height + 0.10 m + repeat)⌋; strips = ⌈wall width ÷ 0.53 m⌉; rolls = ⌈strips ÷ strips per roll⌉",
+      "de": "Bahnen je Rolle = ⌊10,05 m ÷ (Raumhöhe + 0,10 m + Rapport)⌋; Bahnen = ⌈Wandbreite ÷ 0,53 m⌉; Rollen = ⌈Bahnen ÷ Bahnen je Rolle⌉"
+    },
+    "WP-Q2": {
+      "en": "1 pack of paste per 5 rolls",
+      "de": "1 Packung Kleister je 5 Rollen"
+    },
+    "WP-C1": {
+      "en": "for uneven or dark surfaces",
+      "de": "für unebene oder dunkle Untergründe"
+    },
+    "WP-C2": {
+      "en": "for absorbent surfaces",
+      "de": "für saugende Untergründe"
+    },
+    "WP-C3": {
+      "en": "for holes or cracks",
+      "de": "für Löcher oder Risse"
+    }
+  }
+}

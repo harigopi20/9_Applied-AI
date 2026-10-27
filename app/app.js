@@ -42,6 +42,7 @@
     questionId: null,
     editOnly: false,         // true when the customer changes one answer (SR-08)
     overrides: {},           // role -> product_nr chosen by the customer
+    owned: new Set(),        // roles the customer already has (C-8) – rules.js decides if allowed
     checked: new Set(),      // product_nr ticked off (FR: simple check-off)
     storeId: null,           // stage 4 – FR-30: no store = aisle/shelf "not available"
     result: null
@@ -73,6 +74,13 @@
     list: ["M3 5h2l2.2 10.2a1 1 0 0 0 1 .8h9.6a1 1 0 0 0 1-.8L20 8H6.2", "M9 20.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1", "M17 20.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1"],
     shelf: ["M3 9h18", "M3 15h18", "M6 9v3", "M18 9v3", "M6 15v3", "M18 15v3"],
     picture: ["M4 5h16v14H4z", "M4 15l4.5-4.5 4 4 2.5-2.5L20 17"],
+    cabinet: ["M5 4h14v11H5z", "M12 4v11", "M10 9.5v1", "M14 9.5v1", "M3 19h18"],
+    anchor: ["M5 21V8h9v13", "M14 10l4-3", "M19 3v18"],
+    paint: ["M4 4h13v5H4z", "M17 6.5h3v6h-8v3", "M11 15.5h2v5h-2z"],
+    glass_door: ["M6 3h12v18H6z", "M9 7l3-2.5", "M9 11l6-5", "M15 12v3"],
+    lock: ["M6 11h12v10H6z", "M8.5 11V8a3.5 3.5 0 0 1 7 0v3", "M12 15v2"],
+    sliding_door: ["M3 4h18", "M5 6h8v15H5z", "M13 6h6v15h-6", "M7 13h2"],
+    wallpaper: ["M5 3h10v18H5z", "M15 5h3a1 1 0 0 1 1 1v3", "M8 7l4 4", "M8 12l4 4"],
     mic: ["M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z", "M5 11a7 7 0 0 0 14 0", "M12 18v3"],
     stop: ["M7 7h10v10H7z"]
   };
@@ -279,22 +287,34 @@
     form.addEventListener("submit", (e) => { e.preventDefault(); submitText(area.value, sp.transcribed ? "speech" : "text"); });
     wrap.appendChild(form);
     wrap.appendChild(el("p", { class: "muted or", text: t("or_choose") }));
-    const grid = el("div", { class: "template-grid" });
+    // Project buttons grouped as in the project catalogue (Wall mounting, Decorating, Doors & locks).
+    const groups = [];
     state.data.templates.forEach((tpl) => {
-      const reviewed = tpl.review && tpl.review.status === "reviewed";
-      grid.appendChild(el("button", {
-        class: "btn template", "data-template": tpl.template_id,
-        onclick: () => startTemplate(tpl, state.pendingGuesses)
-      }, [
-        el("span", { class: "template-icon", "aria-hidden": "true" }, [icon(tpl.template_id === "hang_picture" ? "picture" : "shelf", true)]),
-        el("span", { class: "template-title", text: pick(tpl.title) }),
-        el("span", { class: "template-review " + (reviewed ? "ok" : "pending"),
-          text: (reviewed ? t("template_reviewed") : t("template_unreviewed")) +
-            (tpl.review && tpl.review.review_date ? " · " + tpl.review.review_date : "") +
-            " · v" + tpl.version })
-      ]));
+      const key = tpl.group ? tpl.group.en : "";
+      let g = groups.find((x) => x.key === key);
+      if (!g) { g = { key, label: tpl.group, list: [] }; groups.push(g); }
+      g.list.push(tpl);
     });
-    wrap.appendChild(grid);
+    groups.forEach((g) => {
+      if (g.label) wrap.appendChild(el("h3", { class: "template-group", text: pick(g.label) }));
+      const grid = el("div", { class: "template-grid" });
+      g.list.forEach((tpl) => {
+        const reviewed = tpl.review && tpl.review.status === "reviewed";
+        grid.appendChild(el("button", {
+          class: "btn template", "data-template": tpl.template_id,
+          onclick: () => startTemplate(tpl, state.pendingGuesses)
+        }, [
+          el("span", { class: "template-icon", "aria-hidden": "true" }, [icon(ICONS[tpl.icon] ? tpl.icon : "shelf", true)]),
+          el("span", { class: "template-title", text: pick(tpl.title) }),
+          tpl.safety_level ? el("span", { class: "template-level level-" + tpl.safety_level, text: t("level_" + tpl.safety_level) }) : null,
+          el("span", { class: "template-review " + (reviewed ? "ok" : "pending"),
+            text: (reviewed ? t("template_reviewed") : t("template_unreviewed")) +
+              (tpl.review && tpl.review.review_date ? " · " + tpl.review.review_date : "") +
+              " · v" + tpl.version })
+        ]));
+      });
+      wrap.appendChild(grid);
+    });
     return wrap;
   }
 
@@ -340,7 +360,7 @@
       box.appendChild(el("p", { text: t("recognized_values") }));
       const ul = el("ul", { class: "guess-list" });
       keys.forEach((k) => ul.appendChild(el("li", { "data-fact": k }, [
-        el("span", { text: t("fact_" + k) + ": " }), el("strong", { text: factLabel(k, rec.facts[k]) }),
+        el("span", { text: factName(k, rec.template) + ": " }), el("strong", { text: factLabel(k, rec.facts[k], rec.template) }),
         el("span", { class: "fact-status observed", text: t("status_observed") })
       ])));
       box.appendChild(ul);
@@ -418,6 +438,8 @@
       ]));
     }
 
+    if (f.type === "multi") return renderMulti(form, box, f, current, inGroup);
+
     if (f.type === "choice") {
       let selected = current;
       const group = el("div", { class: "choices", role: "radiogroup", "aria-labelledby": inGroup ? "lbl-" + f.fact : "q-text" });
@@ -471,19 +493,79 @@
     };
   }
 
+  /**
+   * Checklist field (e.g. used-item defects C-7, wall condition). The customer
+   * must tick at least one box – "none" is an explicit answer, never a default.
+   * Value: array of ticked options ([] = none).
+   */
+  function renderMulti(form, box, f, current, inGroup) {
+    const ticked = new Set(Array.isArray(current) ? current : []);
+    let none = Array.isArray(current) && current.length === 0;
+    const list = el("div", { class: "checklist", role: "group", "aria-labelledby": inGroup ? "lbl-" + f.fact : "q-text" });
+    const boxes = [];
+    const mk = (value, label) => {
+      const id = "ms-" + f.fact + "-" + value;
+      const input = el("input", { type: "checkbox", id, class: "check", "data-value": value,
+        checked: value === "none" ? none : ticked.has(value) });
+      input.addEventListener("change", () => {
+        if (value === "none") {
+          none = input.checked;
+          if (none) { ticked.clear(); boxes.forEach((b) => { if (b !== input) b.checked = false; }); }
+        } else {
+          if (input.checked) ticked.add(value); else ticked.delete(value);
+          if (input.checked) { none = false; boxes.filter((b) => b.getAttribute("data-value") === "none").forEach((b) => { b.checked = false; }); }
+        }
+      });
+      boxes.push(input);
+      return el("label", { for: id, class: "check-option" }, [input, el("span", { text: label })]);
+    };
+    f.options.forEach((opt) => list.appendChild(mk(opt, optionLabel(f, opt))));
+    list.appendChild(mk("none", pick(f.none_label) || t("dont_know")));
+    box.appendChild(list);
+    form.appendChild(box);
+    return () => {
+      if (!none && ticked.size === 0) {
+        return f.optional ? { fact: f.fact, value: [] } : { error: t("choose_option_multi") };
+      }
+      return { fact: f.fact, value: none ? [] : f.options.filter((o) => ticked.has(o)) };
+    };
+  }
+
   function optionLabel(f, opt) {
+    if (f.option_labels && f.option_labels[opt]) return pick(f.option_labels[opt]);
     if (f.fact === "wall_type") return t("wall_" + opt);
     if (opt === R.UNKNOWN_VALUE) return t("dont_know");
     return f.unit ? opt + " " + f.unit : String(opt);
   }
 
-  function factLabel(key, fact) {
+  /** Field definition of a fact in the template (questions or group fields). */
+  function fieldDef(key, tpl) {
+    for (const q of ((tpl || state.template) || {}).questions || []) {
+      if (q.type === "group") { const f = q.fields.find((x) => x.fact === key); if (f) return f; }
+      else if (q.fact === key) return q;
+    }
+    return null;
+  }
+
+  function factName(key, tpl) {
+    const f = fieldDef(key, tpl);
+    return f && f.label ? pick(f.label) : t("fact_" + key);
+  }
+
+  function factLabel(key, fact, tpl) {
     if (!fact) return "–";
     const v = fact.value;
+    const f = fieldDef(key, tpl);
+    if (Array.isArray(v)) {
+      if (!v.length) return f && f.none_label ? pick(f.none_label) : "–";
+      return v.map((o) => (f ? optionLabel(f, o) : String(o))).join(", ");
+    }
     if (key === "wall_type") return t("wall_" + v);
     if (v === R.UNKNOWN_VALUE) return t("dont_know");
+    if (f && f.option_labels && f.option_labels[v]) return pick(f.option_labels[v]);
     const units = { load_kg: "kg", shelf_length_cm: "cm", shelf_depth_cm: "cm" };
-    return v + (units[key] ? " " + units[key] : "");
+    const unit = f && f.unit ? f.unit : units[key];
+    return v + (unit ? " " + unit : "");
   }
 
   // Facts summary with status label and "Change" (SR-01, SR-08)
@@ -496,7 +578,7 @@
       keys.forEach((key) => {
         const f = state.facts[key];
         dl.appendChild(el("div", { class: "fact-row" }, [
-          el("dt", { text: t("fact_" + key) }),
+          el("dt", { text: factName(key) }),
           el("dd", {}, [
             el("span", { class: "fact-value", text: factLabel(key, f) }),
             f ? el("span", { class: "fact-status " + f.status, text: t("status_" + f.status.replace(/-/g, "_")) }) : null
@@ -527,22 +609,25 @@
     const box = el("section", { class: "card stop", role: "alert", "data-state": "safety_blocked", "data-reason": b.reason }, [
       el("h2", { text: t("stop_title") })
     ]);
-    const factNames = (b.facts || []).map((k) => t("fact_" + k)).join(", ");
-    const mainText = {
+    const factNames = (b.facts || []).map((k) => factName(k)).join(", ");
+    // Stop rules from the project catalogue bring their own text ({limit} filled in by code).
+    const own = b.message ? pick(b.message).split("{limit}").join(b.limit_kg === null || b.limit_kg === undefined ? "–" : String(b.limit_kg)) : null;
+    const mainText = own || {
       fact_unknown: t("stop_fact_unknown", { facts: factNames }),
       load_over_limit: t("stop_load_over_limit", { load: b.load_kg, limit: b.limit_kg }),
-      wall_limit: t("stop_wall_limit", { load: b.load_kg, limit: b.limit_kg }),
+      wall_limit: t("stop_wall_limit", { load: b.load_kg, limit: b.limit_kg, wall: t("wall_" + b.wall) }),
       no_suitable_system: t("stop_no_suitable_system"),
       invalid_value: t("stop_invalid_value")
     }[b.reason];
-    const help = {
+    const help = b.help ? pick(b.help) : {
       fact_unknown: t("stop_fact_unknown_help"),
       wall_limit: t("stop_wall_limit_help"),
       no_suitable_system: t("stop_no_suitable_system_help")
     }[b.reason];
     box.appendChild(el("p", { class: "stop-main", text: mainText }));
     if (help) box.appendChild(el("p", { text: help }));
-    box.appendChild(el("p", { class: "strong", text: t("stop_professional") }));
+    box.appendChild(el("p", { class: "strong", "data-handoff": b.hand_off || "default",
+      text: b.hand_off ? t("handoff_" + b.hand_off) : t("stop_professional") }));
     box.appendChild(el("p", { class: "muted small", text: t("rule") + ": " + b.rule_id }));
     box.appendChild(viewEvidence(r));
     return box;
@@ -552,6 +637,10 @@
   function viewList(r) {
     const box = el("section", { class: "card list", "data-state": r.state });
     box.appendChild(el("h2", { text: t("list_title") + " – " + pick(state.template.title) }));
+    if (state.template.safety_level) {
+      box.appendChild(el("p", { class: "muted small", "data-level": state.template.safety_level,
+        text: t("safety_level") + ": " + t("level_" + state.template.safety_level) }));
+    }
     box.appendChild(el("p", {
       class: "state-banner " + (r.state === "validated" ? "ok" : "warn"), role: "status",
       text: r.state === "validated" ? t("state_validated") : t("state_incomplete")
@@ -568,14 +657,14 @@
 
     // FR-31: summary of items the chosen store cannot supply
     if (state.storeId) {
-      const missing = r.items.filter((it) => it.product &&
+      const missing = r.items.filter((it) => it.product && !it.owned &&
         R.availability(state.data.stock, state.data.stores, state.storeId, it.product.product_nr, state.storeOrigin, CFG.store).status !== "in_stock").length;
       if (missing) box.appendChild(el("p", { class: "state-banner warn", "data-missing": String(missing), text: t("avail_summary", { n: missing }) }));
     }
 
     // Safety notices first (SR-05, SR-02)
     r.notices.filter((n) => n.id !== "estimates").forEach((n) => {
-      box.appendChild(el("p", { class: "notice safety", "data-notice": n.id, text: t("notice_" + n.id) }));
+      box.appendChild(el("p", { class: "notice safety", "data-notice": n.id, text: n.text ? pick(n.text) : t("notice_" + n.id) }));
     });
 
     ["materials", "tools", "safety"].forEach((section) => {
@@ -593,6 +682,8 @@
         ? [el("span", { class: "total-label", text: t("total") }), priceEl(r.total.amount, "total-value")]
         : [el("span", { text: t("total_" + r.total.reason) })]));
     box.appendChild(el("p", { class: "notice", text: t("notice_estimates") }));
+    const howto = viewHowto(state.template);
+    if (howto) box.appendChild(howto);
     // NFR-05 / SR-10: how this list was made and the template's review status
     const rv = r.review || {};
     box.appendChild(el("p", { class: "transparency", "data-transparency": "list" }, [
@@ -606,13 +697,37 @@
     return box;
   }
 
+  /** "I already have this" (C-8). Plugs and screws are never ownable (SR-15); rules.js decides. */
+  function ownedButton(i) {
+    if (!i.ownable || i.owned_auto) return null;
+    return el("button", { type: "button", class: "btn small owned-toggle", "data-owned": i.owned ? "yes" : "no",
+      text: i.owned ? t("owned_need") : t("owned_have"),
+      onclick: () => { if (i.owned) state.owned.delete(i.role); else state.owned.add(i.role); recompute(); } });
+  }
+
   function viewItem(i) {
     const p = i.product;
-    const li = el("li", { class: "item status-" + i.status, "data-role": i.role, "data-product": p ? p.product_nr : "" });
+    const li = el("li", { class: "item status-" + i.status + (i.owned ? " owned" : ""), "data-role": i.role, "data-product": p ? p.product_nr : "" });
+    if (i.owned) {
+      // Customer's own part: not counted, no store data; load-bearing parts get the check note (SR-15).
+      li.appendChild(el("p", { class: "item-name" }, [
+        el("span", { text: p ? productName(p) : pick(i.label) }),
+        el("span", { class: "tag owned", text: t("owned_tag") })
+      ]));
+      if (i.load_bearing) {
+        li.appendChild(el("p", { class: "warn-text", "data-owned-check": "1",
+          text: i.required_rating_kg !== null ? t("owned_check_rating", { kg: i.required_rating_kg }) : t("owned_check_condition") }));
+      }
+      const b = ownedButton(i);
+      if (b) li.appendChild(b);
+      return li;
+    }
     if (!p) {
       li.appendChild(el("p", { class: "item-name", text: pick(i.label) }));
       li.appendChild(el("p", { class: "warn-text", text: t("unresolved_item") }));
       li.appendChild(el("p", { class: "muted small", text: t("rule") + ": " + i.rule_ids.join(", ") }));
+      const b = ownedButton(i);
+      if (b) li.appendChild(b);
       return li;
     }
     const id = "chk-" + i.role;
@@ -686,6 +801,10 @@
         text: t("variant_incompatible", { checks: i.failed_checks.map((c) => c.check + " (" + c.detail + ")").join("; ") }) }));
     }
 
+    if (i.owned_refused) li.appendChild(el("p", { class: "warn-text", role: "note", "data-owned-refused": "1", text: t("owned_refused") }));
+    const ob = ownedButton(i);
+    if (ob && !i.owned_refused) li.appendChild(ob);
+
     // Product variant change → full re-check (SR-08, RB-03)
     const variants = R.variantOptions(state.template, i.role, state.data.catalogue);
     if (variants.length > 1) {
@@ -699,6 +818,41 @@
       li.appendChild(el("label", { class: "variant-label" }, [el("span", { class: "muted small", text: t("change_variant") + " " }), sel]));
     }
     return li;
+  }
+
+  /**
+   * How-to links from the project catalogue (sheet "How-to links"). Only links,
+   * never copied content; https and an allow-listed host are checked in code (NFR-07).
+   */
+  function safeHowtoUrl(raw) {
+    try {
+      const u = new URL(String(raw));
+      if (u.protocol !== "https:" || !(CFG.data.howtoHosts || []).includes(u.hostname)) return null;
+      // English mode: ask YouTube for English subtitles (catalogue fallback, S-05).
+      if (window.BBI18n.getLang() === "en" && u.hostname === "www.youtube.com") {
+        u.searchParams.set("hl", "en"); u.searchParams.set("cc_load_policy", "1"); u.searchParams.set("cc_lang_pref", "en");
+      }
+      return u.toString();
+    } catch (_) { return null; }
+  }
+
+  function viewHowto(tpl) {
+    const links = ((tpl && tpl.howto) || []).map((h) => Object.assign({}, h, { safe: safeHowtoUrl(h.url) })).filter((h) => h.safe);
+    if (!links.length) return null;
+    const box = el("div", { class: "howto", "data-howto": String(links.length) }, [el("h3", { text: t("howto_title") })]);
+    const ul = el("ul", { class: "howto-list" });
+    links.forEach((h) => {
+      const german = h.lang === "de" && window.BBI18n.getLang() !== "de";
+      ul.appendChild(el("li", {}, [
+        el("span", { class: "tag", text: t(h.type === "video" ? "howto_video" : "howto_article") }),
+        el("a", { href: h.safe, target: "_blank", rel: "noopener noreferrer", referrerpolicy: "no-referrer", text: pick(h.title) }),
+        el("span", { class: "muted small", text: " · " + (h.publisher || "") }),
+        german ? el("p", { class: "muted small", text: t(h.type === "video" ? "howto_german_video" : "howto_german_article") }) : null
+      ]));
+    });
+    box.appendChild(ul);
+    box.appendChild(el("p", { class: "muted small", text: t("howto_note") }));
+    return box;
   }
 
   // Evidence log (DR-07)
@@ -799,6 +953,7 @@
     state.recognized = null;
     state.pendingGuesses = {};
     state.overrides = {};
+    state.owned = new Set();
     state.checked = new Set();
     state.editOnly = false;
     afterFactsChanged();
@@ -816,7 +971,8 @@
 
   function recompute(askNext) {
     stopRecognizer(true); // leaving the entry screen ends any recording
-    const r = R.evaluate(state.template, state.facts, state.data.catalogue, state.data.safetyRules, { overrides: state.overrides });
+    const r = R.evaluate(state.template, state.facts, state.data.catalogue, state.data.safetyRules,
+      { overrides: state.overrides, owned: Array.from(state.owned) });
     state.result = r;
     if (askNext && r.state === "needs_clarification") {
       const next = state.template.questions.find((q) => questionFacts(q).some((k) => r.missing_facts.includes(k)));
@@ -935,7 +1091,7 @@
 
   function resetProject() {
     state.inputText = ""; state.chooseNotice = null; state.pendingGuesses = {}; state.recognized = null;
-    state.template = null; state.facts = {}; state.overrides = {}; state.checked = new Set(); state.result = null;
+    state.template = null; state.facts = {}; state.overrides = {}; state.owned = new Set(); state.checked = new Set(); state.result = null;
     go("choose");
   }
 

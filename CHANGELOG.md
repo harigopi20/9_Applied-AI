@@ -6,6 +6,15 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Product catalogue v2 and project catalogue – 9 projects – 2026-10-27
+Summary (same as the pull request):
+- Product catalogue v2 (102 products, German names) and project catalogue (draft v1) added to `data/`
+- `tools/add_rule_columns.py` only fills empty cells (keeps team values) and exports all three CSVs
+- 7 new project templates (wall cabinet, anti-tip, paint, glass door, door lock, sliding door, wallpaper); shelf and picture aligned with the catalogue
+- Rule engine: stop rules ST-01…ST-14 and warnings from the templates, conditions, new quantity rules, plasterboard cabinet table, projects without load questions, "I already have this" (C-8, SR-15)
+- UI: grouped project buttons with safety level, checklist questions, catalogue stop texts, OBI how-to links, German product names
+- Lexicon, AI schema and proxy know the new projects and wall types; 91 tests passing
+
 - **2026-10-27 – Product catalogue v2 and project catalogue added to the repository.**
   `data/product_catalogue.xlsx` replaced by the team's v2 (102 products P001–P102,
   German names `product_name_de`/`category_de`, stock for the new products in all
@@ -19,6 +28,25 @@ when they are released to `main`.
   product) to P997; DR-01 count raised to ≥ 100; new test for German names (70 passing).
   *Why:* the team delivered updated catalogues that belong in git (DR-01, DR-04).
   *Prompt:* "I have an updated project and product catalogue – push them and update the app."
+
+- **2026-10-27 – App updated to the project catalogue: 9 projects (PRJ-01…PRJ-09).**
+  New templates in `app/data/templates/`: wall cabinet (incl. the plasterboard limit
+  table), anti-tip kit, paint a wall (litres from coverage, mould checks), glass door
+  (hinge rating from the door weight), interior door lock (type and size must match),
+  sliding door (rail ≥ 2 × leaf, moving load only on concrete/solid brick) and nonwoven
+  wallpaper (roll calculation). Shelf and picture aligned: wall types *solid brick*,
+  *brick (type unknown)* (max. 25 kg for shelves) and *aerated concrete* (stop ST-02),
+  shelf length > 120 cm stops (ST-04), used-item defect checklist. Rule engine: stop
+  rules and warnings from the templates (fail safe if a value is missing), conditions,
+  new quantity expressions (add/sub/div/floor/ceil/min/table/"unclear"), projects
+  without load or wall questions, "I already have this" for allowed parts (C-8, never
+  plugs/screws, refused for defective load-bearing parts – ST-06, SR-15). UI: grouped
+  project buttons with icons and safety level, checklist questions, catalogue stop
+  texts with hand-off, OBI how-to links (https + allow-listed hosts only, English
+  subtitles requested in EN mode). Keyword lexicon, AI schema and proxy prompt know the
+  new projects and wall types. 91 tests passing (21 new).
+  *Why:* the team's project catalogue defines the 9 Release-1 projects (DR-04).
+  *Prompt:* "push them and update the app."
 
 ## Milestone: Design update 2 and store availability (FR-31) – 2026-10-25
 Summary (same as the pull request):
