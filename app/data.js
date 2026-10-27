@@ -73,6 +73,7 @@
       const product = Object.freeze({
         product_nr: nr,
         name: str(r.product_name),
+        name_de: str(r.product_name_de), // v2: German name (display only; empty → English name)
         variant_group: str(r.variant_group).toLowerCase(),
         category: str(r.category),
         size: str(r.size),

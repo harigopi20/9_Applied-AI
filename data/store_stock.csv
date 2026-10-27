@@ -69,3 +69,35 @@ P067,Batten,3,Timber,2,69,13,Timber,2,87,3,Timber,2,36,18,Timber,2,60,1,Timber,2
 P068,Square timber,3,Timber,2,13,13,Timber,2,8,3,Timber,2,21,18,Timber,2,15,1,Timber,2,16
 P069,Glued laminated panel,3,Timber,3,9,13,Timber,3,18,3,Timber,3,10,18,Timber,3,15,1,Timber,3,22
 P070,MDF board,3,Timber,3,11,13,Timber,3,20,3,Timber,3,27,18,Timber,3,20,1,Timber,3,17
+P071,Paint tray,5,Painting tools,1,18,7,Painting tools,3,8,8,Painting tools,1,20,2,Painting tools,4,6,3,Painting tools,1,7
+P072,Telescopic pole,5,Painting tools,2,17,7,Painting tools,3,17,8,Painting tools,1,11,2,Painting tools,4,18,3,Painting tools,1,5
+P073,Step ladder,5,Painting tools,1,15,7,Painting tools,1,5,8,Painting tools,4,10,2,Painting tools,2,14,3,Painting tools,1,20
+P074,Deep primer,2,Wall paint,4,7,15,Wall paint,3,19,1,Wall paint,2,5,1,Wall paint,4,23,5,Wall paint,2,7
+P075,"Mould remover, chlorine-free",2,Wall paint,4,11,15,Wall paint,3,3,1,Wall paint,2,17,1,Wall paint,4,8,5,Wall paint,3,11
+P076,Anti-mould wall paint,2,Wall paint,3,8,15,Wall paint,2,20,1,Wall paint,2,9,1,Wall paint,1,8,5,Wall paint,1,6
+P077,Nitrile gloves,12,Safety,3,16,18,Safety,4,19,12,Safety,3,17,6,Safety,1,25,8,Safety,2,24
+P078,"Nonwoven wallpaper, paintable",9,Wallpaper,2,21,9,Wallpaper,4,13,9,Wallpaper,3,25,9,Wallpaper,3,12,9,Wallpaper,4,19
+P079,Nonwoven wallpaper paste,9,Wallpaper,3,12,9,Wallpaper,4,16,9,Wallpaper,4,6,9,Wallpaper,2,15,9,Wallpaper,3,16
+P080,Wallpaper primer,9,Wallpaper,3,3,9,Wallpaper,4,18,9,Wallpaper,1,25,9,Wallpaper,1,12,9,Wallpaper,2,11
+P081,Paste roller,9,Wallpaper,1,22,9,Wallpaper,3,9,9,Wallpaper,1,19,9,Wallpaper,4,14,9,Wallpaper,3,21
+P082,Wallpaper smoothing brush,9,Wallpaper,4,17,9,Wallpaper,3,22,9,Wallpaper,3,4,9,Wallpaper,4,19,9,Wallpaper,4,16
+P083,Seam roller,9,Wallpaper,1,16,9,Wallpaper,4,17,9,Wallpaper,3,14,9,Wallpaper,4,21,9,Wallpaper,1,20
+P084,Wallpaper trimming spatula,9,Wallpaper,1,23,9,Wallpaper,1,5,9,Wallpaper,4,21,9,Wallpaper,1,11,9,Wallpaper,3,10
+P085,Cutter knife with snap-off blades,9,Wallpaper,4,25,9,Wallpaper,1,19,9,Wallpaper,4,13,9,Wallpaper,3,19,9,Wallpaper,4,23
+P086,Bucket,5,Painting tools,3,8,7,Painting tools,3,9,8,Painting tools,2,3,2,Painting tools,2,5,3,Painting tools,1,22
+P087,"Glass door, toughened safety glass 8 mm",10,Doors & locks,1,13,10,Doors & locks,3,14,10,Doors & locks,4,20,10,Doors & locks,2,12,10,Doors & locks,3,11
+P088,Glass door hinge set,10,Doors & locks,4,3,10,Doors & locks,4,3,10,Doors & locks,3,24,10,Doors & locks,4,24,10,Doors & locks,2,25
+P089,Glass door handle set with latch,10,Doors & locks,2,8,10,Doors & locks,3,4,10,Doors & locks,1,5,10,Doors & locks,4,3,10,Doors & locks,4,19
+P090,Cut-resistant gloves,12,Safety,4,17,18,Safety,4,25,12,Safety,1,7,6,Safety,3,8,8,Safety,2,13
+P091,"Interior door lock, bit key (BB)",10,Doors & locks,4,19,10,Doors & locks,4,8,10,Doors & locks,2,18,10,Doors & locks,4,12,10,Doors & locks,4,19
+P092,Bathroom door lock (WC),10,Doors & locks,2,11,10,Doors & locks,4,16,10,Doors & locks,2,22,10,Doors & locks,2,19,10,Doors & locks,1,11
+P093,Interior door lock for profile cylinder (PZ),10,Doors & locks,2,7,10,Doors & locks,2,20,10,Doors & locks,4,19,10,Doors & locks,3,12,10,Doors & locks,1,24
+P094,Profile cylinder,10,Doors & locks,2,11,10,Doors & locks,2,22,10,Doors & locks,3,8,10,Doors & locks,3,22,10,Doors & locks,2,18
+P095,Door handle set,10,Doors & locks,2,10,10,Doors & locks,1,12,10,Doors & locks,2,9,10,Doors & locks,1,9,10,Doors & locks,4,20
+P096,Sliding door rail system,10,Doors & locks,2,23,10,Doors & locks,2,10,10,Doors & locks,2,17,10,Doors & locks,2,23,10,Doors & locks,4,25
+P097,Wooden sliding door leaf,10,Doors & locks,3,10,10,Doors & locks,1,16,10,Doors & locks,4,18,10,Doors & locks,4,21,10,Doors & locks,1,8
+P098,Floor guide for sliding door,10,Doors & locks,4,4,10,Doors & locks,2,14,10,Doors & locks,2,17,10,Doors & locks,4,14,10,Doors & locks,4,22
+P099,Flush pull handle for sliding door,10,Doors & locks,1,5,10,Doors & locks,2,16,10,Doors & locks,2,24,10,Doors & locks,1,15,10,Doors & locks,3,5
+P100,Anti-tip kit for furniture,18,Fixings,3,5,6,Fixings,1,12,6,Fixings,4,16,12,Fixings,3,12,7,Fixings,3,15
+P101,Folding rule,6,Hand tools & drill bits,2,3,1,Hand tools & drill bits,3,23,5,Hand tools & drill bits,3,6,7,Hand tools & drill bits,1,12,18,Hand tools & drill bits,4,23
+P102,Cabinet hanging rail set,8,Shelving,3,6,4,Shelving,1,5,15,Shelving,2,16,15,Shelving,3,20,4,Shelving,4,6
