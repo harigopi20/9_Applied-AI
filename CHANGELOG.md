@@ -6,6 +6,17 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-10-27 – Test results are saved as files and run automatically on GitHub.**
+  New `tools/run_tests.js` (with `tools/package.json`, Playwright 1.63.0): serves the
+  repository itself, runs `app/tests.html` in headless Chromium and writes
+  `test/results/<date>_<commit>.md` and `.json` (commit, branch, browser, every test);
+  exit code 1 on a failed test. New workflow `.github/workflows/tests.yml` runs it on
+  every pull request into `main`, every push to `main` and on demand – result in the
+  run summary, files as artifact `test-results` (90 days). `.gitignore` for
+  `tools/node_modules/`. README and test document §8 explain where results are stored.
+  *Why:* results were only visible in the open browser tab and in hand-written logs.
+  *Prompt:* "Where are test results stored? – Yes, implement the runner script and CI."
+
 ## Milestone: Requirements and test cases updated to the current app – 2026-10-27
 Summary (same as the pull request):
 - New dated files `requirements-R1-MVP_2026-10-27.md`, `requirements-R2-R4_2026-10-27.md`, `01_test_cases_2026-10-27.md` (originals kept)

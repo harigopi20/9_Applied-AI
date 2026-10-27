@@ -154,6 +154,26 @@ python3 -m http.server 8000          # in the repository root
 `tests.html` runs all automated tests in the browser against the real data files,
 fixture copies of the catalogue, the AI `mock` mode and a simulated Web Speech API.
 
+### Save test results
+The browser page shows the results only while it is open. To keep them as a file:
+```bash
+npm install --prefix tools                        # once: Playwright
+npx --prefix tools playwright install chromium    # once: browser
+node tools/run_tests.js                           # runs app/tests.html headless
+```
+The script starts its own local web server, runs the suite in headless Chromium and
+writes `test/results/<date>_<commit>.md` (readable table) and `.json` (all details:
+commit, branch, browser, every test). A file name ending in `-dirty` means the run
+included uncommitted changes. Exit code 1 if a test fails. Commit the result file
+if it is evidence for a release (test log in `test/01_test_cases_2026-10-27.md` §8.1).
+Options: `--out <folder>`, `--no-save`.
+
+**Automatically on GitHub:** `.github/workflows/tests.yml` runs the same script on
+every pull request into `main`, on every push to `main` and on demand (Actions →
+Tests → *Run workflow*). The pull request shows a green or red **Tests** check; the
+result table is in the run summary and the files can be downloaded as the artifact
+`test-results` (kept 90 days).
+
 ## Publish on GitHub Pages
 Settings → Pages → *Deploy from a branch* → `main`, folder `/ (root)` → Save.
 The root `index.html` forwards to `app/`; `.nojekyll` serves files as they are.
@@ -267,7 +287,7 @@ usability test or by hand.
 | `tools/` | Script that adds the rule-engine columns to the team workbook |
 | `requirements/` | Requirements (R1 MVP, R2–R4); current version: files with `_2026-10-27` (after the vibe coding session), older versions kept |
 | `data/` | Team data workbook (`product_catalogue.xlsx`) with CSV exports, PLZ table, concept and design documents |
-| `test/` | Test case descriptions; current version: `01_test_cases_2026-10-27.md` |
+| `test/` | Test case descriptions (current version: `01_test_cases_2026-10-27.md`) and saved test results in `test/results/` |
 | `diagrams/` | Architecture and planning diagrams |
 | `pitch/` | Pitch deck |
 
