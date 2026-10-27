@@ -1,0 +1,11 @@
+{
+  "name": "baumarkt-buddy-tools",
+  "private": true,
+  "description": "Runs the automated test suite (app/tests.html) headless and saves the result – see tools/run_tests.js",
+  "scripts": {
+    "test": "node run_tests.js"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
