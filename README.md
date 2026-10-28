@@ -100,8 +100,12 @@ matches, word forms and compounds ("Regale", "Eckregal") and words with one typo
 Only keywords with 5+ letters and the same first letter count, so short words like
 "Bild" need the exact spelling. Real words that only look like a typo ("Frage" is
 not "frame") are listed in `typo_exceptions` in the lexicon. If two projects could
-be meant, the app shows the project buttons. The high-risk check (SR-09) uses the
-same tolerance – "Steckdoze" is refused like "Steckdose".
+be meant, the app shows the project buttons. Phrases are matched word by word
+with one mistake per word ("stud wlal", "tragende Wnad"; 4-letter words only with
+two swapped letters). The "Did we understand you correctly?" screen lists every
+correction – e.g. *"regla" read as "Regal"* – so the customer can spot a wrong
+guess (NFR-05). The high-risk check (SR-09) uses the same tolerance – "Steckdoze"
+and "tragende Wnad" are refused like the correct spelling.
 
 All modes return the same JSON (`intent`, `high_risk`, `facts`), which is validated
 in code; anything unexpected is discarded. If the AI fails, times out or answers
@@ -158,7 +162,7 @@ repository's `data/` folder – so serve the **repository root**:
 ```bash
 python3 -m http.server 8000          # in the repository root
 # app:   http://localhost:8000/app/
-# tests: http://localhost:8000/app/tests.html   (summary at the top: 99 tests)
+# tests: http://localhost:8000/app/tests.html   (summary at the top: 101 tests)
 ```
 `tests.html` runs all automated tests in the browser against the real data files,
 fixture copies of the catalogue, the AI `mock` mode and a simulated Web Speech API.

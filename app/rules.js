@@ -118,6 +118,31 @@
     return editDistance(word, keyword, max) <= max;
   }
 
+  /** One word of a phrase: exact, word form (5+ letters, e.g. "tragenden"), typo, or – for 4-letter words – two swapped neighbours ("wnad"). */
+  function phraseWordLike(word, keyword) {
+    if (word === keyword) return true;
+    if (keyword.length >= 5) return word.startsWith(keyword) || typoMatch(word, keyword);
+    if (keyword.length === 4 && word.length === 4 && word[0] === keyword[0]) {
+      const diff = [...word].map((c, i) => c !== keyword[i] ? i : -1).filter((i) => i >= 0);
+      return diff.length === 2 && diff[1] === diff[0] + 1 && word[diff[0]] === keyword[diff[1]] && word[diff[1]] === keyword[diff[0]];
+    }
+    return false;
+  }
+
+  /**
+   * Phrase with spelling mistakes ("tragende wnad" → "tragende wand").
+   * `words` is the normalised text split into words. Returns the typed words
+   * that matched, or null.
+   */
+  function phraseTypoMatch(words, phrase) {
+    const parts = normalise(phrase).trim().split(" ").filter(Boolean);
+    if (parts.length < 2) return null;
+    for (let i = 0; i + parts.length <= words.length; i++) {
+      if (parts.every((p, j) => phraseWordLike(words[i + j], p))) return words.slice(i, i + parts.length).join(" ");
+    }
+    return null;
+  }
+
   /** SR-09 / FR-15: high-risk work detection on any text (typed or spoken), typo-tolerant. */
   function checkScope(text, safetyRules) {
     const groups = safetyRules.high_risk_keywords || {};
@@ -128,10 +153,12 @@
       if (cat === "comment") return;
       let hit = findPhrase(text, groups[cat]);
       if (!hit) {
-        // A misspelled dangerous word ("Steckdoze") is refused like the correct one.
-        const single = [].concat(...Object.values(groups[cat]).filter(Array.isArray))
-          .map((k) => normalise(k).trim()).filter((k) => k.length >= 6 && !k.includes(" "));
-        hit = single.find((k) => words.some((w) => typoMatch(w, k))) || null;
+        // A misspelled dangerous word or phrase ("Steckdoze", "tragende Wnad")
+        // is refused like the correct one.
+        const all = [].concat(...Object.values(groups[cat]).filter(Array.isArray)).map((k) => normalise(k).trim());
+        hit = all.filter((k) => k.length >= 6 && !k.includes(" ")).find((k) => words.some((w) => typoMatch(w, k)))
+          || all.filter((k) => k.includes(" ")).find((k) => phraseTypoMatch(words, k))
+          || null;
       }
       if (hit) { categories.push(cat); matched.push(hit); }
     });
@@ -819,7 +846,7 @@
   }
 
   root.BBRules = Object.freeze({
-    STATUS, UNKNOWN_VALUE, makeFact, trustedValue, editDistance, typoMatch,
+    STATUS, UNKNOWN_VALUE, makeFact, trustedValue, editDistance, typoMatch, phraseTypoMatch,
     evaluate, storeInfo, availability, variantOptions, compatible, checkPlz, distanceKm, findStores,
     guardGeneratedText, impliesClearance, checkScope, findPhrase
   });

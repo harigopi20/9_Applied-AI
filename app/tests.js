@@ -614,6 +614,33 @@
     eq(R.editDistance("regla", "regal", 1), 1, "swapped letters count as one mistake");
   });
 
+  test("NFR-05 (typos)", "The recognised screen names each corrected word ('Regla' read as 'Regal')", async () => {
+    const s = await appSubmit("Ich möchte ein Regla an Gipskarten hängen", adapter("template"));
+    eq(s.screen, "recognized");
+    eq(s.recognized.corrections, [{ typed: "regla", understood: "regal" }, { typed: "gipskarten", understood: "gipskarton" }]);
+    const box = document.getElementById("sandbox");
+    box.replaceChildren(window.BBApp.viewRecognized());
+    const list = box.querySelector("[data-corrections]");
+    assert(list && list.textContent.includes("regla") && list.textContent.includes("Regal"), "shown: " + (list && list.textContent));
+    const exact = await appSubmit("Ich möchte ein Regal aufhängen", adapter("template"));
+    eq(exact.recognized.corrections, [], "no note when spelled correctly");
+    box.replaceChildren(window.BBApp.viewRecognized());
+    eq(box.querySelector("[data-corrections]"), null);
+    const mock = await appSubmit("MOCK_SHELF", adapter("mock"));
+    eq(mock.recognized.corrections, [], "only keyword mode reports corrections");
+  });
+
+  test("SR-09 (phrase typos)", "Misspelled dangerous phrases are refused ('tragende Wnad', 'load bearnig wall')", async () => {
+    ["tragende Wnad entfernen", "tragnde wand", "wand entfrenen", "verdeckte Leitnug anbohren", "a load bearnig wall"].forEach((txt) =>
+      assert(R.checkScope(txt, D.safetyRules).highRisk, txt));
+    ["Regal an die Wand", "Wnad streichen", "hang a shelf on the wall"].forEach((txt) =>
+      assert(!R.checkScope(txt, D.safetyRules).highRisk, "false refusal: " + txt));
+    eq((await appSubmit("Ich will die tragende Wnad entfernen", adapter("template"))).screen, "high_risk");
+    const c = [];
+    eq(window.BBAI.templateUnderstand("shelf on a stud wlal", D.lexicon, IDS(), c).facts.wall_type, "plasterboard", "phrase typo in wall type");
+    eq(c.map((x) => x.understood), ["stud wall"]);
+  });
+
   test("NFR-09", "Numbers and units in German and English (words and digits)", () => {
     const u = (txt) => window.BBAI.templateUnderstand(txt, D.lexicon, IDS());
     eq(u("Regal zwölf Kilo").facts.load_kg, 12);

@@ -365,6 +365,12 @@
       ])));
       box.appendChild(ul);
     }
+    if (rec.corrections && rec.corrections.length) {
+      const cap = (w) => w.charAt(0).toUpperCase() + w.slice(1);
+      const ul = el("ul", { class: "typo-list", "data-corrections": String(rec.corrections.length) });
+      rec.corrections.forEach((c) => ul.appendChild(el("li", { text: t("recognized_typo", { typed: c.typed, understood: cap(c.understood) }) })));
+      box.appendChild(el("div", { class: "hint", role: "note" }, [el("p", { class: "strong", text: t("recognized_typo_title") }), ul]));
+    }
     box.appendChild(el("p", { class: "muted small", text: t("recognized_confirm_note") }));
     box.appendChild(el("p", { class: "muted small", text: t("recognized_source_" + state.ai.mode) }));
     box.appendChild(el("div", { class: "actions" }, [
@@ -1110,7 +1116,14 @@
       go("choose");
       return state.screen;
     }
-    state.recognized = { template: tpl, facts: guessesFor(tpl, out.facts, source) };
+    // NFR-05: in keyword mode, show which misspelled words were corrected ("Regla" → "Regal").
+    let corrections = [];
+    if (res.source === "template") {
+      window.BBAI.templateUnderstand(clean, state.data.lexicon, templates.map((x) => x.template_id), corrections);
+      const seen = new Set();
+      corrections = corrections.filter((c) => !seen.has(c.typed + "|" + c.understood) && seen.add(c.typed + "|" + c.understood));
+    }
+    state.recognized = { template: tpl, facts: guessesFor(tpl, out.facts, source), corrections };
     go("recognized");
     return state.screen;
   }

@@ -147,22 +147,37 @@
    *    (single keywords of 5+ letters at the start or end of a word)
    *  - spelling mistakes: "regla", "reagl", "regall", "gipskarten" (BBRules.typoMatch)
    */
-  function hasLike(tokens, list, exceptions) {
+  function hasLike(tokens, list, exceptions, corrections) {
     if (hasAny(tokens, list)) return true;
-    const words = tokens.filter((t) => typeof t === "string" && t.length >= 4);
-    const typo = root.BBRules && root.BBRules.typoMatch;
+    const all = tokens.filter((t) => typeof t === "string");
+    const words = all.filter((t) => t.length >= 4);
+    const R = root.BBRules;
     const notTypos = new Set(exceptions || []);
     return (list || []).some((kw) => {
       const k = kw.toLowerCase();
-      if (k.length < 5 || k.includes(" ")) return false;
-      return words.some((w) => w.startsWith(k) || w.endsWith(k) || (typo && !notTypos.has(w) && typo(w, k)));
+      // Phrases with a spelling mistake ("gipskarton wnad"), word by word
+      if (k.includes(" ")) {
+        const typed = R && R.phraseTypoMatch(all, k);
+        if (typed && corrections) corrections.push({ typed, understood: k });
+        return !!typed;
+      }
+      if (k.length < 5) return false;
+      if (words.some((w) => w.startsWith(k) || w.endsWith(k))) return true; // word forms, compounds
+      const typed = R && words.find((w) => !notTypos.has(w) && R.typoMatch(w, k));
+      if (typed && corrections) corrections.push({ typed, understood: k });
+      return !!typed;
     });
   }
 
   function langLists(group) { return [].concat(group.en || [], group.de || []); }
 
   /** Template mode: returns an object in the schema above (still validated afterwards). */
-  function templateUnderstand(text, lex, templateIds) {
+  /**
+   * @param corrections optional array – receives {typed, understood} for every
+   *        spelling mistake that was tolerated (shown as "understood as" on the
+   *        recognised screen, NFR-05). Not part of the validated output.
+   */
+  function templateUnderstand(text, lex, templateIds, corrections) {
     const raw = normalise(text);
     const tokens = wordsToNumbers(raw, lex);
     const notTypos = ((lex.typo_exceptions || {}).words || []).map((w) => w.toLowerCase());
@@ -173,13 +188,13 @@
     // Exact keywords first; only if none matches, word forms and spelling
     // mistakes are tried. Two or more possible projects → "unclear" (buttons).
     let hits = templateIds.filter((id) => lex.intents[id] && hasAny(raw, langLists(lex.intents[id])));
-    if (hits.length === 0) hits = templateIds.filter((id) => lex.intents[id] && hasLike(raw, langLists(lex.intents[id]), notTypos));
+    if (hits.length === 0) hits = templateIds.filter((id) => lex.intents[id] && hasLike(raw, langLists(lex.intents[id]), notTypos, corrections));
     let intent = hits.length === 1 ? hits[0] : "unclear";
     if (hits.length === 0 && hasLike(raw, langLists(lex.diy_words), notTypos)) intent = "unsupported";
 
     // Wall type (only if exactly one is mentioned)
     let walls = Object.keys(lex.wall_types).filter((w) => hasAny(raw, langLists(lex.wall_types[w])));
-    if (walls.length === 0) walls = Object.keys(lex.wall_types).filter((w) => hasLike(raw, langLists(lex.wall_types[w]), notTypos));
+    if (walls.length === 0) walls = Object.keys(lex.wall_types).filter((w) => hasLike(raw, langLists(lex.wall_types[w]), notTypos, corrections));
     const over = lex.wall_type_overrides || {};
     walls = walls.filter((w) => !walls.some((o) => Array.isArray(over[o]) && over[o].includes(w)));
     if (walls.length === 1) facts.wall_type = walls[0];
