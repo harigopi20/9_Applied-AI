@@ -90,9 +90,18 @@ darker shades (#E05A00 for large bold text, #C85000 for normal text).
 ## AI adapter modes (`aiMode` in `app/config.js`)
 | Mode | What it does | Cost |
 |---|---|---|
-| `template` **(default – team decision)** | Keyword matching with `data/understanding-lexicon.json`: intents, wall types, units and number words in DE/EN ("zwölf Kilo", "twelve kilos", "80x25 cm") | free |
+| `template` **(default – team decision)** | Keyword matching with `data/understanding-lexicon.json`: intents, wall types, units and number words in DE/EN ("zwölf Kilo", "twelve kilos", "80x25 cm"). Tolerates spelling mistakes and word forms ("Regla", "Regall", "Bücherregla", "shefl" → shelf) – always only a guess the customer confirms | free |
 | `proxy` | A commercial language model via `proxy/` – built, **not active**. Set `ai.proxyUrl` | API usage |
 | `mock` | Fixed answers from `data/ai-mock-responses.json` for tests and demos; also via `app/index.html?ai=mock` | free |
+
+**Spelling mistakes (template mode):** exact keywords are tried first; if none
+matches, word forms and compounds ("Regale", "Eckregal") and words with one typo
+("Regla", swapped letters count as one mistake; two from 9 letters) are accepted.
+Only keywords with 5+ letters and the same first letter count, so short words like
+"Bild" need the exact spelling. Real words that only look like a typo ("Frage" is
+not "frame") are listed in `typo_exceptions` in the lexicon. If two projects could
+be meant, the app shows the project buttons. The high-risk check (SR-09) uses the
+same tolerance – "Steckdoze" is refused like "Steckdose".
 
 All modes return the same JSON (`intent`, `high_risk`, `facts`), which is validated
 in code; anything unexpected is discarded. If the AI fails, times out or answers
@@ -149,7 +158,7 @@ repository's `data/` folder – so serve the **repository root**:
 ```bash
 python3 -m http.server 8000          # in the repository root
 # app:   http://localhost:8000/app/
-# tests: http://localhost:8000/app/tests.html   (summary at the top: 97 tests)
+# tests: http://localhost:8000/app/tests.html   (summary at the top: 99 tests)
 ```
 `tests.html` runs all automated tests in the browser against the real data files,
 fixture copies of the catalogue, the AI `mock` mode and a simulated Web Speech API.

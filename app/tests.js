@@ -589,6 +589,31 @@
     eq((await appSubmit("x".repeat(600), adapter("template"))).chooseNotice, "too_long");
   });
 
+  test("FR-03 (typos)", "Misspelled project words are still recognised – as a guess the customer confirms", async () => {
+    const u = (txt) => window.BBAI.templateUnderstand(txt, D.lexicon, IDS());
+    ["Ich möchte ein Regla aufhängen", "Regall 15 kg", "ein reagl an die Wand", "Bücherregla", "Eckregal anbringen",
+      "Regale aufhängen", "shlef on the wall", "a shefl"].forEach((txt) => eq(u(txt).intent, "hang_shelf", txt));
+    eq(u("Bilderrahmn aufhängen").intent, "hang_picture");
+    eq(u("Regla an Gipskarten").facts.wall_type, "plasterboard", "misspelled wall type");
+    // Real words that only look like a typo are not read as a keyword
+    ["Ich habe eine Frage", "Hallo", "bald fertig"].forEach((txt) => assert(!IDS().includes(u(txt).intent), "false hit: " + txt));
+    // Still only a guess: the recognised screen asks, nothing is confirmed
+    const s = await appSubmit("Ich möchte ein Regla mit 12 kg aufhängen", adapter("template"));
+    eq(s.screen, "recognized");
+    eq(s.recognized.template.template_id, "hang_shelf");
+    window.BBApp.startTemplate(s.recognized.template, s.recognized.facts);
+    eq(s.result.state, "needs_clarification", "no list before confirmation");
+  });
+
+  test("SR-09 (typos)", "A misspelled dangerous job is refused like the correct one", async () => {
+    ["Steckdoze versetzen", "Lichtschalterr tauschen", "Gastherne tauschen"].forEach((txt) =>
+      assert(R.checkScope(txt, D.safetyRules).highRisk, txt));
+    ["Ich möchte ein Regla aufhängen", "hang a shefl", "Regal statisch sicher?"].forEach((txt) =>
+      assert(!R.checkScope(txt, D.safetyRules).highRisk, "false refusal: " + txt));
+    eq((await appSubmit("Ich will eine Steckdoze versetzen", adapter("template"))).screen, "high_risk");
+    eq(R.editDistance("regla", "regal", 1), 1, "swapped letters count as one mistake");
+  });
+
   test("NFR-09", "Numbers and units in German and English (words and digits)", () => {
     const u = (txt) => window.BBAI.templateUnderstand(txt, D.lexicon, IDS());
     eq(u("Regal zwölf Kilo").facts.load_kg, 12);

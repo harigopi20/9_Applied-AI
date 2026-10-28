@@ -6,6 +6,26 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Typo-tolerant project recognition – 2026-10-28
+Summary (same as the pull request):
+- Misspelled project and wall words are recognised in keyword mode ("Regla", "Regall", "Bücherregla", "shefl", "Gipskarten") – still only a guess the customer confirms
+- Misspelled dangerous jobs are refused like correct ones ("Steckdoze", "Gastherne")
+- Exception list for real words that only look like a typo ("Frage" is not "frame")
+
+- **2026-10-28 – Typo tolerance for project, wall and high-risk words.**
+  New `editDistance` / `typoMatch` in `app/rules.js` (swapped letters count as one
+  mistake; keywords of 5+ letters, same first letter, 1 mistake – 2 from 9 letters).
+  `app/ai-adapter.js` (template mode) tries exact keywords first, then word forms
+  and compounds ("Regale", "Eckregal", "Regalbretter") and spelling mistakes; two
+  possible projects → "unclear" (project buttons). The result stays a guess shown on
+  "Did we understand you correctly?" and confirmed in the questions (SR-01). The
+  G0 high-risk check also catches misspelled single keywords – a false hit only
+  makes the app more careful (SR-09). New `typo_exceptions` list in
+  `app/data/understanding-lexicon.json`. 2 new tests (99 passing).
+  *Why:* a misspelled "Regla" instead of "Regal" was not recognised.
+  *Prompt:* "How can I avoid that the project is not found when it is misspelled,
+  e.g. 'regla' instead of 'regal'?"
+
 ## Milestone: Saved test results and automatic test runs – 2026-10-27
 Summary (same as the pull request):
 - `tools/run_tests.js` runs `app/tests.html` headless and saves `test/results/<date>_<commit>.md` / `.json`

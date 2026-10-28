@@ -82,14 +82,57 @@
     return { text: String(text), discarded: false, reason: null };
   }
 
-  /** SR-09 / FR-15: high-risk work detection on any text (typed or spoken). */
+  // ---------------------------------------------------------------------
+  // Typo tolerance (spelling mistakes such as "regla" → "regal")
+  // ---------------------------------------------------------------------
+  /** Edit distance with swapped neighbours counting as one edit (Damerau, OSA). Stops early above `max`. */
+  function editDistance(a, b, max) {
+    if (Math.abs(a.length - b.length) > max) return max + 1;
+    let prev2 = null, prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) {
+      const cur = [i];
+      let rowMin = i;
+      for (let j = 1; j <= b.length; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        let v = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+        if (prev2 && i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) v = Math.min(v, prev2[j - 2] + 1);
+        cur.push(v);
+        rowMin = Math.min(rowMin, v);
+      }
+      if (rowMin > max) return max + 1;
+      prev2 = prev; prev = cur;
+    }
+    return prev[b.length];
+  }
+
+  /**
+   * Does a typed word match a single-word keyword despite a spelling mistake?
+   * Conservative on purpose: keywords of 5+ letters only, same first letter,
+   * 1 mistake (2 from 9 letters). Used only where the result is a GUESS the
+   * customer confirms (project/wall keywords) or where a match makes the app
+   * MORE careful (high-risk refusal, SR-09) – never to confirm a fact.
+   */
+  function typoMatch(word, keyword) {
+    if (!word || !keyword || keyword.length < 5 || word[0] !== keyword[0]) return false;
+    const max = keyword.length >= 9 ? 2 : 1;
+    return editDistance(word, keyword, max) <= max;
+  }
+
+  /** SR-09 / FR-15: high-risk work detection on any text (typed or spoken), typo-tolerant. */
   function checkScope(text, safetyRules) {
     const groups = safetyRules.high_risk_keywords || {};
     const categories = [];
     const matched = [];
+    const words = normalise(text).trim().split(" ").filter(Boolean);
     Object.keys(groups).forEach((cat) => {
       if (cat === "comment") return;
-      const hit = findPhrase(text, groups[cat]);
+      let hit = findPhrase(text, groups[cat]);
+      if (!hit) {
+        // A misspelled dangerous word ("Steckdoze") is refused like the correct one.
+        const single = [].concat(...Object.values(groups[cat]).filter(Array.isArray))
+          .map((k) => normalise(k).trim()).filter((k) => k.length >= 6 && !k.includes(" "));
+        hit = single.find((k) => words.some((w) => typoMatch(w, k))) || null;
+      }
       if (hit) { categories.push(cat); matched.push(hit); }
     });
     return { highRisk: categories.length > 0, categories, matched, rule_id: "SR-09" };
@@ -776,7 +819,7 @@
   }
 
   root.BBRules = Object.freeze({
-    STATUS, UNKNOWN_VALUE, makeFact, trustedValue,
+    STATUS, UNKNOWN_VALUE, makeFact, trustedValue, editDistance, typoMatch,
     evaluate, storeInfo, availability, variantOptions, compatible, checkPlz, distanceKm, findStores,
     guardGeneratedText, impliesClearance, checkScope, findPhrase
   });
