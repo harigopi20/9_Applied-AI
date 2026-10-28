@@ -589,6 +589,58 @@
     eq((await appSubmit("x".repeat(600), adapter("template"))).chooseNotice, "too_long");
   });
 
+  test("FR-03 (typos)", "Misspelled project words are still recognised – as a guess the customer confirms", async () => {
+    const u = (txt) => window.BBAI.templateUnderstand(txt, D.lexicon, IDS());
+    ["Ich möchte ein Regla aufhängen", "Regall 15 kg", "ein reagl an die Wand", "Bücherregla", "Eckregal anbringen",
+      "Regale aufhängen", "shlef on the wall", "a shefl"].forEach((txt) => eq(u(txt).intent, "hang_shelf", txt));
+    eq(u("Bilderrahmn aufhängen").intent, "hang_picture");
+    eq(u("Regla an Gipskarten").facts.wall_type, "plasterboard", "misspelled wall type");
+    // Real words that only look like a typo are not read as a keyword
+    ["Ich habe eine Frage", "Hallo", "bald fertig"].forEach((txt) => assert(!IDS().includes(u(txt).intent), "false hit: " + txt));
+    // Still only a guess: the recognised screen asks, nothing is confirmed
+    const s = await appSubmit("Ich möchte ein Regla mit 12 kg aufhängen", adapter("template"));
+    eq(s.screen, "recognized");
+    eq(s.recognized.template.template_id, "hang_shelf");
+    window.BBApp.startTemplate(s.recognized.template, s.recognized.facts);
+    eq(s.result.state, "needs_clarification", "no list before confirmation");
+  });
+
+  test("SR-09 (typos)", "A misspelled dangerous job is refused like the correct one", async () => {
+    ["Steckdoze versetzen", "Lichtschalterr tauschen", "Gastherne tauschen"].forEach((txt) =>
+      assert(R.checkScope(txt, D.safetyRules).highRisk, txt));
+    ["Ich möchte ein Regla aufhängen", "hang a shefl", "Regal statisch sicher?"].forEach((txt) =>
+      assert(!R.checkScope(txt, D.safetyRules).highRisk, "false refusal: " + txt));
+    eq((await appSubmit("Ich will eine Steckdoze versetzen", adapter("template"))).screen, "high_risk");
+    eq(R.editDistance("regla", "regal", 1), 1, "swapped letters count as one mistake");
+  });
+
+  test("NFR-05 (typos)", "The recognised screen names each corrected word ('Regla' read as 'Regal')", async () => {
+    const s = await appSubmit("Ich möchte ein Regla an Gipskarten hängen", adapter("template"));
+    eq(s.screen, "recognized");
+    eq(s.recognized.corrections, [{ typed: "regla", understood: "regal" }, { typed: "gipskarten", understood: "gipskarton" }]);
+    const box = document.getElementById("sandbox");
+    box.replaceChildren(window.BBApp.viewRecognized());
+    const list = box.querySelector("[data-corrections]");
+    assert(list && list.textContent.includes("regla") && list.textContent.includes("Regal"), "shown: " + (list && list.textContent));
+    const exact = await appSubmit("Ich möchte ein Regal aufhängen", adapter("template"));
+    eq(exact.recognized.corrections, [], "no note when spelled correctly");
+    box.replaceChildren(window.BBApp.viewRecognized());
+    eq(box.querySelector("[data-corrections]"), null);
+    const mock = await appSubmit("MOCK_SHELF", adapter("mock"));
+    eq(mock.recognized.corrections, [], "only keyword mode reports corrections");
+  });
+
+  test("SR-09 (phrase typos)", "Misspelled dangerous phrases are refused ('tragende Wnad', 'load bearnig wall')", async () => {
+    ["tragende Wnad entfernen", "tragnde wand", "wand entfrenen", "verdeckte Leitnug anbohren", "a load bearnig wall"].forEach((txt) =>
+      assert(R.checkScope(txt, D.safetyRules).highRisk, txt));
+    ["Regal an die Wand", "Wnad streichen", "hang a shelf on the wall"].forEach((txt) =>
+      assert(!R.checkScope(txt, D.safetyRules).highRisk, "false refusal: " + txt));
+    eq((await appSubmit("Ich will die tragende Wnad entfernen", adapter("template"))).screen, "high_risk");
+    const c = [];
+    eq(window.BBAI.templateUnderstand("shelf on a stud wlal", D.lexicon, IDS(), c).facts.wall_type, "plasterboard", "phrase typo in wall type");
+    eq(c.map((x) => x.understood), ["stud wall"]);
+  });
+
   test("NFR-09", "Numbers and units in German and English (words and digits)", () => {
     const u = (txt) => window.BBAI.templateUnderstand(txt, D.lexicon, IDS());
     eq(u("Regal zwölf Kilo").facts.load_kg, 12);
