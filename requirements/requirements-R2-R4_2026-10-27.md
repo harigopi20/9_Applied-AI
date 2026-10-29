@@ -3,10 +3,11 @@
 | | |
 |---|---|
 | **Source** | `requirements-R2-R4.md` (25 Oct 2026, `Requirements_R1_3.xlsx` round 4) updated after the vibe coding session of 27 Oct 2026 (project catalogue draft v1, app on `main`, PR #87–#90) |
-| **Date** | 27 October 2026 |
+| **Date** | 29 October 2026 |
 | **Scope** | Releases 2, 3 and 4 (Beyond) – proposal, not built in the 2-week sprint |
-| **Items** | 20 – Functional: 16 · Safety: 1 · Non-functional: 2 · Data: 1 |
-| **MoSCoW** | Must: 2 · Should: 11 · Could: 5 · Won't: 2 |
+| **Items** | 18 – Functional: 15 · Safety: 1 · Non-functional: 2 · Data: 0 |
+| **MoSCoW** | Must: 2 · Should: 11 · Could: 3 · Won't: 2 |
+| **Changes 29 Oct 2026** | Team decisions D-1 … D-11 of 29 Oct 2026: FR-17 and DR-06 moved to R1 (save the project list); open points for wood walls, "estimate for me" and Q-1 … Q-4 resolved (see the last section). |
 | **Changes 27 Oct 2026** | FR-07 moved to R1 (implemented as "I already have this"). R1 already covers parts of FR-10, FR-12, FR-14, FR-16 and NFR-08 – noted in the rationale with "Session 27 Oct 2026". Open points from the project catalogue for later releases: see the last section. |
 
 **Legend:** MoSCoW = priority within the release (Must / Should / Could / Won't) · Release no. = 1 (R1) … 4 (Beyond) · Design components = IDs from `data/03-design.md`.
@@ -15,33 +16,26 @@
 
 | Release | Items |
 |---|---|
-| Release 2 – Extended MVP | 7 |
+| Release 2 – Extended MVP | 5 |
 | Release 3 – Pilot-ready | 11 |
 | Release 4 – Beyond (not planned) | 2 |
 
-## Release 2 – Extended MVP – 7
+## Release 2 – Extended MVP – 5
 
-### Functional requirements (FR) – 5
+### Functional requirements (FR) – 4
 
 | ID | Type | Category | Requirement | Simple language | Proposed release | MoSCoW (in that release) | Rationale | Design components (for the part in the proposed release) | Release no. | Team decision | Team comment |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | FR-10 | Functional | Validation | Explain recommendations and unresolved facts | The app explains why each item fits and what is still unclear. | R2 | Must | R1 shows the quantity basis/rule ID; full explanations in R2 \| Session 27 Oct 2026: R1 already shows the evidence log, the stop rule text with hand-off and, for size problems, "needed vs. available" sizes in cm. | DC-20, DC-04, DC-34 | 2 |  |  |
 | FR-12 | Functional | Shopping | Offer feasible basket options and alternatives | Offer a cheaper or a better option for an item, and update the total price. | R2 | Should | Needs the core rule engine first \| Session 27 Oct 2026: R1 already lets the customer switch to another variant of the same product group (e.g. 10 l / 5 l / colour paint) with a full re-check and new total; cheaper/premium suggestions are still R2. | DC-28, DC-24, DC-04 | 2 |  |  |
-| FR-14 | Functional | Shopping | Provide an offline project checklist | The shopping list still works in the store without internet. | R2 | Should | R1 has simple tick-off; offline PWA in R2 \| Session 27 Oct 2026: R1 also has "I already have this" (FR-07). | DC-06, DC-15 | 2 |  |  |
+| FR-14 | Functional | Shopping | Provide an offline project checklist | The shopping list still works in the store without internet. | R2 | Should | Offline PWA in R2 \| Session 27 Oct 2026: R1 also has "I already have this" (FR-07). \| Decision 29 Oct 2026 (D-3): the tick box on each list item is removed in R1; only "I already have this" (FR-07) remains. | DC-06, DC-15 | 2 |  |  |
 | FR-16 | Functional | Assembly | Link assembly steps to reviewed sources | Give step-by-step building instructions based on the manufacturer's manual. | R2 | Should | Needs reviewed manufacturer sources \| Session 27 Oct 2026: R1 shows team-checked OBI how-to links for projects 5–9 as links only (FR-32); own step-by-step guidance stays R2. | DC-08, DC-33, DC-32 | 2 |  |  |
-| FR-17 | Functional | Shopping | Export and share a project summary | Save or share a project summary, for example as a link or PDF. | R2 | Could | Nice for sharing, low risk | DC-07 | 2 |  |  |
 
 ### Non-functional requirements (NFR) – 1
 
 | ID | Type | Category | Requirement | Simple language | Proposed release | MoSCoW (in that release) | Rationale | Design components (for the part in the proposed release) | Release no. | Team decision | Team comment |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | NFR-08 | Non-functional | Accessibility | Accessible contrast, scalable text, screen-reader labels and a non-map shopping route. | Easy for everyone to use: good contrast, bigger text, works with screen readers. | R2 | Should | Basic contrast in R1; full accessibility in R2 \| PLZ feature (R1): PLZ field and store list have screen-reader labels. \| Session 27 Oct 2026: new checklist questions and "I already have this" buttons have labels; touch targets ≥ 44 px. | DC-39 | 2 |  |  |
-
-### Data requirements (DR) – 1
-
-| ID | Type | Category | Requirement | Simple language | Proposed release | MoSCoW (in that release) | Rationale | Design components (for the part in the proposed release) | Release no. | Team decision | Team comment |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| DR-06 | Data | Sharing | Sharing: link or PDF export; later retailer hand-off. | Share the project as a link or PDF. | R2 | Could | Follows FR-17 | DC-07 | 2 |  |  |
 
 ## Release 3 – Pilot-ready – 11
 
@@ -80,20 +74,20 @@
 | FR-21 | Functional | Integration | Support an approved reservation integration | Reserve products in the store, only with an approved retailer. | Beyond | Won't | Requires retailer contract and API | DC-40 | 4 |  |  |
 | FR-23 | Functional | Integration | Optimise baskets across retailers | Compare and combine shopping baskets across several stores. | Beyond | Won't | Multi-retailer data not available | DC-28, DC-40, DC-24 | 4 |  |  |
 
-## Open points from the vibe coding session (27 Oct 2026) – for later releases
+## Open points from the vibe coding session (27 Oct 2026) – status after the team decisions of 29 Oct 2026
 
 Not new requirement IDs yet; the team decides where they belong. Source: project catalogue draft v1 (open points Q-1 … Q-4) and README → Limitations.
 
 | Topic | Today (R1 app) | Proposal |
 |---|---|---|
-| Wall type "wood (solid or stud)" | Not offered – no wood fixings in the catalogue | Add wood fixings to the catalogue, then the wall type (R2) |
-| Load help "estimate for me" (C-7) | Only "I know it" / "I don't know" (unknown = stop) | Estimate tables per project, result shown as estimate and confirmed (R2) |
-| Owned items as a separate question screen (C-8) | Ticked off in the list ("I already have this") | Keep the list solution unless user tests show a need (R2, FR-07) |
+| Wall type "wood (solid or stud)" | Not offered – no wood fixings in the catalogue | **Decided 29 Oct 2026 (D-5): R1** – see FR-04, SR-13 |
+| Load help "estimate for me" (C-7) | Only "I know it" / "I don't know" (unknown = stop) | **Decided 29 Oct 2026 (D-2): R1** – see FR-04, SR-14 |
+| Owned items as a separate question screen (C-8) | Ticked off in the list ("I already have this") | **Decided 29 Oct 2026 (D-3):** keep the list solution; tick box removed (FR-07, FR-34, SR-17) |
 | Sliding-door overlap 3 cm per side / top | Assumption (rule of thumb) | Replace by manufacturer values; qualified review (R3, SR-10) |
 | Cavity anchors and anchor bolts bring their own screw | Assumption | Verify with product data; add screws to the catalogue if not (R2) |
-| Sliding door max. 60 kg (catalogue) | App plans up to 40 kg (10 mm plug rated 50 kg, × 1.25, SR-04) | Add a plug or anchor rated for 75 kg that fits the rail (R2) |
+| Sliding door max. 60 kg (catalogue) | App plans up to 40 kg (10 mm plug rated 50 kg, × 1.25, SR-04) | **Decided 29 Oct 2026 (D-4):** stays 40 kg until a plug or anchor rated ≥ 75 kg is added to the catalogue (SR-13) |
 | Wall plugs for the sliding-door rail | Quantity "per rail instructions" → no total | Add the plug count to the rail data (R2) |
-| Q-1 FR-05 = 3 question groups | Implemented as max. 3 screens | Team to confirm |
-| Q-2 / Q-3 how-to videos | Channel of 2 videos and English audio track to check | Team check, record in the project catalogue |
-| Q-4 plasterboard limit 25 kg | Implemented (Knauf-based table) | Qualified review (R3, SR-10) |
+| Q-1 FR-05 = 3 question groups | Implemented as max. 3 screens | **Resolved 29 Oct 2026 (D-8):** FR-05 = max. 3 question screens |
+| Q-2 / Q-3 how-to videos | Channel of 2 videos and English audio track to check | **Resolved:** all videos verified by Hari (27 Oct 2026) |
+| Q-4 plasterboard limit 25 kg | Implemented (Knauf-based table) | **Resolved:** 25 kg decided (team); qualified review in R3 (SR-10) |
 | Sample values P071–P105 | Price, rating, weight and stock are sample values | Team check before the presentation; real data with a partner (R3) |
