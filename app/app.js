@@ -342,18 +342,14 @@
       if (g.label) wrap.appendChild(el("h3", { class: "template-group", text: pick(g.label) }));
       const grid = el("div", { class: "template-grid" });
       g.list.forEach((tpl) => {
-        const reviewed = tpl.review && tpl.review.status === "reviewed";
         grid.appendChild(el("button", {
           class: "btn template", "data-template": tpl.template_id,
           onclick: () => startTemplate(tpl, state.pendingGuesses)
         }, [
           el("span", { class: "template-icon", "aria-hidden": "true" }, [icon(ICONS[tpl.icon] ? tpl.icon : "shelf", true)]),
           el("span", { class: "template-title", text: pick(tpl.title) }),
-          tpl.safety_level ? el("span", { class: "template-level level-" + tpl.safety_level, text: t("level_" + tpl.safety_level) }) : null,
-          el("span", { class: "template-review " + (reviewed ? "ok" : "pending"),
-            text: (reviewed ? t("template_reviewed") : t("template_unreviewed")) +
-              (tpl.review && tpl.review.review_date ? " · " + tpl.review.review_date : "") +
-              " · v" + tpl.version })
+          tpl.safety_level ? el("span", { class: "template-level level-" + tpl.safety_level, text: t("level_" + tpl.safety_level) }) : null
+          // Review status and version are shown on the list only (SR-10, NFR-05), not on the tiles.
         ]));
       });
       wrap.appendChild(grid);

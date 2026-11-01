@@ -1113,6 +1113,10 @@
       });
       const tr = box.querySelector('[data-transparency="list"]');
       assert(tr && tr.textContent.includes(window.BBI18n.t("template_unreviewed")), "review status shown (SR-10)");
+      const choose = document.getElementById("sandbox");
+      choose.replaceChildren(window.BBApp.viewChoose());
+      assert(choose.querySelector("[data-template]"), "project tiles rendered");
+      assert(!choose.textContent.includes(window.BBI18n.t("template_unreviewed")), "no review status on the project tiles");
     });
     window.BBI18n.setLang("en");
     ["template", "mock", "proxy"].forEach((m) => assert(window.BBI18n.TEXTS.en["notice_ai_" + m] && window.BBI18n.TEXTS.de["notice_ai_" + m], "AI notice for mode " + m));

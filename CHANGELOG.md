@@ -6,6 +6,18 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Cleaner project tiles – 2026-11-01
+Summary (same as the pull request):
+- Project tiles no longer show "Template not yet reviewed by the team · vX.Y.Z"
+- Review status and template version stay visible in the transparency line of the list (SR-10, NFR-05); test added
+
+- **2026-11-01 – Review status removed from the project tiles.** `viewChoose` in
+  `app/app.js` no longer renders the `.template-review` line (styles removed); the list
+  still shows the template version and review status. NFR-05 test checks that the tiles
+  have no review text. README updated.
+  *Why:* the tiles should be calmer; the status is kept where the result is shown.
+  *Prompt:* "Remove 'Template not yet reviewed by the team · v1.1.0' from the tiles."
+
 ## Milestone: Shopping by aisle – 2026-10-31
 Summary (same as the pull request):
 - Orange button "Start shopping by aisle" under the list opens a new screen: the checked list of the chosen store grouped by aisle (ascending) and shelf
