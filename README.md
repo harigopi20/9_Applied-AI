@@ -314,6 +314,7 @@ usability test or by hand.
 | `data/` | Team data workbook (`product_catalogue.xlsx`) with CSV exports, PLZ table, concept and design documents |
 | `test/` | Test case descriptions (current version: `01_test_cases.md`; older dated copies in `test/archive/`) and saved test results in `test/results/` |
 | `diagrams/` | Architecture and planning diagrams |
+| `docs/` | Research documents, e.g. the [competitor analysis](docs/competitor-analysis.md) |
 | `pitch/` | Pitch deck |
 
 ## Team
