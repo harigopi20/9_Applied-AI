@@ -6,6 +6,18 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Risk analysis – 2026-11-02
+Summary (same as the pull request):
+- New `docs/risk-analysis.md`: 20 risks in five categories (safety, AI, data quality, legal, business), rated by likelihood and impact
+- Risk matrix, countermeasures with status (linked to requirements and open GitHub issues), top risks with next steps
+- README folder table links the risk analysis
+
+- **2026-11-02 – Risk analysis.** New `docs/risk-analysis.md` with risk register,
+  risk matrix and next steps; legal points (EU AI Act Art. 50, Product Liability
+  Directive 2024/2853) checked against current sources. README `docs/` row updated.
+  *Why:* the professor asked the team for a risk analysis of the project.
+  *Prompt:* "What kind of risk analysis can we do? … Please do it!"
+
 ## Milestone: Cleaner project tiles – 2026-11-01
 Summary (same as the pull request):
 - Project tiles no longer show "Template not yet reviewed by the team · vX.Y.Z"
