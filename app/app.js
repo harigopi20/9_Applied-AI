@@ -169,6 +169,7 @@
     m.appendChild(state.leaveAsk ? viewLeave() : screens[state.screen]());
     renderNav();
     renderProgress();
+    renderBack();
     document.getElementById("footer-text").textContent = t("footer");
     m.focus({ preventScroll: true });
     window.scrollTo(0, 0);
@@ -202,6 +203,26 @@
     }
     if (sc === "shopping") return { step: "shopping", stop: false };
     return null;
+  }
+
+  // In-app back button (3 Nov 2026): same as the browser back (issue #101 history).
+  // Not on the first step (that would leave the app) and not on question screens,
+  // which have their own "Back" button.
+  function backVisible() {
+    return nav.enabled && nav.pos > 1 && !state.leaveAsk && STEP_SCREENS.includes(state.screen) && state.screen !== "question";
+  }
+
+  function renderBack() {
+    const bar = document.getElementById("backbar");
+    if (!bar) return;
+    bar.hidden = !backVisible();
+    bar.replaceChildren(...(bar.hidden ? [] : [viewBack()]));
+  }
+
+  function viewBack() {
+    return el("button", { type: "button", class: "back-btn", id: "back-btn", "aria-label": t("back"), onclick: () => nav.back() }, [
+      el("span", { class: "back-chevron", "aria-hidden": "true", text: "‹" }), el("span", { text: t("back") })
+    ]);
   }
 
   function renderProgress() {
@@ -1853,7 +1874,7 @@
   window.BBApp = Object.freeze({
     state, viewResult, viewItem, viewQuestion, viewChoose, viewRecognized, viewHighRisk,
     recompute, startTemplate, submitText, micTap, consentAccept, consentDecline,
-    renderHeader, viewLeave, initHistory, disableHistory, nav, go, viewStore, viewList, viewShopping, aisleRoute, viewProgress, progressStep, openStoreSearch, searchStores, chooseStore, leaveStoreSearch, buildListHtml, saveList
+    renderHeader, viewLeave, viewBack, backVisible, initHistory, disableHistory, nav, go, viewStore, viewList, viewShopping, aisleRoute, viewProgress, progressStep, openStoreSearch, searchStores, chooseStore, leaveStoreSearch, buildListHtml, saveList
   });
 
   document.addEventListener("DOMContentLoaded", () => {

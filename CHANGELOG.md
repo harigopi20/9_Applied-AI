@@ -6,6 +6,18 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: In-app back button – 2026-11-03
+Summary (same as the pull request):
+- "‹ Back" button under the progress bar goes back to the previous step (same as the browser back, issue #101)
+- Hidden on the first step (would leave the app) and on question screens (they have their own Back button)
+- 1 new test (117 passing); test result saved
+
+- **2026-11-03 – In-app back button.** `#backbar` in `app/index.html`, `renderBack` /
+  `viewBack` / `backVisible` in `app/app.js` (calls the history back from #101), styles in
+  `app/style.css` (44 px tap area). README updated.
+  *Why:* customers should get back to the previous page without the browser controls.
+  *Prompt:* "Please add a back button to get back to the previous page."
+
 ## Milestone: Saved list in the app design (issue #135) – 2026-11-03
 Summary (same as the pull request):
 - "Save list" / "Share list" now give one HTML file in the app design instead of a plain text file
