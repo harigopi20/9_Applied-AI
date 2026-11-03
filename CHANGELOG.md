@@ -6,6 +6,20 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: "Already have" button in the price row – 2026-11-03
+Summary (same as the pull request):
+- "I already have this" moved from its own row to the right of the price row (variant B)
+- Button text shortened: "Hab ich schon" (DE), "Have it already" (EN)
+- List about one row (~50 px) shorter per tool or other ownable part
+- UI test C-8 checks the new position (120 passing); test result saved
+
+- **2026-11-03 – "Already have" button moved into the price row.** `app/app.js`: the
+  "I already have this" button now sits on the right of the price row instead of its own
+  row (variant B); `app/style.css` pushes it to the right edge. Texts shortened to
+  "Hab ich schon" (DE) and "Have it already" (EN). The UI test C-8 checks the position. README updated.
+  *Why:* the list was long on the phone; this saves about one row (~50 px) per tool or other ownable part.
+  *Prompt:* "Would the list get shorter if the button moved up next to the product?" → screenshots of A and B → "Implement variant B with 'Hab ich schon'."
+
 ## Milestone: "I already have this" keeps the scroll position (issue #119) – 2026-11-03
 Summary (same as the pull request):
 - "I already have this" / "I need it after all" no longer jumps to the top of the list – the clicked item stays where it was on screen
