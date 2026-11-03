@@ -26,3 +26,6 @@
   under a new milestone heading with the same summary as the pull request.
 - Update README.md whenever features or usage change.
 - Never commit code that doesn't work. Fix errors first, then commit.
+- Always save every test run in `test/results/`: run `node tools/run_tests.js`
+  (without `--no-save`) and commit the `.md` and `.json` result files together
+  with the change they test.

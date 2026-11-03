@@ -188,8 +188,9 @@ node tools/run_tests.js                           # runs app/tests.html headless
 The script starts its own local web server, runs the suite in headless Chromium and
 writes `test/results/<date>_<commit>.md` (readable table) and `.json` (all details:
 commit, branch, browser, every test). A file name ending in `-dirty` means the run
-included uncommitted changes. Exit code 1 if a test fails. Commit the result file
-if it is evidence for a release (test log in `test/01_test_cases.md` §8.1).
+included uncommitted changes. Exit code 1 if a test fails. Every test run is saved and
+its result files are committed with the change they test (team rule since 3 Nov 2026;
+test log in `test/01_test_cases.md` §8.1).
 Options: `--out <folder>`, `--no-save`.
 
 **Automatically on GitHub:** `.github/workflows/tests.yml` runs the same script on
