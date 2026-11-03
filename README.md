@@ -122,7 +122,9 @@ guess (NFR-05). The high-risk check (SR-09) uses the same tolerance – "Steckdo
 and "tragende Wnad" are refused like the correct spelling.
 
 All modes return the same JSON (`intent`, `high_risk`, `facts`), which is validated
-in code; anything unexpected is discarded. If the AI fails, times out or answers
+in code; anything unexpected is discarded. Exception for our own keyword code
+(template mode, no AI): a single impossible value ("-5 kg", "0 kg", "9999 kg") is dropped
+and asked again, the project is kept (issues #104, #105); AI answers stay all-or-nothing. If the AI fails, times out or answers
 invalidly, the app offers the project buttons and keeps the text and the values
 already recognised (NFR-03). Before text goes to the proxy, postcodes, phone numbers
 and e-mail addresses are removed; only `text` and `lang` are sent (NFR-04).
@@ -155,7 +157,8 @@ typing and the project buttons always work.
 | S5 | any | Deny the microphone in the browser prompt | Hint; typing and buttons work |
 
 ## Store selection by PLZ (FR-29, FR-30)
-- The PLZ is checked in code: exactly 5 digits **and** present in the PLZ table.
+- The PLZ is checked in code: exactly 5 digits **and** present in the PLZ table. Spaces and other non-digits are removed while typing or pasting (" 91126" works, issue #109).
+- Number answers accept only digits with one decimal comma or point ("4", "4,5", "4.5"); "1e1", "0x10" and the like are rejected (issue #108).
 - Valid → stores within `store.maxDistanceKm` (50 km), sorted by straight-line distance, at most `store.maxStoresShown` (5), with address and opening hours.
 - Invalid, unknown or no store in range → message plus the full store list.
 - **A store is never selected automatically** – not even the nearest one or the only one in range; the customer taps it (RB-16, SR-06). *Team decision 25 Oct 2026: no preselection* – FR-29, design D-11 and TC-38 say the same.

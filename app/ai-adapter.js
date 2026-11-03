@@ -37,10 +37,16 @@
 
   /**
    * Strict validation in code. Anything unexpected → the whole answer is
-   * rejected (no partial use of a doubtful answer).
-   * @returns {ok:true, output} | {ok:false, errors:[...]}
+   * rejected (no partial use of a doubtful answer, DR-05).
+   * Exception (issue #105): for our own keyword code (template mode, no AI)
+   * options.dropBadValues drops only an out-of-range value – the project and the
+   * other values stay; a dropped value is simply asked again. Structure errors
+   * (keys, intent, types) still reject the whole answer.
+   * @returns {ok:true, output, dropped} | {ok:false, errors:[...]}
    */
-  function validateOutput(obj, templateIds) {
+  function validateOutput(obj, templateIds, options) {
+    const dropBad = !!(options && options.dropBadValues);
+    const dropped = [];
     const errors = [];
     const isObj = (o) => o !== null && typeof o === "object" && !Array.isArray(o);
     if (!isObj(obj)) return { ok: false, errors: ["not an object"] };
@@ -59,17 +65,20 @@
         const v = obj.facts[name];
         if (v === null || v === undefined) return;
         const r = FACT_RULES[name];
-        if (r.type === "enum" && !r.values.includes(v)) errors.push(name + " invalid: " + String(v));
+        let bad = null;
+        if (r.type === "enum" && !r.values.includes(v)) bad = name + " invalid: " + String(v);
         if (r.type !== "enum") {
           const okNum = typeof v === "number" && Number.isFinite(v) && v >= r.min && v <= r.max;
-          if (!okNum || (r.type === "integer" && !Number.isInteger(v))) errors.push(name + " out of range: " + String(v));
+          if (!okNum || (r.type === "integer" && !Number.isInteger(v))) bad = name + " out of range: " + String(v);
         }
+        if (bad && dropBad) dropped.push(name);
+        else if (bad) errors.push(bad);
       });
     }
     if (errors.length) return { ok: false, errors };
     const facts = {};
-    FACT_NAMES.forEach((n) => { facts[n] = obj.facts[n] === undefined ? null : obj.facts[n]; });
-    return { ok: true, output: Object.freeze({ intent: obj.intent, high_risk: obj.high_risk, facts: Object.freeze(facts) }) };
+    FACT_NAMES.forEach((n) => { facts[n] = obj.facts[n] === undefined || dropped.includes(n) ? null : obj.facts[n]; });
+    return { ok: true, dropped, output: Object.freeze({ intent: obj.intent, high_risk: obj.high_risk, facts: Object.freeze(facts) }) };
   }
 
   /** NFR-04: remove postcodes, e-mail addresses and phone numbers before sending text anywhere. */
@@ -87,10 +96,14 @@
     return String(text == null ? "" : text)
       .normalize("NFKC")
       .toLowerCase()
+      // Issue #104: a minus directly before a number is kept ("-5 kg" stays negative, so the
+      // range check drops it); a hyphen between numbers ("5-10") is still a separator.
+      .replace(/(^|[^\p{L}\p{N}.])[-\u2212\u2013](?=\d)/gu, "$1 \u2212")
       .replace(/(\d),(\d)/g, "$1.$2")             // 2,5 kg → 2.5 kg
       .replace(/(\d)([a-zäöüß]+)/g, "$1 $2")      // 12kg → 12 kg
       .replace(/(\d)\s*[x×*]\s*(\d)/g, "$1 x $2") // 80x25 → 80 x 25
-      .replace(/[^\p{L}\p{N}.\s]+/gu, " ")
+      .replace(/[^\p{L}\p{N}.\s\u2212]+/gu, " ")
+      .replace(/\u2212(?!\d)/g, " ")
       .replace(/(?<!\d)\.|\.(?!\d)/g, " ")
       .split(/\s+/)
       .filter(Boolean);
@@ -123,7 +136,7 @@
         out.push(n);
         continue;
       }
-      if (/^\d+(\.\d+)?$/.test(tok)) { out.push(Number(tok)); continue; }
+      if (/^\u2212?\d+(\.\d+)?$/.test(tok)) { out.push(Number(tok.replace("\u2212", "-"))); continue; }
       out.push(tok);
     }
     return out;
@@ -252,7 +265,8 @@
     const maxAttempts = 2; // design §5: retry max. 2, then fallback
 
     function finish(source, candidate) {
-      const v = validateOutput(candidate, templateIds);
+      // Only our own keyword code may drop single bad values (issue #105); AI answers stay all-or-nothing (DR-05).
+      const v = validateOutput(candidate, templateIds, { dropBadValues: source === "template" });
       return v.ok ? { ok: true, source, output: v.output } : { ok: false, source, reason: "invalid_output", errors: v.errors };
     }
 

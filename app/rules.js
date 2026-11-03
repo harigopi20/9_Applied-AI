@@ -975,6 +975,21 @@
    * PLZ check in code: exactly 5 digits AND present in the reference table.
    * The PLZ is never logged, never put into the evidence log and never sent.
    */
+  /**
+   * Issue #108: a number typed by the customer – digits with at most one decimal
+   * comma or point ("4", "4,5", "4.5"). Anything else ("1e1", "0x10", "4,5,6",
+   * "Infinity", "-3") → NaN, so the range check asks again.
+   */
+  function parseDecimal(raw) {
+    const s = String(raw == null ? "" : raw).trim();
+    return /^\d+([.,]\d+)?$/.test(s) ? Number(s.replace(",", ".")) : NaN;
+  }
+
+  /** Issue #109: postcode field – keeps digits only (spaces, pasted text), max. 5. */
+  function cleanPlzInput(raw) {
+    return String(raw == null ? "" : raw).replace(/\D+/g, "").slice(0, 5);
+  }
+
   function checkPlz(input, plzTable) {
     const plz = String(input == null ? "" : input).trim();
     if (!/^\d{5}$/.test(plz)) return { valid: false, reason: "format" };
@@ -1060,6 +1075,6 @@
     STATUS, UNKNOWN_VALUE, makeFact, trustedValue, editDistance, typoMatch, phraseTypoMatch,
     evaluate, storeInfo, availability, variantOptions, compatible, checkPlz, distanceKm, findStores,
     guardGeneratedText, impliesClearance, checkScope, findPhrase,
-    guideLimits, limitCheck, catalogueSizes, segmentPlan
+    guideLimits, limitCheck, catalogueSizes, segmentPlan, parseDecimal, cleanPlzInput
   });
 })(typeof window !== "undefined" ? window : globalThis);
