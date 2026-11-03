@@ -1183,6 +1183,109 @@
     eq(sig(s.result), before, "same checked result");
   });
 
+  // ---------------------------------------------------------------------
+  // Size limits before input (proposal A) and several boards (proposal B, SHELF-S1) – 3 Nov 2026
+  // ---------------------------------------------------------------------
+  test("ST-04 / FR-04 (limits A)", "Size limits are read from the stop rules of every project – no new values", () => {
+    const lim = (id) => R.guideLimits(tpl(id)).map((l) => l.facts.join("*") + (l.when ? "[" + l.when.values.join(",") + "]" : "") + ":" + l.min + "-" + l.max);
+    eq(lim("hang_shelf").filter((x) => x.startsWith("shelf_length")), ["shelf_length_cm:null-120"]);
+    const cab = lim("hang_wall_cabinet");
+    ["cabinet_width_cm:null-120", "cabinet_depth_cm:null-60", "cabinet_height_cm:30-100"].forEach((x) => assert(cab.includes(x), "cabinet " + x));
+    const paint = lim("paint_wall");
+    assert(paint.includes("wall_width_m*room_height_m:null-60"), "paint area");
+    assert(paint.includes("room_height_m:null-2.5"), "paint height");
+    const lock = lim(D.templates.find((x) => x.template_id.includes("lock")).template_id);
+    ["backset_mm:55-55", "distance_mm[BB,PZ]:72-72", "distance_mm[WC]:78-78"].forEach((x) => assert(lock.includes(x), "lock " + x));
+    // every limit equals the stop rule: the value on the limit passes, just beyond it stops
+    const cabT = tpl("hang_wall_cabinet");
+    const lc = R.guideLimits(cabT).find((l) => l.facts[0] === "cabinet_width_cm");
+    eq(R.limitCheck(lc, confirmed({ cabinet_width_cm: 120 })).violated, false);
+    eq(R.limitCheck(lc, confirmed({ cabinet_width_cm: 121 })).violated, true);
+  });
+
+  test("ST-04 / FR-04 (limits A, UI)", "Questions show the guide limits and catalogue sizes before input; typing beyond a limit warns; the stop names the crossed limit", () => {
+    const s = window.BBApp.state;
+    window.BBI18n.setLang("de");
+    s.data = D;
+    const box = document.getElementById("sandbox");
+    const ask = (template, qid) => { s.template = template; s.facts = {}; s.questionId = qid; s.editOnly = false; box.replaceChildren(window.BBApp.viewQuestion()); };
+    ask(tpl("hang_wall_cabinet"), "Q2");
+    ["cabinet_width_cm", "cabinet_depth_cm", "cabinet_height_cm"].forEach((k) => assert(box.querySelector('[data-guide-hint="' + k + '"]'), "hint " + k));
+    assert(box.querySelector('[data-guide-hint="cabinet_width_cm"]').textContent.includes("bis 120 cm"), "limit text");
+    const warn = box.querySelector('[data-guide-warn="cabinet_width_cm"]');
+    eq(warn.hidden, true, "no warning before input");
+    const inp = box.querySelector("#in-cabinet_width_cm");
+    inp.value = "150"; inp.dispatchEvent(new Event("input", { bubbles: true }));
+    eq(warn.hidden, false, "warning while typing 150");
+    inp.value = "100"; inp.dispatchEvent(new Event("input", { bubbles: true }));
+    eq(warn.hidden, true, "no warning at 100");
+    // catalogue sizes up front (shelf boards, sliding-door leaves)
+    ask(SHELF(), "Q3");
+    const cat = box.querySelector('[data-catalogue-hint="board"]');
+    assert(cat && cat.textContent.includes("120 × 25"), "board sizes shown");
+    assert(box.querySelector('[data-split-hint="shelf_length_cm"]'), "split hint at the length");
+    ask(D.templates.find((x) => x.template_id.includes("sliding")), "Q2");
+    assert(box.querySelector('[data-catalogue-hint="leaf"]'), "leaf sizes shown");
+    // the stop names the crossed limit
+    window.BBI18n.setLang("en");
+    renderResult(tpl("hang_wall_cabinet"), confirmed({ wall_type: "concrete", cabinet_width_cm: 150, cabinet_depth_cm: 30, cabinet_height_cm: 60, load_kg: 20, condition: [] }), null);
+    const lines = box.querySelector("[data-stop-limits]");
+    assert(lines, "limit list on the stop");
+    assert(/150 cm.*up to 120 cm/.test(lines.textContent), "value and limit: " + lines.textContent);
+  });
+
+  test("SHELF-S1 (B)", "Shelf longer than 120 cm: several boards side by side, each with its own fixings, checked for the full weight", () => {
+    const base = Object.assign({}, SHELF_OK, { load_kg: 20, shelf_length_cm: 300, shelf_layout: "multiple" });
+    const r = run(SHELF(), confirmed(base));
+    eq(r.state, "validated");
+    eq([r.segments.count, r.segments.length, r.segments.load_kg, r.segments.load_from], [3, 100, 20, "full"]);
+    const one = run(SHELF(), confirmed(Object.assign({}, SHELF_OK, { load_kg: 20, shelf_length_cm: 100 })));
+    ["board", "bracket", "wall_plug", "screw"].forEach((role) => eq(item(r, role).quantity.units, 3 * item(one, role).quantity.units, role + " × 3"));
+    eq(item(r, "drill").quantity.units, 1, "tools not multiplied");
+    assert(item(r, "board").product.specs.length_mm >= 1000, "board long enough for 100 cm");
+    const n = r.notices.find((x) => x.id === "segments");
+    assert(n && n.cut_from === 120, "cut hint 120 → 100 cm");
+    assert(r.evidence.some((e) => e.rule_id === "SHELF-S1"), "evidence log");
+    // the load is never divided: 40 kg on plasterboard (limit 25) still stops
+    eq(run(SHELF(), confirmed(Object.assign({}, base, { wall_type: "plasterboard", load_kg: 40 }))).blocked.rule_id, "R-08");
+    // books estimate is per cm → per board (150 cm = 38 kg → 19 kg per 75 cm board)
+    const f = confirmed(Object.assign({}, base, { shelf_length_cm: 150 }));
+    f.load_kg = R.makeFact(38, R.STATUS.CONFIRMED, "question:estimate:SHELF-E1");
+    const re = run(SHELF(), f);
+    eq([re.state, re.segments.count, re.segments.load_kg, re.segments.load_from], ["validated", 2, 19, "estimate"]);
+    // 130 cm → 2 boards of 65 cm (80 cm boards)
+    const r2 = run(SHELF(), confirmed(Object.assign({}, base, { shelf_length_cm: 130 })));
+    eq([r2.segments.count, r2.segments.length, item(r2, "board").product.specs.length_mm], [2, 65, 800]);
+  });
+
+  test("SHELF-S1 (B, UI)", "Length above 120 cm shows the split choice with the plan; the stop offers 'several boards' and the tap re-checks", () => {
+    const s = window.BBApp.state;
+    window.BBI18n.setLang("en");
+    s.data = D; s.template = SHELF(); s.facts = {}; s.questionId = "Q3"; s.editOnly = false;
+    const box = document.getElementById("sandbox");
+    box.replaceChildren(window.BBApp.viewQuestion());
+    const layoutBox = box.querySelector('[data-value="multiple"]').closest(".field");
+    eq(layoutBox.hidden, true, "hidden at first");
+    const inp = box.querySelector("#in-shelf_length_cm");
+    inp.value = "300"; inp.dispatchEvent(new Event("input", { bubbles: true }));
+    eq(layoutBox.hidden, false, "shown above 120 cm");
+    assert(box.querySelector("[data-segment-plan]").textContent.includes("3 boards of 100 cm"), "plan shown");
+    inp.value = "100"; inp.dispatchEvent(new Event("input", { bubbles: true }));
+    eq(layoutBox.hidden, true, "hidden again at 100 cm");
+    // stop screen with the tip
+    s.owned = new Set();
+    renderResult(SHELF(), confirmed(Object.assign({}, SHELF_OK, { shelf_length_cm: 300, shelf_layout: "single" })), null);
+    s.screen = "result";
+    eq(s.result.blocked.rule_id, "ST-04");
+    const btn = box.querySelector("#use-split");
+    assert(btn && btn.textContent.includes("3"), "split button");
+    btn.click();
+    eq(s.facts.shelf_layout.value, "multiple");
+    eq(s.facts.shelf_layout.status, R.STATUS.CONFIRMED);
+    eq(s.result.state, "validated", "re-checked with 3 boards");
+    assert(window.BBApp.viewResult().textContent.includes("3 boards of 100 cm"), "segment notice on the list");
+  });
+
   test("NFR-09", "Every UI text exists in English and German", () => {
     const en = Object.keys(window.BBI18n.TEXTS.en), de = Object.keys(window.BBI18n.TEXTS.de);
     eq(en.filter((k) => !de.includes(k)), [], "missing in German");
@@ -1375,7 +1478,9 @@
     eq(item(r, "drill").product.product_nr, "P040");
     eq([sh({ wall_type: "brick", load_kg: 18 }).state, sh({ wall_type: "brick", load_kg: 26 }).blocked.rule_id], ["validated", "ST-03"]);
     eq(stopOf(sh({ wall_type: "aerated_concrete" })), "ST-02");
-    eq(stopOf(sh({ shelf_length_cm: 130 })), "ST-04");
+    // SHELF-S1 (3 Nov 2026): above 120 cm the customer first chooses one board or several
+    eq(sh({ shelf_length_cm: 130 }).missing_facts, ["shelf_layout"]);
+    eq(stopOf(sh({ shelf_length_cm: 130, shelf_layout: "single" })), "ST-04");
   });
 
   test("FR-02 / FR-03 (catalogue)", "Keywords find the new projects and wall types (EN + DE); 'solid brick' wins over 'brick'", () => {
