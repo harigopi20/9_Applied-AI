@@ -1314,6 +1314,14 @@
     assert(window.BBApp.viewResult().textContent.includes("3 boards of 100 cm"), "segment notice on the list");
   });
 
+  test("FR-29 (text)", "No store in range: the notice names Baumarkt-Buddy partner stores (EN + DE)", () => {
+    window.BBI18n.setLang("en");
+    assert(window.BBI18n.t("store_none_in_range", { km: 50 }).startsWith("There is no Baumarkt-Buddy partner store within 50 km of this postcode."), "EN");
+    window.BBI18n.setLang("de");
+    assert(window.BBI18n.t("store_none_in_range", { km: 50 }).startsWith("Im Umkreis von 50 km dieser PLZ gibt es keinen Baumarkt-Buddy-Partnermarkt."), "DE");
+    window.BBI18n.setLang("en");
+  });
+
   test("NFR-09 (flags)", "Language button shows a flag: English screen → German flag, German screen → UK flag; label for screen readers", () => {
     const box = document.getElementById("sandbox");
     box.replaceChildren(...["app-title", "app-tagline", "sample-badge"].map((id) => Object.assign(document.createElement("span"), { id })),
