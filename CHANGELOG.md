@@ -6,6 +6,24 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Browser back stays inside the app (issue #101) – 2026-11-03
+Summary (same as the pull request):
+- Browser back / back swipe goes one step back inside the app (list → question → project; shopping → list); forward re-checks the answers (SR-08)
+- Only real steps get a history entry (no entry for re-renders, loading or the start notice); leaving the store search replaces its entry
+- Back on the first step while a list exists asks "Leave your list?" (save / stay / leave) instead of closing the app
+- History holds only screen and question id – no answers, no postcode (NFR-04); 2 new tests (116 passing); test result saved
+
+- **2026-11-03 – Browser back / back swipe (issue #101, options A + B).** `app/app.js`:
+  `initHistory`, `syncHistory` (called from `render`, pushes an entry only when the step
+  changes), `onPopState` / `restoreStep` (shows the step again; result and shopping are
+  re-computed from the current answers, a missing answer leads to its question), guard entry
+  with `viewLeave` ("Leave your list?" – save / stay / leave; leave goes past the guard, opened
+  directly → start again). Texts EN/DE in `app/i18n.js`. Tests #101 (A) and #101 (B) with
+  real `history.back()` / `forward()`. Review and proposal posted on issue #101; option C
+  (keep the project over a reload, `sessionStorage`) is left to the team. README updated.
+  *Why:* one back swipe in the store lost the whole list.
+  *Prompt:* "Check issue #101, review the proposal, suggest an alternative" → "Yes, implement A & B and post the review on #101."
+
 ## Milestone: "Partner store" wording for stores out of range – 2026-11-03
 Summary (same as the pull request):
 - Notice when no store is within 50 km now says "There is no Baumarkt-Buddy partner store within 50 km of this postcode." (DE: "… keinen Baumarkt-Buddy-Partnermarkt.")

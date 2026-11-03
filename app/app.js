@@ -37,6 +37,7 @@
     storeSearch: null,       // result of BBRules.findStores – never selects a store itself
     storeOrigin: null,       // FR-31: centre of the entered PLZ (coordinates only, in memory)
     storeReturn: "choose",   // where to go after choosing/skipping a store
+    leaveAsk: false,         // issue #101: "Leave your list?" shown after back on the first step
     template: null,
     facts: {},
     questionId: null,
@@ -158,13 +159,14 @@
   }
 
   function render() {
+    syncHistory();
     if (!document.getElementById("main")) return; // headless use in tests.html
     document.documentElement.lang = window.BBI18n.getLang();
     renderHeader();
     const m = main();
     m.replaceChildren();
     const screens = { loading: viewLoading, error: viewError, start: viewStart, store: viewStore, choose: viewChoose, recognized: viewRecognized, high_risk: viewHighRisk, question: viewQuestion, result: viewResult, shopping: viewShopping };
-    m.appendChild(screens[state.screen]());
+    m.appendChild(state.leaveAsk ? viewLeave() : screens[state.screen]());
     renderNav();
     renderProgress();
     document.getElementById("footer-text").textContent = t("footer");
@@ -1400,9 +1402,138 @@
   }
 
   // ---------------------------------------------------------------------
+  // Browser back / back swipe (issue #101, 3 Nov 2026)
+  // A: every real step gets a history entry, so "back" goes one step back inside
+  //    the app. The entry holds only the screen and question id – no answers, no
+  //    postcode (NFR-04); answers stay in memory as before.
+  // B: one guard entry before the first step. Reaching it while a list exists
+  //    asks "Leave your list?" instead of closing the app.
+  // ---------------------------------------------------------------------
+  const STEP_SCREENS = ["choose", "recognized", "high_risk", "store", "question", "result", "shopping"];
+  const nav = {
+    enabled: false, pos: 0, keys: [], restoring: false,
+    go: (n) => window.history.go(n),       // replaceable in tests.html
+    back: () => window.history.back(),
+    forward: () => window.history.forward()
+  };
+
+  function navEntry() {
+    const q = state.screen === "question";
+    return { bb: "step", idx: nav.pos, screen: state.screen, questionId: q ? state.questionId : null, editOnly: q && !!state.editOnly };
+  }
+  const navKeyOf = (e) => e.screen + (e.questionId ? ":" + e.questionId : "") + (e.editOnly ? ":edit" : "");
+
+  function initHistory() {
+    nav.enabled = true;
+    nav.pos = 0;
+    nav.keys = ["guard"];
+    window.history.replaceState({ bb: "guard", idx: 0 }, "");
+    window.removeEventListener("popstate", onPopState);
+    window.addEventListener("popstate", onPopState);
+  }
+
+  function disableHistory() {
+    nav.enabled = false;
+    window.removeEventListener("popstate", onPopState);
+  }
+
+  /** Called on every render: adds an entry only when the step changes (not for re-renders). */
+  function syncHistory() {
+    if (!nav.enabled || state.leaveAsk || !STEP_SCREENS.includes(state.screen)) return;
+    const entry = navEntry();
+    const key = navKeyOf(entry);
+    if (nav.restoring) { window.history.replaceState(entry, ""); nav.keys[nav.pos] = key; return; }
+    if (nav.keys[nav.pos] === key) return;
+    // Leaving the store search: back must not return to it (replace, or step back if it is the same screen as before).
+    if (nav.pos > 0 && nav.keys[nav.pos] === "store") {
+      if (nav.keys[nav.pos - 1] === key) { nav.back(); return; }
+      window.history.replaceState(entry, "");
+      nav.keys[nav.pos] = key;
+      return;
+    }
+    nav.pos += 1;
+    entry.idx = nav.pos;
+    window.history.pushState(entry, "");
+    nav.keys.length = nav.pos;
+    nav.keys[nav.pos] = key;
+  }
+
+  /** A list the customer could lose (not a stop screen). */
+  function hasList() {
+    return !!(state.template && state.result && state.result.state !== "safety_blocked" && state.result.method);
+  }
+
+  function onPopState(e) {
+    const st = e.state;
+    if (!st || !st.bb) return; // not one of ours
+    nav.pos = st.idx;
+    if (st.bb === "guard") {
+      if (nav.leaving || !hasList()) { nav.leaving = false; nav.back(); return; } // nothing to lose → leave as usual
+      state.leaveAsk = true;
+      nav.forward(); // stay on the first step; the question is shown there
+      return;
+    }
+    restoreStep(st);
+  }
+
+  /** Shows a step again. Results are never taken from history: the current answers are re-checked (SR-08). */
+  function restoreStep(st) {
+    nav.restoring = true;
+    try {
+      stopRecognizer(true);
+      let sc = st.screen;
+      const needsProject = ["question", "result", "shopping"].includes(sc);
+      if (!state.data || (needsProject && !state.template)) sc = state.data ? "choose" : "start";
+      if (sc === "recognized" && !state.recognized) sc = "choose";
+      if (sc === "question") {
+        const q = state.template.questions.find((x) => x.id === st.questionId);
+        if (!q) { recompute(true); return; }
+        state.questionId = q.id;
+        state.editOnly = !!st.editOnly;
+      }
+      if (sc === "result" || sc === "shopping") {
+        recompute(true); // a missing answer leads to its question, a stop to the stop screen
+        if (sc === "shopping" && state.screen === "result" && state.result.state !== "safety_blocked") { state.screen = "shopping"; render(); }
+        return;
+      }
+      if (sc === "store") { state.storeSearch = null; state.plzInput = ""; }
+      state.screen = sc;
+      render();
+    } finally {
+      nav.restoring = false;
+    }
+  }
+
+  function viewLeave() {
+    const box = el("section", { class: "card leave", role: "alertdialog", "aria-labelledby": "leave-title", "data-leave": "1" }, [
+      el("h2", { id: "leave-title", text: t("leave_title") }),
+      el("p", { text: t("leave_text") })
+    ]);
+    box.appendChild(el("div", { class: "actions" }, [
+      el("button", { type: "button", class: "btn primary", id: "leave-save", text: t("save_list"), onclick: () => saveList(state.result) }),
+      el("button", { type: "button", class: "btn", id: "leave-stay", text: t("leave_stay"), onclick: () => { state.leaveAsk = false; go("result"); } }),
+      el("button", { type: "button", class: "btn", id: "leave-go", text: t("leave_go"), onclick: leaveApp })
+    ]));
+    return box;
+  }
+
+  function leaveApp() {
+    state.leaveAsk = false;
+    nav.leaving = true;
+    nav.go(-(nav.pos + 1)); // past the guard to the page before the app
+    // Opened directly (no page before): the browser cannot close the tab – start again instead.
+    setTimeout(() => {
+      if (document.visibilityState === "hidden") return;
+      nav.leaving = false;
+      resetProject();
+    }, 600);
+  }
+
+  // ---------------------------------------------------------------------
   // Flow control (orchestrator)
   // ---------------------------------------------------------------------
   function go(screen) {
+    state.leaveAsk = false;
     if (screen !== "choose") stopRecognizer(true);
     state.screen = screen;
     render();
@@ -1662,7 +1793,7 @@
   window.BBApp = Object.freeze({
     state, viewResult, viewItem, viewQuestion, viewChoose, viewRecognized, viewHighRisk,
     recompute, startTemplate, submitText, micTap, consentAccept, consentDecline,
-    renderHeader, viewStore, viewList, viewShopping, aisleRoute, viewProgress, progressStep, openStoreSearch, searchStores, chooseStore, leaveStoreSearch, buildListText, saveList
+    renderHeader, viewLeave, initHistory, disableHistory, nav, go, viewStore, viewList, viewShopping, aisleRoute, viewProgress, progressStep, openStoreSearch, searchStores, chooseStore, leaveStoreSearch, buildListText, saveList
   });
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -1675,6 +1806,7 @@
     });
     // Recording can always be cancelled with Escape (FR-25).
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") stopRecognizer(false); });
+    initHistory(); // issue #101: browser back stays inside the app
     boot();
   });
 })();
