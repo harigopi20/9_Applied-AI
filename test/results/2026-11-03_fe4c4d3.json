@@ -1,8 +1,8 @@
 {
-  "date": "2026-11-03T14:41:15.842Z",
-  "commit": "40a2a6e",
+  "date": "2026-11-03T14:41:31.204Z",
+  "commit": "fe4c4d3",
   "branch": "claude/owned-keep-scroll",
-  "uncommitted_changes": true,
+  "uncommitted_changes": false,
   "browser": "Chromium 153.0.8010.12 (headless, Playwright)",
   "finished": true,
   "summary": "ALL PASSED – 120 passed, 0 failed, 0 pending",
@@ -208,7 +208,7 @@
       "id": "NFR-02",
       "name": "Catalogue lookup < 1 s and list generation < 5 s",
       "status": "pass",
-      "details": "list in 0.7 ms"
+      "details": "list in 0.4 ms"
     },
     {
       "id": "FR-03 / DR-05",
