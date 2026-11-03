@@ -518,9 +518,9 @@
     };
     form.addEventListener("submit", submit);
 
+    // Back / cancel is the "Back" in the tab bar (3 Nov 2026) – no second back button here.
     const actions = el("div", { class: "actions" }, [
-      el("button", { type: "button", class: "btn", text: state.editOnly ? t("cancel") : t("back"), onclick: questionBack }),
-      el("button", { type: "submit", class: "btn primary", text: t("next") })
+      el("button", { type: "submit", class: "btn primary", id: "question-confirm", text: t("next") })
     ]);
     form.appendChild(actions);
     refresh();
@@ -1434,10 +1434,7 @@
     r.notices.filter((n) => n.id !== "estimates").forEach((n) => {
       box.appendChild(el("p", { class: "notice safety", "data-notice": n.id, text: noticeText(n) }));
     });
-    wrap.appendChild(box);
-    wrap.appendChild(el("div", { class: "actions" }, [
-      el("button", { type: "button", class: "btn", id: "back-to-list", text: t("shopping_back"), onclick: () => go("result") })
-    ]));
+    wrap.appendChild(box); // back to the list: "Back" in the tab bar
     return wrap;
   }
 
@@ -1721,15 +1718,6 @@
     state.questionId = id;
     state.editOnly = true;
     go("question");
-  }
-
-  function questionBack() {
-    if (state.editOnly) { state.editOnly = false; go("result"); return; }
-    const qs = state.template.questions;
-    const idx = qs.findIndex((q) => q.id === state.questionId);
-    if (idx <= 0) { go("choose"); return; }
-    state.questionId = qs[idx - 1].id;
-    render();
   }
 
   // ---------------------------------------------------------------------

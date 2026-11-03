@@ -6,6 +6,18 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: No duplicate back buttons – 2026-11-03
+Summary (same as the pull request):
+- Question screens: the "Back" / "Cancel" button in the form is removed – only "Confirm"; back goes via "Back" in the tab bar
+- Shopping by aisle: "Back to the list" removed for the same reason
+- Checked all screens: other buttons are real choices and stay (continue without a store, other project, new project, cancel in the microphone notice)
+- Tests updated (117 passing); test result saved
+
+- **2026-11-03 – Duplicate back buttons removed.** `viewQuestion` / `viewShopping` in
+  `app/app.js` (`questionBack` and text `shopping_back` removed). README updated.
+  *Why:* with "Back" in the tab bar the extra back buttons were confusing (iPhone screenshots).
+  *Prompt:* "The Back buttons on the wall question make no sense – check the other pages too, now that the bottom bar has Back."
+
 ## Milestone: Back button in the tab bar – 2026-11-03
 Summary (same as the pull request):
 - "Back" moved from under the progress bar into the bottom tab bar: Back · Start · Store · List (always visible, also on long lists)
