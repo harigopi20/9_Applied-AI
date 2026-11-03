@@ -1210,15 +1210,16 @@
     const box = document.getElementById("sandbox");
     const ask = (template, qid) => { s.template = template; s.facts = {}; s.questionId = qid; s.editOnly = false; box.replaceChildren(window.BBApp.viewQuestion()); };
     ask(tpl("hang_wall_cabinet"), "Q2");
-    ["cabinet_width_cm", "cabinet_depth_cm", "cabinet_height_cm"].forEach((k) => assert(box.querySelector('[data-guide-hint="' + k + '"]'), "hint " + k));
-    assert(box.querySelector('[data-guide-hint="cabinet_width_cm"]').textContent.includes("bis 120 cm"), "limit text");
-    const warn = box.querySelector('[data-guide-warn="cabinet_width_cm"]');
+    ["cabinet_depth_cm", "cabinet_height_cm"].forEach((k) => assert(box.querySelector('[data-guide-hint="' + k + '"]'), "hint " + k));
+    assert(box.querySelector('[data-guide-hint="cabinet_depth_cm"]').textContent.includes("bis 60 cm"), "limit text");
+    assert(box.querySelector('[data-split-hint="cabinet_width_cm"]').textContent.includes("120 cm"), "width: split hint with the limit (CAB-S1)");
+    const warn = box.querySelector('[data-guide-warn="cabinet_depth_cm"]');
     eq(warn.hidden, true, "no warning before input");
-    const inp = box.querySelector("#in-cabinet_width_cm");
-    inp.value = "150"; inp.dispatchEvent(new Event("input", { bubbles: true }));
-    eq(warn.hidden, false, "warning while typing 150");
-    inp.value = "100"; inp.dispatchEvent(new Event("input", { bubbles: true }));
-    eq(warn.hidden, true, "no warning at 100");
+    const inp = box.querySelector("#in-cabinet_depth_cm");
+    inp.value = "70"; inp.dispatchEvent(new Event("input", { bubbles: true }));
+    eq(warn.hidden, false, "warning while typing 70");
+    inp.value = "40"; inp.dispatchEvent(new Event("input", { bubbles: true }));
+    eq(warn.hidden, true, "no warning at 40");
     // catalogue sizes up front (shelf boards, sliding-door leaves)
     ask(SHELF(), "Q3");
     const cat = box.querySelector('[data-catalogue-hint="board"]');
@@ -1228,10 +1229,10 @@
     assert(box.querySelector('[data-catalogue-hint="leaf"]'), "leaf sizes shown");
     // the stop names the crossed limit
     window.BBI18n.setLang("en");
-    renderResult(tpl("hang_wall_cabinet"), confirmed({ wall_type: "concrete", cabinet_width_cm: 150, cabinet_depth_cm: 30, cabinet_height_cm: 60, load_kg: 20, condition: [] }), null);
+    renderResult(tpl("hang_wall_cabinet"), confirmed({ wall_type: "concrete", cabinet_width_cm: 80, cabinet_depth_cm: 70, cabinet_height_cm: 60, load_kg: 20, condition: [] }), null);
     const lines = box.querySelector("[data-stop-limits]");
     assert(lines, "limit list on the stop");
-    assert(/150 cm.*up to 120 cm/.test(lines.textContent), "value and limit: " + lines.textContent);
+    assert(/70 cm.*up to 60 cm/.test(lines.textContent), "value and limit: " + lines.textContent);
   });
 
   test("SHELF-S1 (B)", "Shelf longer than 120 cm: several boards side by side, each with its own fixings, checked for the full weight", () => {
@@ -1256,6 +1257,27 @@
     // 130 cm → 2 boards of 65 cm (80 cm boards)
     const r2 = run(SHELF(), confirmed(Object.assign({}, base, { shelf_length_cm: 130 })));
     eq([r2.segments.count, r2.segments.length, item(r2, "board").product.specs.length_mm], [2, 65, 800]);
+  });
+
+  test("CAB-S1", "Wall cabinet wider than 120 cm: several cabinets of the same width, each with its own rail and fixings, checked for the full weight", () => {
+    const base = Object.assign({}, CAB_OK, { wall_type: "concrete", cabinet_width_cm: 240, cabinet_layout: "multiple" });
+    const r = run(CAB(), confirmed(base));
+    eq(r.state, "validated");
+    eq([r.segments.count, r.segments.length, r.segments.load_from], [2, 120, "full"]);
+    eq(r.segments.load_kg, CAB_OK.load_kg, "weight not divided");
+    const one = run(CAB(), confirmed(Object.assign({}, base, { cabinet_width_cm: 120, cabinet_layout: undefined })));
+    ["rail", "wall_plug", "screw"].forEach((role) => eq(item(r, role).quantity.units, 2 * item(one, role).quantity.units, role + " × 2"));
+    eq(item(r, "drill").quantity.units, 1, "tools not multiplied");
+    assert(r.notices.some((n) => n.id === "segments" && n.cut_from === null), "notice, no cut hint");
+    // depth and height limits still stop; plasterboard table is checked per cabinet (60 cm wide)
+    eq(stopOf(run(CAB(), confirmed(Object.assign({}, base, { cabinet_depth_cm: 61 })))), "ST-04");
+    const pb = run(CAB(), confirmed(Object.assign({}, base, { wall_type: "plasterboard", cabinet_width_cm: 130, cabinet_depth_cm: 30, load_kg: 20 })));
+    eq([pb.segments.length, stopOf(pb)], [65, "ST-03"], "65 cm × 30 cm on plasterboard: table 18.75 kg < 20 kg");
+    // texts come from the cabinet template
+    window.BBI18n.setLang("de");
+    renderResult(CAB(), confirmed(base), null);
+    assert(window.BBApp.viewResult().textContent.includes("2 Schränke à 120 cm"), "German cabinet text");
+    window.BBI18n.setLang("en");
   });
 
   test("SHELF-S1 (B, UI)", "Length above 120 cm shows the split choice with the plan; the stop offers 'several boards' and the tap re-checks", () => {
@@ -1352,7 +1374,9 @@
   test("PRJ-02 / ST-02 / ST-04", "Cabinet: aerated concrete, width > 120, depth > 60, height < 30 or > 100 → stop with catalogue text", () => {
     const c = (x) => run(CAB(), confirmed(Object.assign({}, CAB_OK, x)));
     eq(stopOf(c({ wall_type: "aerated_concrete" })), "ST-02");
-    [{ cabinet_width_cm: 121 }, { cabinet_depth_cm: 61 }, { cabinet_height_cm: 25 }, { cabinet_height_cm: 101 }].forEach((x) => {
+    // CAB-S1 (3 Nov 2026): above 120 cm the customer first chooses one cabinet or several
+    eq(c({ cabinet_width_cm: 121 }).missing_facts, ["cabinet_layout"]);
+    [{ cabinet_width_cm: 121, cabinet_layout: "single" }, { cabinet_depth_cm: 61 }, { cabinet_height_cm: 25 }, { cabinet_height_cm: 101 }].forEach((x) => {
       const r = c(x);
       eq([r.state, stopOf(r)], ["safety_blocked", "ST-04"], JSON.stringify(x));
       assert(r.blocked.message.de.includes("außerhalb"), "German text");

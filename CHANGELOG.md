@@ -6,6 +6,23 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Several wall cabinets side by side – 2026-11-03
+Summary (same as the pull request):
+- Wall cabinet wider than 120 cm: several cabinets of the same width side by side (new rule CAB-S1), each with its own rail, plugs and screws, checked for the full weight
+- Depth, height and plasterboard table checked per cabinet; the stop offers the split as a button
+- Split texts moved from i18n.js into the project templates (`segments.texts`) so shelf and cabinet share one mechanism
+- Cabinet template v1.1.0; 1 new test, 2 tests updated (112 passing)
+
+- **2026-11-03 – Several wall cabinets (CAB-S1).** `app/data/templates/hang-wall-cabinet.json`
+  (v1.1.0): new field `cabinet_layout` (shown above 120 cm) and `segments` block (max. 120 cm
+  per cabinet = ST-04 limit, materials × count, weight never divided). The split texts
+  (hint, plan, tip, button, notice, weight notes, cut) now live in each template's
+  `segments.texts`; `segText` in `app/app.js` reads them, the 9 shelf keys left `app/i18n.js`.
+  Tests: PRJ-02 and the limits UI test updated (121 cm first asks for the layout), new
+  CAB-S1 test. README updated.
+  *Why:* customers with a wide cabinet row should not hit a size stop.
+  *Prompt:* "Yes, do the wall cabinet with several cabinets as well."
+
 ## Milestone: Size limits before input and several shelf boards – 2026-11-03
 Summary (same as the pull request):
 - All projects: number fields show the guide limit from the stop rules (ST-04) and the catalogue sizes of size-dependent parts; typing beyond a limit warns at once
