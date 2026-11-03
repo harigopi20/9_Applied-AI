@@ -1177,7 +1177,7 @@
     eq(box.querySelectorAll("[data-route-aisle]").length, route.groups.length);
     eq(box.querySelectorAll(".route-stop").length, onRoute);
     assert(!box.querySelector('input[type="checkbox"]'), "no tick boxes (D-3)");
-    assert(box.querySelector("#back-to-list"), "back to the list");
+    assert(!box.querySelector("#back-to-list"), "no own back button – the tab bar has Back");
     // without a store: hint + postcode button, no route
     s.storeId = null;
     box.replaceChildren(window.BBApp.viewShopping());
@@ -1416,6 +1416,9 @@
       box.querySelector('[data-tab="back"]').click();
       await p;
       eq([s.screen, A.canGoBack()], ["question", true], "tap → previous step; active on questions too");
+      const q = document.getElementById("sandbox");
+      q.replaceChildren(A.viewQuestion());
+      eq([...q.querySelectorAll("form .actions button")].map((b) => b.id), ["question-confirm"], "question form: only Confirm, no second Back");
       box = bar();
       p = popped();
       box.querySelector('[data-tab="back"]').click();
