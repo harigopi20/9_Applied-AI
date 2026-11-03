@@ -471,6 +471,128 @@
    * @param options    { overrides: {role: product_nr}, generatedHints: {role: text},
    *                     owned: [role, …] – parts the customer already has (C-8, SR-15) }
    */
+  // ---------------------------------------------------------------------
+  // Size limits shown before input (3 Nov 2026, proposal A)
+  // ---------------------------------------------------------------------
+  /**
+   * Plain size limits read from the project's stop rules – no new values: e.g.
+   * ST-04 "shelf_length_cm > 120" → { facts:[shelf_length_cm], max:120 }. Handles
+   * gt/lt on one fact or on the product of two facts (area), inside "any", and
+   * "all" with one choice condition (e.g. lock type). Anything else is skipped –
+   * the stop rule itself stays the only decision.
+   */
+  function guideLimits(template) {
+    const out = [];
+    const factsOf = (e) => {
+      if (e && typeof e === "object" && "fact" in e) return [e.fact];
+      if (e && Array.isArray(e.mul) && e.mul.length === 2 && e.mul.every((x) => x && typeof x === "object" && "fact" in x)) return e.mul.map((x) => x.fact);
+      return null;
+    };
+    const walk = (c, stop, when) => {
+      if (!c || typeof c !== "object") return;
+      if (Array.isArray(c.any)) { c.any.forEach((x) => walk(x, stop, when)); return; }
+      if (Array.isArray(c.all)) {
+        const conds = c.all.filter((x) => x && x.fact_in);
+        const rest = c.all.filter((x) => !(x && x.fact_in));
+        if (!when && conds.length === 1 && rest.length === 1) walk(rest[0], stop, conds[0].fact_in);
+        return;
+      }
+      const op = Array.isArray(c.gt) ? "gt" : Array.isArray(c.lt) ? "lt" : null;
+      if (!op) return;
+      const facts = factsOf(c[op][0]);
+      const value = c[op][1];
+      if (!facts || typeof value !== "number") return;
+      const key = stop.rule_id + "|" + facts.join("*") + "|" + (when ? when.fact + "=" + when.values.join(",") : "");
+      let l = out.find((x) => x.key === key);
+      if (!l) {
+        l = { key, rule_id: stop.rule_id, stop_id: stop.id || stop.rule_id, facts, when: when ? { fact: when.fact, values: when.values.slice() } : null, min: null, max: null };
+        out.push(l);
+      }
+      if (op === "gt") l.max = l.max === null ? value : Math.min(l.max, value);
+      else l.min = l.min === null ? value : Math.max(l.min, value);
+    };
+    (template.stops || []).forEach((st) => walk(st.when, st, null));
+    return out;
+  }
+
+  /** Checks one guide limit against (trusted) facts. null = values missing or condition not met. */
+  function limitCheck(l, facts) {
+    if (l.when) {
+      const w = trustedValue(facts, l.when.fact);
+      if (w === undefined || !l.when.values.includes(w)) return null;
+    }
+    const vals = l.facts.map((k) => { const v = trustedValue(facts, k); return v === undefined || v === UNKNOWN_VALUE ? NaN : Number(v); });
+    if (vals.some((v) => !Number.isFinite(v))) return null;
+    const value = round(vals.reduce((a, b) => a * b, 1));
+    return { value, violated: (l.max !== null && value > l.max) || (l.min !== null && value < l.min) };
+  }
+
+  function collectFacts(expr, template, set, seen) {
+    if (!expr || typeof expr !== "object") return;
+    if (Array.isArray(expr)) { expr.forEach((x) => collectFacts(x, template, set, seen)); return; }
+    if ("fact" in expr) { set.add(expr.fact); return; }
+    if ("var" in expr) {
+      seen = seen || new Set();
+      if (seen.has(expr.var)) return;
+      seen.add(expr.var);
+      const def = template.variables && template.variables[expr.var];
+      if (def) collectFacts(def.expr, template, set, seen);
+      return;
+    }
+    Object.values(expr).forEach((v) => collectFacts(v, template, set, seen));
+  }
+
+  /**
+   * Catalogue sizes of parts whose size depends on the customer's answers
+   * (roles with size_check, e.g. shelf board, sliding-door leaf), in the unit of
+   * the question. Shown before input so the customer knows what exists.
+   */
+  function catalogueSizes(template, catalogue) {
+    const roles = new Map();
+    (template.methods || []).forEach((m) => m.roles.forEach((r) => { if (!roles.has(r.role)) roles.set(r.role, r); }));
+    (template.common_roles || []).forEach((r) => { if (!roles.has(r.role)) roles.set(r.role, r); });
+    const out = [];
+    roles.forEach((role) => {
+      const sc = role.size_check;
+      if (!sc) return;
+      const sel = role.select || {};
+      const facts = new Set();
+      sc.dims.forEach((d) => ["spec_gte", "spec_lte", "spec_eq"].forEach((k) => {
+        if (sel[k] && sel[k][d.spec]) collectFacts(sel[k][d.spec], template, facts);
+      }));
+      const f = sc.factor || 1;
+      const seen = new Set();
+      const sizes = [];
+      rolePool(role, catalogue).filter((p) => !p.requires_professional).forEach((p) => {
+        const dims = sc.dims.map((d) => (typeof p.specs[d.spec] === "number" ? round(p.specs[d.spec] * f) : null));
+        if (dims.some((x) => x === null) || seen.has(dims.join("x"))) return;
+        seen.add(dims.join("x"));
+        sizes.push(dims);
+      });
+      sizes.sort((a, b) => { for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] - b[i]; return 0; });
+      out.push({ role: role.role, label: role.label, unit: sc.unit || "", dims: sc.dims.map((d) => d.label), facts: Array.from(facts), sizes });
+    });
+    return out;
+  }
+
+  /**
+   * Proposal B (3 Nov 2026), rule SHELF-S1: a shelf longer than the guide limit
+   * may be built from several equal boards side by side. Returns the plan or null.
+   */
+  function segmentPlan(template, length) {
+    const sg = template && template.segments;
+    if (!sg || !Number.isFinite(length) || length <= sg.max_length) return null;
+    const count = Math.ceil(length / sg.max_length - 1e-9);
+    return { rule_id: sg.rule_id, count, length: Math.round((length / count) * 10) / 10, total: length, unit: sg.unit || "" };
+  }
+
+  function estimateRuleOf(template, ruleId) {
+    for (const q of template.questions || []) {
+      for (const f of q.type === "group" ? q.fields : [q]) if (f.estimate && f.estimate.rule_id === ruleId) return f.estimate;
+    }
+    return null;
+  }
+
   function evaluate(template, facts, catalogue, safetyRules, options) {
     options = options || {};
     const ctx = { template, facts, catalogue, resolved: {}, vars: {}, evidence: [] };
@@ -489,6 +611,7 @@
       total: { amount: null, reason: null },
       subtotals: {},        // FR-34: per section { amount, reason } – owned parts not counted
       worst_case: null,     // SR-14 / D-2: { load_kg } when the weight was unknown
+      segments: null,       // SHELF-S1: { count, length, total, load_kg, load_from } for several boards
       evidence: ctx.evidence
     };
 
@@ -520,6 +643,18 @@
       else if (!TRUSTED.has(f.status)) result.missing_facts.push(key); // a guess is not enough
       log(ctx, "R-01", "fact " + key, f ? (f.value + " [" + f.status + "]") : "missing", f ? ("fact:" + f.source) : "-");
     });
+    // SHELF-S1: above the guide length the customer chooses one board or several side by side.
+    const sg = template.segments;
+    let plan = null;
+    if (sg && !unknown.length) {
+      const p = segmentPlan(template, Number(trustedValue(facts, sg.length_fact)));
+      if (p) {
+        const lay = trustedValue(facts, sg.layout_fact);
+        if (lay === undefined) result.missing_facts.push(sg.layout_fact);
+        else if (lay === sg.split_value) plan = p;
+        log(ctx, sg.rule_id, "layout above " + sg.max_length + " " + (sg.unit || ""), lay === undefined ? "waiting for the customer's choice" : String(lay), tplSource);
+      }
+    }
     if (unknown.length) {
       result.state = "safety_blocked";
       result.blocked = { reason: "fact_unknown", rule_id: "R-01", facts: unknown };
@@ -530,6 +665,26 @@
       result.state = "needs_clarification";
       log(ctx, "SR-03", "mounting gate", "waiting for confirmed: " + result.missing_facts.join(", "), tplSource);
       return finalise(result);
+    }
+    if (plan) {
+      // Every board is checked on its own with its own brackets and fixings. The load
+      // is NOT divided: each board is checked for the full weight given (safe side) –
+      // except the books estimate (SHELF-E1), which is per cm and so per board.
+      const est = sg.estimate_rule ? estimateRuleOf(template, sg.estimate_rule) : null;
+      const lfx = facts.load_kg;
+      const swap = {};
+      swap[sg.length_fact] = makeFact(plan.length, STATUS.CONFIRMED, "rule:" + sg.rule_id + " length per board");
+      if (result.worst_case) plan.load_from = "worst_case";
+      else if (est && lfx && String(lfx.source || "").includes(":estimate:" + est.rule_id)) {
+        plan.load_from = "estimate";
+        swap.load_kg = makeFact(Math.ceil(plan.length * est.kg_per_unit), STATUS.CONFIRMED, "rule:" + sg.rule_id + " estimate per board (" + est.rule_id + ")");
+      } else plan.load_from = "full";
+      facts = Object.assign({}, facts, swap);
+      ctx.facts = facts;
+      plan.load_kg = Number(trustedValue(facts, "load_kg"));
+      result.segments = plan;
+      log(ctx, sg.rule_id, "several boards side by side", plan.total + " " + plan.unit + " → " + plan.count + " × " + plan.length + " " + plan.unit +
+        "; each board checked for " + plan.load_kg + " kg (" + plan.load_from + ")", tplSource);
     }
 
     // --- Stop rules of the project (DR-04 project catalogue, sheet "Stop rules") --
@@ -550,7 +705,9 @@
       result.state = "safety_blocked";
       result.blocked = {
         reason: "stop_rule", rule_id: stop.rule_id, stop_id: stop.id || stop.rule_id,
-        message: stop.message, help: stop.help || null, hand_off: stop.hand_off || "staff", limit_kg: limit
+        message: stop.message, help: stop.help || null, hand_off: stop.hand_off || "staff", limit_kg: limit,
+        // Proposal A: which size limit was crossed (value given vs. limit of this guide)
+        limits: guideLimits({ stops: [stop] }).map((l) => Object.assign({}, l, limitCheck(l, facts))).filter((l) => l.violated)
       };
       log(ctx, stop.rule_id, "stop rule " + (stop.id || stop.rule_id), "stop → " + (stop.hand_off || "staff"), tplSource);
       return finalise(result);
@@ -653,6 +810,10 @@
       }
       const q = { rule_id: it.quantityRule.rule_id, units: null, packs: null, pack_qty: null, clear: false, estimate: true };
       try { q.units = evalExpr(it.quantityRule.units, ctx); } catch (_) { q.units = null; }
+      if (result.segments && q.units !== null && (sg.sections || ["materials"]).includes(it.section)) {
+        q.units = q.units * result.segments.count;
+        q.rule_id = q.rule_id + " × " + result.segments.rule_id;
+      }
       if (it.product) {
         q.pack_qty = it.product.pack_qty;
         if (q.units !== null && q.pack_qty) {
@@ -687,6 +848,11 @@
     // --- Notices (SR-02, SR-05, NFR-05) -------------------------------------
     result.notices.push({ id: "estimates", rule_id: "NFR-05" });
     if (result.worst_case) result.notices.push({ id: "worst_case", rule_id: "SR-14", kg: result.worst_case.load_kg });
+    if (result.segments) {
+      const cutItem = sg.cut_role ? result.items.find((i) => i.role === sg.cut_role && i.product) : null;
+      const pieceLen = cutItem && typeof cutItem.product.specs[sg.cut_spec] === "number" ? round(cutItem.product.specs[sg.cut_spec] * (sg.cut_factor || 1)) : null;
+      result.notices.push(Object.assign({ id: "segments" }, result.segments, { cut_from: pieceLen !== null && pieceLen > result.segments.length ? pieceLen : null }));
+    }
     if (result.method.penetrates_wall) {
       result.notices.push({ id: "detector_limits", rule_id: "SR-05" });
       result.notices.push({ id: "no_wall_certification", rule_id: "SR-02" });
@@ -893,6 +1059,7 @@
   root.BBRules = Object.freeze({
     STATUS, UNKNOWN_VALUE, makeFact, trustedValue, editDistance, typoMatch, phraseTypoMatch,
     evaluate, storeInfo, availability, variantOptions, compatible, checkPlz, distanceKm, findStores,
-    guardGeneratedText, impliesClearance, checkScope, findPhrase
+    guardGeneratedText, impliesClearance, checkScope, findPhrase,
+    guideLimits, limitCheck, catalogueSizes, segmentPlan
   });
 })(typeof window !== "undefined" ? window : globalThis);

@@ -441,7 +441,11 @@
 
     const fields = q.type === "group" ? q.fields : [q];
     const getters = [];
-    fields.forEach((f) => getters.push(renderField(form, f, q.type === "group")));
+    const live = { values: {}, updaters: [], q };
+    fields.forEach((f) => getters.push(renderField(form, f, q.type === "group", live)));
+    const refresh = () => { const facts = liveFacts(live); live.updaters.forEach((u) => u(facts)); };
+    form.addEventListener("input", refresh);
+    form.addEventListener("click", refresh);
 
     const error = el("p", { class: "error", role: "alert", "aria-live": "polite" });
     form.appendChild(error);
@@ -452,6 +456,7 @@
       const values = [];
       for (const g of getters) {
         const v = g();
+        if (v.skip) continue; // field not shown (show_when)
         if (v.error) { error.textContent = v.error; return; }
         values.push(v);
       }
@@ -470,11 +475,13 @@
       el("button", { type: "submit", class: "btn primary", text: t("next") })
     ]);
     form.appendChild(actions);
+    refresh();
     return form;
   }
 
   /** Renders one field; returns a getter that validates the value in code. */
-  function renderField(form, f, inGroup) {
+  function renderField(form, f, inGroup, live) {
+    live = live || { values: {}, updaters: [], q: { type: "single", fact: f.fact } };
     const fact = state.facts[f.fact];
     const current = fact ? fact.value : null;
     const box = el("div", { class: "field" });
@@ -510,10 +517,25 @@
         group.appendChild(b);
       });
       box.appendChild(group);
+      live.values[f.fact] = () => (selected === null || selected === undefined ? undefined : selected);
+      // SHELF-S1: the split choice shows the plan ("3 boards of 100 cm") while typing the length
+      const sg = state.template.segments;
+      if (sg && sg.layout_fact === f.fact) {
+        const plan = el("p", { class: "guess", "data-segment-plan": "1" });
+        box.appendChild(plan);
+        live.updaters.push((facts) => {
+          const p = R.segmentPlan(state.template, Number(R.trustedValue(facts, sg.length_fact)));
+          plan.textContent = p ? t("segment_plan", { count: p.count, length: fmtNum(p.length) + " " + p.unit }) : "";
+        });
+      }
+      if (f.show_when) live.updaters.push((facts) => { box.hidden = !showWhenMet(f, facts); });
       form.appendChild(box);
-      return () => selected === null || selected === undefined
-        ? { error: t("choose_option") }
-        : { fact: f.fact, value: selected };
+      return () => {
+        if (box.hidden) return { skip: true };
+        return selected === null || selected === undefined
+          ? { error: t("choose_option") }
+          : { fact: f.fact, value: selected };
+      };
     }
 
     // number
@@ -526,6 +548,12 @@
     // D-2 (FR-04, SR-14): weight answers "I know it" / "weigh it" / "estimate for me" / "I don't know"
     const weight = f.fact === "load_kg" && f.allow_unknown ? weightHelp(f, input, box) : null;
     box.appendChild(row);
+    live.values[f.fact] = () => {
+      const n = Number(input.value.trim().replace(",", "."));
+      return input.value.trim() !== "" && Number.isFinite(n) ? n : undefined;
+    };
+    const hints = fieldHints(f, state.template, live.q, live);
+    if (hints) box.appendChild(hints);
     if (weight) box.appendChild(weight.after);
     let unknown = false;
     if (f.allow_unknown) {
@@ -641,6 +669,101 @@
     };
   }
 
+  /** Number in the UI language (2.5 → "2,5" in German). */
+  function fmtNum(v) {
+    return new Intl.NumberFormat(window.BBI18n.getLang() === "de" ? "de-DE" : "en-GB", { maximumFractionDigits: 1 }).format(v);
+  }
+
+  function noticeText(n) {
+    if (n.text) return pick(n.text);
+    if (n.id === "segments") {
+      const v = { count: n.count, length: fmtNum(n.length), total: fmtNum(n.total), kg: fmtNum(n.load_kg), cut: n.cut_from !== null ? fmtNum(n.cut_from) : "" };
+      return [t("notice_segments", v), t("segments_load_" + n.load_from, v), n.cut_from !== null ? t("segments_cut", v) : ""].filter(Boolean).join(" ");
+    }
+    return t("notice_" + n.id, n);
+  }
+
+  // ---------------------------------------------------------------------
+  // Proposal A (3 Nov 2026): show the guide's size limits before input
+  // ---------------------------------------------------------------------
+  function limitUnit(facts, tpl) {
+    const units = facts.map((k) => { const f = fieldDef(k, tpl); return f && f.unit ? f.unit : ""; });
+    if (units.length === 1) return units[0];
+    return units.every((u) => u && u === units[0]) ? units[0] + "²" : units.filter(Boolean).join("·");
+  }
+
+  /** "up to 120 cm", "30–100 cm", "only 55 mm", "for Bathroom (WC): only 78 mm", "Width × Height up to 60 m²" */
+  function limitCore(l, tpl) {
+    const unit = limitUnit(l.facts, tpl);
+    const v = (x) => fmtNum(x) + (unit ? " " + unit : "");
+    return l.min !== null && l.max !== null
+      ? (l.min === l.max ? t("guide_eq", { value: v(l.min) }) : t("guide_range", { min: fmtNum(l.min), max: v(l.max) }))
+      : l.max !== null ? t("guide_max", { value: v(l.max) }) : t("guide_min", { value: v(l.min) });
+  }
+
+  function limitText(l, tpl) {
+    let txt = limitCore(l, tpl);
+    if (l.facts.length > 1) txt = l.facts.map((k) => factName(k, tpl)).join(" × ") + " " + txt;
+    if (l.when) {
+      const wf = fieldDef(l.when.fact, tpl) || {};
+      txt = t("guide_when", { cond: l.when.values.map((o) => optionLabel(wf, o)).join(", ") }) + " " + txt;
+    }
+    return txt;
+  }
+
+  /** Limits shown at a field: own limits, and product limits at the last of their facts. */
+  function limitsForField(fact, tpl) {
+    return R.guideLimits(tpl).filter((l) => l.facts.includes(fact) && (l.facts.length === 1 || l.facts[l.facts.length - 1] === fact));
+  }
+
+  /** Facts as they are on the screen right now (typed or tapped, not yet sent) – only for hints. */
+  function liveFacts(live) {
+    const facts = {};
+    Object.entries(state.facts).forEach(([k, f]) => { facts[k] = f; });
+    Object.entries(live.values).forEach(([k, get]) => {
+      const v = get();
+      if (v === undefined || v === null) delete facts[k];
+      else facts[k] = R.makeFact(v, R.STATUS.CONFIRMED, "live");
+    });
+    return facts;
+  }
+
+  function showWhenMet(f, facts) {
+    if (!f.show_when) return true;
+    // Fail safe: a missing value hides nothing that is needed – the rule engine asks again.
+    try { return R.guideLimits({ stops: [{ rule_id: "show", when: f.show_when }] }).some((l) => { const c = R.limitCheck(l, facts); return c && c.violated; }); }
+    catch (_) { return false; }
+  }
+
+  /** Hints under a field: guide limits, catalogue sizes, the split option (SHELF-S1). */
+  function fieldHints(f, tpl, q, live) {
+    const wrap = el("div", { class: "field-hints" });
+    const sg = tpl.segments;
+    const splitField = !!(sg && sg.length_fact === f.fact);
+    const limits = limitsForField(f.fact, tpl);
+    if (limits.length && !splitField) {
+      const rules = Array.from(new Set(limits.map((l) => l.rule_id))).join(", ");
+      wrap.appendChild(el("p", { class: "hint", "data-guide-hint": f.fact,
+        text: t("guide_hint", { limits: limits.map((l) => limitText(l, tpl)).join(" · "), rules }) }));
+    }
+    if (splitField) wrap.appendChild(el("p", { class: "hint", "data-split-hint": f.fact, text: t("split_hint", { max: fmtNum(sg.max_length) + " " + (sg.unit || ""), rules: Array.from(new Set(limits.map((l) => l.rule_id))).join(", ") || sg.rule_id }) }));
+    // Catalogue sizes at the first field of this screen that drives the part's size
+    const qFacts = q.type === "group" ? q.fields.map((x) => x.fact) : [q.fact];
+    R.catalogueSizes(tpl, state.data.catalogue).forEach((c) => {
+      if (!c.sizes.length || qFacts.find((k) => c.facts.includes(k)) !== f.fact) return;
+      wrap.appendChild(el("p", { class: "muted small", "data-catalogue-hint": c.role, text: t("catalogue_sizes", {
+        part: pick(c.label), sizes: c.sizes.map((d) => d.map(fmtNum).join(" × ")).join(" · ") + (c.unit ? " " + c.unit : ""),
+        dims: c.dims.map(pick).join(" × ") }) }));
+    });
+    // Live warning while typing: outside the guide → the app will stop (the rule engine decides).
+    if (limits.length && !splitField) {
+      const warn = el("p", { class: "warn-text", "data-guide-warn": f.fact, role: "status", hidden: true, text: t("guide_live_warn") });
+      wrap.appendChild(warn);
+      live.updaters.push((facts) => { warn.hidden = !limits.some((l) => { const c = R.limitCheck(l, facts); return c && c.violated; }); });
+    }
+    return wrap.childNodes.length ? wrap : null;
+  }
+
   function optionLabel(f, opt) {
     if (f.option_labels && f.option_labels[opt]) return pick(f.option_labels[opt]);
     if (f.fact === "wall_type") return t("wall_" + opt);
@@ -686,7 +809,7 @@
     const box = el("section", { class: "card facts" }, [el("h2", { text: t("facts_title") })]);
     const dl = el("dl", { class: "fact-list" });
     tpl.questions.forEach((q) => {
-      const keys = q.type === "group" ? q.fields.map((f) => f.fact) : [q.fact];
+      const keys = (q.type === "group" ? q.fields : [q]).filter((fd) => showWhenMet(fd, state.facts)).map((fd) => fd.fact);
       keys.forEach((key) => {
         const f = state.facts[key];
         dl.appendChild(el("div", { class: "fact-row" }, [
@@ -742,6 +865,31 @@
       worst_case_over_limit: t("stop_worst_case_help")
     }[b.reason];
     box.appendChild(el("p", { class: "stop-main", text: mainText }));
+    // Proposal A: name the crossed limit – value given vs. this guide's limit
+    if (b.limits && b.limits.length) {
+      const ul = el("ul", { class: "stop-limits", "data-stop-limits": String(b.limits.length) });
+      b.limits.forEach((l) => {
+        const unit = limitUnit(l.facts, state.template);
+        ul.appendChild(el("li", { "data-limit-fact": l.facts.join("*"), text: t("stop_limit_line", {
+          name: l.facts.map((k) => factName(k)).join(" × "), value: fmtNum(l.value) + (unit ? " " + unit : ""), limit: limitCore(l, state.template) }) }));
+      });
+      box.appendChild(ul);
+    }
+    // Proposal B (SHELF-S1): too long for one board → offer boards side by side
+    const sg = state.template.segments;
+    const lenFact = sg ? state.facts[sg.length_fact] : null;
+    const plan = sg && lenFact && (b.limits || []).some((l) => l.facts.includes(sg.length_fact)) ? R.segmentPlan(state.template, Number(lenFact.value)) : null;
+    if (plan) {
+      box.appendChild(el("div", { class: "split-tip", "data-split-tip": "1" }, [
+        el("p", { class: "strong", text: t("split_tip", { count: plan.count, length: fmtNum(plan.length) + " " + plan.unit }) }),
+        el("button", { type: "button", class: "btn primary", id: "use-split", text: t("split_use", { count: plan.count }),
+          onclick: () => {
+            // The customer's tap is the confirmation (SR-01).
+            state.facts[sg.layout_fact] = R.makeFact(sg.split_value, R.STATUS.CONFIRMED, "stop:split_tip");
+            afterFactsChanged();
+          } })
+      ]));
+    }
     if (help) box.appendChild(el("p", { text: help }));
     box.appendChild(el("p", { class: "strong", "data-handoff": b.hand_off || "default",
       text: b.hand_off ? t("handoff_" + b.hand_off) : t("stop_professional") }));
@@ -804,7 +952,7 @@
 
     // Safety notices first (SR-05, SR-02)
     r.notices.filter((n) => n.id !== "estimates").forEach((n) => {
-      box.appendChild(el("p", { class: "notice safety", "data-notice": n.id, text: n.text ? pick(n.text) : t("notice_" + n.id, n) }));
+      box.appendChild(el("p", { class: "notice safety", "data-notice": n.id, text: noticeText(n) }));
     });
 
     ["materials", "tools", "safety"].forEach((section) => {
@@ -1060,7 +1208,7 @@
     });
     L.push("");
     L.push(r.total.amount !== null ? t("total") + ": " + fmt(r.total.amount) : t("total_" + r.total.reason));
-    const notes = r.notices.filter((n) => n.id !== "estimates").map((n) => (n.text ? pick(n.text) : t("notice_" + n.id, n)));
+    const notes = r.notices.filter((n) => n.id !== "estimates").map((n) => (noticeText(n)));
     if (notes.length) { L.push(""); L.push(t("save_safety_title") + ":"); notes.forEach((n) => L.push("- " + n)); }
     const links = ((tpl && tpl.howto) || []).map((h) => ({ h, url: safeHowtoUrl(h.url) })).filter((x) => x.url);
     if (links.length) { L.push(""); L.push(t("howto_title") + ":"); links.forEach((x) => L.push("- " + pick(x.h.title) + ": " + x.url)); }
@@ -1173,7 +1321,7 @@
     }
     // Safety notices stay visible while shopping (SR-05)
     r.notices.filter((n) => n.id !== "estimates").forEach((n) => {
-      box.appendChild(el("p", { class: "notice safety", "data-notice": n.id, text: n.text ? pick(n.text) : t("notice_" + n.id, n) }));
+      box.appendChild(el("p", { class: "notice safety", "data-notice": n.id, text: noticeText(n) }));
     });
     wrap.appendChild(box);
     wrap.appendChild(el("div", { class: "actions" }, [

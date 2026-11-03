@@ -1,14 +1,14 @@
 {
   "template_id": "hang_shelf",
   "project_id": "PRJ-01",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "comment": "DR-04 project template. All limits and factors are MOCK values (design DD-3) and must be checked by the team before the demo (SR-10). The rule engine (rules.js) interprets this file; no product decision is made by the AI.",
   "review": {
     "status": "pending_team_review",
     "reviewed_by": null,
     "review_date": null,
     "created": "2026-10-25",
-    "updated": "2026-10-27",
+    "updated": "2026-11-03",
     "source": "data/project_catalogue.xlsx (draft v1, 27 Oct 2026)"
   },
   "title": { "en": "Hang a shelf", "de": "Regal aufhängen" },
@@ -119,6 +119,18 @@
           "label": { "en": "Length", "de": "Länge" }
         },
         {
+          "fact": "shelf_layout",
+          "type": "choice",
+          "comment": "SHELF-S1 (3 Nov 2026, proposal B): only asked when the length is above the guide limit (segments.max_length).",
+          "show_when": { "gt": [{ "fact": "shelf_length_cm" }, 120] },
+          "options": ["multiple", "single"],
+          "option_labels": {
+            "multiple": { "en": "Several boards side by side", "de": "Mehrere Bretter nebeneinander" },
+            "single": { "en": "One long board (above 120 cm: ask staff)", "de": "Ein durchgehendes Brett (über 120 cm: Personal fragen)" }
+          },
+          "label": { "en": "Longer than 120 cm – how should it be built?", "de": "Länger als 120 cm – wie soll es gebaut werden?" }
+        },
+        {
           "fact": "shelf_depth_cm",
           "type": "choice",
           "options": [20, 25, "unknown"],
@@ -142,6 +154,20 @@
       ]
     }
   ],
+  "segments": {
+    "rule_id": "SHELF-S1",
+    "comment": "Proposal B (3 Nov 2026, user request): above the guide length (ST-04, 120 cm) the shelf may be built from several equal boards side by side. Each board gets its own brackets, plugs and screws and is checked on its own for the full weight given (the load is never divided); only the books estimate SHELF-E1 is per board. Team review (SR-10).",
+    "length_fact": "shelf_length_cm",
+    "layout_fact": "shelf_layout",
+    "split_value": "multiple",
+    "max_length": 120,
+    "unit": "cm",
+    "sections": ["materials"],
+    "estimate_rule": "SHELF-E1",
+    "cut_role": "board",
+    "cut_spec": "length_mm",
+    "cut_factor": 0.1
+  },
   "variables": {
     "bracket_count": {
       "rule_id": "SHELF-Q1",

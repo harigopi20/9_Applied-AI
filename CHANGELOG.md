@@ -6,6 +6,27 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Size limits before input and several shelf boards – 2026-11-03
+Summary (same as the pull request):
+- All projects: number fields show the guide limit from the stop rules (ST-04) and the catalogue sizes of size-dependent parts; typing beyond a limit warns at once
+- Size stops name the value given and the limit of the guide
+- Shelf: above 120 cm several boards side by side (new rule SHELF-S1); each board with its own fixings, checked for the full weight; cut hint; stop offers the split as a button
+- Shelf template v1.2.0; 4 new tests (111 passing)
+
+- **2026-11-03 – Size limits before input (proposal A) and several shelf boards (proposal B).**
+  `app/rules.js`: `guideLimits` reads plain size limits from the stop rules (no new values),
+  `limitCheck`, `catalogueSizes` (sizes of parts with `size_check`), `segmentPlan`; a stop
+  rule result carries `limits` (crossed limit, value given). New template block `segments`
+  and field `shelf_layout` (with `show_when`) in `app/data/templates/hang-shelf.json`
+  (v1.2.0): above 120 cm the customer chooses one board (→ ST-04 as before) or several
+  boards; the engine checks one board of length ÷ count, multiplies materials by the count
+  and never divides the weight (books estimate SHELF-E1 per board). `app/app.js`: field
+  hints, live warning, split choice with plan, limit lines and split button on the stop,
+  segment notice on the list, in the saved file and on the shopping route. Texts EN/DE.
+  RB-01 test updated (130 cm now first asks for the layout). README updated.
+  *Why:* customers should not run into size errors at the end; a long shelf is possible with several boards.
+  *Prompt:* "Implement A for all projects and B for the shelf" (show limits before input; several boards side by side).
+
 ## Milestone: Risk analysis – 2026-11-02
 Summary (same as the pull request):
 - New `docs/risk-analysis.md`: 20 risks in five categories (safety, AI, data quality, legal, business), rated by likelihood and impact

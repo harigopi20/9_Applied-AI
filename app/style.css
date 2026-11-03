@@ -330,6 +330,9 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 16px 32px; outline: none; 
 .subtotal-label { font-family: var(--font-head); font-size: 1.2rem; font-weight: 700; }
 .subtotal .subtotal-value { font-size: 1.6rem; }
 .save-box { margin: 14px 0; }
+.field-hints .hint, .field-hints .muted, .field-hints .warn-text { margin: 6px 0 0; }
+.stop-limits { margin: 0 0 12px; padding-left: 20px; font-weight: 600; }
+.split-tip { margin: 0 0 14px; padding: 12px; border: 2px solid var(--brand); border-radius: 10px; background: var(--brand-soft); }
 /* Orange action button: black text on brand orange (white would fail WCAG, see header) */
 .btn.brand { background: var(--brand); border-color: var(--brand); color: var(--ink); font-weight: 700; font-size: 1.25rem; border-radius: 10px; }
 .btn.brand:hover { background: var(--brand-dark); border-color: var(--brand-dark); }
