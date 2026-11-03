@@ -305,10 +305,15 @@
     } else {
       const input = el("input", {
         id: "plz-input", class: "input plz", type: "text", inputmode: "numeric", autocomplete: "off",
-        maxlength: "5", "aria-label": t("store_plz_label"), placeholder: t("store_plz_placeholder")
+        maxlength: "12", "aria-label": t("store_plz_label"), placeholder: t("store_plz_placeholder")
       });
       input.value = state.plzInput;
-      input.addEventListener("input", () => { state.plzInput = input.value; });
+      // Issue #109: spaces and other non-digits are removed while typing or pasting (" 91126" → "91126").
+      input.addEventListener("input", () => {
+        const clean = R.cleanPlzInput(input.value);
+        if (clean !== input.value) input.value = clean;
+        state.plzInput = clean;
+      });
       const form = el("form", { class: "plz-form", novalidate: true }, [
         el("label", { for: "plz-input", class: "field-label", text: t("store_plz_label") }),
         el("div", { class: "number-row" }, [input, el("button", { type: "submit", class: "btn primary", id: "plz-submit", text: t("store_search") })]),
@@ -597,8 +602,8 @@
     const weight = f.fact === "load_kg" && f.allow_unknown ? weightHelp(f, input, box) : null;
     box.appendChild(row);
     live.values[f.fact] = () => {
-      const n = Number(input.value.trim().replace(",", "."));
-      return input.value.trim() !== "" && Number.isFinite(n) ? n : undefined;
+      const n = R.parseDecimal(input.value);
+      return Number.isFinite(n) ? n : undefined;
     };
     const hints = fieldHints(f, state.template, live.q, live);
     if (hints) box.appendChild(hints);
@@ -613,10 +618,9 @@
     form.appendChild(box);
     return () => {
       if (unknown) return { fact: f.fact, value: R.UNKNOWN_VALUE, source: "question:answer:dont_know" };
-      // Validation in code: comma or dot decimal, within template range.
-      const raw = input.value.trim().replace(",", ".");
-      const n = Number(raw);
-      const ok = raw !== "" && Number.isFinite(n) && n >= f.min && n <= f.max && (!f.integer || Number.isInteger(n));
+      // Validation in code: digits with one comma or dot only (issue #108), within template range.
+      const n = R.parseDecimal(input.value);
+      const ok = Number.isFinite(n) && n >= f.min && n <= f.max && (!f.integer || Number.isInteger(n));
       if (!ok) return { error: t("value_required", { min: f.min, max: f.max }) };
       const est = weight && weight.estimate();
       return est && est.value === n
@@ -642,7 +646,7 @@
       const basis = el("input", { type: "text", inputmode: "decimal", autocomplete: "off", class: "input", id: "in-estimate-basis",
         "aria-label": pick(rule.label), value: known && known.value !== R.UNKNOWN_VALUE ? String(known.value) : "" });
       const calc = () => {
-        const n = Number(basis.value.trim().replace(",", "."));
+        const n = R.parseDecimal(basis.value);
         if (!Number.isFinite(n) || n < rule.basis_min || n > rule.basis_max) {
           est = null;
           estNote.textContent = t("value_required", { min: rule.basis_min, max: rule.basis_max });
@@ -659,7 +663,7 @@
           el("button", { type: "button", class: "btn small", id: "estimate-run", text: t("weight_estimate_run"), onclick: calc })]),
         estNote);
     }
-    input.addEventListener("input", () => { if (est && Number(input.value.replace(",", ".")) !== est.value) est = null; });
+    input.addEventListener("input", () => { if (est && R.parseDecimal(input.value) !== est.value) est = null; });
     const modes = [["know", t("weight_know")], ["weigh", t("weight_weigh")]].concat(rule ? [["estimate", t("weight_estimate")]] : []);
     const group = el("div", { class: "choices weight-modes", role: "radiogroup", "aria-label": t("weight_how") });
     const set = (m) => {

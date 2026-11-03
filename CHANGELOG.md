@@ -6,6 +6,23 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Typed input checked and cleaned (issues #104, #105, #108, #109) – 2026-11-03
+Summary (same as the pull request):
+- #104: a minus before a number in the project text is kept ("-5 kg" is no longer read as 5 kg)
+- #105: in keyword mode an impossible value ("-5 kg", "0 kg", "9999 kg") is dropped and asked again – the project is kept; AI answers stay all-or-nothing (DR-05)
+- #108: number fields accept only digits with one comma or point ("1e1", "0x10" rejected)
+- #109: postcode field removes spaces and other non-digits while typing or pasting (" 91126" works)
+- 3 new tests (120 passing); test result saved
+
+- **2026-11-03 – Input checks (issues #104, #105, #108, #109).** `app/ai-adapter.js`:
+  `normalise` keeps a minus directly before a number; `validateOutput(…, { dropBadValues })`
+  drops single out-of-range values for the template mode only. `app/rules.js`: new
+  `parseDecimal` (strict number) and `cleanPlzInput` (digits only, max. 5). `app/app.js`:
+  number fields, live hints and the weight estimate use `parseDecimal`; the PLZ field cleans
+  its input (`maxlength` 12 so a pasted space no longer cuts the last digit). README updated.
+  *Why:* four exploratory-test bugs with the same background – customer input not cleaned or checked strictly enough.
+  *Prompt:* "Check issues #104, 105, 108, 109 – same background, same fix?" → "Yes, all four in one PR."
+
 ## Milestone: No duplicate back buttons – 2026-11-03
 Summary (same as the pull request):
 - Question screens: the "Back" / "Cancel" button in the form is removed – only "Confirm"; back goes via "Back" in the tab bar

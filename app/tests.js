@@ -1469,6 +1469,52 @@
     }
   });
 
+  // ---------------------------------------------------------------------
+  // Issues #104, #105, #108, #109 – typed input checked and cleaned in code (3 Nov 2026)
+  // ---------------------------------------------------------------------
+  test("#104 / #105", "Typed text: '-5 kg', '0 kg', '9999 kg' → project kept, the impossible weight is dropped and asked again; AI answers stay all-or-nothing (DR-05)", async () => {
+    const tu = (txt) => window.BBAI.templateUnderstand(txt, D.lexicon, IDS());
+    eq(tu("hang a shelf -5 kg").facts.load_kg, -5, "#104: the minus is kept");
+    eq(tu("hang a shelf 5-10 kg").facts.load_kg !== -10, true, "a hyphen between numbers is no minus");
+    for (const txt of ["hang a shelf -5 kg", "hang a shelf 0 kg", "hang a shelf 9999 kg"]) {
+      const r = await adapter("template").understand(txt, "en");
+      eq([r.ok, r.output.intent, r.output.facts.load_kg], [true, "hang_shelf", null], txt);
+      const st = await appSubmit(txt, adapter("template"));
+      eq(st.screen, "recognized", "project recognised: " + txt);
+      assert(!(st.recognized.facts && st.recognized.facts.load_kg), "no weight guess: " + txt);
+    }
+    const ok = await adapter("template").understand("hang a shelf 12 kg", "en");
+    eq(ok.output.facts.load_kg, 12, "a valid weight stays");
+    const ai = await adapter("mock").understand("MOCK_BAD_VALUE", "en");
+    eq(ai.ok, false, "AI answer with a bad value is still rejected as a whole (DR-05)");
+  });
+
+  test("#108", "Number fields accept only digits with one comma or point ('1e1', '0x10', '4,5,6', 'Infinity', '-3' rejected)", () => {
+    eq(["4", "4,5", "4.5", " 12 ", "0,5"].map((x) => R.parseDecimal(x)), [4, 4.5, 4.5, 12, 0.5]);
+    ["1e1", "0x10", "4,5,6", "Infinity", "-3", "", "4.", ".5", "1 000"].forEach((x) => assert(Number.isNaN(R.parseDecimal(x)), "rejected: " + x));
+    const { s, box } = questionSetup(tpl("paint_wall"), "Q1", {});
+    const w = box.querySelector("#in-wall_width_m");
+    w.value = "1e1";
+    box.querySelector("#in-room_height_m").value = "2,5";
+    box.querySelector('[data-value="painted"]').click();
+    box.querySelector("form").requestSubmit();
+    assert(box.querySelector(".error").textContent.length > 0, "error shown for 1e1");
+    assert(!s.facts.wall_width_m, "1e1 not taken");
+  });
+
+  test("#109", "Postcode field: spaces and other non-digits are removed while typing or pasting (' 91126' → stores listed)", () => {
+    eq([" 91126", "91 126", "D-91126 ", "9112 6x", "123456789"].map((x) => R.cleanPlzInput(x)), ["91126", "91126", "91126", "91126", "12345"]);
+    const s = storeSetup();
+    const box = renderStore();
+    const inp = box.querySelector("#plz-input");
+    inp.value = " 91126";
+    inp.dispatchEvent(new Event("input", { bubbles: true }));
+    eq([inp.value, s.plzInput], ["91126", "91126"], "cleaned in the field");
+    const res = window.BBApp.searchStores(inp.value);
+    assert(res.status !== "invalid", "valid postcode: " + res.status);
+    s.plzInput = "";
+  });
+
   test("NFR-09", "Every UI text exists in English and German", () => {
     const en = Object.keys(window.BBI18n.TEXTS.en), de = Object.keys(window.BBI18n.TEXTS.de);
     eq(en.filter((k) => !de.includes(k)), [], "missing in German");
