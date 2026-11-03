@@ -159,7 +159,7 @@ typing and the project buttons always work.
 ## Store selection by PLZ (FR-29, FR-30)
 - The PLZ is checked in code: exactly 5 digits **and** present in the PLZ table. Spaces and other non-digits are removed while typing or pasting (" 91126" works, issue #109).
 - Number answers accept only digits with one decimal comma or point ("4", "4,5", "4.5"); "1e1", "0x10" and the like are rejected (issue #108).
-- Valid → stores within `store.maxDistanceKm` (50 km), sorted by straight-line distance, at most `store.maxStoresShown` (5), with address and opening hours.
+- Valid → stores within `store.maxDistanceKm` (50 km), sorted by straight-line distance, at most `store.maxStoresShown` (6 = all sample stores, D-8 / D-11), with address and opening hours.
 - Invalid, unknown or no store in range → message plus the full store list.
 - **A store is never selected automatically** – not even the nearest one or the only one in range; the customer taps it (RB-16, SR-06). *Team decision 25 Oct 2026: no preselection* – FR-29, design D-11 and TC-38 say the same.
 - Skipped → the complete list with identical checks; aisle, shelf and stock show "not available" plus an "Add postcode" button.
@@ -229,7 +229,8 @@ The team's workbook (exports: `products.csv`, `store_stock.csv`, `stores.csv`):
 |---|---|
 | `Products` | Product data once for all stores: `product_nr`, `product_name`, `category`, `size`, `description`, `material`, `colour`, `price_eur`, `max_load_kg`, `suitable_wall_types`, `compatible_with`, `use_cases`, `requires_professional`, `safety_note` – plus the **rule-engine columns** `variant_group`, `pack_qty` (pieces per sales unit; empty = unclear), `pack_unit`, `specs` (`key=value;…`, e.g. `diameter_mm=8`), `data_note` |
 | `Store stock` | Per product and store: `<store_id>_aisle_nr`, `_aisle_name`, `_shelf_nr`, `_qty` (empty aisle = not carried, qty 0 = out of stock) |
-| `Stores` | 5 stores: `store_id`, `store_name`, `street`, `plz`, `city`, `opening_hours`, `lat`, `lon` |
+| `Stores` | 6 stores (incl. SCH – OBI Schwabach, D-11): `store_id`, `store_name`, `street`, `plz`, `city`, `opening_hours`, `lat`, `lon` |
+| `Fixing chain`, `System ratings`, `Capacity`, `Cabinet`, `Anti-tip`, `D-13 mapping` | New in data v3 (3 Nov 2026) for the shelf / wall-cabinet / anti-tip logic (D-13, D-14). All load values come from *System ratings* (sample until the fischer recommended loads are entered). Not read by the app yet. |
 
 The app finds the header row in each sheet (title rows above it are fine) and
 skips legend or note rows. The rule-engine columns are added or refreshed with
@@ -340,12 +341,12 @@ usability test or by hand.
 2-week MVP sprint starting 19 Oct 2026 → final pitch.
 
 ## Limitations
-Sample catalogue (105 products), invented prices, stock and aisle positions, 5 sample
+Sample catalogue (288 products, data v3), invented prices, stock and aisle positions, 6 sample
 stores in a fictional partnership scenario (addresses and opening hours to be verified
 by the team), approximate PLZ distances, 9 project templates not yet reviewed by the team.
 Open points from the project catalogue: wall type "wood" and fixings for aerated
 concrete (D-5) are not built yet – the catalogue has no wood or aerated-concrete
-fixings; the 6th store Schwabach (D-11) is not in the data yet; "estimate for me" exists
+fixings; "estimate for me" exists
 only for the shelf (other projects: no team estimate rule yet); cavity anchors and anchor bolts are assumed to bring their
 own screw; the sliding-door plug (10 mm, 50 kg) limits the door to 40 kg although the
 catalogue allows 60 kg (every part must carry the whole load × 1.25, SR-04).

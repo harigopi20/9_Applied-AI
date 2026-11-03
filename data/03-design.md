@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Document** | `docs/03-design.md` |
+| **Document** | `data/03-design_03_11_26.md` (dated copy of `data/03-design.md`) |
 | **V-model phase** | 3 – Design |
-| **Version** | 0.4 (one data workbook, 5 OBI stores, availability referral) |
-| **Date** | 25 October 2026 |
+| **Version** | 0.4.1 – addendum of 3 Nov 2026: 6 OBI stores (D-11), mounting logic for shelf, wall cabinet and anti-tip (D-13 / D-14). The full v0.5 update (D-12) is still open. |
+| **Date** | 3 November 2026 (addendum); 25 October 2026 |
 | **Inputs** | [`docs/01-concept.md`](01-concept.md) · [`requirements/baumarkt-buddy-product-requirements.md`](../requirements/baumarkt-buddy-product-requirements.md) v1.0 · [`diagrams/`](../diagrams/) |
 | **Owner / approver** | App builder · reviewed by Quality & Responsible AI |
 | **Verified by** | Phase 5 – integration and unit tests (`test/`) |
@@ -236,21 +236,41 @@ All values below are **mock values for the prototype** and must be confirmed by 
 | ID | Rule | Purpose |
 |---|---|---|
 | R-01 | No mounting output unless wall type and load are confirmed | Safety |
-| R-02 | Select smallest bracket with rated load ≥ 1.25 × intended load | Compatibility |
-| R-03 | Select board whose rated load ≥ 1.25 × intended load | Compatibility |
+| R-02 | Select smallest bracket with rated load ≥ 1.25 × intended load · **Changed 3 Nov 2026:** shelf and wall cabinet – bracket class / rail follow the plug size (R-17) | Compatibility |
+| R-03 | Select board whose rated load ≥ 1.25 × intended load · **Changed 3 Nov 2026:** board = standard size ≥ requested length and depth; 18 mm if depth ≤ 30 cm and capacity ≤ 32 kg, else 25 mm | Compatibility |
 | R-04 | Wall plug must be in the bracket's `compatible_with` list and suit the wall type | Compatibility |
 | R-05 | Drill bit derived from the plug diameter | Compatibility |
 | R-06 | Screw derived from the plug (diameter and length) | Compatibility |
 | R-07 | Capacity from system / manufacturer rating, **not** the sum of plug ratings; no rating → *Data unavailable* | Safety |
-| R-08 | Plasterboard and load > 25 kg → *Safety blocked*, offer alternative | Safety |
+| R-08 | Plasterboard and load > 25 kg → *Safety blocked*, offer alternative · **Changed 3 Nov 2026:** 25 kg per wall section, shared by all shelves | Safety |
 | R-09 | Drill type by wall (concrete/brick → hammer drill) | Tools |
 | R-10 | PPE by activity (drilling → safety glasses, dust mask) | PPE |
 | R-11 | Any drilling → detector + warning "a negative scan is no guarantee" | Safety |
-| R-12 | Any load > 50 kg → *Safety blocked* + professional | Safety |
+| R-12 | Any load > 50 kg → *Safety blocked* + professional · **Changed 3 Nov 2026:** wall cabinet 80 kg in R1 (anchor bolts on concrete up to 120 kg in R2) | Safety |
 | R-13 | Product with `requires_professional = yes` → refuse | Safety |
-| R-14 | Quantities per bracket pair (plugs and screws per bracket) | Quantity |
+| R-14 | Quantities per bracket pair (plugs and screws per bracket) · **Changed 3 Nov 2026:** brackets = length ÷ 80 rounded up + 1; 2 fixings per bracket; rail points = width ÷ 30 rounded up + 1; anti-tip kits = width ÷ 90 rounded up | Quantity |
 | R-15 | Picture-hook rule by weight and wall type | Quantity |
 | R-16 | Required item missing in catalogue → flag, never substitute silently | Data |
+| **R-17** | Fixing chain (new 3 Nov 2026): plug size (= drill bit) → screw Ø → bracket hole / rail slot; screw Ø ≤ hole Ø − 0.5 mm; wall type → plug type and hammer mode (FR-09) | Compatibility |
+| **R-18** | Capacity per plug option = MIN(system rating × f, bracket pair or rail × f, board) ÷ 1.25, capped by the wall cap; shelf f = MIN(1, 25 ÷ depth), cabinet f = MIN(1, height ÷ depth) (SR-18) | Safety |
+| **R-19** | Size hints instead of stops: depth above wall limit → offer max. depth; non-standard length → next size up + cut hint; shelf > 200 cm → split or cut (FR-36) | Usability |
+| **R-20** | Wall cabinet: weight = panel surface × 11 kg/m² (estimate with margin); only plug options ≥ 1.5 × weight (SR-14, SR-19) | Safety |
+| **R-21** | Anti-tip: plug size from depth (≤ 30 / 50 / 75 cm → 6 / 8 / 10 mm); over 180 cm → next size up and 2 fixings; kits = width ÷ 90 (SR-19, FR-06) | Safety |
+| **R-22** | Spirit level on every shelf and wall cabinet list (P032 60 cm; P371 120 cm above 120 cm) (FR-37) | Tools |
+
+### 6.1 Mounting logic D-13 / D-14 (added 3 Nov 2026)
+
+The customer gives **wall type** and **size** only – no weight. The app shows **plug options with "max. X kg"** and the customer confirms one.
+
+| Step | Shelf | Wall cabinet | Anti-tip |
+|---|---|---|---|
+| 1 Wall | plug type, hammer mode, wall cap, max. depth | same | same |
+| 2 Size | length × depth | width × depth × height | width × depth × height |
+| 3 App | board, brackets (R-03, R-14); hints (R-19) | weight estimate, rail, fixing points (R-20) | kits, plug size, fixings (R-21) |
+| 4 Choose | plug options with max. kg (R-18) | plug options with max. kg contents (R-18, R-20) | – (fixing shown) |
+| 5 Confirm | "I will load max. X kg" | "I will put max. X kg inside" | "fixed to the top or side panel" |
+
+Stops only: wall unknown (ST-01), high-risk work (G0), wall cabinet too heavy for the wall. All load values come from the sheet **System ratings** of the catalogue workbook (DR-09; source: fischer recommended loads, one plug = system rating, no summing).
 
 **Example – UC-1 "hang a 20 kg shelf on concrete":** R-01 ✓ → R-02/R-03 bracket and board ≥ 25 kg → R-04…R-06 plug, bit, screw → R-09 hammer drill → R-10 PPE → R-11 detector + warning → R-14 quantities.
 
@@ -262,11 +282,12 @@ All values below are **mock values for the prototype** and must be confirmed by 
 
 | File | Content | Key fields |
 |---|---|---|
-| `data/product_catalogue.xlsx` – sheet **Products** (export `data/products.csv`) | 70 products, written once for all stores (DR-01) | `product_nr`, `product_name`, `category`, `size`, `price_eur`, `max_load_kg`, `suitable_wall_types`, `compatible_with`, `requires_professional`, `safety_note` |
+| `data/product_catalogue.xlsx` – sheet **Products** (export `data/products.csv`) | 105 products; dated copy `data/product_catalogue_03_11_26.xlsx`: 288 products incl. P201–P384 for D-13 / D-14 (DR-01) | `product_nr`, `product_name`, `category`, `size`, `price_eur`, `max_load_kg`, `suitable_wall_types`, `compatible_with`, `requires_professional`, `safety_note` |
 | `data/product_catalogue.xlsx` – sheet **Store stock** (export `data/store_stock.csv`) | Aisle, shelf and quantity per product for each store (DR-01) | `product_nr`, then per store `<store_id>_aisle_nr`, `_aisle_name`, `_shelf_nr`, `_qty` · empty aisle = not carried · qty 0 = out of stock |
-| `data/product_catalogue.xlsx` – sheet **Stores** (export `data/stores.csv`) | 5 sample OBI stores: NUE-LEY, NUE-REG, NUE-BAY, ERL-OST, ERL-WEST (fictional partnership for the exam) | `store_id`, `store_name`, `street`, `plz`, `city`, `opening_hours`, `lat`, `lon` |
+| `data/product_catalogue.xlsx` – sheet **Stores** (export `data/stores.csv`) | 6 sample OBI stores: NUE-LEY, NUE-REG, NUE-BAY, ERL-OST, ERL-WEST and **SCH (OBI Markt Schwabach, 91126 – added 3 Nov 2026, D-11)** (fictional partnership for the exam) | `store_id`, `store_name`, `street`, `plz`, `city`, `opening_hours`, `lat`, `lon` |
 | `data/product_catalogue.csv`, `data/store_map.csv` | **Obsolete** since v0.4 – kept for reference only | – |
-| `data/templates/*.json` *(to be created)* | Project templates | `project_type`, `required_facts`, `questions`, `bom_roles`, `quantity_rules`, `review_status` |
+| `app/data/templates/*.json` | 9 project templates (6 offered since 3 Nov 2026) | `template_id`, `questions`, `wall_limits`, `stops`, `methods`, `segments`, `review` |
+| `data/product_catalogue_03_11_26.xlsx` – sheets **Fixing chain**, **System ratings**, **Capacity**, **Cabinet**, **Anti-tip** (new 3 Nov 2026) | Lookup for R-17; all load values (DR-09); calculation checks for R-18 … R-21 | `wall`, `plug mm`, system / bracket / rail / board ratings, wall cap, max. depth, safety factor |
 | `data/plz_coordinates.csv` (DR-08) | German PLZ → centre coordinates (8,298 PLZ) | `plz`, `lat`, `lon` · source: plz_geocoord, WZB Berlin 2019, Apache-2.0 · store coordinates = PLZ centre (approximate) |
 
 ### 7.2 Core entities
@@ -430,10 +451,12 @@ Rule: a failed service call never advances a state; any change to material, dime
 | DD-3 | Safety factors and limits (1.25×, 25 kg, 50 kg) | Keep as mock values; reviewer to confirm |
 | DD-4 | Where the orchestrator runs (browser vs. backend) | Backend/edge, to keep API keys and rules off the client |
 | DD-5 | Speech-to-text service | Browser Web Speech API (in R1). Not available in Firefox → typing; audio may be processed by the browser vendor → named in the privacy notice |
-| DD-6 | Distance for "no store near you" and max. stores shown | TBD (team) |
-| DD-7 | Number of sample stores | **Decided:** 5 OBI stores in Nürnberg and Erlangen (sample data) |
-| DD-8 | Stock and price display without a store | TBD (team) |
-| DD-9 | PLZ data source and licence | **Decided:** plz_geocoord (WZB Berlin, Apache-2.0) → `data/plz_coordinates.csv` |
+| DD-6 | Distance for "no store near you" and max. stores shown | **Decided (D-8, 29 Oct 2026):** 50 km, max. 6 stores shown |
+| DD-7 | Number of sample stores | **Decided (D-11):** 6 OBI stores in Nürnberg, Erlangen and Schwabach (sample data; SCH added 3 Nov 2026) |
+| DD-8 | Stock and price display without a store | **Decided (D-9):** price shown; stock, aisle, shelf "not available" with a postcode hint |
+| DD-9 | PLZ data source and licence | **Decided:** plz_geocoord (WZB Berlin, Apache-2.0) → `data/plz_coordinates.csv` (contains 91126 Schwabach – no change needed) |
+| DD-10 | Load values for plugs and fixings | **Decided 3 Nov 2026:** fischer recommended loads; one plug's value = system rating; generic product names |
+| DD-2 (update) | R-07 capacity source without a manufacturer system rating | **Decided 3 Nov 2026:** R-18 with the System ratings table (DR-09) |
 
 ---
 

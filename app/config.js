@@ -50,9 +50,10 @@ window.BB_CONFIG = Object.freeze({
     howtoHosts: ["www.youtube.com", "www.obi.de", "www.obi.ch"]
   },
 
-  // FR-29 – confirmed by the team 2026-10-25 (design DD-6).
+  // FR-29 – confirmed by the team 2026-10-25 (design DD-6); D-8 / D-11 (29 Oct 2026):
+  // all sample stores are listed, max. 6 (incl. OBI Schwabach).
   store: {
     maxDistanceKm: 50,   // "no store near you" when the nearest store is farther
-    maxStoresShown: 5    // number of stores listed after a valid PLZ
+    maxStoresShown: 6    // number of stores listed after a valid PLZ
   }
 });

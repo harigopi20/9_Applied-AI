@@ -6,10 +6,10 @@
 
 | File | Content | Requirement |
 |---|---|---|
-| `product_catalogue.xlsx` | Master workbook for the team (v2, 27 Oct 2026) – sheets: **Read Me**, **Products**, **Store stock**, **Stores**, **Translations** | DR-01 |
-| `products.csv` | Export of sheet *Products*: 105 products (P001–P105; P103/P104 = 120 cm shelf boards 25/20 cm deep, P105 = 100 cm sliding door leaf, added 27 Oct 2026, sample values), written once for all stores (name EN/DE, size, load, wall types, compatibility, safety note, price) | DR-01 |
+| `product_catalogue.xlsx` | Master workbook for the team (v3, 3 Nov 2026 – the former dated copy `product_catalogue_03_11_26.xlsx`) – sheets: **Read Me**, **Products**, **Store stock**, **Stores**, **Translations**, **Fixing chain**, **System ratings** (all load values – sample until the fischer recommended loads are entered), **Capacity**, **Cabinet**, **Anti-tip**, **D-13 mapping** | DR-01, DR-09 |
+| `products.csv` | Export of sheet *Products*: 288 products (P001–P105, plus 183 generic sample products P201–P384 for the new mounting logic – shelf, wall cabinet, anti-tip – added 3 Nov 2026; P103/P104 = 120 cm shelf boards 25/20 cm deep, P105 = 100 cm sliding door leaf, added 27 Oct 2026, sample values), written once for all stores (name EN/DE, size, load, wall types, compatibility, safety note, price) | DR-01 |
 | `store_stock.csv` | Export of sheet *Store stock*: aisle, shelf and quantity per product for each store (`<store_id>_aisle_nr`, `_aisle_name`, `_shelf_nr`, `_qty`) | DR-01 |
-| `stores.csv` | Export of sheet *Stores*: 5 OBI stores with address, PLZ, opening hours, coordinates | DR-01, FR-29 |
+| `stores.csv` | Export of sheet *Stores*: 6 OBI stores with address, PLZ, opening hours, coordinates | DR-01, FR-29 |
 | `project_catalogue.xlsx` | Project catalogue (draft v1, 27 Oct 2026, team review pending) – 9 projects with questions, limits, items, stop rules, how-to links and sources | DR-04 |
 | `plz_coordinates.csv` | German PLZ → centre coordinates (8,298 PLZ), used for distance sorting | DR-08 |
 | `product_catalogue.csv`, `store_map.csv` | **Obsolete** – replaced by the files above; the app reads `product_catalogue.xlsx` since 25 Oct 2026 | – |
@@ -23,12 +23,14 @@
 | NUE-BAY | OBI Markt Nürnberg Äußere Bayreuther Straße | 90411 |
 | ERL-OST | OBI Markt Erlangen-Ost | 91052 |
 | ERL-WEST | OBI Markt Erlangen West (Neumühle) | 91056 |
+| SCH | OBI Markt Schwabach, Nürnberger Str. 86, Mo–Sa 8:00–20:00 (added 3 Nov 2026, D-11) | 91126 |
 
 ## Rules in the data
 
 - **Empty aisle** in *Store stock* = the store does **not carry** the product.
 - **qty 0** = the store carries it but it is **out of stock**.
 - In both cases the app keeps the item on the list and names the nearest other store with stock, or says "please ask staff" (FR-31).
+- SCH uses the aisle layout of ERL-WEST with its own sample stock; the products P201–P384 are placed in the aisle of a similar existing product in every store (plugs like P044, brackets like P059, boards like P064, rails like P102, spirit level like P032).
 - ERL-OST uses the original catalogue layout; the other stores have the same aisle names with different aisle numbers and stock (generated sample data).
 
 **Demo cases:** P044 out of stock in ERL-OST · P059 not carried in NUE-REG · P064 out of stock in NUE-BAY.
@@ -52,4 +54,4 @@ template and its tests.
 
 ## Source and licence – `plz_coordinates.csv`
 
-Derived from **plz_geocoord** by Markus Konrad, Wissenschaftszentrum Berlin für Sozialforschung (WZB), January 2019 – <https://github.com/WZBSocialScienceCenter/plz_geocoord> – licensed under the **Apache License 2.0**. Columns renamed to `plz, lat, lon` and coordinates rounded to 5 decimals.
+Derived from **plz_geocoord** by Markus Konrad, Wissenschaftszentrum Berlin für Sozialforschung (WZB), January 2019 – <https://github.com/WZBSocialScienceCenter/plz_geocoord> – licensed under the **Apache License 2.0**. Columns renamed to `plz, lat, lon` and coordinates rounded to 5 decimals. PLZ 91126 (Schwabach) is included: 49.31777, 11.02358 – used for store SCH; no change to the file was needed.

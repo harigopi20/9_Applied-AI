@@ -82,8 +82,8 @@
   // ---------------------------------------------------------------------
   // Data (DR-01..DR-04, SR-10)
   // ---------------------------------------------------------------------
-  test("DR-01", "Single Excel file loads with ~100 products (v2), stores and stock", () => {
-    assert(D.catalogue.all.length >= 100, "products: " + D.catalogue.all.length);
+  test("DR-01", "Single Excel file loads with 288 products (v3, 3 Nov 2026), stores and stock", () => {
+    eq(D.catalogue.all.length, 288, "products in data v3");
     assert(D.stores.length >= 2, "at least 2 stores");
     assert(D.stock.size > 100, "stock rows");
     assert(D.stores.every((s) => s.data_status === "sample"), "stores labelled sample (NFR-05)");
@@ -888,7 +888,7 @@
 
   test("DR-08", "PLZ reference table loaded and store coordinates match their PLZ centre", () => {
     assert(D.plzTable && D.plzTable.size > 8000, "postcodes: " + (D.plzTable && D.plzTable.size));
-    eq(D.stores.length, 5, "5 sample stores (DR-01)");
+    eq(D.stores.length, 6, "6 sample stores incl. SCH (DR-01, D-11)");
     D.stores.forEach((st) => {
       const p = D.plzTable.get(st.plz);
       assert(p, "store PLZ in table: " + st.plz);
@@ -1099,6 +1099,26 @@
     eq(s.storeId, null, "no automatic preselection");
     const box = renderStore();
     eq(box.querySelectorAll(".btn.store.selected").length, 0, "nothing highlighted as chosen");
+  });
+
+  test("TC-107 / FR-29 / DR-01", "6 stores in data v3: PLZ 91126 → OBI Schwabach first; 91052 → Schwabach by distance; all 6 shown, none preselected", () => {
+    const sch = D.stores.find((x) => x.store_id === "SCH");
+    assert(sch, "store SCH in sheet Stores");
+    eq(sch.plz, "91126");
+    assert(D.stock.size > 0 && R.storeInfo(D.stock, "SCH", "P044"), "SCH has store-stock columns");
+    for (const plz of ["91126", "91052"]) {
+      const s = storeSetup();
+      const res = window.BBApp.searchStores(plz);
+      eq(res.status, "nearby", "status for " + plz);
+      eq(res.stores.length, 6, "all 6 stores listed for " + plz);
+      res.stores.forEach((x, i) => { if (i) assert(res.stores[i - 1].km <= x.km, plz + ": sorted by distance"); });
+      assert(res.stores.some((x) => x.store.store_id === "SCH"), plz + ": Schwabach listed");
+      if (plz === "91126") eq(res.stores[0].store.store_id, "SCH", "Schwabach first for 91126");
+      eq(s.storeId, null, plz + ": no automatic preselection");
+      const box = renderStore();
+      eq(box.querySelectorAll("[data-store]").length, 6, plz + ": 6 store buttons");
+      eq(box.querySelectorAll(".btn.store.selected").length, 0, plz + ": nothing highlighted as chosen");
+    }
   });
 
   // ---------------------------------------------------------------------

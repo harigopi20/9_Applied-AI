@@ -6,6 +6,22 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-11-03 – D-13/D-14 Step 1: catalogue data v3 with 6 stores (TC-107).** The dated
+  workbook `data/product_catalogue_03_11_26.xlsx` is now `data/product_catalogue.xlsx`
+  (288 products P001–P105 + P201–P384; store SCH – OBI Schwabach; new sheets Fixing chain,
+  System ratings, Capacity, Cabinet, Anti-tip, D-13 mapping). `products.csv`, `store_stock.csv`
+  and `stores.csv` re-exported (identical to the dated CSVs). `data/03-design.md` replaced by the
+  dated version (R-17 … R-22, §6.1). `app/config.js`: `maxStoresShown` 5 → 6 (FR-29: all sample
+  stores, max. 6). Tests: DR-08 expects 6 stores, DR-01 expects 288 products, new TC-107
+  (91126 → Schwabach first, 91052 → Schwabach by distance, all 6 shown, none preselected).
+  README.md and data/README.md updated. The new sheets are not read by the app yet (Step 2).
+  *Note:* Python is not installed on this machine, so `tools/add_rule_columns.py` could not run.
+  The workbook's rule-engine columns are already filled, so the script would not change it;
+  a read-only Node check with the app's SheetJS, following the script's `export()` logic,
+  gave byte-identical CSVs to the dated exports, which were then copied into place.
+  *Why:* handover D-13/D-14, Step 1 (data) – D-11 data delivered.
+  *Prompt:* "Read the handover and CLAUDE.md; local only; start with Step 1 (Data); show the plan first." → "OK, go ahead."
+
 ## Milestone: "Already have" button in the price row – 2026-11-03
 Summary (same as the pull request):
 - "I already have this" moved from its own row to the right of the price row (variant B)
