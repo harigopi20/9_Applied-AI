@@ -306,6 +306,8 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 16px 32px; outline: none; 
 .item.owned { opacity: .75; }
 .item.owned .item-name span:first-child { text-decoration: line-through; }
 .owned-toggle { margin-top: 6px; }
+/* In the price row: pushed to the right edge, vertically centred (variant B, 3 Nov 2026) */
+.price .owned-toggle { margin: 0 0 0 auto; align-self: center; padding: 4px 12px; font-size: 1rem; }
 /* Checklist questions (C-7 defects, wall condition) */
 .checklist { display: grid; gap: 6px; }
 .check-option { display: flex; align-items: center; gap: 6px; min-height: var(--touch); cursor: pointer; }

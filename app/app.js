@@ -1101,10 +1101,14 @@
       el("span", { class: "muted small", text: t("rule") + " " + q.rule_id + " / " + i.rule_ids.join(", ") })
     ]));
 
+    // "I already have this" sits on the right of the price row (user request 3 Nov 2026, variant B) –
+    // saves one row per tool; the line price below wraps onto its own row.
+    const ob = i.owned_refused ? null : ownedButton(i);
     li.appendChild(el("div", { class: "price" }, [
       p.price_eur !== null ? priceEl(p.price_eur) : el("span", { class: "muted", text: t("price_unknown") }),
       el("span", { class: "price-unit muted", text: p.price_eur !== null ? " " + t("per_pack") : "" }),
       el("span", { class: "tag sample", text: t("sample_note") }),
+      ob,
       i.line_price !== null ? el("span", { class: "line-price muted", text: t("line_total", { price: window.BBI18n.formatPrice(i.line_price) }) }) : null
     ]));
 
@@ -1151,8 +1155,6 @@
     }
 
     if (i.owned_refused) li.appendChild(el("p", { class: "warn-text", role: "note", "data-owned-refused": "1", text: t("owned_refused") }));
-    const ob = ownedButton(i);
-    if (ob && !i.owned_refused) li.appendChild(ob);
 
     // Product variant change → full re-check (SR-08, RB-03)
     const variants = R.variantOptions(state.template, i.role, state.data.catalogue);

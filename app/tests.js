@@ -2010,6 +2010,7 @@
     box.replaceChildren(window.BBApp.viewResult());
     const before = s.result.total.amount;
     assert(!box.querySelector('[data-role="wall_plug"] .owned-toggle') && !box.querySelector('[data-role="screw"] .owned-toggle'), "no button for plugs/screws");
+    assert(box.querySelector('[data-role="drill"] .price > .owned-toggle'), "button sits in the price row (variant B)");
     box.querySelector('[data-role="drill"] .owned-toggle').click();
     box.replaceChildren(window.BBApp.viewResult());
     assert(box.querySelector('[data-role="drill"]').classList.contains("owned"), "drill marked as owned");
