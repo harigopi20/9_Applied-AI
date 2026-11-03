@@ -1338,6 +1338,109 @@
     box.replaceChildren();
   });
 
+  // ---------------------------------------------------------------------
+  // Issue #101 – browser back / back swipe stays inside the app (3 Nov 2026)
+  // ---------------------------------------------------------------------
+  const waitFor = async (cond, what, ms) => {
+    const t0 = Date.now();
+    while (!cond()) {
+      if (Date.now() - t0 > (ms || 3000)) throw new AssertionError("timeout: " + what);
+      await new Promise((r) => setTimeout(r, 20));
+    }
+  };
+  const popped = () => new Promise((res) => window.addEventListener("popstate", () => setTimeout(res, 0), { once: true }));
+  async function histBack() { const p = popped(); history.back(); await p; }
+  async function histForward() { const p = popped(); history.forward(); await p; }
+  function freshFlow() {
+    const A = window.BBApp, s = A.state;
+    window.BBI18n.setLang("en");
+    s.data = D; s.storeId = null; s.storeOrigin = null; s.owned = new Set(); s.overrides = {}; s.result = null; s.template = null; s.leaveAsk = false;
+    A.initHistory();
+    A.go("choose");
+    A.startTemplate(SHELF(), {});
+    s.facts = confirmed(SHELF_OK);
+    A.recompute(true);
+  }
+
+  test("#101 (A)", "Browser back goes one step back inside the app (list → question → project); forward re-checks the answers; re-renders, store search and shopping handled", async () => {
+    const A = window.BBApp, s = A.state;
+    try {
+      freshFlow();
+      eq([s.screen, A.nav.pos], ["result", 3], "choose → question → list = 3 steps");
+      eq(history.state.screen, "result");
+      assert(!("facts" in history.state) && !JSON.stringify(history.state).includes("concrete"), "no answers in the history (NFR-04)");
+      A.recompute(); // re-render of the same screen
+      eq(A.nav.pos, 3, "a re-render adds no step");
+      await histBack();
+      eq([s.screen, s.questionId], ["question", "Q1"], "back: list → question");
+      await histBack();
+      eq(s.screen, "choose", "back: question → project choice");
+      await histForward(); await histForward();
+      eq([s.screen, s.result.state], ["result", "validated"], "forward: back to the list");
+      // forward never shows an outdated list: change an answer, go forward → re-checked
+      await histBack();
+      s.facts.wall_type = R.makeFact("unknown", R.STATUS.CONFIRMED, "test");
+      await histForward();
+      eq([s.screen, s.result.state], ["result", "safety_blocked"], "forward re-checks: unknown wall → stop");
+      s.facts.wall_type = R.makeFact("concrete", R.STATUS.CONFIRMED, "test");
+      A.recompute(true);
+      // shopping by aisle → back → list
+      A.go("shopping");
+      await histBack();
+      eq(s.screen, "result", "back: shopping → list");
+      // store search: after choosing a store, back does not return to the search
+      A.openStoreSearch("result");
+      eq(s.screen, "store");
+      const p = popped();
+      A.chooseStore("ERL-OST");
+      await p;
+      eq([s.screen, s.storeId], ["result", "ERL-OST"]);
+      await histBack();
+      assert(s.screen !== "store", "back after choosing a store skips the search: " + s.screen);
+    } finally {
+      A.disableHistory();
+      s.storeId = null;
+    }
+  });
+
+  test("#101 (B)", "Back on the first step with a list asks 'Leave your list?' (save / stay / leave); without a list the app is left as usual", async () => {
+    const A = window.BBApp, s = A.state;
+    const orig = { go: A.nav.go, back: A.nav.back };
+    try {
+      freshFlow();
+      await histBack(); await histBack();
+      eq([s.screen, A.nav.pos], ["choose", 1], "first step");
+      history.back(); // → guard → the app stays and asks
+      await waitFor(() => s.leaveAsk && A.nav.pos === 1, "leave question");
+      const box = document.getElementById("sandbox");
+      box.replaceChildren(A.viewLeave());
+      ["#leave-save", "#leave-stay", "#leave-go"].forEach((id) => assert(box.querySelector(id), id));
+      eq(box.querySelector("h2").textContent, "Leave your list?");
+      box.querySelector("#leave-stay").click();
+      eq([s.leaveAsk, s.screen], [false, "result"], "stay → back to the list");
+      // leave: goes past the guard to the page before the app (stubbed here)
+      await histBack();
+      history.back();
+      await waitFor(() => s.leaveAsk, "leave question again");
+      let went = null;
+      A.nav.go = (n) => { went = n; };
+      box.replaceChildren(A.viewLeave());
+      box.querySelector("#leave-go").click();
+      eq(went, -2, "history.go(-2): guard + page before");
+      await waitFor(() => s.result === null && s.screen === "choose", "no page before → start again", 2000);
+      // no list → back on the first step leaves as usual (no question)
+      let left = false;
+      A.nav.back = () => { left = true; };
+      history.back();
+      await waitFor(() => left, "leaves without asking");
+      eq(s.leaveAsk, false);
+    } finally {
+      A.nav.go = orig.go; A.nav.back = orig.back;
+      A.disableHistory();
+      document.getElementById("sandbox").replaceChildren();
+    }
+  });
+
   test("NFR-09", "Every UI text exists in English and German", () => {
     const en = Object.keys(window.BBI18n.TEXTS.en), de = Object.keys(window.BBI18n.TEXTS.de);
     eq(en.filter((k) => !de.includes(k)), [], "missing in German");
