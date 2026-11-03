@@ -1830,15 +1830,16 @@
     assert(!renderResult(SHELF(), confirmed(SHELF_OK), null).querySelector(".howto"), "no links for PRJ-01");
   });
 
-  test("DR-04 (UI)", "Project buttons: 9 projects in 3 groups with icon and safety level", () => {
+  test("DR-04 (UI)", "Project buttons: 9 projects in 3 groups with icon; safety level only on the list", () => {
     const s = window.BBApp.state;
     s.data = D; s.chooseNotice = null; s.inputText = ""; s.busy = false; s.pendingGuesses = {};
     const box = document.getElementById("sandbox");
     box.replaceChildren(window.BBApp.viewChoose());
     eq(box.querySelectorAll("[data-template]").length, 9);
     eq(box.querySelectorAll(".template-group").length, 3);
-    eq(box.querySelectorAll(".template-level").length, 9);
+    eq(box.querySelectorAll(".template-level").length, 0, "no safety level on the tiles (user request 3 Nov 2026)");
     eq(box.querySelectorAll("[data-template] svg.icon").length, 9);
+    assert(renderResult(SHELF(), confirmed(SHELF_OK), null).querySelector("[data-level]"), "safety level shown on the list");
   });
 
   // ---------------------------------------------------------------------

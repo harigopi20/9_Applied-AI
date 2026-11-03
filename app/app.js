@@ -347,9 +347,8 @@
           onclick: () => startTemplate(tpl, state.pendingGuesses)
         }, [
           el("span", { class: "template-icon", "aria-hidden": "true" }, [icon(ICONS[tpl.icon] ? tpl.icon : "shelf", true)]),
-          el("span", { class: "template-title", text: pick(tpl.title) }),
-          tpl.safety_level ? el("span", { class: "template-level level-" + tpl.safety_level, text: t("level_" + tpl.safety_level) }) : null
-          // Review status and version are shown on the list only (SR-10, NFR-05), not on the tiles.
+          el("span", { class: "template-title", text: pick(tpl.title) })
+          // Safety level and template version are shown on the list only, not on the tiles (user request 3 Nov 2026).
         ]));
       });
       wrap.appendChild(grid);

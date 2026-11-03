@@ -6,6 +6,17 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Project tiles without safety level – 2026-11-03
+Summary (same as the pull request):
+- Project tiles show only icon and title; "Mounting – full / Mounting – light / Basic" removed from the tiles
+- The safety level stays at the top of the list; DR-04 UI test updated; test result saved
+
+- **2026-11-03 – Safety level removed from the project tiles.** `viewChoose` in `app/app.js`
+  no longer renders `.template-level` (styles removed). The list still shows
+  "Safety level: …" (`data-level`). DR-04 UI test checks both. README updated.
+  *Why:* calmer tiles; the level is shown where the result is.
+  *Prompt:* "Remove MOUNTING – FULL / MOUNTING – LIGHT / BASIC from the project tiles."
+
 ## Milestone: No review status in the list – 2026-11-03
 Summary (same as the pull request):
 - The list's transparency line no longer says "Template not yet reviewed by the team"; it keeps the template version
