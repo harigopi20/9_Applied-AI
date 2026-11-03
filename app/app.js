@@ -180,7 +180,7 @@
     document.getElementById("sample-badge").textContent = t("sample_badge");
     const btn = document.getElementById("lang-toggle");
     // Flag of the language the button switches to (EN screen → German flag), text only for screen readers
-    btn.replaceChildren(flag(t("lang_toggle_short")), el("span", { class: "sr-only", text: t("lang_toggle") }));
+    btn.replaceChildren(el("span", { class: "flag-wrap" }, [flag(t("lang_toggle_short"))]), el("span", { class: "sr-only", text: t("lang_toggle") }));
     btn.setAttribute("aria-label", t("lang_toggle_aria"));
     btn.setAttribute("title", t("lang_toggle"));
   }
