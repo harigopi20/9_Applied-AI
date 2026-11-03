@@ -6,6 +6,20 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Smaller project list – Doors & locks not offered – 2026-11-03
+Summary (same as the pull request):
+- The app offers 6 projects; glass door, interior door lock and sliding door ("Doors & locks") are no longer shown or recognised
+- Their templates stay in the repo (`inactiveTemplates` in `app/config.js`) and are still tested, so they can come back by moving one line
+- Tests updated (6 tiles in 2 groups, door words fall back to the project choice); test result saved
+
+- **2026-11-03 – Doors & locks removed from the app.** `app/config.js`: the three door
+  templates moved from `templates` to the new `inactiveTemplates` list, so the app does
+  not load, show or recognise them (typing "Schiebetür" shows the project choice with a
+  notice). `app/tests.js` loads the inactive templates separately, so their rule tests
+  (PRJ-06…PRJ-08, size limits) keep running. README updated.
+  *Why:* the team wants to start with a smaller project list.
+  *Prompt:* "Please remove the projects under Doors & locks – we want to start with a smaller project list."
+
 ## Milestone: Project tiles without safety level – 2026-11-03
 Summary (same as the pull request):
 - Project tiles show only icon and title; "Mounting – full / Mounting – light / Basic" removed from the tiles

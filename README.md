@@ -11,16 +11,18 @@ safety gear with quantity, price, stock and aisle/shelf in the chosen store.
 Dangerous work (electrics, gas, load-bearing walls, hidden pipes and cables) is
 refused with a referral to a professional.
 
-**Release 1 (MVP)** supports the 9 projects of the team's project catalogue
-(`data/project_catalogue.xlsx`, draft v1) with sample data:
+**Release 1 (MVP)** offers 6 projects of the team's project catalogue
+(`data/project_catalogue.xlsx`, draft v1) with sample data. The team starts with a
+smaller project list (3 Nov 2026): the three "Doors & locks" projects are not offered
+for now – their templates stay in `app/data/templates/` (listed under
+`inactiveTemplates` in `app/config.js`) and are still tested.
 
 | Group | Projects | Safety level |
 |---|---|---|
 | Wall mounting | Hang a shelf · Hang a wall cabinet · Anchor a shelf (anti-tip) | Mounting – full |
 | Wall mounting | Hang a picture | Mounting – light |
 | Decorating | Paint a wall · Hang nonwoven wallpaper | Basic |
-| Doors & locks | Install a glass door · Install a sliding door | Mounting – full |
-| Doors & locks | Change the lock of an interior door | Basic |
+| *Not offered for now:* Doors & locks | Install a glass door · Install a sliding door · Change the lock of an interior door | Mounting – full / Basic |
 
 *Basic* projects ask no wall or load questions; the high-risk filter, catalogue
 check, product warnings and stop rules always run. Photo entry, saved projects,
@@ -87,7 +89,7 @@ It is hidden on the start notice.
 
 1. **Start:** notice about AI use, sample data, privacy and the browser speech service.
 2. **Store (optional):** enter a postcode → sample stores within 50 km, nearest first → tap one. Or skip.
-3. **Project:** describe it (type or 🎤) or tap one of the 9 project buttons (grouped, icon and title only). The safety level is shown at the top of the list and the template version at its end; the team review status is kept in the template files only, not shown in the app.
+3. **Project:** describe it (type or 🎤) or tap one of the 6 project buttons (grouped, icon and title only). The safety level is shown at the top of the list and the template version at its end; the team review status is kept in the template files only, not shown in the app.
 4. **Check:** "Did we understand you correctly?" – recognised values are guesses.
 5. **Questions (max. 3 screens):** e.g. wall type, weight, sizes, condition checklists (mould, used-item defects) – guesses are pre-filled, you confirm by tapping. Stop rules from the catalogue (ST-01…ST-14) end the flow with a hand-off to staff or a specialist.
    **Weight (D-2, FR-04, SR-14):** "I know it", "Weigh it" (bathroom-scale tip), "Estimate for me" (shelf only: 1 kg per 4 cm of shelf for books, rule SHELF-E1 – shown as estimate, counts only after "Confirm") or "I don't know". *I don't know* plans for the project's worst case = its highest allowed load (shelf 50 kg, cabinet 50 kg, picture 25 kg, sliding door 60 kg; team decision 31 Oct 2026). If that worst case is above the wall's limit or no part can carry it, the app stops with ST-05 "please weigh it or ask OBI staff".

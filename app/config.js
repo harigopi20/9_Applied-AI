@@ -29,17 +29,22 @@ window.BB_CONFIG = Object.freeze({
     lexicon: "data/understanding-lexicon.json",
     mockResponses: "data/ai-mock-responses.json",
     plzTable: "../data/plz_coordinates.csv", // DR-08: PLZ → centre (WZB plz_geocoord, Apache-2.0)
-    // DR-04: one template per project of data/project_catalogue.xlsx (PRJ-01 … PRJ-09), in catalogue order.
+    // DR-04: one template per project of data/project_catalogue.xlsx, in catalogue order.
+    // Only these projects are offered in the app (smaller start list, team decision 3 Nov 2026).
     templates: [
       "data/templates/hang-shelf.json",
       "data/templates/hang-wall-cabinet.json",
       "data/templates/hang-picture.json",
       "data/templates/anchor-shelf-anti-tip.json",
       "data/templates/paint-wall.json",
+      "data/templates/hang-nonwoven-wallpaper.json"
+    ],
+    // Not offered for now ("Doors & locks"): the files stay and are still tested, so a
+    // project comes back by moving its line up into "templates".
+    inactiveTemplates: [
       "data/templates/install-glass-door.json",
       "data/templates/change-interior-door-lock.json",
-      "data/templates/install-sliding-door.json",
-      "data/templates/hang-nonwoven-wallpaper.json"
+      "data/templates/install-sliding-door.json"
     ],
     // How-to links (project catalogue sheet "How-to links") may only point to these hosts (NFR-07).
     howtoHosts: ["www.youtube.com", "www.obi.de", "www.obi.ch"]
