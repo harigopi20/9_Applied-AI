@@ -6,6 +6,22 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-11-03 – Preview keeps all features of the app; only the new logic for shelf, wall cabinet
+  and anti-tip.** `?preview=d13` now shows the normal project page (free text, voice, all six
+  projects, groups) instead of a reduced chooser. Tiles, free text and voice lead shelf, wall
+  cabinet and anti-tip into the new flow (a recognised wall type is pre-selected, still confirmed
+  by tap); after "Confirm" the normal list screen shows the result, so subtotals, "I already have
+  this", availability and referral, shopping by aisle, save/share, the facts summary with "Change",
+  the evidence log and the tab-bar Back work as before. Tools and safety gear come from the project
+  templates; drill: hammer drill P040 when hammer mode is on, else P039. Picture, painting and
+  wallpaper are unchanged. `app/app.js`: hooks in `startTemplate`, `recompute`, `editQuestion`,
+  history and render – all inactive without `?preview=d13`. Existing tests unchanged and green;
+  checked in the browser (all handover cases, store SCH, EN/DE).
+  *Why:* colleagues should try the new logic in the app as they know it.
+  *Prompt:* "Keep the project page as it is now, show the other projects with their old logic, provide
+  all other features of the previous version except the logic behind the mounting projects; and a way
+  to share it with colleagues without committing to the main repository."
+
 - **2026-11-03 – Preview mode for the D-13/D-14 mounting logic (`?preview=d13`).** New
   `app/preview-d13.js` / `app/preview-d13.css`: with `?preview=d13` the app loads
   `data/product_catalogue_03_11_26.xlsx` and offers *Hang a shelf*, *Hang a wall cabinet*,

@@ -189,9 +189,13 @@ Without Python, `npx http-server -p 8000 -c-1` in the repository root does the s
 Open **http://localhost:8000/app/?preview=d13** to try the new logic before the full
 rebuild. Without `?preview=d13` the app works exactly as before.
 
-- Projects: *Hang a shelf*, *Hang a wall cabinet*, *Anchor a shelf to the wall (anti-tip)*
-  with the new flow **wall → size → summary → plug options "max. X kg" → confirm →
-  shopping list**; *Hang a picture* keeps its weight question (D-2) and opens the normal flow.
+- The app looks and works as usual (project page with free text and voice, all projects,
+  store search, list with subtotals, "I already have this", availability and referral,
+  shopping by aisle, save/share, facts with "Change", evidence log, back navigation).
+- Only *Hang a shelf*, *Hang a wall cabinet* and *Anchor a shelf to the wall (anti-tip)* use the
+  new flow **wall → size → summary → plug options "max. X kg" → confirm**; the result is shown on
+  the normal list screen. *Hang a picture* keeps its weight question (D-2); painting and wallpaper
+  are unchanged.
 - Data: `data/product_catalogue_03_11_26.xlsx`; every load value from sheet *System
   ratings* (`BBRules.fixingChain` R-17, `BBRules.capacity` R-18); rail ratings from the
   rail products (80 / 150 kg, as in sheet *Cabinet*); 2 plugs per bracket.

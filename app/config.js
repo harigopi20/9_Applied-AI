@@ -81,7 +81,10 @@ window.BB_CONFIG = Object.freeze({
       maxShelfLengthCm: 200,                 // longer → split into equal shelves or cut (D-13)
       maxCabinetWidthCm: 120,                // longest mounting rail
       longLevelFromCm: 120,                  // spirit level P371 (120 cm) above this length (FR-37)
-      products: { spiritLevel: "P032", spiritLevelLong: "P371", antiTipKit: "P100", detector: "P034" },
+      products: { spiritLevel: "P032", spiritLevelLong: "P371", antiTipKit: "P100", detector: "P034", drillHammer: "P040", drill: "P039" },
+      // Template roles with fixed products that the new logic replaces (spirit level P032/P371 by length,
+      // the exact drill bit instead of a bit set); all other tools and safety gear stay as in the templates.
+      skipTemplateRoles: ["spirit_level", "drill_bit_set"],
       variants: { board: "shelf-board-d13", bracket: "shelf-bracket-d13", rail: "cabinet-rail-d13", hangers: "cabinet-hanger-d13", cavityAnchor: "cavity-anchor-d13" }
     }
   }
