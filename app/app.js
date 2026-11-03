@@ -1196,72 +1196,132 @@
    * how-to links. The customer's PLZ is never included (the store address is
    * written without its postcode). Built on the device – nothing is sent.
    */
-  function buildListText(r) {
+  /** HTML escaping for the saved file (all text comes from data or texts, never trusted as HTML). */
+  function escHtml(x) {
+    return String(x).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  // Issue #135 (3 Nov 2026): the saved list is one self-contained HTML file in the app design –
+  // no script, nothing loaded from the internet (own CSP in the file), system fonts only.
+  const SAVE_CSS = [
+    ":root{--brand:#FF7313;--ink:#1a1a1a;--muted:#5c5c5c;--line:#d6d6d6;--warn:#8a3b00;--ok:#1f9d3a}",
+    "body{margin:0;font-family:Barlow,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:var(--ink);background:#fff;font-size:16px;line-height:1.4}",
+    ".head{font-family:'Barlow Condensed','Avenir Next Condensed','Roboto Condensed','Arial Narrow',sans-serif;font-stretch:condensed;font-weight:800}",
+    "header{background:var(--brand);padding:16px 16px 34px;clip-path:polygon(0 0,100% 0,100% 72%,0 100%)}",
+    ".brand{display:inline-block;background:#fff;color:#c85000;font-size:1.6rem;padding:2px 10px}",
+    ".badge{display:inline-block;background:var(--ink);color:#fff;font-size:.85rem;padding:3px 8px;margin-top:6px;text-transform:uppercase}",
+    "main{padding:0 16px 24px;max-width:720px;margin:auto}h1,h2{margin:18px 0 8px}h1{font-size:1.8rem}",
+    "h2{font-size:1.35rem;border-bottom:3px solid var(--ink);padding-bottom:4px}",
+    ".meta{color:var(--muted);margin:2px 0}.facts{color:var(--muted);margin:6px 0 0;padding-left:18px;font-size:.9rem}",
+    ".items{list-style:none;padding:0;margin:0}.items li{border-bottom:1px solid var(--line);padding:10px 0}",
+    ".row{display:flex;justify-content:space-between;gap:10px}.nm{font-weight:600;margin:0}",
+    ".mut{color:var(--muted);margin:2px 0 0;font-size:.9rem}.price{font-size:1.25rem;margin:0;white-space:nowrap}",
+    ".loc{margin:6px 0 0;display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:.9rem}",
+    ".chip{border:2px solid var(--ink);border-radius:999px;padding:0 10px;font-weight:600}.ok{color:var(--ok)}.out{color:var(--warn);font-weight:600}",
+    ".ref{margin:4px 0 0;font-size:.9rem;color:var(--warn)}",
+    ".note{margin:6px 0 0;font-size:.85rem;background:#fff1e6;padding:6px 8px;border-left:4px solid var(--brand)}",
+    ".tag{display:inline-block;border:1.5px solid var(--ink);border-radius:4px;padding:0 6px;font-size:.8rem;font-weight:600}",
+    ".sub{display:flex;justify-content:space-between;margin:8px 0 0;font-weight:600}",
+    ".total{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:20px 0;font-size:1.4rem}",
+    ".total b{background:var(--ink);color:#fff;padding:4px 12px}",
+    ".safety{background:#fff8e1;border-left:4px solid var(--warn);padding:8px 10px;font-size:.9rem;margin:8px 0}",
+    ".links a{color:#c85000;font-weight:600}.foot{color:var(--muted);font-size:.8rem}",
+    "@media print{header,.chip,.total b{-webkit-print-color-adjust:exact;print-color-adjust:exact}}"
+  ].join("\n");
+
+  /**
+   * FR-17 / DR-06 (D-1): the complete list as a file – products, quantities, prices,
+   * subtotals and total, items you already have, aisle/shelf/stock of the chosen store,
+   * product warnings (unchanged, SR-07), safety notes and how-to links. No PLZ.
+   */
+  function buildListHtml(r) {
+    const e = escHtml;
     const fmt = (n) => window.BBI18n.formatPrice(n);
+    const lang = window.BBI18n.getLang();
     const tpl = state.template;
     const store = state.storeId ? state.data.stores.find((x) => x.store_id === state.storeId) : null;
-    const L = [];
-    L.push("Baumarkt-Buddy – " + pick(tpl.title));
-    L.push(new Date().toISOString().slice(0, 10) + " · " + t("save_sample_note"));
-    L.push(store ? t("store_selected") + ": " + store.name + (store.street ? ", " + store.street : "") + (store.city ? ", " + store.city : "")
-      : t("save_no_store"));
-    L.push("");
-    L.push(t("facts_title") + ":");
+    const title = "Baumarkt-Buddy – " + pick(tpl.title);
+    const date = new Intl.DateTimeFormat(lang === "de" ? "de-DE" : "en-GB", { day: "numeric", month: "long", year: "numeric" }).format(new Date());
+    const H = [];
+    H.push("<!doctype html><html lang=\"" + lang + "\"><head><meta charset=\"utf-8\">",
+      "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">",
+      "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'; img-src data:\">",
+      "<title>" + e(title) + "</title><style>" + SAVE_CSS + "</style></head><body>",
+      "<header><span class=\"brand head\">Baumarkt-Buddy</span><br><span class=\"badge head\">" + e(t("sample_badge")) + "</span></header><main>",
+      "<h1 class=\"head\">" + e(t("list_title") + " – " + pick(tpl.title)) + "</h1>",
+      "<p class=\"meta\">" + e(date) + " · " + e(t("save_sample_note")) + "</p>",
+      "<p class=\"meta\">" + e(store ? t("store_selected") + ": " + store.name + (store.street ? ", " + store.street : "") + (store.city ? ", " + store.city : "") : t("save_no_store")) + "</p>");
+    // Your details (answers), compact
+    const facts = [];
     tpl.questions.forEach((q) => (q.type === "group" ? q.fields.map((f) => f.fact) : [q.fact]).forEach((k) => {
-      if (state.facts[k]) L.push("- " + factName(k, tpl) + ": " + factLabel(k, state.facts[k], tpl));
+      if (state.facts[k]) facts.push("<li>" + e(factName(k, tpl) + ": " + factLabel(k, state.facts[k], tpl)) + "</li>");
     }));
+    if (facts.length) H.push("<ul class=\"facts\">" + facts.join("") + "</ul>");
+    // Safety notes first (SR-05, SR-02)
+    r.notices.filter((n) => n.id !== "estimates").forEach((n) => H.push("<p class=\"safety\">" + e(noticeText(n)) + "</p>"));
+    const owned = [];
     ["materials", "tools", "safety"].forEach((section) => {
-      const items = r.items.filter((i) => i.section === section);
+      const items = r.items.filter((i) => i.section === section && !i.owned);
+      r.items.filter((i) => i.section === section && i.owned).forEach((i) => owned.push(i));
       if (!items.length) return;
-      L.push("");
-      L.push("== " + t("section_" + section) + " ==");
+      H.push("<h2 class=\"head\">" + e(t("section_" + section)) + "</h2><ul class=\"items\">");
       items.forEach((i) => {
         const p = i.product;
-        if (!p) { L.push("- " + pick(i.label) + " – " + t("unresolved_item")); return; }
-        let line = "- " + productName(p) + " · " + p.size + " (" + p.product_nr + ")";
-        if (i.owned) {
-          line += " – " + t("owned_tag") + " (" + t("save_not_counted") + ")";
-          L.push(line);
-          if (i.section === "tools" || i.section === "safety") L.push("  " + t("owned_gear_hint"));
-          return;
-        }
+        if (!p) { H.push("<li><p class=\"nm\">" + e(pick(i.label)) + "</p><p class=\"ref\">" + e(t("unresolved_item")) + "</p></li>"); return; }
         const q = i.quantity;
-        line += " – " + (q.clear ? t("qty_packs", { packs: q.packs }) + (q.pack_qty > 1 ? " (" + t("qty_need", { units: q.units }) + ")" : "") : t("qty_unclear"));
-        line += " – " + (p.price_eur !== null ? fmt(p.price_eur) + " " + t("per_pack") : t("price_unknown"));
-        if (i.line_price !== null) line += " – " + t("line_total", { price: fmt(i.line_price) });
-        L.push(line);
+        const qty = q.clear ? t("qty_packs", { packs: q.packs }) + (q.pack_qty > 1 ? " (" + t("qty_need", { units: q.units }) + ")" : "") : t("qty_unclear");
+        const price = i.line_price !== null ? fmt(i.line_price) : p.price_eur !== null ? fmt(p.price_eur) + " " + t("per_pack") : t("price_unknown");
+        H.push("<li><div class=\"row\"><div><p class=\"nm\">" + e(productName(p)) + "</p>",
+          "<p class=\"mut\">" + e(p.size + " · " + qty + " · " + p.product_nr) + " <span class=\"tag\">" + e(t("qty_estimate")) + "</span></p></div>",
+          "<p class=\"price head\">" + e(price) + "</p></div>");
         const si = R.storeInfo(state.data.stock, state.storeId, p.product_nr);
-        const na = t("not_available");
-        L.push("  " + t("aisle") + ": " + (si.aisle_nr === null ? na : si.aisle_nr + (si.aisle_name ? " (" + si.aisle_name + ")" : "")) +
-          " · " + t("shelf") + ": " + (si.shelf_nr === null ? na : si.shelf_nr) + " · " + t("stock") + ": " + (si.stock_qty === null ? na : si.stock_qty));
-        const av = R.availability(state.data.stock, state.data.stores, state.storeId, p.product_nr, state.storeOrigin, CFG.store);
-        if (av.status === "out_of_stock" || av.status === "not_carried") {
-          L.push("  " + (av.referral ? t("avail_referral", { store: av.referral.store.name, km: formatKm(av.referral.km) }) : t("avail_ask_staff")));
+        if (store) {
+          const na = t("not_available");
+          const av = R.availability(state.data.stock, state.data.stores, state.storeId, p.product_nr, state.storeOrigin, CFG.store);
+          H.push("<p class=\"loc\"><span class=\"chip\">" + e(t("aisle") + ": " + (si.aisle_nr === null ? na : si.aisle_nr + (si.aisle_name ? " (" + si.aisle_name + ")" : ""))) + "</span>",
+            "<span class=\"chip\">" + e(t("shelf") + ": " + (si.shelf_nr === null ? na : si.shelf_nr)) + "</span>",
+            av.status === "in_stock" ? "<span class=\"ok\">● " + e(t("stock") + ": " + si.stock_qty) + "</span>" : "<span class=\"out\">● " + e(t(av.status === "out_of_stock" ? "avail_out_here" : "avail_not_carried_here", { store: store.name })) + "</span>", "</p>");
+          if (av.status === "out_of_stock" || av.status === "not_carried") {
+            H.push("<p class=\"ref\">" + e(av.referral ? t("avail_referral", { store: av.referral.store.name, km: formatKm(av.referral.km) }) : t("avail_ask_staff")) + "</p>");
+          }
         }
-        if (i.safety_note) L.push("  " + t("manufacturer_note") + ": " + i.safety_note); // SR-07: unchanged
+        if (i.safety_note) H.push("<p class=\"note\"><b>" + e(t("manufacturer_note")) + ":</b> " + e(i.safety_note) + "</p>"); // SR-07: unchanged
+        H.push("</li>");
       });
+      H.push("</ul>");
       const st = r.subtotals && r.subtotals[section];
-      if (st) L.push(st.amount !== null ? t("subtotal", { section: t("section_" + section) }) + ": " + fmt(st.amount) : t("subtotal_none", { section: t("section_" + section) }));
+      if (st) H.push("<p class=\"sub\"><span>" + e(st.amount !== null ? t("subtotal", { section: t("section_" + section) }) : t("subtotal_none", { section: t("section_" + section) })) + "</span>" + (st.amount !== null ? "<b>" + e(fmt(st.amount)) + "</b>" : "") + "</p>");
     });
-    L.push("");
-    L.push(r.total.amount !== null ? t("total") + ": " + fmt(r.total.amount) : t("total_" + r.total.reason));
-    const notes = r.notices.filter((n) => n.id !== "estimates").map((n) => (noticeText(n)));
-    if (notes.length) { L.push(""); L.push(t("save_safety_title") + ":"); notes.forEach((n) => L.push("- " + n)); }
+    // Items the customer already has (C-8): not counted; load-bearing parts keep the check note (SR-15)
+    if (owned.length) {
+      H.push("<h2 class=\"head\">" + e(t("save_owned_title")) + "</h2><ul class=\"items\">");
+      owned.forEach((i) => {
+        const p = i.product;
+        H.push("<li><p class=\"nm\">" + e(p ? productName(p) : pick(i.label)) + "</p><p class=\"mut\">" + e((p ? p.size + " · " + p.product_nr + " – " : "") + t("save_not_counted")) + "</p>");
+        if (i.load_bearing) H.push("<p class=\"ref\">" + e(i.required_rating_kg !== null ? t("owned_check_rating", { kg: i.required_rating_kg }) : t("owned_check_condition")) + "</p>");
+        if (i.section === "tools" || i.section === "safety") H.push("<p class=\"mut\">" + e(t("owned_gear_hint")) + "</p>");
+        H.push("</li>");
+      });
+      H.push("</ul>");
+    }
+    H.push("<p class=\"total head\"><span>" + e(r.total.amount !== null ? t("total") : t("total_" + r.total.reason)) + "</span>" + (r.total.amount !== null ? "<b>" + e(fmt(r.total.amount)) + "</b>" : "") + "</p>");
     const links = ((tpl && tpl.howto) || []).map((h) => ({ h, url: safeHowtoUrl(h.url) })).filter((x) => x.url);
-    if (links.length) { L.push(""); L.push(t("howto_title") + ":"); links.forEach((x) => L.push("- " + pick(x.h.title) + ": " + x.url)); }
-    L.push("");
-    L.push(t("notice_estimates"));
-    L.push(t("footer"));
-    return L.join("\n") + "\n";
+    if (links.length) {
+      H.push("<h2 class=\"head\">" + e(t("howto_title")) + "</h2><ul class=\"links\">");
+      links.forEach((x) => H.push("<li><a href=\"" + e(x.url) + "\" rel=\"noopener noreferrer\">" + e(pick(x.h.title)) + "</a></li>"));
+      H.push("</ul>");
+    }
+    H.push("<p class=\"foot\">" + e(t("notice_estimates")) + "</p><p class=\"foot\">" + e(t("footer")) + "</p></main></body></html>");
+    return H.join("\n") + "\n";
   }
 
   function saveFileName() {
-    return "baumarkt-buddy_" + state.template.template_id + "_" + new Date().toISOString().slice(0, 10) + ".txt";
+    return "baumarkt-buddy_" + state.template.template_id + "_" + new Date().toISOString().slice(0, 10) + ".html";
   }
 
-  /** Download the list as a .txt file (no network, DR-06). */
+  /** Download the list as one HTML file (no network, DR-06). */
   function saveList(r) {
-    const blob = new Blob([buildListText(r)], { type: "text/plain;charset=utf-8" });
+    const blob = new Blob([buildListHtml(r)], { type: "text/html;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = el("a", { href: url, download: saveFileName() });
     document.body.appendChild(a);
@@ -1369,13 +1429,13 @@
 
   /** Share the same file via the phone's share sheet, where the browser supports it. */
   async function shareList(r) {
-    const file = new File([buildListText(r)], saveFileName(), { type: "text/plain" });
+    const file = new File([buildListHtml(r)], saveFileName(), { type: "text/html" });
     try { await navigator.share({ files: [file], title: "Baumarkt-Buddy – " + pick(state.template.title) }); } catch (_) { /* cancelled */ }
   }
 
   function viewSave(r) {
     let canShare = false;
-    try { canShare = !!(navigator.canShare && navigator.canShare({ files: [new File(["x"], "x.txt", { type: "text/plain" })] })); } catch (_) { canShare = false; }
+    try { canShare = !!(navigator.canShare && navigator.canShare({ files: [new File(["x"], "x.html", { type: "text/html" })] })); } catch (_) { canShare = false; }
     return el("div", { class: "save-box", "data-save": "1" }, [
       el("div", { class: "actions" }, [
         el("button", { type: "button", class: "btn primary", id: "save-list", text: t("save_list"), onclick: () => saveList(r) }),
@@ -1793,7 +1853,7 @@
   window.BBApp = Object.freeze({
     state, viewResult, viewItem, viewQuestion, viewChoose, viewRecognized, viewHighRisk,
     recompute, startTemplate, submitText, micTap, consentAccept, consentDecline,
-    renderHeader, viewLeave, initHistory, disableHistory, nav, go, viewStore, viewList, viewShopping, aisleRoute, viewProgress, progressStep, openStoreSearch, searchStores, chooseStore, leaveStoreSearch, buildListText, saveList
+    renderHeader, viewLeave, initHistory, disableHistory, nav, go, viewStore, viewList, viewShopping, aisleRoute, viewProgress, progressStep, openStoreSearch, searchStores, chooseStore, leaveStoreSearch, buildListHtml, saveList
   });
 
   document.addEventListener("DOMContentLoaded", () => {

@@ -1827,7 +1827,8 @@
     s.owned = new Set();
   });
 
-  test("TC-100 / TC-101 / FR-17 / DR-06", "Saved list file: products, prices, subtotals, total, owned items, store aisles, how-to links – no PLZ, nothing sent", async () => {
+  const htmlText = (html) => new DOMParser().parseFromString(html, "text/html").body.textContent.replace(/\s+/g, " ");
+  test("TC-100 / TC-101 / FR-17 / DR-06", "Saved list file (HTML, app design – issue #135): products, prices, subtotals, total, owned items, store aisles, how-to links – no PLZ, no script, nothing sent", async () => {
     const s = window.BBApp.state;
     window.BBI18n.setLang("en");
     const point = R.checkPlz("91052", D.plzTable).point;
@@ -1835,12 +1836,18 @@
     s.plzInput = "91052";
     s.owned = new Set(["drill"]);
     s.result = R.evaluate(SHELF(), s.facts, D.catalogue, D.safetyRules, { owned: ["drill"] });
-    const txt = window.BBApp.buildListText(s.result);
+    const html = window.BBApp.buildListHtml(s.result);
+    const txt = htmlText(html);
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    eq(doc.querySelectorAll("script, link, iframe, img[src^=http]").length, 0, "self-contained: no script, no external resource");
+    assert(/default-src 'none'/.test(doc.querySelector('meta[http-equiv="Content-Security-Policy"]').content), "own CSP");
+    assert(doc.querySelector("header .brand") && doc.querySelector(".total b"), "app design: brand header and total box");
+    eq(doc.querySelector(".safety") === doc.querySelector("main").querySelector("p.safety"), true, "safety notes before the items");
     const r = s.result;
     r.items.filter((i) => !i.owned).forEach((i) => assert(txt.includes(i.product.product_nr), "product " + i.product.product_nr));
     assert(txt.includes(window.BBI18n.formatPrice(r.total.amount)), "total");
     Object.keys(r.subtotals).forEach((sec) => assert(txt.includes(window.BBI18n.formatPrice(r.subtotals[sec].amount)), "subtotal " + sec));
-    assert(/P040.*You have this/.test(txt), "owned drill marked");
+    assert(/You already have.*P040.*not counted/.test(txt), "owned drill in its own section, not counted");
     const aisle = R.storeInfo(D.stock, "ERL-OST", "P049").aisle_nr;
     assert(txt.includes("Aisle: " + aisle), "aisle of the chosen store");
     assert(txt.includes("OBI Markt Erlangen-Ost"), "chosen store named");
@@ -1851,8 +1858,8 @@
     const tplWithLinks = D.templates.find((x) => (x.howto || []).length);
     if (tplWithLinks) {
       const saved = s.template; s.template = tplWithLinks;
-      const t2 = window.BBApp.buildListText(Object.assign({}, r, { items: [], subtotals: {} }));
-      assert(t2.includes("https://"), "how-to link in the file");
+      const t2 = window.BBApp.buildListHtml(Object.assign({}, r, { items: [], subtotals: {} }));
+      assert(/<a href="https:\/\//.test(t2), "clickable how-to link in the file");
       s.template = saved;
     }
     // Saving creates a local file only: no fetch / XHR / beacon
@@ -1869,11 +1876,14 @@
       window.fetch = orig.fetch; navigator.sendBeacon = orig.beacon; XMLHttpRequest.prototype.open = orig.open;
     }
     eq(calls, [], "nothing sent");
-    assert(downloaded && downloaded.href.startsWith("blob:") && /\.txt$/.test(downloaded.name), "local .txt file: " + JSON.stringify(downloaded));
+    assert(downloaded && downloaded.href.startsWith("blob:") && /\.html$/.test(downloaded.name), "local .html file: " + JSON.stringify(downloaded));
     // Without a store: aisle/shelf "not available" in the file
     renderResult(SHELF(), confirmed(SHELF_OK), null);
-    const t3 = window.BBApp.buildListText(s.result);
-    assert(t3.includes(window.BBI18n.t("save_no_store")) && t3.includes("Aisle: not available"), "no-store file");
+    const h3 = window.BBApp.buildListHtml(s.result);
+    assert(htmlText(h3).includes(window.BBI18n.t("save_no_store")) && !/class="chip"/.test(h3), "no-store file: hint, no aisle chips");
+    // text from data is escaped – no HTML injection into the file
+    const evil = Object.assign({}, s.result, { items: s.result.items.map((i, n) => (n ? i : Object.assign({}, i, { safety_note: "<img src=x onerror=alert(1)>" }))) });
+    assert(!window.BBApp.buildListHtml(evil).includes("<img src=x"), "escaped");
     s.owned = new Set(); s.plzInput = "";
   });
 

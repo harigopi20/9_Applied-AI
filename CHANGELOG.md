@@ -6,6 +6,21 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Saved list in the app design (issue #135) – 2026-11-03
+Summary (same as the pull request):
+- "Save list" / "Share list" now give one HTML file in the app design instead of a plain text file
+- Orange header with brand and "Sample data", safety notes first, one row per item (price on the right, aisle/shelf chips, availability dot), manufacturer notes highlighted, subtotals, black total box, "You already have" section, clickable how-to links
+- Self-contained: no script, nothing loaded from the internet (own CSP), system fonts; prints to PDF; still no PLZ, nothing sent
+- TC-100 test updated (HTML content, no script, escaping); test result saved
+
+- **2026-11-03 – Saved list as HTML (issue #135, option 1).** `buildListHtml` replaces
+  `buildListText` in `app/app.js` (styles in `SAVE_CSS`, all text escaped with `escHtml`);
+  `saveList` / `shareList` write `baumarkt-buddy_<project>_<date>.html`. Owned items get
+  their own section and keep the SR-15 check note. Texts `save_privacy` and new
+  `save_owned_title` (EN/DE). Review with options posted on #135. README updated.
+  *Why:* the text file looked bad on the phone and did not match the app.
+  *Prompt:* "Look at issue 135 – the saved list looks bad, suggest how to match the app design" → "Yes, implement option 1 and comment on #135."
+
 ## Milestone: Smaller language flag – 2026-11-03
 Summary (same as the pull request):
 - The language flag in the header is smaller (32 px instead of 52 px / 46 px on phones); the tap area stays 44 px (NFR-08)
