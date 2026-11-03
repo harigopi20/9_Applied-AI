@@ -1112,11 +1112,13 @@
         assert(/SHELF-Q\d/.test(li.textContent), "rule id visible");
       });
       const tr = box.querySelector('[data-transparency="list"]');
-      assert(tr && tr.textContent.includes(window.BBI18n.t("template_unreviewed")), "review status shown (SR-10)");
+      assert(tr && tr.textContent.includes("v" + SHELF().version), "template version shown");
+      const noReview = /not yet reviewed|noch nicht vom Team/;
+      assert(!noReview.test(tr.textContent), "no review status in the list (user request 3 Nov 2026)");
       const choose = document.getElementById("sandbox");
       choose.replaceChildren(window.BBApp.viewChoose());
       assert(choose.querySelector("[data-template]"), "project tiles rendered");
-      assert(!choose.textContent.includes(window.BBI18n.t("template_unreviewed")), "no review status on the project tiles");
+      assert(!noReview.test(choose.textContent), "no review status on the project tiles");
     });
     window.BBI18n.setLang("en");
     ["template", "mock", "proxy"].forEach((m) => assert(window.BBI18n.TEXTS.en["notice_ai_" + m] && window.BBI18n.TEXTS.de["notice_ai_" + m], "AI notice for mode " + m));

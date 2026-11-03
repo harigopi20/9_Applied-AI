@@ -89,8 +89,6 @@
       recognized_continue: "Yes, continue",
       recognized_other: "No, choose a project",
       guess_read_back: "We understood: {value}. Please check and confirm.",
-      template_unreviewed: "Template not yet reviewed by the team",
-      template_reviewed: "Template reviewed",
 
       // Questions (FR-04, FR-05)
       question_of: "Question {n} of {total}",
@@ -188,7 +186,7 @@
 
       // Notices (SR-02, SR-05, NFR-05)
       list_transparency: "How this list was made: products, quantities, compatibility and safety checks come from fixed rules, the project template and the sample catalogue – not from AI. Values marked \"confirmed by you\" are your own answers.",
-      list_template_status: "Project template v{version}: {status}.",
+      list_template_status: "Project template v{version}.",
       notice_estimates: "Quantities are estimates based on the rules shown. Prices and stock are sample data.",
       notice_detector_limits: "Cable and stud detectors help, but they have limits: they often do not find plastic water pipes, deep cables or cables without current. A \"nothing found\" result is not a clearance to drill. Plan holes away from sockets, switches and the areas directly above, below and beside them. If in doubt, ask a qualified person.",
       notice_no_wall_certification: "We cannot see or test your wall. This app does not confirm what your wall is made of, how much it can hold or where cables and pipes run.",
@@ -354,8 +352,6 @@
       recognized_continue: "Ja, weiter",
       recognized_other: "Nein, Projekt wählen",
       guess_read_back: "Wir haben verstanden: {value}. Bitte prüfen und bestätigen.",
-      template_unreviewed: "Vorlage noch nicht vom Team geprüft",
-      template_reviewed: "Vorlage geprüft",
 
       question_of: "Frage {n} von {total}",
       dont_know: "Weiß ich nicht",
@@ -449,7 +445,7 @@
       evidence_source: "Quelle",
 
       list_transparency: "So entsteht diese Liste: Produkte, Mengen, Kompatibilität und Sicherheitsprüfungen stammen aus festen Regeln, der Projektvorlage und dem Beispielkatalog – nicht aus der KI. Werte mit „von Ihnen bestätigt“ sind Ihre eigenen Antworten.",
-      list_template_status: "Projektvorlage v{version}: {status}.",
+      list_template_status: "Projektvorlage v{version}.",
       notice_estimates: "Mengen sind Schätzungen nach den angezeigten Regeln. Preise und Bestände sind Beispieldaten.",
       notice_detector_limits: "Leitungssucher helfen, haben aber Grenzen: Kunststoff-Wasserrohre, tief liegende oder stromlose Leitungen werden oft nicht gefunden. „Nichts gefunden“ ist keine Freigabe zum Bohren. Planen Sie Bohrlöcher nicht über, unter oder neben Steckdosen und Schaltern. Im Zweifel fragen Sie eine Fachkraft.",
       notice_no_wall_certification: "Wir können Ihre Wand weder sehen noch prüfen. Diese App bestätigt nicht, woraus Ihre Wand besteht, wie viel sie trägt oder wo Leitungen und Rohre verlaufen.",

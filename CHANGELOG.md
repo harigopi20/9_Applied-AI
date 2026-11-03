@@ -6,6 +6,18 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: No review status in the list – 2026-11-03
+Summary (same as the pull request):
+- The list's transparency line no longer says "Template not yet reviewed by the team"; it keeps the template version
+- Unused texts `template_reviewed` / `template_unreviewed` removed; NFR-05 test updated; test result saved
+
+- **2026-11-03 – Review status removed from the list.** `viewList` in `app/app.js`
+  shows only "Project template v1.2.0." after "How this list was made"; the review
+  status stays in the template files (`review`, SR-10) for the team. NFR-05 test checks
+  the version and that no review text appears on the list or the tiles. README updated.
+  *Why:* the hint confused customers; the review is a team task, not customer information.
+  *Prompt:* "Remove '… Template not yet reviewed by the team.'"
+
 ## Milestone: Save every test run in test/results – 2026-11-03
 Summary (same as the pull request):
 - Current test result (112 passed) saved as `test/results/2026-11-03_7fde5b4.md` / `.json`
