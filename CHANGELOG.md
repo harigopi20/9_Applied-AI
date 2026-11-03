@@ -6,6 +6,24 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-11-03 – Preview mode for the D-13/D-14 mounting logic (`?preview=d13`).** New
+  `app/preview-d13.js` / `app/preview-d13.css`: with `?preview=d13` the app loads
+  `data/product_catalogue_03_11_26.xlsx` and offers *Hang a shelf*, *Hang a wall cabinet*,
+  *Hang a picture* and *Anti-tip*. Shelf, cabinet and anti-tip follow the new flow wall → size →
+  summary (board and brackets / cabinet weight and rail / kits) → plug options with "max. X kg"
+  → confirm → shopping list, all loads from sheet *System ratings* via `fixingChain` (R-17) and
+  `capacity` (R-18); rail ratings from the rail products (80 / 150 kg as in sheet *Cabinet*);
+  2 plugs per bracket; spirit level P032 / P371 above 120 cm; too deep → hint with the max. depth;
+  stops only for "I don't know" and a cabinet too heavy for the wall. *Hang a picture* keeps its
+  weight question (D-2) and opens the existing flow. Store choice (6 stores incl. Schwabach) with
+  aisle and stock; texts in English (default) and German. `app/app.js`: small hooks, active only
+  in preview mode; `app/index.html` loads the preview script; `app/config.js` → `preview.d13`.
+  Checked in the browser: all six manual cases of the handover give the expected values.
+  Existing tests unchanged and green. README updated.
+  *Why:* see the new logic in the app before the full rebuild (Steps 3–5).
+  *Prompt:* "Build a preview mode at /app/?preview=d13 for shelf, wall cabinet and anti-tip … also add
+  Hang a picture, keep the rail ratings as in the Cabinet sheet, 2 plugs per bracket, English and German, 6 stores."
+
 - **2026-11-03 – D-13/D-14 Step 2: engine basics – System ratings, fixing chain (R-17), capacity (R-18).**
   `app/data.js`: new `buildMounting` reads the sheets *System ratings* and *Fixing chain*
   (system rating per wall and plug size, wall cap, max. depths, bracket pairs, boards, safety

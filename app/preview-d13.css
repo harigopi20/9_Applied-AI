@@ -1,0 +1,7 @@
+/* Styles for the D-13 / D-14 preview (?preview=d13 only – loaded by preview-d13.js). */
+.pv-banner { margin: 0 0 12px; padding: 8px 12px; border-radius: 6px; background: #FFF1E6; color: #5A2A00; border: 1px solid #FF7E21; font-size: .9rem; }
+.pv-opt { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+.pv-opt-kg { font-weight: 700; color: #C24F00; }
+.pv-facts { margin: 8px 0; padding-left: 18px; }
+.pv-facts li { margin: 4px 0; }
+.pv-size .field { margin-bottom: 10px; }

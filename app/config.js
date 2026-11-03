@@ -68,5 +68,21 @@ window.BB_CONFIG = Object.freeze({
       cavity_anchor:  { plugVariant: "cavity-anchor-d13",       screw: "own" },  // anchor brings its own screw
       screw:          { plugVariant: null,                      screw: "std" }   // wood: screw in a pilot hole
     }
+  },
+
+  // Preview of the D-13/D-14 logic: http://localhost:8000/app/?preview=d13 (app/preview-d13.js).
+  // Without "?preview=d13" none of this is used. Loads come from sheet "System ratings";
+  // rail ratings from the rail products (= the values in sheet Cabinet).
+  preview: {
+    d13: {
+      workbook: "../data/product_catalogue_03_11_26.xlsx",
+      pictureTemplate: "hang_picture",       // picture keeps its weight question (D-2) – existing flow
+      plugsPerBracket: 2,                    // confirmed by the team 3 Nov 2026 (slide: 3 brackets → 6 plugs)
+      maxShelfLengthCm: 200,                 // longer → split into equal shelves or cut (D-13)
+      maxCabinetWidthCm: 120,                // longest mounting rail
+      longLevelFromCm: 120,                  // spirit level P371 (120 cm) above this length (FR-37)
+      products: { spiritLevel: "P032", spiritLevelLong: "P371", antiTipKit: "P100", detector: "P034" },
+      variants: { board: "shelf-board-d13", bracket: "shelf-bracket-d13", rail: "cabinet-rail-d13", hangers: "cabinet-hanger-d13", cavityAnchor: "cavity-anchor-d13" }
+    }
   }
 });

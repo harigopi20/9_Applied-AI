@@ -183,6 +183,21 @@ python3 -m http.server 8000          # in the repository root
 ```
 `tests.html` runs all automated tests in the browser against the real data files,
 fixture copies of the catalogue, the AI `mock` mode and a simulated Web Speech API.
+Without Python, `npx http-server -p 8000 -c-1` in the repository root does the same.
+
+### Preview of the new mounting logic (D-13 / D-14)
+Open **http://localhost:8000/app/?preview=d13** to try the new logic before the full
+rebuild. Without `?preview=d13` the app works exactly as before.
+
+- Projects: *Hang a shelf*, *Hang a wall cabinet*, *Anchor a shelf to the wall (anti-tip)*
+  with the new flow **wall → size → summary → plug options "max. X kg" → confirm →
+  shopping list**; *Hang a picture* keeps its weight question (D-2) and opens the normal flow.
+- Data: `data/product_catalogue_03_11_26.xlsx`; every load value from sheet *System
+  ratings* (`BBRules.fixingChain` R-17, `BBRules.capacity` R-18); rail ratings from the
+  rail products (80 / 150 kg, as in sheet *Cabinet*); 2 plugs per bracket.
+- Store selection (6 stores incl. OBI Schwabach) with aisle and stock on the list; English and German.
+- Code: `app/preview-d13.js` + `app/preview-d13.css`; settings in `app/config.js` → `preview.d13`.
+  Stops only for wall "I don't know" and a wall cabinet too heavy for the wall; too deep → hint with the max. depth.
 
 ### Save test results
 The browser page shows the results only while it is open. To keep them as a file:

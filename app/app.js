@@ -12,6 +12,9 @@
   const { t, pick } = window.BBI18n;
   const R = window.BBRules;
   const CFG = window.BB_CONFIG;
+  // D-13/D-14 preview (app/preview-d13.js): only active with "?preview=d13" in the URL.
+  // Without it PV is null and every line below behaves exactly as before.
+  const PV = window.BBPreviewD13 && window.BBPreviewD13.active ? window.BBPreviewD13 : null;
 
   const state = {
     data: null,
@@ -175,6 +178,7 @@
     const m = main();
     m.replaceChildren();
     const screens = { loading: viewLoading, error: viewError, start: viewStart, store: viewStore, choose: viewChoose, recognized: viewRecognized, high_risk: viewHighRisk, question: viewQuestion, result: viewResult, shopping: viewShopping };
+    if (PV) Object.assign(screens, PV.screens);
     m.appendChild(state.leaveAsk ? viewLeave() : screens[state.screen]());
     renderNav();
     renderProgress();
@@ -207,6 +211,7 @@
   /** Which step a screen belongs to, and whether the flow stopped there (safety stop). */
   function progressStep() {
     const sc = state.screen;
+    if (PV) { const p = PV.progress(sc); if (p) return p; }
     if (["loading", "error", "start"].includes(sc)) return null;
     if (sc === "store") return { step: "store", stop: false };
     if (sc === "choose" || sc === "recognized") return { step: "project", stop: false };
@@ -1776,6 +1781,7 @@
     state.plzInput = "";      // the PLZ is not kept
     state.storeSearch = null;
     // D-3: a store change only looks up aisle/shelf again – checks stay identical (RB-17).
+    if (PV && PV.screens[state.storeReturn] && state.storeReturn !== "choose") { go(state.storeReturn); return; }
     go(["result", "shopping"].includes(state.storeReturn) && state.result ? state.storeReturn : "choose");
   }
 
@@ -1852,7 +1858,10 @@
     state.screen = "loading";
     render();
     try {
-      state.data = await window.BBData.loadAll(CFG);
+      // Preview: same loader, but the dated workbook named in config.preview.d13 (D-13/D-14).
+      const cfg = PV ? Object.assign({}, CFG, { data: Object.assign({}, CFG.data, { workbook: PV.workbook }) }) : CFG;
+      state.data = await window.BBData.loadAll(cfg);
+      if (PV) PV.init({ state, el, icon, priceEl, productName, formatKm, go, render, startTemplate, openStoreSearch, resetProject });
       state.ai = createAdapter(CFG.aiMode);
       state.screen = "start";
     } catch (e) {
