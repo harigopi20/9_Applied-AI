@@ -1403,23 +1403,25 @@
     }
   });
 
-  test("Back button", "In-app back button: shown on list/shopping/store (not on the first step, not on questions); tap = one step back", async () => {
+  test("Back button", "Back is the first item of the tab bar (Back · Start · Store · List); greyed out on the first step; tap = one step back, also on questions", async () => {
     const A = window.BBApp, s = A.state;
+    const bar = () => { const box = document.getElementById("sandbox"); box.replaceChildren(...A.navButtons()); return box; };
     try {
       freshFlow();
-      eq([s.screen, A.backVisible()], ["result", true], "list: back button shown");
-      const box = document.getElementById("sandbox");
-      box.replaceChildren(A.viewBack());
-      eq(box.querySelector("#back-btn").textContent.replace("‹", ""), "Back");
-      const p = popped();
-      box.querySelector("#back-btn").click();
+      let box = bar();
+      eq([...box.querySelectorAll("[data-tab]")].map((b) => b.dataset.tab), ["back", "home", "store", "list"], "order");
+      eq(box.querySelector('[data-tab="back"]').textContent, "Back");
+      eq(box.querySelector('[data-tab="back"]').disabled, false, "list: back active");
+      let p = popped();
+      box.querySelector('[data-tab="back"]').click();
       await p;
-      eq([s.screen, A.backVisible()], ["question", false], "tap → previous step; questions use their own Back button");
-      await histBack();
-      eq([s.screen, A.nav.pos, A.backVisible()], ["choose", 1, false], "not on the first step (would leave the app)");
-      await histForward(); await histForward();
-      A.go("shopping");
-      eq(A.backVisible(), true, "shopping: shown");
+      eq([s.screen, A.canGoBack()], ["question", true], "tap → previous step; active on questions too");
+      box = bar();
+      p = popped();
+      box.querySelector('[data-tab="back"]').click();
+      await p;
+      eq([s.screen, A.nav.pos], ["choose", 1], "first step");
+      eq(bar().querySelector('[data-tab="back"]').disabled, true, "greyed out on the first step (would leave the app)");
     } finally {
       A.disableHistory();
       document.getElementById("sandbox").replaceChildren();

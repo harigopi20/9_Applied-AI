@@ -70,6 +70,7 @@
 
   // Line icons (presentation only, static SVG paths – never built from data)
   const ICONS = {
+    back: ["M15 5l-7 7 7 7"],
     home: ["M3 11.5 12 4l9 7.5", "M5.5 9.5V20h13V9.5"],
     store: ["M3 9h18", "M4 9l1.5-5h13L20 9", "M5 9v11h14V9", "M9 20v-6h6v6"],
     list: ["M3 5h2l2.2 10.2a1 1 0 0 0 1 .8h9.6a1 1 0 0 0 1-.8L20 8H6.2", "M9 20.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1", "M17 20.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1"],
@@ -169,7 +170,6 @@
     m.appendChild(state.leaveAsk ? viewLeave() : screens[state.screen]());
     renderNav();
     renderProgress();
-    renderBack();
     document.getElementById("footer-text").textContent = t("footer");
     m.focus({ preventScroll: true });
     window.scrollTo(0, 0);
@@ -205,26 +205,6 @@
     return null;
   }
 
-  // In-app back button (3 Nov 2026): same as the browser back (issue #101 history).
-  // Not on the first step (that would leave the app) and not on question screens,
-  // which have their own "Back" button.
-  function backVisible() {
-    return nav.enabled && nav.pos > 1 && !state.leaveAsk && STEP_SCREENS.includes(state.screen) && state.screen !== "question";
-  }
-
-  function renderBack() {
-    const bar = document.getElementById("backbar");
-    if (!bar) return;
-    bar.hidden = !backVisible();
-    bar.replaceChildren(...(bar.hidden ? [] : [viewBack()]));
-  }
-
-  function viewBack() {
-    return el("button", { type: "button", class: "back-btn", id: "back-btn", "aria-label": t("back"), onclick: () => nav.back() }, [
-      el("span", { class: "back-chevron", "aria-hidden": "true", text: "‹" }), el("span", { text: t("back") })
-    ]);
-  }
-
   function renderProgress() {
     const bar = document.getElementById("progress");
     if (!bar) return;
@@ -248,25 +228,38 @@
     return ol;
   }
 
-  // Bottom tab bar (NFR-01: one-handed use in the store)
-  function renderNav() {
-    const nav = document.getElementById("tab-bar");
-    if (!nav) return;
-    const hidden = ["loading", "error", "start"].includes(state.screen);
-    nav.hidden = hidden;
-    document.body.classList.toggle("has-nav", !hidden);
-    if (hidden) return;
+  /**
+   * Back in the tab bar (3 Nov 2026): same as the browser back (issue #101 history).
+   * Greyed out on the first step, where back would leave the app.
+   */
+  function canGoBack() {
+    return nav.enabled && nav.pos > 1 && !state.leaveAsk && STEP_SCREENS.includes(state.screen);
+  }
+
+  // Bottom tab bar (NFR-01: one-handed use in the store) – Back · Start · Store · List
+  function navButtons() {
     const active = state.screen === "store" ? "store" : ["result", "shopping"].includes(state.screen) ? "list" : "home";
     const items = [
+      { id: "back", label: t("back"), action: () => nav.back(), disabled: !canGoBack(), noActive: true },
       { id: "home", label: t("nav_start"), action: resetProject },
       { id: "store", label: t("nav_store"), action: () => openStoreSearch(state.screen === "shopping" ? "shopping" : state.result ? "result" : "choose") },
       { id: "list", label: t("nav_list"), action: () => go("result"), disabled: !state.result }
     ];
-    nav.replaceChildren(...items.map((it) => el("button", {
+    return items.map((it) => el("button", {
       type: "button", class: "tab" + (it.id === active ? " active" : ""), "data-tab": it.id,
       "aria-current": it.id === active ? "page" : null, disabled: it.disabled,
       onclick: it.action
-    }, [icon(it.id), el("span", { text: it.label })])));
+    }, [icon(it.id), el("span", { text: it.label })]));
+  }
+
+  function renderNav() {
+    const bar = document.getElementById("tab-bar");
+    if (!bar) return;
+    const hidden = ["loading", "error", "start"].includes(state.screen);
+    bar.hidden = hidden;
+    document.body.classList.toggle("has-nav", !hidden);
+    if (hidden) return;
+    bar.replaceChildren(...navButtons());
   }
 
   // ---------------------------------------------------------------------
@@ -1874,7 +1867,7 @@
   window.BBApp = Object.freeze({
     state, viewResult, viewItem, viewQuestion, viewChoose, viewRecognized, viewHighRisk,
     recompute, startTemplate, submitText, micTap, consentAccept, consentDecline,
-    renderHeader, viewLeave, viewBack, backVisible, initHistory, disableHistory, nav, go, viewStore, viewList, viewShopping, aisleRoute, viewProgress, progressStep, openStoreSearch, searchStores, chooseStore, leaveStoreSearch, buildListHtml, saveList
+    renderHeader, viewLeave, navButtons, canGoBack, initHistory, disableHistory, nav, go, viewStore, viewList, viewShopping, aisleRoute, viewProgress, progressStep, openStoreSearch, searchStores, chooseStore, leaveStoreSearch, buildListHtml, saveList
   });
 
   document.addEventListener("DOMContentLoaded", () => {

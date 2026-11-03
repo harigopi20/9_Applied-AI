@@ -6,6 +6,18 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Back button in the tab bar – 2026-11-03
+Summary (same as the pull request):
+- "Back" moved from under the progress bar into the bottom tab bar: Back · Start · Store · List (always visible, also on long lists)
+- Active on every step including questions; greyed out on the first step (would leave the app)
+- Back-button test updated (117 passing); test result saved
+
+- **2026-11-03 – Back button in the tab bar.** `navButtons` / `canGoBack` in `app/app.js`
+  (new `back` icon, `renderNav` builds the bar from `navButtons`); the top `#backbar`,
+  `renderBack` and its styles are removed. README updated.
+  *Why:* on a long list the top button scrolls away; the tab bar is always in reach (iPhone screenshot).
+  *Prompt:* "Wouldn't it make more sense to put the back button in the bottom bar with Start, Store, List?" → "Yes, do it."
+
 ## Milestone: In-app back button – 2026-11-03
 Summary (same as the pull request):
 - "‹ Back" button under the progress bar goes back to the previous step (same as the browser back, issue #101)
