@@ -6,6 +6,20 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Flags on the language button – 2026-11-03
+Summary (same as the pull request):
+- The round language button shows a flag instead of "DE" / "EN": German flag on the English screen, UK flag on the German screen
+- Flags are own inline SVGs (no image file, no emoji); screen readers still hear "Switch language to German/English"
+- 1 new test (113 passing); test result saved
+
+- **2026-11-03 – Flags on the language button.** New `flag(code)` in `app/app.js`
+  (inline SVG: Germany black/red/gold, United Kingdom Union Jack), used by
+  `renderHeader` instead of the text "DE"/"EN"; hidden text and `aria-label` stay.
+  Styles in `app/style.css` (round flag fills the button). New test NFR-09 (flags).
+  README updated.
+  *Why:* a flag is quicker to recognise than a language code.
+  *Prompt:* "Use flags in the button to change language – EN = UK flag, DE = German flag."
+
 ## Milestone: Smaller project list – Doors & locks not offered – 2026-11-03
 Summary (same as the pull request):
 - The app offers 6 projects; glass door, interior door lock and sliding door ("Doors & locks") are no longer shown or recognised

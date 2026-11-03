@@ -105,6 +105,38 @@
     return svg;
   }
 
+  /**
+   * Flag for the language button (own inline SVG, no image file or emoji – emoji flags
+   * do not show on Windows). "DE" = Germany, "EN" = United Kingdom (Union Jack).
+   */
+  function flag(code) {
+    const NS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("class", "flag flag-" + code.toLowerCase());
+    svg.setAttribute("data-flag", code);
+    svg.setAttribute("preserveAspectRatio", "xMidYMid slice");
+    const add = (tag, attrs) => {
+      const n = document.createElementNS(NS, tag);
+      Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v));
+      svg.appendChild(n);
+    };
+    if (code === "DE") {
+      svg.setAttribute("viewBox", "0 0 5 3");
+      add("rect", { width: 5, height: 1, y: 0, fill: "#000000" });
+      add("rect", { width: 5, height: 1, y: 1, fill: "#DD0000" });
+      add("rect", { width: 5, height: 1, y: 2, fill: "#FFCE00" });
+    } else {
+      svg.setAttribute("viewBox", "0 0 60 30");
+      add("rect", { width: 60, height: 30, fill: "#012169" });
+      add("path", { d: "M0,0 L60,30 M60,0 L0,30", stroke: "#FFFFFF", "stroke-width": 6 });
+      add("path", { d: "M0,0 L60,30 M60,0 L0,30", stroke: "#C8102E", "stroke-width": 2 });
+      add("path", { d: "M30,0 V30 M0,15 H60", stroke: "#FFFFFF", "stroke-width": 10 });
+      add("path", { d: "M30,0 V30 M0,15 H60", stroke: "#C8102E", "stroke-width": 6 });
+    }
+    return svg;
+  }
+
   /** Price with small cents, e.g. 14,⁹⁹ € (display only; amount from the catalogue). */
   function priceEl(amount, cls) {
     const lang = window.BBI18n.getLang();
@@ -145,7 +177,8 @@
     document.getElementById("app-tagline").textContent = t("app_tagline");
     document.getElementById("sample-badge").textContent = t("sample_badge");
     const btn = document.getElementById("lang-toggle");
-    btn.textContent = t("lang_toggle_short");
+    // Flag of the language the button switches to (EN screen → German flag), text only for screen readers
+    btn.replaceChildren(flag(t("lang_toggle_short")), el("span", { class: "sr-only", text: t("lang_toggle") }));
     btn.setAttribute("aria-label", t("lang_toggle_aria"));
     btn.setAttribute("title", t("lang_toggle"));
   }
@@ -1629,7 +1662,7 @@
   window.BBApp = Object.freeze({
     state, viewResult, viewItem, viewQuestion, viewChoose, viewRecognized, viewHighRisk,
     recompute, startTemplate, submitText, micTap, consentAccept, consentDecline,
-    viewStore, viewList, viewShopping, aisleRoute, viewProgress, progressStep, openStoreSearch, searchStores, chooseStore, leaveStoreSearch, buildListText, saveList
+    renderHeader, viewStore, viewList, viewShopping, aisleRoute, viewProgress, progressStep, openStoreSearch, searchStores, chooseStore, leaveStoreSearch, buildListText, saveList
   });
 
   document.addEventListener("DOMContentLoaded", () => {

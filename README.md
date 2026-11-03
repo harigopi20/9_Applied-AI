@@ -72,7 +72,7 @@ flowchart LR
 
 ## Look and feel
 DIY-store app style: white page, orange header band (**#FF7313**) with a diagonal
-edge and the title in a white box, a round language button, condensed bold
+edge and the title in a white box, a round language button with a flag (German flag on the English screen, UK flag on the German screen – own inline SVG), condensed bold
 headlines, black pill buttons and outlined secondary buttons, outlined project
 tiles with line icons, flat product rows with big prices and an availability dot,
 the total in a black price box, and a bottom tab bar (Start · Store · List).
