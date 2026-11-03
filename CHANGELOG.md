@@ -6,6 +6,16 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: "Partner store" wording for stores out of range – 2026-11-03
+Summary (same as the pull request):
+- Notice when no store is within 50 km now says "There is no Baumarkt-Buddy partner store within 50 km of this postcode." (DE: "… keinen Baumarkt-Buddy-Partnermarkt.")
+- 1 new test (114 passing); test result saved
+
+- **2026-11-03 – Wording "partner store".** `store_none_in_range` in `app/i18n.js` (EN + DE).
+  New test FR-29 (text).
+  *Why:* the sample stores are partner stores of the app, not all stores.
+  *Prompt:* "Change the first sentence to: There is no baumarkt buddy partner store within 50km of this postcode."
+
 ## Milestone: Flags on the language button – 2026-11-03
 Summary (same as the pull request):
 - The round language button shows a flag instead of "DE" / "EN": German flag on the English screen, UK flag on the German screen
