@@ -166,7 +166,18 @@
     "estimate_rule": "SHELF-E1",
     "cut_role": "board",
     "cut_spec": "length_mm",
-    "cut_factor": 0.1
+    "cut_factor": 0.1,
+    "texts": {
+      "split_hint": { "en": "One board: up to {max} (rule {rules}). Longer? Then several boards side by side are possible.", "de": "Ein Brett: bis {max} (Regel {rules}). Länger? Dann sind mehrere Bretter nebeneinander möglich." },
+      "plan": { "en": "→ {count} boards of {length} each, side by side", "de": "→ {count} Bretter à {length} nebeneinander" },
+      "tip": { "en": "Several boards side by side are possible: {count} boards of {length} each.", "de": "Mehrere Bretter nebeneinander sind möglich: {count} Bretter à {length}." },
+      "use": { "en": "Use {count} boards side by side", "de": "{count} Bretter nebeneinander nehmen" },
+      "notice": { "en": "Your shelf: {count} boards of {length} cm side by side ({total} cm in total). Each board gets its own brackets, wall plugs and screws.", "de": "Ihr Regal: {count} Bretter à {length} cm nebeneinander ({total} cm insgesamt). Jedes Brett bekommt eigene Träger, Dübel und Schrauben." },
+      "load_full": { "en": "Each board is checked on its own for the full {kg} kg (safe side). If the weight is spread, you can give the weight of the heaviest board instead.", "de": "Jedes Brett wird einzeln für die vollen {kg} kg geprüft (sicher gerechnet). Verteilt sich das Gewicht, können Sie stattdessen das Gewicht des schwersten Bretts angeben." },
+      "load_estimate": { "en": "Weight per board estimated with the books rule (SHELF-E1): {kg} kg – please check.", "de": "Gewicht je Brett nach der Bücher-Regel (SHELF-E1) geschätzt: {kg} kg – bitte prüfen." },
+      "load_worst_case": { "en": "Weight unknown: each board is checked for the project maximum of {kg} kg.", "de": "Gewicht unbekannt: Jedes Brett wird für das Projekt-Maximum von {kg} kg geprüft." },
+      "cut": { "en": "The boards are {cut} cm long – ask in the store to have them cut to {length} cm.", "de": "Die Bretter sind {cut} cm lang – lassen Sie sie im Markt auf {length} cm zuschneiden." }
+    }
   },
   "variables": {
     "bracket_count": {

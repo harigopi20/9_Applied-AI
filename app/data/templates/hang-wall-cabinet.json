@@ -1,13 +1,14 @@
 {
   "template_id": "hang_wall_cabinet",
   "project_id": "PRJ-02",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "comment": "DR-04 template from the project catalogue PRJ-02 (draft). Closed wall cabinet on a hanging rail, max. 60 cm deep. Limits: sheet Limits + Plasterboard cabinet (S-01, S-02, S-08). Team review pending (SR-10).",
   "review": {
     "status": "pending_team_review",
     "reviewed_by": null,
     "review_date": null,
     "created": "2026-10-27",
+    "updated": "2026-11-03",
     "source": "data/project_catalogue.xlsx (draft v1, 27 Oct 2026)"
   },
   "title": {
@@ -96,6 +97,18 @@
             "en": "Width",
             "de": "Breite"
           }
+        },
+        {
+          "fact": "cabinet_layout",
+          "type": "choice",
+          "comment": "CAB-S1 (3 Nov 2026): only asked when the width is above the guide limit (segments.max_length).",
+          "show_when": { "gt": [{ "fact": "cabinet_width_cm" }, 120] },
+          "options": ["multiple", "single"],
+          "option_labels": {
+            "multiple": { "en": "Several cabinets of the same width side by side", "de": "Mehrere gleich breite Schränke nebeneinander" },
+            "single": { "en": "One wide cabinet (above 120 cm: ask staff)", "de": "Ein breiter Schrank (über 120 cm: Personal fragen)" }
+          },
+          "label": { "en": "Wider than 120 cm – how should it be built?", "de": "Breiter als 120 cm – wie soll es gebaut werden?" }
         },
         {
           "fact": "cabinet_depth_cm",
@@ -430,6 +443,25 @@
   "no_system_message": {
     "en": "Our catalogue has no rail and plug combination rated for this weight and wall (we never add up plug ratings).",
     "de": "Unser Katalog hat keine Kombination aus Schiene und Dübeln, die für dieses Gewicht und diese Wand zugelassen ist (wir addieren nie Dübelwerte)."
+  },
+  "segments": {
+    "rule_id": "CAB-S1",
+    "comment": "3 Nov 2026 (user request, same as SHELF-S1): above the guide width (ST-04, 120 cm per cabinet) several cabinets of the same width side by side. Each cabinet gets its own hanging rail, plugs and screws and is checked on its own for the full weight given (never divided); the plasterboard table (ST-03) is checked per cabinet. Team review (SR-10).",
+    "length_fact": "cabinet_width_cm",
+    "layout_fact": "cabinet_layout",
+    "split_value": "multiple",
+    "max_length": 120,
+    "unit": "cm",
+    "sections": ["materials"],
+    "texts": {
+      "split_hint": { "en": "One cabinet: up to {max} wide (rule {rules}). Wider? Then several cabinets of the same width side by side are possible.", "de": "Ein Schrank: bis {max} breit (Regel {rules}). Breiter? Dann sind mehrere gleich breite Schränke nebeneinander möglich." },
+      "plan": { "en": "→ {count} cabinets of {length} each, side by side", "de": "→ {count} Schränke à {length} nebeneinander" },
+      "tip": { "en": "Several cabinets side by side are possible: {count} cabinets of {length} each.", "de": "Mehrere Schränke nebeneinander sind möglich: {count} Schränke à {length}." },
+      "use": { "en": "Use {count} cabinets side by side", "de": "{count} Schränke nebeneinander nehmen" },
+      "notice": { "en": "Your cabinets: {count} cabinets of {length} cm side by side ({total} cm in total). Each cabinet gets its own hanging rail, wall plugs and screws. Cabinets of different widths? Then plan each cabinet on its own.", "de": "Ihre Schränke: {count} Schränke à {length} cm nebeneinander ({total} cm insgesamt). Jeder Schrank bekommt eigene Aufhängeschiene, Dübel und Schrauben. Unterschiedlich breite Schränke? Dann jeden Schrank einzeln planen." },
+      "load_full": { "en": "Each cabinet is checked on its own for the full {kg} kg (safe side). If the weight is spread, you can give the weight of the heaviest cabinet instead.", "de": "Jeder Schrank wird einzeln für die vollen {kg} kg geprüft (sicher gerechnet). Verteilt sich das Gewicht, können Sie stattdessen das Gewicht des schwersten Schranks angeben." },
+      "load_worst_case": { "en": "Weight unknown: each cabinet is checked for the project maximum of {kg} kg.", "de": "Gewicht unbekannt: Jeder Schrank wird für das Projekt-Maximum von {kg} kg geprüft." }
+    }
   },
   "variables": {
     "rail_count": {

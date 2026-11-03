@@ -525,7 +525,7 @@
         box.appendChild(plan);
         live.updaters.push((facts) => {
           const p = R.segmentPlan(state.template, Number(R.trustedValue(facts, sg.length_fact)));
-          plan.textContent = p ? t("segment_plan", { count: p.count, length: fmtNum(p.length) + " " + p.unit }) : "";
+          plan.textContent = p ? segText("plan", { count: p.count, length: fmtNum(p.length) + " " + p.unit }) : "";
         });
       }
       if (f.show_when) live.updaters.push((facts) => { box.hidden = !showWhenMet(f, facts); });
@@ -674,11 +674,18 @@
     return new Intl.NumberFormat(window.BBI18n.getLang() === "de" ? "de-DE" : "en-GB", { maximumFractionDigits: 1 }).format(v);
   }
 
+  /** Texts of the split option (SHELF-S1, CAB-S1) come from the project template. */
+  function segText(key, vars, tpl) {
+    const sg = (tpl || state.template || {}).segments;
+    const txt = sg && sg.texts && sg.texts[key] ? pick(sg.texts[key]) : "";
+    return txt.replace(/\{(\w+)\}/g, (m, k) => (vars && vars[k] !== undefined ? String(vars[k]) : m));
+  }
+
   function noticeText(n) {
     if (n.text) return pick(n.text);
     if (n.id === "segments") {
       const v = { count: n.count, length: fmtNum(n.length), total: fmtNum(n.total), kg: fmtNum(n.load_kg), cut: n.cut_from !== null ? fmtNum(n.cut_from) : "" };
-      return [t("notice_segments", v), t("segments_load_" + n.load_from, v), n.cut_from !== null ? t("segments_cut", v) : ""].filter(Boolean).join(" ");
+      return [segText("notice", v), segText("load_" + n.load_from, v), n.cut_from !== null ? segText("cut", v) : ""].filter(Boolean).join(" ");
     }
     return t("notice_" + n.id, n);
   }
@@ -746,7 +753,7 @@
       wrap.appendChild(el("p", { class: "hint", "data-guide-hint": f.fact,
         text: t("guide_hint", { limits: limits.map((l) => limitText(l, tpl)).join(" · "), rules }) }));
     }
-    if (splitField) wrap.appendChild(el("p", { class: "hint", "data-split-hint": f.fact, text: t("split_hint", { max: fmtNum(sg.max_length) + " " + (sg.unit || ""), rules: Array.from(new Set(limits.map((l) => l.rule_id))).join(", ") || sg.rule_id }) }));
+    if (splitField) wrap.appendChild(el("p", { class: "hint", "data-split-hint": f.fact, text: segText("split_hint", { max: fmtNum(sg.max_length) + " " + (sg.unit || ""), rules: Array.from(new Set(limits.map((l) => l.rule_id))).join(", ") || sg.rule_id }) }));
     // Catalogue sizes at the first field of this screen that drives the part's size
     const qFacts = q.type === "group" ? q.fields.map((x) => x.fact) : [q.fact];
     R.catalogueSizes(tpl, state.data.catalogue).forEach((c) => {
@@ -881,8 +888,8 @@
     const plan = sg && lenFact && (b.limits || []).some((l) => l.facts.includes(sg.length_fact)) ? R.segmentPlan(state.template, Number(lenFact.value)) : null;
     if (plan) {
       box.appendChild(el("div", { class: "split-tip", "data-split-tip": "1" }, [
-        el("p", { class: "strong", text: t("split_tip", { count: plan.count, length: fmtNum(plan.length) + " " + plan.unit }) }),
-        el("button", { type: "button", class: "btn primary", id: "use-split", text: t("split_use", { count: plan.count }),
+        el("p", { class: "strong", text: segText("tip", { count: plan.count, length: fmtNum(plan.length) + " " + plan.unit }) }),
+        el("button", { type: "button", class: "btn primary", id: "use-split", text: segText("use", { count: plan.count }),
           onclick: () => {
             // The customer's tap is the confirmation (SR-01).
             state.facts[sg.layout_fact] = R.makeFact(sg.split_value, R.STATUS.CONFIRMED, "stop:split_tip");
