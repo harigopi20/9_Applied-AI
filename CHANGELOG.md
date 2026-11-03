@@ -6,6 +6,17 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Save every test run in test/results – 2026-11-03
+Summary (same as the pull request):
+- Current test result (112 passed) saved as `test/results/2026-11-03_7fde5b4.md` / `.json`
+- New working rule in CLAUDE.md: every test run is saved in `test/results/` and committed with its change; README updated
+
+- **2026-11-03 – Test results always saved.** Ran `node tools/run_tests.js` on `main`
+  (commit 7fde5b4, 112 passed) and committed the result files. CLAUDE.md gets the rule
+  "always save every test run in test/results/", README describes it.
+  *Why:* the only saved result was from 27 Oct 2026; the team wants every run on record.
+  *Prompt:* "Yes, always put all test results into test/results."
+
 ## Milestone: Several wall cabinets side by side – 2026-11-03
 Summary (same as the pull request):
 - Wall cabinet wider than 120 cm: several cabinets of the same width side by side (new rule CAB-S1), each with its own rail, plugs and screws, checked for the full weight
