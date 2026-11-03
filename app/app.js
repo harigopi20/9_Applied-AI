@@ -159,7 +159,15 @@
     return window.BBI18n.getLang() === "de" && p.name_de ? p.name_de : p.name;
   }
 
-  function render() {
+  /**
+   * Draws the current screen. Normally it starts at the top; with `opts.anchor`
+   * (a CSS selector) the element it names stays at the same place on screen and
+   * the first `opts.focus` element inside it gets the focus (issue #119).
+   */
+  function render(opts) {
+    const anchor = opts && opts.anchor;
+    const old = anchor ? document.querySelector(anchor) : null;
+    const top = old ? old.getBoundingClientRect().top : null;
     syncHistory();
     if (!document.getElementById("main")) return; // headless use in tests.html
     document.documentElement.lang = window.BBI18n.getLang();
@@ -171,6 +179,13 @@
     renderNav();
     renderProgress();
     document.getElementById("footer-text").textContent = t("footer");
+    const now = top !== null ? document.querySelector(anchor) : null;
+    if (now) {
+      window.scrollBy(0, now.getBoundingClientRect().top - top);
+      const f = opts.focus ? now.querySelector(opts.focus) : null;
+      (f || m).focus({ preventScroll: true });
+      return;
+    }
     m.focus({ preventScroll: true });
     window.scrollTo(0, 0);
   }
@@ -1056,7 +1071,11 @@
     if (!i.ownable || i.owned_auto) return null;
     return el("button", { type: "button", class: "btn small owned-toggle", "data-owned": i.owned ? "yes" : "no",
       text: i.owned ? t("owned_need") : t("owned_have"),
-      onclick: () => { if (i.owned) state.owned.delete(i.role); else state.owned.add(i.role); recompute(); } });
+      onclick: () => {
+        if (i.owned) state.owned.delete(i.role); else state.owned.add(i.role);
+        // Issue #119: stay at this item instead of jumping back to the top of the list
+        recompute(false, { anchor: '.item[data-role="' + i.role + '"]', focus: ".owned-toggle" });
+      } });
   }
 
   function viewItem(i) {
@@ -1703,7 +1722,7 @@
     recompute(true);
   }
 
-  function recompute(askNext) {
+  function recompute(askNext, renderOpts) {
     stopRecognizer(true); // leaving the entry screen ends any recording
     const r = R.evaluate(state.template, state.facts, state.data.catalogue, state.data.safetyRules,
       { overrides: state.overrides, owned: Array.from(state.owned) });
@@ -1715,7 +1734,7 @@
     } else {
       state.screen = "result";
     }
-    render();
+    render(renderOpts);
   }
 
   function editQuestion(id) {
