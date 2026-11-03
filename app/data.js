@@ -159,6 +159,168 @@
       });
   }
 
+  // ---------------------------------------------------------------------
+  // D-13 / D-14 mounting data (DR-09): sheets "System ratings" and "Fixing chain".
+  // EVERY load value comes from these sheets – none is written in code.
+  // ---------------------------------------------------------------------
+  const RATINGS_SHEET = "System ratings";
+  const CHAIN_SHEET = "Fixing chain";
+
+  /** Number from a mounting cell. "n/a", "–", "-" or empty → null (= not offered); never 0 (RB-06). */
+  function rating(v) {
+    const s = str(v);
+    if (s === "" || /^(n\/a|–|-)$/i.test(s)) return null;
+    const n = Number(s);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  /** Raw grid of a sheet (array of rows). */
+  function sheetGrid(XLSX, sheet) {
+    return sheet ? XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null, raw: true }) : [];
+  }
+
+  /**
+   * Rows of the table whose header row starts with the cells `head`
+   * (case-insensitive). The table ends at the first row whose first cell
+   * does not match `rowKey` (a title row or a single value below it).
+   */
+  function gridTable(grid, head, rowKey, where) {
+    const h = grid.findIndex((row) => row && head.every((c, i) => str(row[i]).toLowerCase() === c));
+    if (h < 0) throw new Error(where + ": table '" + head.join(", ") + "' not found");
+    const header = grid[h].map(str);
+    const rows = [];
+    for (let i = h + 1; i < grid.length; i++) {
+      const row = grid[i];
+      if (!row || !rowKey.test(str(row[0]))) break;
+      rows.push({ header, cells: row });
+    }
+    if (!rows.length) throw new Error(where + ": table '" + head.join(", ") + "' is empty");
+    return rows;
+  }
+
+  /** A single value: the row whose first cell is `label`, value in the second cell. */
+  function gridValue(grid, label, where) {
+    const row = grid.find((r) => r && str(r[0]).toLowerCase() === label.toLowerCase());
+    const v = row ? rating(row[1]) : null;
+    if (v === null || v <= 0) throw new Error(where + ": value '" + label + "' missing or not a positive number");
+    return v;
+  }
+
+  function need(v, what) {
+    if (v === null) throw new Error(what + " missing or not a number");
+    return v;
+  }
+
+  /**
+   * Builds the mounting data from the raw grids of the two sheets.
+   * Throws a clear error if a table or value is missing (NFR-03) –
+   * the app then offers no shelf / cabinet / anti-tip options.
+   */
+  function buildMounting(ratingsGrid, chainGrid) {
+    const W = RATINGS_SHEET, C = CHAIN_SHEET;
+    const WALL = /^[a-z_]+$/;
+
+    // System rating per wall and plug size, wall cap, max. shelf depth
+    const walls = {};
+    let plugSizes = null;
+    gridTable(ratingsGrid, ["wall", "6 mm"], WALL, W).forEach(({ header, cells }) => {
+      const sizes = header.map((h, i) => ({ mm: (/^(\d+) mm$/.exec(h) || [])[1], i })).filter((x) => x.mm);
+      plugSizes = sizes.map((x) => Number(x.mm));
+      const system = {};
+      sizes.forEach((x) => { system[x.mm] = rating(cells[x.i]); });
+      const col = (name) => header.findIndex((h) => h.toLowerCase() === name);
+      const wall = str(cells[0]);
+      walls[wall] = {
+        wall,
+        system,
+        wallCapKg: need(rating(cells[col("wall cap kg")]), W + ": wall cap of " + wall),
+        shelfMaxDepthCm: need(rating(cells[col("max. depth cm")]), W + ": max. depth of " + wall),
+        capSource: str(cells[col("cap source")])
+      };
+    });
+
+    // Plug type and drill mode per wall (sheet Fixing chain)
+    gridTable(chainGrid, ["wall", "fixing type"], WALL, C).forEach(({ cells }) => {
+      const wall = str(cells[0]);
+      if (!walls[wall]) throw new Error(C + ": wall '" + wall + "' has no row in " + W);
+      const typeText = str(cells[1]);
+      walls[wall].fixingTypeText = typeText;
+      walls[wall].fixingType = (/^[a-z_]+/.exec(typeText) || [""])[0];
+      walls[wall].hammer = str(cells[2]).toLowerCase() === "on";
+    });
+
+    // Wall cabinet cap and max. depth per wall (D-14)
+    gridTable(ratingsGrid, ["wall", "cabinet cap kg"], WALL, W).forEach(({ cells }) => {
+      const wall = str(cells[0]);
+      if (!walls[wall]) throw new Error(W + ": cabinet row for unknown wall '" + wall + "'");
+      walls[wall].cabinetCapKg = need(rating(cells[1]), W + ": cabinet cap of " + wall);
+      walls[wall].cabinetMaxDepthCm = need(rating(cells[2]), W + ": cabinet max. depth of " + wall);
+    });
+    Object.values(walls).forEach((w) => {
+      if (!w.fixingType) throw new Error(C + ": no fixing type for wall '" + w.wall + "'");
+    });
+
+    const brackets = gridTable(ratingsGrid, ["class", "hole ø mm"], /^B[\d.]+$/, W).map(({ cells }) => ({
+      cls: str(cells[0]),
+      holeMm: need(rating(cells[1]), W + ": hole of " + str(cells[0])),
+      pairKg: need(rating(cells[2]), W + ": pair kg of " + str(cells[0])),
+      maxArmMm: need(rating(cells[3]), W + ": max. arm of " + str(cells[0]))
+    })).sort((a, b) => a.holeMm - b.holeMm);
+
+    const boards = gridTable(ratingsGrid, ["thickness mm", "board kg"], /^\d+$/, W).map(({ cells }) => ({
+      thicknessMm: Number(cells[0]),
+      kg: need(rating(cells[1]), W + ": board kg"),
+      maxDepthCm: need(rating(cells[2]), W + ": board max. depth")
+    }));
+
+    const antiTip = gridTable(ratingsGrid, ["depth up to cm", "plug mm"], /^\d+$/, W).map(({ cells }) => ({
+      maxDepthCm: Number(cells[0]),
+      plugMm: need(rating(cells[1]), W + ": anti-tip plug"),
+      cavityAnchor: str(cells[2])
+    }));
+
+    // Fixing chain: plug size (= drill bit) → screw Ø → bracket class, products
+    const chain = {};
+    gridTable(chainGrid, ["plug size mm (= drill bit)", "screw ø mm"], /^\d+$/, C).forEach(({ cells }) => {
+      const id = (v) => (/^P\d+$/.test(str(v)) ? str(v) : null);
+      const mm = Number(cells[0]);
+      chain[mm] = {
+        plugMm: mm,
+        screwMm: need(rating(cells[1]), C + ": screw Ø for " + mm + " mm"),
+        bracketClass: (/^B[\d.]+/.exec(str(cells[2])) || [null])[0],
+        maxArmMm: rating(cells[3]),
+        screwStd: id(cells[4]),
+        screwLong: id(cells[5]),
+        masonryBit: id(cells[6]),
+        woodBit: id(cells[7]),
+        use: str(cells[8])
+      };
+    });
+
+    const deepFreeze = (o) => { Object.values(o).forEach((v) => { if (v && typeof v === "object") deepFreeze(v); }); return Object.freeze(o); };
+    return deepFreeze({
+      plugSizes,
+      walls,
+      brackets,
+      boards,
+      chain,
+      safetyFactor: gridValue(ratingsGrid, "Safety factor", W),
+      referenceDepthCm: gridValue(ratingsGrid, "Reference depth cm", W),
+      bracketSpacingCm: gridValue(ratingsGrid, "Bracket spacing cm", W),
+      cabinet: {
+        panelKgPerM2: gridValue(ratingsGrid, "Panel weight kg/m²", W),
+        minPlugFactor: gridValue(ratingsGrid, "Min. plug factor", W),
+        anchorBoltSystemKg: gridValue(ratingsGrid, "Anchor bolt M10 system kg (concrete)", W),
+        anchorBoltCapKg: gridValue(ratingsGrid, "Cap with anchor bolts kg", W)
+      },
+      antiTip: {
+        rows: antiTip,
+        widthPerKitCm: gridValue(ratingsGrid, "Width per kit cm", W),
+        tallFromCm: gridValue(ratingsGrid, "Tall from cm", W)
+      }
+    });
+  }
+
   function parseWorkbook(arrayBuffer, XLSX) {
     const wb = XLSX.read(arrayBuffer, { type: "array" });
     const missing = REQUIRED_SHEETS.filter((s) => !wb.SheetNames.includes(s));
@@ -168,7 +330,15 @@
       stores = buildStores(sheetRows(XLSX, wb.Sheets.Stores, "store_id"));
       stock = buildStock(sheetRows(XLSX, wb.Sheets[STOCK_SHEET], "product_nr"), stores);
     } catch (_) { stores = []; stock = new Map(); }
-    return { catalogue: buildCatalogue(sheetRows(XLSX, wb.Sheets.Products, "product_nr")), stores, stock };
+    // Mounting data is required only for shelf / cabinet / anti-tip options:
+    // on an error the rest of the app still works and the error is kept.
+    let mounting = null, mountingError = null;
+    try {
+      if (!wb.Sheets[RATINGS_SHEET]) throw new Error("Workbook misses sheet: " + RATINGS_SHEET);
+      if (!wb.Sheets[CHAIN_SHEET]) throw new Error("Workbook misses sheet: " + CHAIN_SHEET);
+      mounting = buildMounting(sheetGrid(XLSX, wb.Sheets[RATINGS_SHEET]), sheetGrid(XLSX, wb.Sheets[CHAIN_SHEET]));
+    } catch (e) { mounting = null; mountingError = e.message; }
+    return { catalogue: buildCatalogue(sheetRows(XLSX, wb.Sheets.Products, "product_nr")), stores, stock, mounting, mountingError };
   }
 
   /**
@@ -226,6 +396,6 @@
   }
 
   root.BBData = Object.freeze({
-    buildCatalogue, buildStores, buildStock, sheetRows, parseWorkbook, parsePlzTable, fetchJson, fetchText, fetchWorkbook, loadAll
+    buildCatalogue, buildStores, buildStock, sheetRows, sheetGrid, buildMounting, parseWorkbook, parsePlzTable, fetchJson, fetchText, fetchWorkbook, loadAll
   });
 })(typeof window !== "undefined" ? window : globalThis);

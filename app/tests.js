@@ -19,6 +19,7 @@
   let INACTIVE = [];     // templates not offered in the app (config inactiveTemplates) – still tested
   let productRows = null; // raw Products rows for fixtures
   let stockRows = null;   // raw "Store stock" rows for fixtures
+  let sheetGrids = null;  // raw grids of System ratings, Fixing chain, Capacity, Cabinet (D-13/D-14)
 
   // ---------------------------------------------------------------------
   // Mini test framework
@@ -2084,14 +2085,192 @@
   });
 
   // ---------------------------------------------------------------------
+  // D-13 / D-14 engine basics: System ratings, fixing chain (R-17), capacity (R-18)
+  // Expected values are read from the workbook at test time – never typed here (DR-09).
+  // ---------------------------------------------------------------------
+  const FT = () => CFG.mounting.fixingTypes;
+  const chainOf = (wall, mm) => R.fixingChain(wall, mm, D.mounting, D.catalogue, FT());
+  const cellStr = (v) => (v === null || v === undefined ? "" : String(v).trim());
+  /** Data rows below the header row whose first cells are `head`. */
+  function gridRows(grid, head, rowKey) {
+    const h = grid.findIndex((r) => r && head.every((c, i) => cellStr(r[i]).toLowerCase() === c));
+    assert(h >= 0, "header '" + head.join(", ") + "' found");
+    const out = [];
+    for (let i = h + 1; i < grid.length && grid[i] && rowKey.test(cellStr(grid[i][0])); i++) out.push(grid[i]);
+    return { header: grid[h].map(cellStr), rows: out };
+  }
+
+  test("DR-09", "Sheets System ratings and Fixing chain load: 6 walls, plug sizes 6–14 mm, brackets, boards, safety factor", () => {
+    eq(D.mountingError, null, "no mounting data error");
+    const M = D.mounting;
+    assert(M, "mounting data loaded");
+    eq(Object.keys(M.walls), ["concrete", "solid_brick", "brick_unknown", "aerated_concrete", "wood", "plasterboard"]);
+    const { header, rows } = gridRows(sheetGrids.ratings, ["wall", "6 mm"], /^[a-z_]+$/);
+    rows.forEach((r) => {
+      const w = M.walls[cellStr(r[0])];
+      header.forEach((h, i) => {
+        const mm = (/^(\d+) mm$/.exec(h) || [])[1];
+        if (!mm) return;
+        const cell = cellStr(r[i]);
+        eq(w.system[mm], cell === "n/a" ? null : Number(cell), w.wall + " " + mm + " mm");
+      });
+    });
+    eq(M.walls.plasterboard.system["6"], null, "n/a stays null, never 0 (RB-06)");
+    eq(M.brackets.length, 5);
+    eq(M.boards.map((b) => b.thicknessMm), [18, 25]);
+    assert(M.safetyFactor > 1, "safety factor from the sheet");
+  });
+
+  test("TC-108 / SR-18 / DR-09", "Capacity per wall × plug × depth equals sheet Capacity; '–' options are not offered", () => {
+    const g = sheetGrids.capacity;
+    const h = g.findIndex((r) => r && cellStr(r[0]) === "wall" && cellStr(r[1]) === "plug mm");
+    assert(h >= 0, "Capacity header row");
+    const depths = g[h].map((c, i) => ({ cm: Number((/^(\d+) cm$/.exec(cellStr(c)) || [])[1]), i })).filter((d) => d.cm);
+    eq(depths.length, 8, "8 depth columns");
+    let cells = 0, hidden = 0;
+    const seen = new Set();
+    for (let i = h + 1; i < g.length; i++) {
+      const r = g[i];
+      if (!r || !D.mounting.walls[cellStr(r[0])]) continue;
+      const wall = cellStr(r[0]), mm = Number(r[1]);
+      seen.add(wall + "|" + mm);
+      const c = chainOf(wall, mm);
+      assert(c.ok, wall + " " + mm + " mm: fixing chain (" + c.reason + ")");
+      eq((c.plug || c.screw).product_nr, cellStr(r[2]), wall + " " + mm + " mm: fixing");
+      eq(c.bracketClass, cellStr(r[3]), wall + " " + mm + " mm: bracket class");
+      depths.forEach((d) => {
+        const res = R.capacity({ kind: "shelf", wall, plugMm: mm, depthCm: d.cm, bracketClass: c.bracketClass, boardMm: 25 }, D.mounting);
+        const want = cellStr(r[d.i]);
+        cells++;
+        if (want === "–" || want === "-") { hidden++; assert(!res.offered, wall + " " + mm + " mm @" + d.cm + " cm must not be offered"); }
+        else { assert(res.offered, wall + " " + mm + " mm @" + d.cm + " cm offered (" + res.reason + ")"); eq(res.maxKg, Number(want), wall + " " + mm + " mm @" + d.cm + " cm"); }
+      });
+    }
+    eq(seen.size, 28, "28 wall × plug rows");
+    // plug sizes missing from the sheet are not offered at all
+    Object.keys(D.mounting.walls).forEach((wall) => D.mounting.plugSizes.forEach((mm) => {
+      if (seen.has(wall + "|" + mm)) return;
+      const c = chainOf(wall, mm);
+      const res = R.capacity({ kind: "shelf", wall, plugMm: mm, depthCm: 25, bracketClass: c.bracketClass, boardMm: 25 }, D.mounting);
+      assert(!c.ok || !res.offered, wall + " " + mm + " mm must not be offered");
+    }));
+    return cells + " cells checked, " + hidden + " not offered";
+  });
+
+  test("R-18 / SR-18", "Capacity: depth factor, safety factor, wall cap, rounding down; too deep → max. depth; cabinet f = MIN(1, H ÷ D)", () => {
+    const M = D.mounting;
+    const shelf = (wall, mm, depth, board) => R.capacity({ kind: "shelf", wall, plugMm: mm, depthCm: depth, bracketClass: chainOf(wall, mm).bracketClass, boardMm: board || 25 }, M);
+    const a = shelf("concrete", 6, 30);
+    const f = M.referenceDepthCm / 30;
+    eq(a.f, f, "f = 25 ÷ 30");
+    eq(a.maxKg, Math.floor(Math.min(M.walls.concrete.system["6"] * f, M.brackets[0].pairKg * f, M.boards[1].kg) / M.safetyFactor), "rounded down");
+    eq(a.limitedBy, "bracket");
+    eq(shelf("concrete", 14, 15).limitedBy, "wall_cap");
+    eq(shelf("concrete", 14, 15).maxKg, M.walls.concrete.wallCapKg);
+    const deep = shelf("aerated_concrete", 10, 40);
+    eq([deep.offered, deep.reason, deep.maxDepthCm], [false, "deeper_than_wall", M.walls.aerated_concrete.shelfMaxDepthCm]);
+    eq(shelf("concrete", 6, 35).reason, "deeper_than_bracket");
+    eq(shelf("concrete", 12, 40, 18).reason, "deeper_than_board", "18 mm board max. 30 cm");
+    eq(R.capacity({ kind: "shelf", wall: "plasterboard", plugMm: 6, depthCm: 20, bracketClass: "B5", boardMm: 25 }, M).reason, "no_system_rating");
+    eq(R.capacity({ kind: "shelf", wall: "concrete", plugMm: 8, depthCm: 20 }, null).reason, "no_data");
+    // Cabinet: compare with the example in sheet Cabinet (size read from the sheet)
+    const g = sheetGrids.cabinet;
+    const val = (label) => Number((g.find((r) => r && cellStr(r[0]) === label) || [])[1]);
+    const D_ = val("Depth cm"), H = val("Height cm");
+    assert(D_ > 0 && H > 0, "cabinet size in sheet");
+    const { rows } = gridRows(g, ["wall", "plug mm", "fixing", "total max. kg"], /^[a-z_]+$/);
+    let n = 0;
+    rows.filter((r) => /^\d+$/.test(cellStr(r[1]))).forEach((r) => {
+      const res = R.capacity({ kind: "cabinet", wall: cellStr(r[0]), plugMm: Number(r[1]), depthCm: D_, heightCm: H }, M);
+      assert(res.offered, cellStr(r[0]) + " " + r[1] + " mm cabinet offered (" + res.reason + ")");
+      eq(res.maxKg, Number(r[3]), "cabinet " + cellStr(r[0]) + " " + r[1] + " mm total max. kg");
+      n++;
+    });
+    assert(n >= 25, "cabinet rows checked: " + n);
+    eq(R.capacity({ kind: "cabinet", wall: "concrete", plugMm: 10, depthCm: 40, heightCm: 20 }, M).f, 0.5, "f = H ÷ D");
+    return n + " cabinet rows checked";
+  });
+
+  test("TC-115 / FR-09 / RB-27", "Fixing chain: screw Ø ≤ hole Ø − 0.5 mm, plug type and hammer mode match the wall, bit = plug size", () => {
+    const M = D.mounting;
+    const walls = gridRows(sheetGrids.chain, ["wall", "fixing type"], /^[a-z_]+$/).rows;
+    const chainRows = gridRows(sheetGrids.chain, ["plug size mm (= drill bit)", "screw ø mm"], /^\d+$/).rows;
+    const label = (wall) => wall.replace("_unknown", "").replace("_", " ");
+    let ok = 0;
+    walls.forEach((wr) => {
+      const wall = cellStr(wr[0]);
+      eq(M.walls[wall].hammer, cellStr(wr[2]).toLowerCase() === "on", wall + ": hammer as in sheet");
+      M.plugSizes.forEach((mm) => {
+        const c = chainOf(wall, mm);
+        if (!c.ok) return;
+        ok++;
+        const where = wall + " " + mm + " mm";
+        assert(c.screwMm <= c.bracketHoleMm - R.HOLE_CLEARANCE_MM, where + ": screw " + c.screwMm + " fits hole " + c.bracketHoleMm);
+        eq(c.hammer, M.walls[wall].hammer, where + ": hammer");
+        const type = FT()[M.walls[wall].fixingType];
+        if (type.plugVariant) {
+          eq(c.plug.variant_group, type.plugVariant, where + ": plug type");
+          assert(c.plug.suitable_wall_types.includes(label(wall)), where + ": plug made for " + label(wall));
+          eq(c.drillBit.specs.diameter_mm, mm, where + ": drill bit = plug size");
+        } else {
+          eq(c.plug, null, where + ": no plug in wood");
+          assert(c.screw.suitable_wall_types.includes("wood"), where + ": wood screw");
+          assert(c.drillBit.use_cases.includes("drilling wood"), where + ": pilot bit");
+        }
+        if (c.ownScrew) {
+          eq(c.screw, null, where + ": cavity anchor brings its own screw");
+        } else {
+          eq(c.screw.specs.diameter_mm, c.screwMm, where + ": screw Ø");
+          eq(c.screw.specs.plug_mm, mm, where + ": screw for this plug size");
+          if (type.plugVariant) assert(c.screw.compatible_with.includes(c.plug.product_nr), where + ": screw listed as compatible with the plug");
+          // for plugs the sheet's own bracket column must agree with the rule
+          const sheetCls = (/^B[\d.]+/.exec(cellStr((chainRows.find((r) => Number(r[0]) === mm) || [])[2])) || [])[0];
+          eq(c.bracketClass, sheetCls, where + ": bracket class as in sheet Fixing chain");
+        }
+      });
+    });
+    assert(ok >= 28, "options checked: " + ok);
+    // RB-27: a screw that does not fit is never matched to a bracket
+    eq(R.bracketForScrew(5, M).cls, "B6.5", "5 mm screw does not fit B5 (5 mm hole)");
+    eq(R.bracketForScrew(4.5, M).cls, "B5", "4.5 mm screw fits B5");
+    eq(R.bracketForScrew(99, M), null, "no bracket for a too thick screw");
+    eq(chainOf("plasterboard", 6).ok, false, "no 6 mm cavity anchor");
+    eq(chainOf("unknown_wall", 8).reason, "unknown_wall");
+    return ok + " options checked";
+  });
+
+  test("NFR-03 / DR-09 / RB-06", "Broken System ratings → clear data error, no guessed values; blank rating is 'not offered', never 0", () => {
+    const copy = () => sheetGrids.ratings.map((r) => (r ? r.slice() : r));
+    const build = (g) => window.BBData.buildMounting(g, sheetGrids.chain);
+    const throwsWith = (g, text) => {
+      try { build(g); } catch (e) { assert(e.message.includes(text), "message '" + e.message + "' names " + text); return; }
+      throw new AssertionError("no error for missing " + text);
+    };
+    let g = copy(); g = g.filter((r) => !(r && cellStr(r[0]) === "Safety factor"));
+    throwsWith(g, "Safety factor");
+    g = copy(); g = g.filter((r) => !(r && cellStr(r[0]) === "class"));
+    throwsWith(g, "class");
+    g = copy(); const capRow = g.findIndex((r) => r && cellStr(r[0]) === "concrete");
+    g[capRow][6] = null; // wall cap of concrete blank
+    throwsWith(g, "wall cap of concrete");
+    g = copy(); const row = g.findIndex((r) => r && cellStr(r[0]) === "concrete");
+    g[row][2] = null; // 8 mm on concrete blank
+    const M = build(g);
+    eq(M.walls.concrete.system["8"], null, "blank → null");
+    eq(R.capacity({ kind: "shelf", wall: "concrete", plugMm: 8, depthCm: 20, bracketClass: "B6.5", boardMm: 25 }, M).reason, "no_system_rating");
+  });
+
+  // ---------------------------------------------------------------------
   // Runner
   // ---------------------------------------------------------------------
   async function loadRawRows() {
     const res = await fetch(CFG.data.workbook, { cache: "no-cache" });
     const wb = XLSX.read(await res.arrayBuffer(), { type: "array" });
+    const grid = (name) => window.BBData.sheetGrid(XLSX, wb.Sheets[name]);
     return {
       products: window.BBData.sheetRows(XLSX, wb.Sheets.Products, "product_nr"),
-      stock: window.BBData.sheetRows(XLSX, wb.Sheets["Store stock"], "product_nr")
+      stock: window.BBData.sheetRows(XLSX, wb.Sheets["Store stock"], "product_nr"),
+      grids: { ratings: grid("System ratings"), chain: grid("Fixing chain"), capacity: grid("Capacity"), cabinet: grid("Cabinet") }
     };
   }
 
@@ -2116,6 +2295,7 @@
       const raw = await loadRawRows();
       productRows = raw.products;
       stockRows = raw.stock;
+      sheetGrids = raw.grids;
     } catch (e) {
       report({ id: "SETUP", name: "Load data files" }, "fail", e.message);
     }

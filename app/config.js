@@ -55,5 +55,18 @@ window.BB_CONFIG = Object.freeze({
   store: {
     maxDistanceKm: 50,   // "no store near you" when the nearest store is farther
     maxStoresShown: 6    // number of stores listed after a valid PLZ
+  },
+
+  // R-17 (D-13 / D-14): fixing type per wall (sheet "Fixing chain") → product
+  // variant group of the plug and which screw column of the chain to use.
+  // No load values here – they all come from sheet "System ratings" (DR-09).
+  mounting: {
+    fixingTypes: {
+      plug_universal: { plugVariant: "wall-plug-universal-d13", screw: "std" },
+      plug_long:      { plugVariant: "wall-plug-long-d13",      screw: "long" },
+      plug_aerated:   { plugVariant: "wall-plug-aerated-d13",   screw: "long" },
+      cavity_anchor:  { plugVariant: "cavity-anchor-d13",       screw: "own" },  // anchor brings its own screw
+      screw:          { plugVariant: null,                      screw: "std" }   // wood: screw in a pilot hole
+    }
   }
 });

@@ -6,6 +6,21 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-11-03 – D-13/D-14 Step 2: engine basics – System ratings, fixing chain (R-17), capacity (R-18).**
+  `app/data.js`: new `buildMounting` reads the sheets *System ratings* and *Fixing chain*
+  (system rating per wall and plug size, wall cap, max. depths, bracket pairs, boards, safety
+  factor, reference depth, cabinet and anti-tip tables, fixing chain rows, plug type and hammer
+  mode per wall) into `data.mounting`; a missing table or value gives `data.mountingError`
+  instead of guessed values; "n/a" or a blank rating stays `null` (not offered), never 0.
+  `app/rules.js`: new `fixingChain` (R-17) and `capacity` (R-18, shelf and cabinet; rounded down
+  as in sheet Capacity). `app/config.js`: `mounting.fixingTypes` maps each fixing type to its plug
+  product group and screw column (no load values). Tests: DR-09 (sheet loading), TC-108
+  (all 224 cells of sheet Capacity), R-18 (factors, caps, too deep, cabinet against sheet Cabinet),
+  TC-115 / RB-27 (screw fits hole, plug type and hammer match the wall), NFR-03 (broken sheet →
+  clear error). No screen change. README updated.
+  *Why:* handover D-13/D-14, Step 2 – the shelf, wall-cabinet and anti-tip steps build on these functions.
+  *Prompt:* "Show Step 2 plan" → plan with rounding down and the open rail-rating question → "OK, go ahead."
+
 - **2026-11-03 – D-13/D-14 Step 1: catalogue data v3 with 6 stores (TC-107).** The dated
   workbook `data/product_catalogue_03_11_26.xlsx` is now `data/product_catalogue.xlsx`
   (288 products P001–P105 + P201–P384; store SCH – OBI Schwabach; new sheets Fixing chain,
