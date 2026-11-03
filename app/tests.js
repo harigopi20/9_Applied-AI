@@ -1314,6 +1314,22 @@
     assert(window.BBApp.viewResult().textContent.includes("3 boards of 100 cm"), "segment notice on the list");
   });
 
+  test("NFR-09 (flags)", "Language button shows a flag: English screen → German flag, German screen → UK flag; label for screen readers", () => {
+    const box = document.getElementById("sandbox");
+    box.replaceChildren(...["app-title", "app-tagline", "sample-badge"].map((id) => Object.assign(document.createElement("span"), { id })),
+      Object.assign(document.createElement("button"), { id: "lang-toggle" }));
+    const btn = () => document.getElementById("lang-toggle");
+    window.BBI18n.setLang("en"); window.BBApp.renderHeader();
+    eq(btn().querySelector("svg.flag").getAttribute("data-flag"), "DE", "German flag on the English screen");
+    eq(btn().getAttribute("aria-label"), window.BBI18n.t("lang_toggle_aria"));
+    assert(btn().querySelector(".sr-only").textContent === "Deutsch", "screen-reader text");
+    window.BBI18n.setLang("de"); window.BBApp.renderHeader();
+    eq(btn().querySelector("svg.flag").getAttribute("data-flag"), "EN", "UK flag on the German screen");
+    eq(btn().querySelectorAll("svg").length, 1, "one flag only");
+    window.BBI18n.setLang("en");
+    box.replaceChildren();
+  });
+
   test("NFR-09", "Every UI text exists in English and German", () => {
     const en = Object.keys(window.BBI18n.TEXTS.en), de = Object.keys(window.BBI18n.TEXTS.de);
     eq(en.filter((k) => !de.includes(k)), [], "missing in German");

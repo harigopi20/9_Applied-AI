@@ -116,6 +116,9 @@ h1, h2, h3, .btn, .tab, .badge, .tag, .price-value, .total-label {
   font-family: var(--font-head); font-size: 1.1rem; font-weight: 800; cursor: pointer;
 }
 .round-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+/* Language button: round flag (flag of the language it switches to) */
+#lang-toggle { padding: 0; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; }
+#lang-toggle .flag { width: 100%; height: 100%; display: block; }
 
 /* ---------------------------------------------------------------------
    Progress bar: Store → Project → Questions → List
