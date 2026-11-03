@@ -16,6 +16,7 @@
   const CFG = window.BB_CONFIG;
   const results = [];
   let D = null;          // loaded data (real files)
+  let INACTIVE = [];     // templates not offered in the app (config inactiveTemplates) – still tested
   let productRows = null; // raw Products rows for fixtures
   let stockRows = null;   // raw "Store stock" rows for fixtures
 
@@ -35,7 +36,8 @@
   // ---------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------
-  const tpl = (id) => D.templates.find((t) => t.template_id === id);
+  const tpl = (id) => D.templates.find((t) => t.template_id === id) || INACTIVE.find((t) => t.template_id === id);
+  const ALL = () => D.templates.concat(INACTIVE);
   const SHELF = () => tpl("hang_shelf");
   const PIC = () => tpl("hang_picture");
 
@@ -87,10 +89,12 @@
     assert(D.stores.every((s) => s.data_status === "sample"), "stores labelled sample (NFR-05)");
   });
 
-  test("DR-04 / SR-10", "9 templates (PRJ-01 … PRJ-09) with rule IDs, quantity rules and review status/date fields", () => {
-    eq(D.templates.map((t) => t.project_id), ["PRJ-01", "PRJ-02", "PRJ-03", "PRJ-04", "PRJ-05", "PRJ-06", "PRJ-07", "PRJ-08", "PRJ-09"]);
-    eq(new Set(D.templates.map((t) => t.template_id)).size, 9, "unique template ids");
-    D.templates.forEach((t) => {
+  test("DR-04 / SR-10", "6 projects offered (doors & locks not offered for now); all 9 templates keep rule IDs, quantity rules and review fields", () => {
+    eq(D.templates.map((t) => t.project_id), ["PRJ-01", "PRJ-02", "PRJ-03", "PRJ-04", "PRJ-05", "PRJ-09"]);
+    eq(INACTIVE.map((t) => t.project_id), ["PRJ-06", "PRJ-07", "PRJ-08"], "glass door, lock, sliding door not offered");
+    assert(D.templates.every((t) => t.group !== "doors"), "no Doors & locks project offered");
+    eq(new Set(ALL().map((t) => t.template_id)).size, 9, "unique template ids");
+    ALL().forEach((t) => {
       assert(["basic", "mounting_light", "mounting_full"].includes(t.safety_level), "safety level of " + t.template_id);
       assert(t.review && "status" in t.review && "review_date" in t.review, "review fields in " + t.template_id);
       t.methods.concat([{ roles: t.common_roles }]).forEach((m) => m.roles.forEach((r) => {
@@ -1196,7 +1200,7 @@
     const paint = lim("paint_wall");
     assert(paint.includes("wall_width_m*room_height_m:null-60"), "paint area");
     assert(paint.includes("room_height_m:null-2.5"), "paint height");
-    const lock = lim(D.templates.find((x) => x.template_id.includes("lock")).template_id);
+    const lock = lim("change_interior_door_lock");
     ["backset_mm:55-55", "distance_mm[BB,PZ]:72-72", "distance_mm[WC]:78-78"].forEach((x) => assert(lock.includes(x), "lock " + x));
     // every limit equals the stop rule: the value on the limit passes, just beyond it stops
     const cabT = tpl("hang_wall_cabinet");
@@ -1227,7 +1231,7 @@
     const cat = box.querySelector('[data-catalogue-hint="board"]');
     assert(cat && cat.textContent.includes("120 × 25"), "board sizes shown");
     assert(box.querySelector('[data-split-hint="shelf_length_cm"]'), "split hint at the length");
-    ask(D.templates.find((x) => x.template_id.includes("sliding")), "Q2");
+    ask(tpl("install_sliding_door"), "Q2");
     assert(box.querySelector('[data-catalogue-hint="leaf"]'), "leaf sizes shown");
     // the stop names the crossed limit
     window.BBI18n.setLang("en");
@@ -1513,10 +1517,14 @@
     const u = (txt) => window.BBAI.templateUnderstand(txt, D.lexicon, IDS());
     eq(u("Ich will mein Wohnzimmer streichen").intent, "paint_wall");
     eq(u("I want to hang a painting").intent, "hang_picture", "'painting' is still a picture");
-    eq(u("Schiebetür über der Tür montieren").intent, "install_sliding_door");
     eq(u("Vliestapete tapezieren").intent, "hang_nonwoven_wallpaper");
-    eq(u("Zimmertürschloss wechseln").intent, "change_interior_door_lock");
-    eq(u("Glastür einbauen").intent, "install_glass_door");
+    // Doors & locks are not offered for now: not recognised in the app, keywords kept for later
+    ["Schiebetür über der Tür montieren", "Zimmertürschloss wechseln", "Glastür einbauen"].forEach((txt) =>
+      assert(!/door/.test(u(txt).intent), "not offered: " + txt + " → " + u(txt).intent));
+    const all = (txt) => window.BBAI.templateUnderstand(txt, D.lexicon, ALL().map((t) => t.template_id));
+    eq(all("Schiebetür über der Tür montieren").intent, "install_sliding_door");
+    eq(all("Zimmertürschloss wechseln").intent, "change_interior_door_lock");
+    eq(all("Glastür einbauen").intent, "install_glass_door");
     eq(u("Hängeschrank in der Küche aufhängen").intent, "hang_wall_cabinet");
     eq(u("Kippsicherung für den Kleiderschrank").intent, "anchor_shelf_anti_tip");
     eq(u("shelf on a solid brick wall").facts.wall_type, "solid_brick");
@@ -1830,15 +1838,16 @@
     assert(!renderResult(SHELF(), confirmed(SHELF_OK), null).querySelector(".howto"), "no links for PRJ-01");
   });
 
-  test("DR-04 (UI)", "Project buttons: 9 projects in 3 groups with icon; safety level only on the list", () => {
+  test("DR-04 (UI)", "Project buttons: 6 projects in 2 groups with icon (no Doors & locks); safety level only on the list", () => {
     const s = window.BBApp.state;
     s.data = D; s.chooseNotice = null; s.inputText = ""; s.busy = false; s.pendingGuesses = {};
     const box = document.getElementById("sandbox");
     box.replaceChildren(window.BBApp.viewChoose());
-    eq(box.querySelectorAll("[data-template]").length, 9);
-    eq(box.querySelectorAll(".template-group").length, 3);
+    eq(box.querySelectorAll("[data-template]").length, 6);
+    eq(box.querySelectorAll(".template-group").length, 2);
+    INACTIVE.forEach((t) => assert(!box.querySelector('[data-template="' + t.template_id + '"]'), "not offered: " + t.template_id));
     eq(box.querySelectorAll(".template-level").length, 0, "no safety level on the tiles (user request 3 Nov 2026)");
-    eq(box.querySelectorAll("[data-template] svg.icon").length, 9);
+    eq(box.querySelectorAll("[data-template] svg.icon").length, 6);
     assert(renderResult(SHELF(), confirmed(SHELF_OK), null).querySelector("[data-level]"), "safety level shown on the list");
   });
 
@@ -1871,6 +1880,7 @@
     window.BBI18n.setLang("en");
     try {
       D = await window.BBData.loadAll(CFG);
+      INACTIVE = await Promise.all((CFG.data.inactiveTemplates || []).map((p) => fetch(p).then((r) => { if (!r.ok) throw new Error(p); return r.json(); })));
       const raw = await loadRawRows();
       productRows = raw.products;
       stockRows = raw.stock;
