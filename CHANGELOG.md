@@ -6,6 +6,17 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Smaller language flag – 2026-11-03
+Summary (same as the pull request):
+- The language flag in the header is smaller (32 px instead of 52 px / 46 px on phones); the tap area stays 44 px (NFR-08)
+- Test result saved
+
+- **2026-11-03 – Smaller language flag.** `app/style.css`: `#lang-toggle` is a 44 px tap
+  area without its own border; the flag sits in a 32 px round `.flag-wrap` (`app/app.js`,
+  `renderHeader`). README updated.
+  *Why:* on the phone the button looked too big next to the title (iPhone screenshot).
+  *Prompt:* "The language button is too big, please change it."
+
 ## Milestone: Browser back stays inside the app (issue #101) – 2026-11-03
 Summary (same as the pull request):
 - Browser back / back swipe goes one step back inside the app (list → question → project; shopping → list); forward re-checks the answers (SR-08)
