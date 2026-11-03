@@ -990,14 +990,10 @@
     box.appendChild(viewSave(r));
     const howto = viewHowto(state.template);
     if (howto) box.appendChild(howto);
-    // NFR-05 / SR-10: how this list was made and the template's review status
-    const rv = r.review || {};
+    // NFR-05: how this list was made and the template version (review status not shown – user request 3 Nov 2026)
     box.appendChild(el("p", { class: "transparency", "data-transparency": "list" }, [
       el("span", { text: t("list_transparency") + " " }),
-      el("span", { text: t("list_template_status", {
-        version: r.template_version,
-        status: rv.status === "reviewed" ? t("template_reviewed") + (rv.review_date ? " (" + rv.review_date + ")" : "") : t("template_unreviewed")
-      }) })
+      el("span", { text: t("list_template_status", { version: r.template_version }) })
     ]));
     box.appendChild(viewEvidence(r));
     return box;
