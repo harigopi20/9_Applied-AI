@@ -6,6 +6,13 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: "I already have this" keeps the scroll position (issue #119) – 2026-11-03
+Summary (same as the pull request):
+- "I already have this" / "I need it after all" no longer jumps to the top of the list – the clicked item stays where it was on screen
+- The focus stays on the clicked button (keyboard and screen reader users stay in place too)
+- All other screen changes still start at the top
+- README and CHANGELOG updated; test result saved (120 passing)
+
 - **2026-11-03 – "I already have this" keeps the scroll position (issue #119).** `app/app.js`:
   `render()` takes an optional anchor; the "I already have this" / "I need it after all" button
   redraws the list with the clicked item at the same place on screen and the focus on its button,
