@@ -1403,6 +1403,29 @@
     }
   });
 
+  test("Back button", "In-app back button: shown on list/shopping/store (not on the first step, not on questions); tap = one step back", async () => {
+    const A = window.BBApp, s = A.state;
+    try {
+      freshFlow();
+      eq([s.screen, A.backVisible()], ["result", true], "list: back button shown");
+      const box = document.getElementById("sandbox");
+      box.replaceChildren(A.viewBack());
+      eq(box.querySelector("#back-btn").textContent.replace("‹", ""), "Back");
+      const p = popped();
+      box.querySelector("#back-btn").click();
+      await p;
+      eq([s.screen, A.backVisible()], ["question", false], "tap → previous step; questions use their own Back button");
+      await histBack();
+      eq([s.screen, A.nav.pos, A.backVisible()], ["choose", 1, false], "not on the first step (would leave the app)");
+      await histForward(); await histForward();
+      A.go("shopping");
+      eq(A.backVisible(), true, "shopping: shown");
+    } finally {
+      A.disableHistory();
+      document.getElementById("sandbox").replaceChildren();
+    }
+  });
+
   test("#101 (B)", "Back on the first step with a list asks 'Leave your list?' (save / stay / leave); without a list the app is left as usual", async () => {
     const A = window.BBApp, s = A.state;
     const orig = { go: A.nav.go, back: A.nav.back };
