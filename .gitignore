@@ -1,3 +1,6 @@
 # Test runner dependencies (npm install --prefix tools) – not part of the repository
 tools/node_modules/
 tools/package-lock.json
+
+# One-file trial build (node tools/build_trial.js) – generated, sent to testers
+trial/

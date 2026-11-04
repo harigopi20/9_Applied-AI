@@ -6,6 +6,16 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-11-04 – One-file trial of the app for testers.** New `tools/build_trial.js` builds
+  `trial/Baumarkt-Buddy-Trial.html`: all scripts, styles, fonts and data files embedded, `fetch()` of
+  the data answered from the embedded copy, D-13/D-14 preview always on. The file opens with a
+  double-click (no server, no git, no `?preview=d13`); checked headless from a separate folder:
+  store search, perforated brick 70 × 40 × 90 cm → size notice → weighed 21 kg → 12/14 mm plugs, no
+  console errors. `trial/` is in `.gitignore`; README updated. `app/` itself is unchanged.
+  *Why:* a colleague could not get the preview running and still saw the old stop.
+  *Prompt (paraphrased):* "Make a workaround so my colleague can simply open the app and try some
+  values – no tests, no code."
+
 - **2026-11-04 – Preview: size screen checks while typing; clearer "cabinet too heavy"; weigh your
   cabinet (CP-D14-W).** `app/preview-d13.js`: the size is checked as soon as all fields hold a number
   (no need to press Continue). The max. depth (cabinet: also max. width) is shown to the right of the

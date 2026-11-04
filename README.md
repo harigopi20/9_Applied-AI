@@ -210,6 +210,12 @@ rebuild. Without `?preview=d13` the app works exactly as before.
   (contents = plug max. − weighed weight) and is named on the list; above it the app stops.
   The weighed-weight path is a proposal for the team (`tpjm/change-proposal-CP-D14-W.md`).
 
+#### One-file trial for testers (no server, no git)
+`node tools/build_trial.js` writes **`trial/Baumarkt-Buddy-Trial.html`**: the whole app (scripts,
+styles, fonts, workbook, templates, PLZ table) in one file, with the D-13/D-14 preview always on.
+Send that file to a tester; they double-click it and it opens in their browser – no install, no
+local server, no `?preview=d13`. Rebuild it after every change (the file is not in git).
+
 ### Save test results
 The browser page shows the results only while it is open. To keep them as a file:
 ```bash
