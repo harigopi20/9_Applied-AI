@@ -6,6 +6,17 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: D-13/D-14 mounting logic preview, cabinet size check and 75 cm cabinet limit – 2026-11-05
+Summary (same as the pull request):
+- Catalogue data v3 with 6 stores (incl. OBI Schwabach): `product_catalogue.xlsx`, `products.csv`, `store_stock.csv`, `stores.csv` replaced; max. 6 stores shown (D-13/D-14 Step 1)
+- New rule functions: fixing chain R-17 and capacity R-18 from sheet *System ratings* (D-13/D-14 Step 2)
+- Preview mode `?preview=d13`: new mounting logic for shelf, wall cabinet and anti-tip inside the normal app; without `?preview=d13` the app works as before
+- Preview size screen checks while typing: max. depth/width beside the field, "too heavy" notice with sizes that fit, "I'll weigh my cabinet" (team decision open: `tpjm/change-proposal-CP-D14-W.md`)
+- Wall cabinet max. 75 cm wide (was 120 cm) – in the preview and in the released app; wider → several cabinets side by side (CAB-S1)
+- One-file trial build for testers: `node tools/build_trial.js` → `trial/Baumarkt-Buddy-Trial.html` (not in git)
+- Open for the team: update 120 → 75 cm in `data/project_catalogue.xlsx`; decide CP-D14-W
+- 127 tests passing; test results saved
+
 - **2026-11-04 – Preview: wall cabinet max. 75 cm wide (was 120 cm).** `app/config.js`
   `preview.d13.maxCabinetWidthCm` 120 → 75; too-wide text now "wall cabinets are max. 75 cm wide"
   (EN/DE); test CP-D14-W checks 75 cm allowed, 76 cm too wide. Released flow (template stop rule,
@@ -18,7 +29,6 @@ when they are released to `main`.
   60 cm instead of 80 cm; split 150 → 2 × 75; 110 cm as 2 cabinets → 2 rails). README updated.
   Open: `data/project_catalogue.xlsx` (source of the template, DR-04) still says 120 cm – the team
   updates it. *Prompt (paraphrased):* "Yes, change the released app too."
-
 - **2026-11-04 – One-file trial of the app for testers.** New `tools/build_trial.js` builds
   `trial/Baumarkt-Buddy-Trial.html`: all scripts, styles, fonts and data files embedded, `fetch()` of
   the data answered from the embedded copy, D-13/D-14 preview always on. The file opens with a
