@@ -2228,6 +2228,11 @@
     // A cabinet that fits by the estimate is unchanged
     const small = plan(wall, fit.width, D_, H);
     assert(small.options.length > 0 && !small.weighed, "fitting size: plugs offered from the estimate");
+    // Max. width of a wall cabinet: 75 cm (4 Nov 2026) – 75 cm is checked, 76 cm is too wide
+    const maxW = window.BB_CONFIG.preview.d13.maxCabinetWidthCm;
+    eq(maxW, 75, "max. cabinet width");
+    eq(!!plan("concrete", maxW, 30, 60).tooWide, false, maxW + " cm allowed");
+    eq(plan("concrete", maxW + 1, 30, 60).tooWide, true, (maxW + 1) + " cm too wide");
     return "max. " + p.maxCabinetKg + " kg cabinet; fit " + fit.height + " / " + fit.width + " / " + fit.depth + " cm (H / W / D)";
   });
 

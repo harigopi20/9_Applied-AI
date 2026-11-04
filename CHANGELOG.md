@@ -6,6 +6,12 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-11-04 – Preview: wall cabinet max. 75 cm wide (was 120 cm).** `app/config.js`
+  `preview.d13.maxCabinetWidthCm` 120 → 75; too-wide text now "wall cabinets are max. 75 cm wide"
+  (EN/DE); test CP-D14-W checks 75 cm allowed, 76 cm too wide. Released flow (template stop rule,
+  CAB-S1 split) unchanged. *Why:* 120 cm wall cabinets are not sold; usual widths are 60–75 cm.
+  *Prompt (paraphrased):* "Max. width 120 cm is too much – it should be 60 or 75 cm" (chose 75 cm).
+
 - **2026-11-04 – One-file trial of the app for testers.** New `tools/build_trial.js` builds
   `trial/Baumarkt-Buddy-Trial.html`: all scripts, styles, fonts and data files embedded, `fetch()` of
   the data answered from the embedded copy, D-13/D-14 preview always on. The file opens with a

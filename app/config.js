@@ -79,7 +79,7 @@ window.BB_CONFIG = Object.freeze({
       pictureTemplate: "hang_picture",       // picture keeps its weight question (D-2) – existing flow
       plugsPerBracket: 2,                    // confirmed by the team 3 Nov 2026 (slide: 3 brackets → 6 plugs)
       maxShelfLengthCm: 200,                 // longer → split into equal shelves or cut (D-13)
-      maxCabinetWidthCm: 120,                // longest mounting rail
+      maxCabinetWidthCm: 75,                 // usual wall cabinets are max. 60–75 cm wide (team, 4 Nov 2026)
       minSuggestedSizeCm: 10,                // "use this size" buttons for a too heavy cabinet never go below this
       longLevelFromCm: 120,                  // spirit level P371 (120 cm) above this length (FR-37)
       products: { spiritLevel: "P032", spiritLevelLong: "P371", antiTipKit: "P100", detector: "P034", drillHammer: "P040", drill: "P039" },

@@ -202,7 +202,7 @@ rebuild. Without `?preview=d13` the app works exactly as before.
 - Store selection (6 stores incl. OBI Schwabach) with aisle and stock on the list; English and German.
 - Code: `app/preview-d13.js` + `app/preview-d13.css`; settings in `app/config.js` → `preview.d13`.
   Stops only for wall "I don't know" and a wall cabinet too heavy for the wall; too deep → hint with the max. depth.
-- **Size screen checks while you type:** the max. depth (and for a cabinet the max. width) is shown to
+- **Size screen checks while you type:** the max. depth (and for a cabinet the max. width, 75 cm) is shown to
   the right of the field. As soon as all fields are filled, the size is checked without pressing
   *Continue*. A wall cabinet too heavy for the wall shows a notice on the same page: estimated weight,
   heaviest cabinet the wall takes (strongest plug ÷ 1.5), buttons with a height, width or depth that
