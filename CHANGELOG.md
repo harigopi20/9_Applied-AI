@@ -11,6 +11,13 @@ when they are released to `main`.
   (EN/DE); test CP-D14-W checks 75 cm allowed, 76 cm too wide. Released flow (template stop rule,
   CAB-S1 split) unchanged. *Why:* 120 cm wall cabinets are not sold; usual widths are 60–75 cm.
   *Prompt (paraphrased):* "Max. width 120 cm is too much – it should be 60 or 75 cm" (chose 75 cm).
+- **2026-11-04 – Released app: wall cabinet max. 75 cm wide per cabinet (was 120 cm).**
+  `app/data/templates/hang-wall-cabinet.json`: stop rule ST-04 width > 75, CAB-S1 `max_length` 75,
+  the "one or several cabinets?" question and its texts from 75 cm (EN/DE). Wider → several cabinets of
+  the same width (e.g. 150 cm → 2 × 75 cm), each with its own rail. Tests updated (cabinet sample
+  60 cm instead of 80 cm; split 150 → 2 × 75; 110 cm as 2 cabinets → 2 rails). README updated.
+  Open: `data/project_catalogue.xlsx` (source of the template, DR-04) still says 120 cm – the team
+  updates it. *Prompt (paraphrased):* "Yes, change the released app too."
 
 - **2026-11-04 – One-file trial of the app for testers.** New `tools/build_trial.js` builds
   `trial/Baumarkt-Buddy-Trial.html`: all scripts, styles, fonts and data files embedded, `fetch()` of

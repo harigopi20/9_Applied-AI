@@ -102,13 +102,13 @@
           "fact": "cabinet_layout",
           "type": "choice",
           "comment": "CAB-S1 (3 Nov 2026): only asked when the width is above the guide limit (segments.max_length).",
-          "show_when": { "gt": [{ "fact": "cabinet_width_cm" }, 120] },
+          "show_when": { "gt": [{ "fact": "cabinet_width_cm" }, 75] },
           "options": ["multiple", "single"],
           "option_labels": {
             "multiple": { "en": "Several cabinets of the same width side by side", "de": "Mehrere gleich breite Schränke nebeneinander" },
-            "single": { "en": "One wide cabinet (above 120 cm: ask staff)", "de": "Ein breiter Schrank (über 120 cm: Personal fragen)" }
+            "single": { "en": "One wide cabinet (above 75 cm: ask staff)", "de": "Ein breiter Schrank (über 75 cm: Personal fragen)" }
           },
-          "label": { "en": "Wider than 120 cm – how should it be built?", "de": "Breiter als 120 cm – wie soll es gebaut werden?" }
+          "label": { "en": "Wider than 75 cm – how should it be built?", "de": "Breiter als 75 cm – wie soll es gebaut werden?" }
         },
         {
           "fact": "cabinet_depth_cm",
@@ -213,7 +213,7 @@
               {
                 "fact": "cabinet_width_cm"
               },
-              120
+              75
             ]
           },
           {
@@ -446,11 +446,11 @@
   },
   "segments": {
     "rule_id": "CAB-S1",
-    "comment": "3 Nov 2026 (user request, same as SHELF-S1): above the guide width (ST-04, 120 cm per cabinet) several cabinets of the same width side by side. Each cabinet gets its own hanging rail, plugs and screws and is checked on its own for the full weight given (never divided); the plasterboard table (ST-03) is checked per cabinet. Team review (SR-10).",
+    "comment": "3 Nov 2026 (user request, same as SHELF-S1): above the guide width (ST-04, 75 cm per cabinet; was 120 cm until 4 Nov 2026 – wall cabinets are sold up to 60–75 cm wide) several cabinets of the same width side by side. Each cabinet gets its own hanging rail, plugs and screws and is checked on its own for the full weight given (never divided); the plasterboard table (ST-03) is checked per cabinet. Team review (SR-10).",
     "length_fact": "cabinet_width_cm",
     "layout_fact": "cabinet_layout",
     "split_value": "multiple",
-    "max_length": 120,
+    "max_length": 75,
     "unit": "cm",
     "sections": ["materials"],
     "texts": {
