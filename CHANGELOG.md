@@ -6,6 +6,26 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-11-04 – Preview: size screen checks while typing; clearer "cabinet too heavy"; weigh your
+  cabinet (CP-D14-W).** `app/preview-d13.js`: the size is checked as soon as all fields hold a number
+  (no need to press Continue). The max. depth (cabinet: also max. width) is shown to the right of the
+  field instead of the line "✓ wall: up to X cm deep"; on a phone it moves below the field. A wall
+  cabinet too heavy for the wall now gets a notice on the size page: estimated weight, heaviest
+  cabinet the wall takes (strongest plug ÷ min. plug factor 1.5), buttons with the largest height,
+  width or depth that fits (`cabinetSizeFit`, min. 10 cm, `config.preview.d13.minSuggestedSizeCm`)
+  and "I'll weigh my cabinet". A weighed weight up to that max. gives the plug options (contents =
+  plug max. − weighed weight), shown on the summary, as a list note and in the evidence log; above it
+  the stop screen names the weighed weight. Stop text rewritten: it no longer reads as if the cabinet
+  weighed 1.5 × its weight. `calc` is now exported without `?preview=d13` (screens stay inactive) so
+  `tests.html` can test it; new test `D-14 / CP-D14-W` (127 tests, all green). Checked in the browser:
+  70 × 40 × 90 cm on perforated brick (32 kg, max. 23 kg, sizes 56 / 45 / 21 cm, weighed 30 kg → stop,
+  21 kg → 12 and 14 mm plugs with 14 kg contents), EN/DE, phone width. README updated; team decision
+  needed on the weighed weight: `tpjm/change-proposal-CP-D14-W.md`.
+  *Why:* the stop came only after Continue, misnamed 48 kg as the cabinet weight and gave no way forward.
+  *Prompt:* "Check the dimensions in the background as they are entered and say on the page if there is a stop –
+  change the size or weigh the cabinet; if the weight is below the max., show the plugs; put the
+  permitted depth to the right of the field."
+
 - **2026-11-03 – Preview keeps all features of the app; only the new logic for shelf, wall cabinet
   and anti-tip.** `?preview=d13` now shows the normal project page (free text, voice, all six
   projects, groups) instead of a reduced chooser. Tiles, free text and voice lead shelf, wall

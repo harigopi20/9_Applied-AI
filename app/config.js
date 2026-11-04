@@ -80,6 +80,7 @@ window.BB_CONFIG = Object.freeze({
       plugsPerBracket: 2,                    // confirmed by the team 3 Nov 2026 (slide: 3 brackets → 6 plugs)
       maxShelfLengthCm: 200,                 // longer → split into equal shelves or cut (D-13)
       maxCabinetWidthCm: 120,                // longest mounting rail
+      minSuggestedSizeCm: 10,                // "use this size" buttons for a too heavy cabinet never go below this
       longLevelFromCm: 120,                  // spirit level P371 (120 cm) above this length (FR-37)
       products: { spiritLevel: "P032", spiritLevelLong: "P371", antiTipKit: "P100", detector: "P034", drillHammer: "P040", drill: "P039" },
       // Template roles with fixed products that the new logic replaces (spirit level P032/P371 by length,

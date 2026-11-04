@@ -5,3 +5,14 @@
 .pv-facts { margin: 8px 0; padding-left: 18px; }
 .pv-facts li { margin: 4px 0; }
 .pv-size .field { margin-bottom: 10px; }
+/* Size screen: max. beside the field (moves below it when the row is too narrow, e.g. on a phone) */
+.pv-size .number-row { flex-wrap: wrap; }
+.pv-limit { color: var(--muted); font-size: .95rem; white-space: nowrap; }
+/* Cabinet too heavy for the wall: notice on the size screen (CP-D14-W) */
+.pv-heavy p { margin: 0 0 8px; }
+.pv-heavy .pv-heavy-label { font-weight: 600; margin-top: 10px; }
+.pv-size-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.pv-weigh { margin: 4px 0 8px; }
+.pv-weigh .number-row { margin-bottom: 4px; }
+.pv-weigh-verdict { font-weight: 600; }
+.pv-weigh-verdict[data-pv-weigh="too_heavy"] { color: var(--warn); }

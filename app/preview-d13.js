@@ -2,8 +2,8 @@
  * Baumarkt-Buddy – PREVIEW of the D-13 / D-14 mounting logic.
  *
  * Active ONLY with "?preview=d13" in the URL (http://localhost:8000/app/?preview=d13).
- * Without it this file only sets BBPreviewD13 = { active: false } and app.js runs
- * exactly as before. tests.html does not load this file.
+ * Without it this file only sets BBPreviewD13 = { active: false, calc } and app.js runs
+ * exactly as before. tests.html loads this file for the pure calculation (calc) only.
  *
  * Everything of the normal app stays (project page, free text, voice, store
  * search, list, shopping by aisle, save/share, "I already have this", other
@@ -21,8 +21,9 @@
 (function (root) {
   "use strict";
 
+  // Without "?preview=d13" only the pure calculation is exported (BBPreviewD13.calc, used by tests.html);
+  // no screen, hook or style of the preview is active.
   const active = !!(root.location && new URLSearchParams(root.location.search).get("preview") === "d13");
-  if (!active) { root.BBPreviewD13 = Object.freeze({ active: false }); return; }
 
   const CFG = root.BB_CONFIG;
   const R = root.BBRules;
@@ -42,7 +43,16 @@
       wall_aerated_concrete: "Aerated concrete", wall_plasterboard: "Plasterboard", wall_wood: "Wood (solid or stud)", wall_unknown: "I don't know",
       size_q_shelf: "How big is your shelf?", size_q_cabinet: "How big is your cabinet?", size_q_antitip: "How big is the furniture?",
       length: "Length", width: "Width", depth: "Depth", height: "Height",
-      depth_ok: "✓ {wall}: up to {max} cm deep", too_deep: "Too deep for this wall: max. {max} cm. Please adjust the depth.",
+      limit_max: "max. {max} cm", too_deep: "Too deep for this wall: max. {max} cm. Please adjust the depth.",
+      heavy: "This cabinet is estimated at {w} kg. This wall ({wall}) takes a cabinet of max. {max} kg, because the fixing must hold 1.5 × the cabinet weight.",
+      heavy_resize: "Change the size:", use_size: "{dim} {v} cm",
+      heavy_weigh: "Or weigh your cabinet – our estimate is on the safe side, real cabinets are often lighter.", weigh_btn: "I'll weigh my cabinet",
+      weigh_label: "My cabinet weighs", weigh_tip: "Tip: stand on a bathroom scale holding the cabinet, then subtract your own weight.",
+      weigh_ok: "✓ {kg} kg is within the limit of {max} kg – Continue shows the plugs.",
+      weigh_too_heavy: "{kg} kg is over the limit of {max} kg for this wall.",
+      heavy_ask: "Or ask a store associate.", heavy_continue: "Please change the size or enter the weight you weighed.",
+      weight_weighed: "Weight: {kg} kg (weighed by you; estimate from the size {est} kg)",
+      n_weighed: "Cabinet weight given by the customer: {kg} kg (estimate from the size: {est} kg).",
       use_max: "Use {max} cm", width_max: "Too wide: max. {max} cm (longest mounting rail).",
       antitip_too_deep: "Deeper than {max} cm: please ask a store associate.",
       enter_number: "Please enter a number greater than 0 for every field.",
@@ -70,7 +80,8 @@
       safety_incl: "Safety factor {f} already included.",
       glass_hint: "Glass doors or a stone top? Please ask a store associate.",
       stop_title: "Please ask a store associate", stop_unknown_wall: "Without the wall type no plug can be chosen safely.",
-      stop_cabinet_heavy: "This cabinet is too heavy for this wall: no plug carries 1.5 × the cabinet weight ({kg} kg). Max. {cap} kg on this wall.",
+      stop_cabinet_heavy: "Your cabinet weighs about {w} kg. For safety, the wall fixing must hold 1.5 × that = {need} kg, but this wall holds max. {best} kg (strongest plug).",
+      stop_cabinet_heavy_weighed: "You weighed your cabinet at {w} kg. For safety, the wall fixing must hold 1.5 × that = {need} kg, but this wall holds max. {best} kg (strongest plug).",
       n_confirmed_shelf: "You confirmed: max. {kg} kg on the shelf ({plug}). Safety factor {f} included.",
       n_confirmed_cabinet: "You confirmed: max. {kg} kg inside the cabinet (cabinet ≈ {w} kg, {plug}). Safety factor {f} included.",
       n_hammer: "Drilling: hammer mode {mode} for this wall.", on: "ON", off: "OFF", n_pilot: "Wood: pre-drill a pilot hole, no wall plug.",
@@ -87,7 +98,16 @@
       wall_aerated_concrete: "Porenbeton", wall_plasterboard: "Gipskarton", wall_wood: "Holz (massiv oder Ständer)", wall_unknown: "Weiß ich nicht",
       size_q_shelf: "Wie groß ist dein Regal?", size_q_cabinet: "Wie groß ist dein Schrank?", size_q_antitip: "Wie groß ist das Möbel?",
       length: "Länge", width: "Breite", depth: "Tiefe", height: "Höhe",
-      depth_ok: "✓ {wall}: bis {max} cm tief", too_deep: "Zu tief für diese Wand: max. {max} cm. Bitte passe die Tiefe an.",
+      limit_max: "max. {max} cm", too_deep: "Zu tief für diese Wand: max. {max} cm. Bitte passe die Tiefe an.",
+      heavy: "Dieser Schrank wiegt geschätzt {w} kg. Diese Wand ({wall}) trägt einen Schrank von max. {max} kg, weil die Befestigung das 1,5-fache Schrankgewicht halten muss.",
+      heavy_resize: "Größe ändern:", use_size: "{dim} {v} cm",
+      heavy_weigh: "Oder wiege deinen Schrank – unsere Schätzung ist vorsichtig, echte Schränke sind oft leichter.", weigh_btn: "Ich wiege meinen Schrank",
+      weigh_label: "Mein Schrank wiegt", weigh_tip: "Tipp: Stell dich mit dem Schrank auf eine Personenwaage und zieh dein eigenes Gewicht ab.",
+      weigh_ok: "✓ {kg} kg liegt im Limit von {max} kg – „Weiter“ zeigt die Dübel.",
+      weigh_too_heavy: "{kg} kg liegt über dem Limit von {max} kg für diese Wand.",
+      heavy_ask: "Oder frag eine Fachberatung im Markt.", heavy_continue: "Bitte ändere die Größe oder gib das gewogene Gewicht ein.",
+      weight_weighed: "Gewicht: {kg} kg (von dir gewogen; Schätzung aus der Größe {est} kg)",
+      n_weighed: "Schrankgewicht vom Kunden angegeben: {kg} kg (Schätzung aus der Größe: {est} kg).",
       use_max: "{max} cm übernehmen", width_max: "Zu breit: max. {max} cm (längste Montageschiene).",
       antitip_too_deep: "Tiefer als {max} cm: bitte frag eine Fachberatung im Markt.",
       enter_number: "Bitte gib in jedes Feld eine Zahl größer als 0 ein.",
@@ -115,7 +135,8 @@
       safety_incl: "Sicherheitsfaktor {f} ist schon eingerechnet.",
       glass_hint: "Glastüren oder Steinplatte? Bitte frag eine Fachberatung im Markt.",
       stop_title: "Bitte frag eine Fachberatung im Markt", stop_unknown_wall: "Ohne die Wandart kann kein Dübel sicher gewählt werden.",
-      stop_cabinet_heavy: "Dieser Schrank ist zu schwer für diese Wand: kein Dübel trägt das 1,5-fache Schrankgewicht ({kg} kg). Max. {cap} kg an dieser Wand.",
+      stop_cabinet_heavy: "Dein Schrank wiegt etwa {w} kg. Zur Sicherheit muss die Befestigung das 1,5-fache halten = {need} kg, diese Wand trägt aber max. {best} kg (stärkster Dübel).",
+      stop_cabinet_heavy_weighed: "Du hast deinen Schrank mit {w} kg gewogen. Zur Sicherheit muss die Befestigung das 1,5-fache halten = {need} kg, diese Wand trägt aber max. {best} kg (stärkster Dübel).",
       n_confirmed_shelf: "Du hast bestätigt: max. {kg} kg auf dem Regal ({plug}). Sicherheitsfaktor {f} eingerechnet.",
       n_confirmed_cabinet: "Du hast bestätigt: max. {kg} kg im Schrank (Schrank ≈ {w} kg, {plug}). Sicherheitsfaktor {f} eingerechnet.",
       n_hammer: "Bohren: Schlagbohren {mode} bei dieser Wand.", on: "AN", off: "AUS", n_pilot: "Holz: vorbohren, kein Dübel.",
@@ -171,14 +192,20 @@
     return { tooDeep: false, shelves, segCm, board25, bracketsPerShelf, brackets: bracketsPerShelf * shelves, options, wallCapKg: w.wallCapKg };
   }
 
-  /** Wall cabinet (D-14): weight from the size, rail, plug options with max. contents. */
-  function cabinetPlan(m, cat, wall, widthCm, depthCm, heightCm) {
+  /**
+   * Wall cabinet (D-14): weight from the size, rail, plug options with max. contents.
+   * weighedKg (optional): the weight the customer weighed. Only used when the estimate from
+   * the size blocks (CP-D14-W, needs team approval) and only up to maxCabinetKg.
+   */
+  function cabinetPlan(m, cat, wall, widthCm, depthCm, heightCm, weighedKg) {
     const w = m.walls[wall];
     if (depthCm > w.cabinetMaxDepthCm) return { tooDeep: true, maxDepthCm: w.cabinetMaxDepthCm };
     if (widthCm > P.maxCabinetWidthCm) return { tooWide: true, maxWidthCm: P.maxCabinetWidthCm };
     // Sheet Cabinet: panel surface m² = (2·H·D + 3·W·D + 2·W·H) ÷ 10000; weight = ROUNDUP(surface × kg/m²)
     const surfaceM2 = (2 * heightCm * depthCm + 3 * widthCm * depthCm + 2 * widthCm * heightCm) / 10000;
-    const weightKg = Math.ceil(surfaceM2 * m.cabinet.panelKgPerM2 - 1e-9);
+    const estimateKg = Math.ceil(surfaceM2 * m.cabinet.panelKgPerM2 - 1e-9);
+    const weighed = weighedKg > 0;
+    const weightKg = weighed ? weighedKg : estimateKg;
     const minKg = weightKg * m.cabinet.minPlugFactor;
     const points = Math.ceil(widthCm / 30 - 1e-9) + 1; // sheet Cabinet: fixing points = ROUNDUP(W ÷ 30) + 1
     const rails = byVariant(cat, P.variants.rail);
@@ -195,10 +222,32 @@
       const cap = R.capacity({ kind: "cabinet", wall, plugMm: mm, depthCm, heightCm, railKg: rail.max_load_kg }, m);
       if (!cap.offered) continue;
       const hanger = byVariant(cat, P.variants.hangers).find((h) => h.specs.class === rail.specs.class) || null;
-      const opt = { mm, total: cap.maxKg, kg: Math.max(0, cap.maxKg - weightKg), cap, chain: c, rail, hanger };
+      const opt = { mm, total: cap.maxKg, kg: Math.max(0, Math.floor(cap.maxKg - weightKg + 1e-9)), cap, chain: c, rail, hanger };
       if (cap.maxKg >= minKg) options.push(opt); else hidden.push(opt);
     }
-    return { tooDeep: false, tooWide: false, surfaceM2, weightKg, minKg, points, options, hidden, capKg: w.cabinetCapKg };
+    // Heaviest cabinet this wall takes: the strongest option must carry min. plug factor × cabinet weight
+    const bestTotalKg = Math.max(0, ...options.concat(hidden).map((o) => o.total));
+    const maxCabinetKg = Math.floor(bestTotalKg / m.cabinet.minPlugFactor + 1e-9);
+    if (weighed && weighedKg > maxCabinetKg) options.length = 0; // weighed, but still too heavy → stop
+    return { tooDeep: false, tooWide: false, surfaceM2, estimateKg, weighed, weightKg, minKg, points, options, hidden, capKg: w.cabinetCapKg, bestTotalKg, maxCabinetKg };
+  }
+
+  /**
+   * Sizes that fit when the estimate blocks: for each of height, width and depth (the other two
+   * unchanged) the largest whole cm below the entered value for which a plug is offered.
+   * null when none down to minSuggestedSizeCm fits.
+   */
+  function cabinetSizeFit(m, cat, wall, widthCm, depthCm, heightCm) {
+    const size = { width: widthCm, depth: depthCm, height: heightCm };
+    const fits = (s) => { const p = cabinetPlan(m, cat, wall, s.width, s.depth, s.height); return !p.tooDeep && !p.tooWide && p.options.length > 0; };
+    const out = {};
+    ["height", "width", "depth"].forEach((k) => {
+      out[k] = null;
+      for (let v = Math.ceil(size[k] - 1e-9) - 1; v >= P.minSuggestedSizeCm; v--) {
+        if (fits(Object.assign({}, size, { [k]: v }))) { out[k] = v; break; }
+      }
+    });
+    return out;
   }
 
   /** Anti-tip (D-14): depth → plug size, width → kits, height → stronger + 2 fixings (sheet Anti-tip). */
@@ -230,7 +279,9 @@
   // State of the preview flow and the result for the normal list screen
   // ---------------------------------------------------------------------
   let X = null; // context from app.js: state, el, icon, go, render, recompute, resetProject, ...
-  const pv = { project: null, tpl: null, wall: null, size: {}, plan: null, opt: null, sizeNotice: null, guesses: {} };
+  // weighing / weighedKg: the customer chose to weigh a cabinet that is too heavy by the estimate (CP-D14-W);
+  // checkedSize: the size the background check last saw (another size clears the weighed weight)
+  const pv = { project: null, tpl: null, wall: null, size: {}, plan: null, opt: null, weighing: false, weighedKg: null, checkedSize: null, guesses: {} };
   const PROJECTS = {
     hang_shelf: { id: "shelf", key: "prj_shelf" },
     hang_wall_cabinet: { id: "cabinet", key: "prj_cabinet" },
@@ -262,7 +313,7 @@
   function start(tpl, guesses) {
     pv.project = PROJECTS[tpl.template_id].id;
     pv.tpl = tpl;
-    pv.wall = null; pv.size = {}; pv.plan = null; pv.opt = null; pv.sizeNotice = null;
+    pv.wall = null; pv.size = {}; pv.plan = null; pv.opt = null; pv.weighing = false; pv.weighedKg = null; pv.checkedSize = null;
     const g = guesses || {};
     const wallGuess = g.wall_type && g.wall_type.value;
     const wallMap = { brick: "brick_unknown" };
@@ -382,14 +433,15 @@
     } else if (pv.project === "cabinet") {
       const p = pv.plan, o = pv.opt, c = o.chain;
       loadKg = o.total; hammer = c.hammer && c.fixingType !== "screw";
-      log("R-20", "cabinet weight", p.weightKg + " kg (" + num(p.surfaceM2, "en") + " m² × " + m.cabinet.panelKgPerM2 + " kg/m²); smallest plug ≥ " + p.minKg + " kg", "sheets System ratings + Cabinet");
+      log("R-20", "cabinet weight", (p.weighed ? p.weightKg + " kg weighed by the customer (CP-D14-W); estimate " + p.estimateKg + " kg" : p.weightKg + " kg") + " (" + num(p.surfaceM2, "en") + " m² × " + m.cabinet.panelKgPerM2 + " kg/m²); smallest plug ≥ " + num(p.minKg, "en") + " kg", p.weighed ? "fact:customer + sheets System ratings + Cabinet" : "sheets System ratings + Cabinet");
       log("R-18", "capacity " + o.mm + " mm", "total " + o.total + " kg, contents " + o.kg + " kg (rail " + o.rail.max_load_kg + " kg, f " + num(o.cap.f, "en") + ")");
       add("rail", "materials", lbl("l_rail"), o.rail, 1, "R-17", lb);
       if (o.hanger) add("hangers", "materials", lbl("l_hanger"), o.hanger, o.hanger.pack_qty || 1, "R-17", lb);
       if (c.plug) add("wall_plug", "materials", lbl("l_plug"), c.plug, p.points, "R-17");
       if (c.screw) add("screw", "materials", lbl("l_screw"), c.screw, p.points, "R-17");
       bitTool = c.drillBit;
-      notices.push({ id: "pv_confirmed", rule_id: "SR-19", text: { en: fill(TEXT.en.n_confirmed_cabinet, { kg: o.kg, w: p.weightKg, plug: optLabel(o, "en"), f: num(sf, "en") }), de: fill(TEXT.de.n_confirmed_cabinet, { kg: o.kg, w: p.weightKg, plug: optLabel(o, "de"), f: num(sf, "de") }) } });
+      notices.push({ id: "pv_confirmed", rule_id: "SR-19", text: { en: fill(TEXT.en.n_confirmed_cabinet, { kg: o.kg, w: num(p.weightKg, "en"), plug: optLabel(o, "en"), f: num(sf, "en") }), de: fill(TEXT.de.n_confirmed_cabinet, { kg: o.kg, w: num(p.weightKg, "de"), plug: optLabel(o, "de"), f: num(sf, "de") }) } });
+      if (p.weighed) notices.push({ id: "pv_weighed", rule_id: "CP-D14-W", text: { en: fill(TEXT.en.n_weighed, { kg: num(p.weightKg, "en"), est: p.estimateKg }), de: fill(TEXT.de.n_weighed, { kg: num(p.weightKg, "de"), est: p.estimateKg }) } });
       notices.push({ id: "pv_glass", rule_id: "D-14", text: both("glass_hint") });
       add("spirit_level", "tools", lbl("l_level"), cat.get(pv.size.width > P.longLevelFromCm ? P.products.spiritLevelLong : P.products.spiritLevel), 1, "FR-37", { ownable: true });
       hammerNotice(pv.wall, c.hammer);
@@ -503,6 +555,18 @@
     return Math.max(...m.antiTip.rows.map((r) => r.maxDepthCm));
   }
 
+  /** Max. per size field, shown to the right of the field ("max. 40 cm"); null = no limit. */
+  function maxFor(f) {
+    if (f === "depth") return maxDepthFor();
+    if (f === "width" && pv.project === "cabinet") return P.maxCabinetWidthCm;
+    return null;
+  }
+
+  /**
+   * Size screen. Checked in the background as soon as every field holds a number (no need to press
+   * Continue): too deep / too wide → hint with the max.; a cabinet too heavy for the wall → notice
+   * on this page with sizes that fit and the option to weigh the cabinet (CP-D14-W).
+   */
   function viewSize() {
     const fields = SIZE_FIELDS[pv.project];
     const inputs = {};
@@ -513,44 +577,120 @@
       const input = X.el("input", { type: "text", inputmode: "decimal", autocomplete: "off", class: "input", id: "pv-" + f, "aria-label": tr(f) });
       input.value = pv.size[f] !== undefined ? String(pv.size[f]) : "";
       inputs[f] = input;
+      const max = maxFor(f);
+      const limit = max === null ? null : X.el("span", { class: "pv-limit", id: "pv-" + f + "-max", "data-pv-max": f, "data-pv-depth-max": f === "depth" ? String(max) : null, text: tr("limit_max", { max }) });
+      if (limit) input.setAttribute("aria-describedby", limit.id);
       form.appendChild(X.el("div", { class: "field" }, [
         X.el("label", { class: "field-label", for: "pv-" + f, text: tr(f) }),
-        X.el("div", { class: "number-row" }, [input, X.el("span", { class: "unit", text: "cm" })])
+        X.el("div", { class: "number-row" }, [input, X.el("span", { class: "unit", text: "cm" }), limit])
       ]));
     });
-    if (pv.project !== "antitip") form.appendChild(X.el("p", { class: "hint", "data-pv-depth-max": String(maxDepthFor()), text: tr("depth_ok", { wall: tr("wall_" + pv.wall), max: maxDepthFor() }) }));
     const notice = X.el("div", { role: "status", "aria-live": "polite" });
     form.appendChild(notice);
-    const showNotice = (n) => {
-      notice.replaceChildren();
-      if (!n) return;
-      notice.appendChild(X.el("p", { class: "hint warn-hint", "data-pv-notice": n.id, text: n.text }));
-      if (n.useMax) notice.appendChild(btn(tr("use_max", { max: n.useMax }), () => { inputs.depth.value = String(n.useMax); notice.replaceChildren(); }, "small", { "data-pv-use-max": String(n.useMax) }));
-    };
-    showNotice(pv.sizeNotice);
-    form.appendChild(X.el("div", { class: "actions" }, [X.el("button", { type: "submit", class: "btn primary", id: "pv-next", text: tr("next") })]));
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
+    const err = X.el("p", { class: "error", role: "alert" });
+    const m = data().mounting, cat = data().catalogue;
+
+    /** All fields as numbers > 0, else null. */
+    const readSize = () => {
       const vals = {};
       for (const f of fields) {
         const n = R.parseDecimal(inputs[f].value);
-        if (!(typeof n === "number" && Number.isFinite(n) && n > 0)) { showNotice({ id: "number", text: tr("enter_number") }); return; }
+        if (!(typeof n === "number" && Number.isFinite(n) && n > 0)) return null;
         vals[f] = n;
       }
-      pv.size = vals;
-      const m = data().mounting, cat = data().catalogue;
-      const plan = pv.project === "shelf" ? shelfPlan(m, cat, pv.wall, vals.length, vals.depth)
-        : pv.project === "cabinet" ? cabinetPlan(m, cat, pv.wall, vals.width, vals.depth, vals.height)
-        : antiTipPlan(m, cat, pv.wall, vals.width, vals.depth, vals.height);
+      return vals;
+    };
+    const sameSize = (a, b) => !!(a && b) && fields.every((f) => a[f] === b[f]);
+    const planFor = (vals, weighedKg) => pv.project === "shelf" ? shelfPlan(m, cat, pv.wall, vals.length, vals.depth)
+      : pv.project === "cabinet" ? cabinetPlan(m, cat, pv.wall, vals.width, vals.depth, vals.height, weighedKg)
+      : antiTipPlan(m, cat, pv.wall, vals.width, vals.depth, vals.height);
+    const parseKg = (s) => { const n = R.parseDecimal(s); return typeof n === "number" && Number.isFinite(n) && n > 0 ? n : null; };
+
+    /** Notice for too heavy: estimate, max., "use this size" buttons, weigh option. */
+    function heavyNotice(vals, plan) {
+      const box = X.el("div", { class: "hint warn-hint pv-heavy", "data-pv-notice": "too_heavy", "data-pv-weight": String(plan.estimateKg), "data-pv-max-kg": String(plan.maxCabinetKg) });
+      box.appendChild(X.el("p", { text: tr("heavy", { w: plan.estimateKg, wall: tr("wall_" + pv.wall), max: plan.maxCabinetKg }) }));
+      const fit = cabinetSizeFit(m, cat, pv.wall, vals.width, vals.depth, vals.height);
+      const sizes = ["height", "width", "depth"].filter((k) => fit[k] !== null);
+      if (sizes.length) {
+        box.appendChild(X.el("p", { class: "pv-heavy-label", text: tr("heavy_resize") }));
+        box.appendChild(X.el("div", { class: "pv-size-btns" }, sizes.map((k) => btn(tr("use_size", { dim: tr(k), v: fit[k] }), () => {
+          inputs[k].value = String(fit[k]);
+          check();
+          inputs[k].focus();
+        }, "small", { "data-pv-use-size": k, "data-value": String(fit[k]) }))));
+      }
+      box.appendChild(X.el("p", { class: "pv-heavy-label", text: tr("heavy_weigh") }));
+      const weighBox = X.el("div", { class: "pv-weigh" });
+      const showWeigh = () => {
+        const kgInput = X.el("input", { type: "text", inputmode: "decimal", autocomplete: "off", class: "input", id: "pv-weighed", "aria-describedby": "pv-weigh-tip" });
+        kgInput.value = pv.weighedKg ? String(pv.weighedKg) : "";
+        const verdict = X.el("p", { class: "pv-weigh-verdict", "aria-live": "polite" });
+        const judge = () => {
+          const kg = parseKg(kgInput.value);
+          pv.weighedKg = kg;
+          err.textContent = "";
+          verdict.replaceChildren();
+          if (kg === null) return;
+          const ok = kg <= plan.maxCabinetKg;
+          verdict.setAttribute("data-pv-weigh", ok ? "ok" : "too_heavy");
+          verdict.textContent = tr(ok ? "weigh_ok" : "weigh_too_heavy", { kg: num(kg), max: plan.maxCabinetKg });
+        };
+        kgInput.addEventListener("input", judge);
+        weighBox.replaceChildren(
+          X.el("label", { class: "field-label", for: "pv-weighed", text: tr("weigh_label") }),
+          X.el("div", { class: "number-row" }, [kgInput, X.el("span", { class: "unit", text: "kg" })]),
+          X.el("p", { class: "muted small", id: "pv-weigh-tip", text: tr("weigh_tip") }),
+          verdict);
+        judge();
+        return kgInput;
+      };
+      if (pv.weighing) showWeigh();
+      else weighBox.appendChild(btn(tr("weigh_btn"), () => { pv.weighing = true; showWeigh().focus(); }, "small", { id: "pv-weigh-btn" }));
+      box.appendChild(weighBox);
+      box.appendChild(X.el("p", { class: "muted small", text: tr("heavy_ask") }));
+      return box;
+    }
+
+    /** Background check of the entered size; returns { vals, plan } or null while a field is empty. */
+    function check() {
+      const vals = readSize();
+      if (!vals) { notice.replaceChildren(); return null; }
+      if (!sameSize(vals, pv.checkedSize)) { pv.weighing = false; pv.weighedKg = null; } // other size = other cabinet
+      pv.checkedSize = vals;
+      const plan = planFor(vals);
+      notice.replaceChildren();
+      err.textContent = "";
       // Too deep / too wide → hint with the max., the customer adjusts (no stop, D-13)
       if (plan.tooDeep) {
-        pv.sizeNotice = pv.project === "antitip"
-          ? { id: "too_deep", text: tr("antitip_too_deep", { max: plan.maxDepthCm }) }
-          : { id: "too_deep", text: tr("too_deep", { max: plan.maxDepthCm }), useMax: plan.maxDepthCm };
-        showNotice(pv.sizeNotice); return;
+        notice.appendChild(X.el("p", { class: "hint warn-hint", "data-pv-notice": "too_deep", text: tr(pv.project === "antitip" ? "antitip_too_deep" : "too_deep", { max: plan.maxDepthCm }) }));
+        if (pv.project !== "antitip") notice.appendChild(btn(tr("use_max", { max: plan.maxDepthCm }), () => { inputs.depth.value = String(plan.maxDepthCm); check(); }, "small", { "data-pv-use-max": String(plan.maxDepthCm) }));
+      } else if (plan.tooWide) {
+        notice.appendChild(X.el("p", { class: "hint warn-hint", "data-pv-notice": "too_wide", text: tr("width_max", { max: plan.maxWidthCm }) }));
+      } else if (pv.project === "cabinet" && !plan.options.length) {
+        notice.appendChild(heavyNotice(vals, plan));
+      } else if (pv.project === "cabinet") {
+        notice.appendChild(X.el("p", { class: "muted small", "data-pv-weight": String(plan.weightKg), text: tr("weight", { kg: plan.weightKg }) }));
       }
-      if (plan.tooWide) { pv.sizeNotice = { id: "too_wide", text: tr("width_max", { max: plan.maxWidthCm }) }; showNotice(pv.sizeNotice); return; }
-      pv.sizeNotice = null; pv.plan = plan; pv.opt = null;
+      return { vals, plan };
+    }
+    fields.forEach((f) => inputs[f].addEventListener("input", check));
+    check();
+
+    form.appendChild(err);
+    form.appendChild(X.el("div", { class: "actions" }, [X.el("button", { type: "submit", class: "btn primary", id: "pv-next", text: tr("next") })]));
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      err.textContent = "";
+      const c = check();
+      if (!c) { err.textContent = tr("enter_number"); return; }
+      let plan = c.plan;
+      if (plan.tooDeep || plan.tooWide) return; // the hint with the max. is on this page
+      if (pv.project === "cabinet" && !plan.options.length) {
+        if (!pv.weighedKg) { err.textContent = tr("heavy_continue"); return; } // stays here: change the size or weigh
+        plan = planFor(c.vals, pv.weighedKg); // weighed: the customer's weight decides (CP-D14-W)
+      }
+      pv.size = c.vals; pv.plan = plan; pv.opt = null;
       if (pv.project === "cabinet" && !plan.options.length) { X.go("pv_stop"); return; }
       X.go("pv_summary");
     });
@@ -576,8 +716,10 @@
     } else if (pv.project === "cabinet") {
       head = tr("cabinet_title");
       items = [
-        { "data-pv-weight": String(p.weightKg), text: tr("weight", { kg: p.weightKg }) },
-        { class: "muted small", text: tr("weight_note", { k: num(m.cabinet.panelKgPerM2) }) },
+        p.weighed
+          ? { "data-pv-weight": String(p.weightKg), "data-pv-weighed": "1", text: tr("weight_weighed", { kg: num(p.weightKg), est: p.estimateKg }) }
+          : { "data-pv-weight": String(p.weightKg), text: tr("weight", { kg: p.weightKg }) },
+        p.weighed ? null : { class: "muted small", text: tr("weight_note", { k: num(m.cabinet.panelKgPerM2) }) },
         tr("rail", { len: p.options[0].rail.specs.rail_length_mm, n: p.points })
       ];
     } else {
@@ -661,7 +803,10 @@
 
   function viewStop() {
     let text = tr("stop_unknown_wall");
-    if (pv.wall !== "unknown" && pv.project === "cabinet" && pv.plan) text = tr("stop_cabinet_heavy", { kg: num(pv.plan.minKg), cap: pv.plan.capKg });
+    const p = pv.plan;
+    if (pv.wall !== "unknown" && pv.project === "cabinet" && p) {
+      text = tr(p.weighed ? "stop_cabinet_heavy_weighed" : "stop_cabinet_heavy", { w: num(p.weightKg), need: num(p.minKg), best: p.bestTotalKg });
+    }
     return X.el("section", { class: "card stop", role: "alert", "data-preview-screen": "pv_stop" }, [
       banner(),
       X.el("h2", { text: tr("stop_title") }),
@@ -682,11 +827,14 @@
     return PROGRESS[sc] ? { step: PROGRESS[sc], stop: false } : null;
   }
 
+  const calc = Object.freeze({ shelfPlan, cabinetPlan, cabinetSizeFit, antiTipPlan }); // pure – also for tests.html and the browser console
+  if (!active) { root.BBPreviewD13 = Object.freeze({ active: false, calc }); return; }
+
   root.BBPreviewD13 = Object.freeze({
     active: true,
     workbook: P.workbook,
     init, progress, handles, owns, start, edit, ready, result, decorate,
     screens: Object.freeze({ pv_wall: viewWall, pv_size: viewSize, pv_summary: viewSummary, pv_plug: viewPlug, pv_fix: viewFix, pv_confirm: viewConfirm, pv_stop: viewStop }),
-    calc: Object.freeze({ shelfPlan, cabinetPlan, antiTipPlan }) // for checks in the browser console
+    calc
   });
 })(typeof window !== "undefined" ? window : globalThis);

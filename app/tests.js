@@ -2191,6 +2191,46 @@
     return n + " cabinet rows checked";
   });
 
+  test("D-14 / CP-D14-W", "Cabinet too heavy (preview): estimate from the size, heaviest cabinet the wall takes, sizes that fit, weighed weight", () => {
+    const M = D.mounting, C = window.BBPreviewD13.calc;
+    assert(C && C.cabinetPlan, "preview calculation loaded without ?preview=d13");
+    eq(window.BBPreviewD13.active, false, "preview screens stay inactive in tests.html");
+    const plan = (wall, w, d, h, kg) => C.cabinetPlan(M, D.catalogue, wall, w, d, h, kg);
+    // User case 4 Nov 2026: 70 × 40 × 90 cm on perforated brick
+    const wall = "brick_unknown", W = 70, D_ = 40, H = 90;
+    const p = plan(wall, W, D_, H);
+    const surface = (2 * H * D_ + 3 * W * D_ + 2 * W * H) / 10000;
+    eq(p.estimateKg, Math.ceil(surface * M.cabinet.panelKgPerM2 - 1e-9), "estimate = ROUNDUP(surface × kg/m²)");
+    eq([p.weighed, p.weightKg], [false, p.estimateKg], "no weighed weight → estimate decides");
+    const best = Math.max(...M.plugSizes.map((mm) => {
+      const c = R.capacity({ kind: "cabinet", wall, plugMm: mm, depthCm: D_, heightCm: H }, M);
+      return c.offered ? c.maxKg : 0;
+    }));
+    eq(p.bestTotalKg, best, "strongest plug option on this wall");
+    eq(p.maxCabinetKg, Math.floor(best / M.cabinet.minPlugFactor + 1e-9), "heaviest cabinet = strongest ÷ min. plug factor");
+    assert(p.estimateKg > p.maxCabinetKg && p.options.length === 0, "estimate " + p.estimateKg + " kg > max. " + p.maxCabinetKg + " kg → no plug offered");
+    // Sizes that fit: the suggested value fits, 1 cm more does not
+    const fit = C.cabinetSizeFit(M, D.catalogue, wall, W, D_, H);
+    const ok = (w, d, h) => { const x = plan(wall, w, d, h); return !x.tooDeep && !x.tooWide && x.options.length > 0; };
+    [["height", (v) => ok(W, D_, v)], ["width", (v) => ok(v, D_, H)], ["depth", (v) => ok(W, v, H)]].forEach(([k, fits]) => {
+      assert(fit[k] !== null, k + " suggested");
+      assert(fits(fit[k]), k + " " + fit[k] + " cm fits");
+      assert(!fits(fit[k] + 1), k + " " + (fit[k] + 1) + " cm does not fit (largest value suggested)");
+      assert(plan(wall, k === "width" ? fit[k] : W, k === "depth" ? fit[k] : D_, k === "height" ? fit[k] : H).estimateKg <= p.maxCabinetKg, k + ": estimate within the max.");
+    });
+    // Weighed weight (CP-D14-W): up to the max. → plugs offered, contents = total − weighed; above → none
+    const atMax = plan(wall, W, D_, H, p.maxCabinetKg);
+    eq([atMax.weighed, atMax.weightKg], [true, p.maxCabinetKg]);
+    assert(atMax.options.length > 0, "weighed " + p.maxCabinetKg + " kg → plugs offered");
+    atMax.options.forEach((o) => eq(o.kg, Math.floor(o.total - p.maxCabinetKg + 1e-9), o.mm + " mm: contents = total − weighed weight"));
+    const over = plan(wall, W, D_, H, p.maxCabinetKg + 0.5);
+    eq(over.options.length, 0, "weighed above the max. → no plug offered (stop)");
+    // A cabinet that fits by the estimate is unchanged
+    const small = plan(wall, fit.width, D_, H);
+    assert(small.options.length > 0 && !small.weighed, "fitting size: plugs offered from the estimate");
+    return "max. " + p.maxCabinetKg + " kg cabinet; fit " + fit.height + " / " + fit.width + " / " + fit.depth + " cm (H / W / D)";
+  });
+
   test("TC-115 / FR-09 / RB-27", "Fixing chain: screw Ø ≤ hole Ø − 0.5 mm, plug type and hammer mode match the wall, bit = plug size", () => {
     const M = D.mounting;
     const walls = gridRows(sheetGrids.chain, ["wall", "fixing type"], /^[a-z_]+$/).rows;
