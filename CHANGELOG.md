@@ -6,6 +6,21 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Section bands – part count on the same line as the category name – 2026-11-05
+Summary (same as the pull request):
+- In the dark section bands the part count ("2 parts" / "2 Teile") now sits on the same baseline as the category name
+- The icon stays vertically centred; band height and layout unchanged; no change on narrow phones where the count wraps under the name
+- 133 tests passing; test results saved
+
+- **2026-11-05 – Section bands: part count aligned with the name.** `app/style.css`: the band heading
+  (`.list-section .section-head h3`) aligns its items on the text baseline instead of centring them
+  (`align-items: baseline`); `.sec-icon` keeps `align-self: center`. Before, the smaller count sat about
+  3 px higher than the name. Measured in the browser at 390 and 770 px, EN/DE: name and count now share
+  the same baseline. No code or text change.
+  *Why:* the count looked higher than the category name (iPad screenshot of "Safety gear (optional)
+  2 parts"). *Prompt (paraphrased):* "Correct the height of the part count, e.g. '2 parts' – put it at
+  the same height as the category."
+
 ## Milestone: Mark tools and safety gear as "(optional)" in the shopping list (issue #168) – 2026-11-05
 Summary (same as the pull request):
 - "Tools (optional)" / "Werkzeug (optional)" and "Safety gear (optional)" / "Schutzausrüstung (optional)" in the section bands; Materials unchanged

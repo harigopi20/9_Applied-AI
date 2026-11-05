@@ -344,10 +344,10 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 16px 32px; outline: none; 
 /* Section header band (user request 5 Nov 2026, variant B): dark band, orange icon, part count */
 .list-section { margin-top: 22px; }
 .list-section .section-head { margin: 0 -16px 6px; padding: 10px 16px; background: var(--ink); color: #fff; flex-wrap: nowrap; }
-.card .list-section .section-head h3 { display: flex; align-items: center; column-gap: 10px; row-gap: 0; flex-wrap: wrap; flex: 1 1 auto; min-width: 0; color: #fff; }
+.card .list-section .section-head h3 { display: flex; align-items: baseline; column-gap: 10px; row-gap: 0; flex-wrap: wrap; flex: 1 1 auto; min-width: 0; color: #fff; }
 .list-section .section-head .pill-btn { flex: none; }
 @media (min-width: 792px) { .list-section .section-head { margin: 0 0 6px; } } /* wide screens: flush with the content */
-.sec-icon { display: inline-flex; color: var(--brand); }
+.sec-icon { display: inline-flex; align-self: center; color: var(--brand); } /* name and part count share one baseline (#168 follow-up); the icon stays centred */
 .sec-icon .icon { width: 24px; height: 24px; stroke-width: 2; }
 .sec-count { font-family: var(--font); font-weight: 500; font-size: .95rem; color: #cfcfcf; }
 /* Issue #168: "(optional)" after Tools / Safety gear – smaller and not bold, stays on one line */
