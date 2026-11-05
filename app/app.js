@@ -343,8 +343,7 @@
       });
       const form = el("form", { class: "plz-form", novalidate: true }, [
         el("label", { for: "plz-input", class: "field-label", text: t("store_plz_label") }),
-        el("div", { class: "number-row" }, [input, el("button", { type: "submit", class: "btn primary", id: "plz-submit", text: t("store_search") })]),
-        el("p", { class: "muted small", text: t("store_privacy") })
+        el("div", { class: "number-row" }, [input, el("button", { type: "submit", class: "btn primary", id: "plz-submit", text: t("store_search") })])
       ]);
       form.addEventListener("submit", (e) => { e.preventDefault(); searchStores(input.value); });
       box.appendChild(form);
