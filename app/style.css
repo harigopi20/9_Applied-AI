@@ -135,6 +135,11 @@ h1, h2, h3, .btn, .tab, .badge, .tag, .price-value, .total-label {
 .progress-label { display: block; margin-top: 6px; font-size: .85rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .progress-step.current .progress-label, .progress-step.stop .progress-label { color: var(--ink); font-weight: 700; }
 .progress-step.stop .progress-label { color: var(--stop); }
+/* Issue #157: finished steps are buttons that go back to them (tap area at least 44 px high) */
+.progress-jump { display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; width: 100%; min-height: 44px; margin: 0; padding: 0 0 4px; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.progress-jump .progress-label { color: var(--ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.progress-jump:hover .progress-label { color: var(--brand); }
+.progress-jump:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; border-radius: 6px; }
 
 main { max-width: 760px; margin: 0 auto; padding: 8px 16px 32px; outline: none; }
 

@@ -86,6 +86,12 @@ A **progress bar** under the header shows where the customer is: **Store → Pro
 Questions → List → Shopping** (done steps orange, current step bold). A safety stop turns the step
 where it happened red (e.g. "unknown wall" at Questions, high-risk work at Project).
 It is hidden on the start notice.
+**Tap a finished step to go back to it (issue #157):** finished steps are underlined buttons
+("Go back to: Project"). *Store* opens the store search and returns to the screen you came from;
+*Project* opens "What do you want to do?" with your text kept; *Questions* opens the first question
+with your answers pre-filled; *List* (from shopping by aisle) opens the list. It works like tapping
+Back several times, so answers are re-checked (SR-08) and browser back/forward keep working.
+The current step and later steps cannot be tapped.
 
 1. **Start:** notice about AI use, sample data, privacy and the browser speech service.
 2. **Store (optional):** enter a postcode → sample stores within 50 km, nearest first → tap one. Or skip.
