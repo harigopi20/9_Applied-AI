@@ -2040,6 +2040,45 @@
     eq(s.result.total.amount, before, "back in the total");
   });
 
+  test("#144 (UI)", "Safety notes in one box: open when the list appears, closed after the first scroll (all notes, incl. the customer's own warnings), tap opens again; new project opens it again", () => {
+    const A = window.BBApp, s = A.state;
+    try {
+      window.BBI18n.setLang("de");
+      s.data = D; s.overrides = {}; s.owned = new Set(); s.storeId = null;
+      A.startTemplate(SHELF(), {});
+      s.facts = confirmed(Object.assign({}, SHELF_OK, { condition: ["cracks"] })); // ST-06 warning of this customer
+      A.recompute(false);
+      const box = document.getElementById("sandbox");
+      box.replaceChildren(A.viewResult());
+      const sb = box.querySelector("[data-safety-box]");
+      assert(sb, "safety box shown");
+      const ids = [...sb.querySelectorAll(".notice.safety")].map((p) => p.dataset.notice);
+      ["detector_limits", "no_wall_certification", "used_item_defect"].forEach((id) => assert(ids.includes(id), id + " inside the box"));
+      assert(!box.querySelector(".notice.safety:not(.safety-box .notice.safety)"), "no safety note outside the box");
+      eq([sb.dataset.safetyBox, sb.querySelector(".safety-head").getAttribute("aria-expanded"), sb.querySelector(".safety-body").hidden], ["open", "true", false], "open at first");
+      eq(sb.querySelector(".safety-count").textContent, " (3)");
+      A.collapseSafety(sb); // what the first scroll does
+      eq([sb.dataset.safetyBox, sb.querySelector(".safety-head").getAttribute("aria-expanded"), sb.querySelector(".safety-body").hidden], ["closed", "false", true], "closed after the first scroll");
+      const teaser = sb.querySelector(".safety-teaser").textContent;
+      assert(/Leitungssucher finden nicht alles/.test(teaser) && /Wand nicht geprüft/.test(teaser) && /Beschädigtes Teil ersetzen/.test(teaser), "short labels stay visible: " + teaser);
+      assert(sb.querySelectorAll(".notice.safety").length === 3, "notes stay in the page (SR-02, SR-05)");
+      A.recompute(false);
+      box.replaceChildren(A.viewResult());
+      eq(box.querySelector("[data-safety-box]").dataset.safetyBox, "closed", "stays closed on a re-render (e.g. 'I already have this')");
+      box.querySelector(".safety-head").click();
+      eq(box.querySelector("[data-safety-box]").dataset.safetyBox, "open", "tap opens it again");
+      box.querySelector(".safety-head").click();
+      eq(box.querySelector("[data-safety-box]").dataset.safetyBox, "closed", "tap closes it");
+      A.startTemplate(SHELF(), {});
+      s.facts = confirmed(SHELF_OK);
+      A.recompute(false);
+      box.replaceChildren(A.viewResult());
+      eq(box.querySelector("[data-safety-box]").dataset.safetyBox, "open", "a new project shows the notes open again");
+    } finally {
+      window.BBI18n.setLang("en"); s.safetyCollapsed = false;
+    }
+  });
+
   test("#145 (UI)", "'Have it all' only for tools and safety gear: marks every tool, tools subtotal 0, plugs/screws stay; 'Buy all after all' brings them back", () => {
     const s = window.BBApp.state;
     try {

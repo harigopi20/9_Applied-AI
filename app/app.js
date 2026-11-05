@@ -49,6 +49,7 @@
     owned: new Set(),        // roles the customer already has (C-8) – rules.js decides if allowed
     checked: new Set(),      // product_nr ticked off (FR: simple check-off)
     storeId: null,           // stage 4 – FR-30: no store = aisle/shelf "not available"
+    safetyCollapsed: false,  // issue #144: safety box on the list closes on the first scroll (per project)
     result: null
   };
 
@@ -1030,10 +1031,9 @@
       if (missing) box.appendChild(el("p", { class: "state-banner warn", "data-missing": String(missing), text: t("avail_summary", { n: missing }) }));
     }
 
-    // Safety notices first (SR-05, SR-02)
-    r.notices.filter((n) => n.id !== "estimates").forEach((n) => {
-      box.appendChild(el("p", { class: "notice safety", "data-notice": n.id, text: noticeText(n) }));
-    });
+    // Safety notices first (SR-05, SR-02) – in one box that closes on the first scroll (issue #144)
+    const sbox = viewSafetyBox(r.notices.filter((n) => n.id !== "estimates"));
+    if (sbox) box.appendChild(sbox);
 
     ["materials", "tools", "safety"].forEach((section) => {
       const items = r.items.filter((i) => i.section === section);
@@ -1070,6 +1070,80 @@
     ]));
     box.appendChild(viewEvidence(r));
     return box;
+  }
+
+  /** Short label of a notice for the closed safety box (issue #144); unknown notices: first sentence. */
+  function noticeShort(n) {
+    const key = "notice_short_" + n.id;
+    const v = t(key, n);
+    if (v && v !== key) return v;
+    const full = noticeText(n);
+    const first = full.split(/(?<=[.!?:])\s/)[0].replace(/[.:]$/, "");
+    return first.length > 48 ? first.slice(0, 46).trimEnd() + "…" : first;
+  }
+
+  /**
+   * Issue #144 (variant A): all safety notices of the list in one box. It is open when the list
+   * appears and closes on the customer's first scroll; then only title, count and short labels stay
+   * visible. Tapping the title opens or closes it again. Nothing is removed – the notices stay in
+   * the page (SR-02, SR-05), in the saved list and on the shopping route.
+   */
+  function viewSafetyBox(notices) {
+    if (!notices.length) return null;
+    const open = !state.safetyCollapsed;
+    const wrap = el("section", { class: "safety-box" + (open ? " open" : ""), "data-safety-box": open ? "open" : "closed" });
+    const head = el("button", { type: "button", class: "safety-head", id: "safety-head", "aria-expanded": open ? "true" : "false", "aria-controls": "safety-body",
+      onclick: () => setSafetyOpen(wrap, wrap.dataset.safetyBox !== "open") }, [
+      el("span", { class: "safety-icon", "aria-hidden": "true", text: "!" }),
+      el("span", { class: "safety-title" }, [
+        el("span", { class: "safety-label", text: t("safety_box_title") }),
+        el("span", { class: "safety-count", text: " (" + notices.length + ")" })
+      ]),
+      el("span", { class: "safety-chev", "aria-hidden": "true", text: "▾" })
+    ]);
+    wrap.appendChild(head);
+    wrap.appendChild(el("p", { class: "safety-teaser", "aria-hidden": "true", text: notices.map(noticeShort).join(" · ") }));
+    const body = el("div", { class: "safety-body", id: "safety-body" });
+    if (!open) body.hidden = true;
+    notices.forEach((n) => body.appendChild(el("p", { class: "notice safety", "data-notice": n.id, text: noticeText(n) })));
+    wrap.appendChild(body);
+    if (open) watchFirstScroll(wrap);
+    return wrap;
+  }
+
+  /**
+   * Opens or closes the safety box. `keepBelow`: the content below the box keeps its place on the
+   * screen (auto-close while scrolling, no jump); a tap keeps the box title in place instead.
+   */
+  function setSafetyOpen(wrap, open, keepBelow) {
+    const next = wrap.nextElementSibling;
+    const before = next ? next.getBoundingClientRect().top : 0;
+    wrap.classList.toggle("open", open);
+    wrap.dataset.safetyBox = open ? "open" : "closed";
+    wrap.querySelector(".safety-head").setAttribute("aria-expanded", open ? "true" : "false");
+    wrap.querySelector(".safety-body").hidden = !open;
+    if (next && (keepBelow || wrap.getBoundingClientRect().top < 0)) window.scrollBy(0, next.getBoundingClientRect().top - before);
+  }
+
+  /** Closes the box once, on the customer's first scroll of this list (issue #144). */
+  function watchFirstScroll(wrap) {
+    if (typeof window.addEventListener !== "function") return;
+    setTimeout(() => { // after render: scrolling done by the app itself does not count
+      const startY = window.scrollY;
+      const onScroll = () => {
+        if (!document.contains(wrap) || state.safetyCollapsed) { window.removeEventListener("scroll", onScroll); return; }
+        if (Math.abs(window.scrollY - startY) < 24) return; // a small jiggle is not a scroll
+        window.removeEventListener("scroll", onScroll);
+        collapseSafety(wrap);
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+    }, 0);
+  }
+
+  function collapseSafety(wrap) {
+    state.safetyCollapsed = true;
+    const w = wrap || document.querySelector("[data-safety-box]");
+    if (w && w.dataset.safetyBox === "open") setSafetyOpen(w, false, true);
   }
 
   /** Small outline "pill" button (issue #145): the visible pill is small, the button keeps the 44 px touch target (NFR-08). */
@@ -1735,6 +1809,7 @@
 
   /** Starts a template; guesses (from text) become "observed" facts – never confirmed (SR-01). */
   function startTemplate(tpl, guesses) {
+    state.safetyCollapsed = false; // issue #144: a new project shows its safety notices open again
     if (PV && PV.handles(tpl)) { stopRecognizer(true); PV.start(tpl, guesses); return; } // preview: new D-13/D-14 flow
     state.template = tpl;
     state.facts = {};
@@ -1928,7 +2003,7 @@
   window.BBApp = Object.freeze({
     state, viewResult, viewItem, viewQuestion, viewChoose, viewRecognized, viewHighRisk,
     recompute, startTemplate, submitText, micTap, consentAccept, consentDecline,
-    renderHeader, viewLeave, navButtons, canGoBack, initHistory, disableHistory, nav, go, viewStore, viewList, viewShopping, aisleRoute, viewProgress, progressStep, openStoreSearch, searchStores, chooseStore, leaveStoreSearch, buildListHtml, saveList
+    renderHeader, viewLeave, navButtons, canGoBack, initHistory, disableHistory, nav, go, viewStore, viewList, viewShopping, aisleRoute, viewProgress, progressStep, openStoreSearch, searchStores, chooseStore, leaveStoreSearch, buildListHtml, saveList, collapseSafety
   });
 
   document.addEventListener("DOMContentLoaded", () => {
