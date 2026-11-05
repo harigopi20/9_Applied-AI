@@ -6,6 +6,13 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Shopping list "Have it all" for Tools and Safety gear (issue #145) – 2026-11-05
+Summary (same as the pull request):
+- New button "Have it all" / "Hab ich alles" beside the headings Tools and Safety gear (from 2 parts that may be owned); turns into "Buy all after all" / "Doch alles kaufen"
+- Same rule as the single "I already have this" (C-8 / SR-15); not for Materials – plugs and screws always stay on the list
+- "Have it all" and "I already have this" are now small outline pills; touch target stays 44 px (NFR-08)
+- New test #145 (UI); 128 tests passing; test results saved; README updated
+
 - **2026-11-05 – Shopping list: "Have it all" for Tools and Safety gear (issue #145); small pill buttons.**
   `app/app.js`: new `sectionHead()` puts "Have it all" / "Hab ich alles" beside the headings *Tools* and
   *Safety gear* (only from 2 parts that may be owned). It marks every part the single "I already have this"
