@@ -6,6 +6,28 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Tap finished steps in the progress bar to go back (issue #157) – 2026-11-05
+Summary (same as the pull request):
+- Finished steps in the progress bar (Store, Project, Questions, List) are buttons that go back to that step
+- Project keeps the typed text, Questions opens the first question with answers pre-filled; current and later steps cannot be tapped
+- Store search opened from a question returns to that question; works in the new (D-13/D-14) and old flow
+- New test "#157"; 133 tests passing; test results saved; README updated
+
+- **2026-11-05 – Progress bar: finished steps are tappable (issue #157).** `app/app.js`: `viewProgress()`
+  wraps each finished step in a `<button class="progress-jump">` (label "Go back to: {step}" /
+  "Zurück zu: {step}", new key `step_jump` in `app/i18n.js`). `progressTarget()` finds the first history
+  entry of that step (after the last entry of an earlier step) and jumps there with `history.go(-n)` –
+  the same as tapping Back several times, so answers are kept and re-checked (SR-08) and browser
+  back/forward keep working; without history only Store is tappable. Store opens the store search with
+  the current screen as return target; new `storeReturnScreen()` lets "Continue without a store" return
+  to a question, a D-13 screen or "Did we understand you?" when it can still be shown (before: project
+  input). `app/style.css`: finished labels underlined, tap area at least 44 px, focus ring. New test
+  "#157" in `app/tests.js` (133 tests, all green). Checked in the browser (shelf, D-13 flow) at 480 and
+  360 px, EN/DE, no horizontal scroll. README updated.
+  *Why:* returning to an earlier step was only possible step by step with Back. *Prompt (paraphrased):*
+  "Issue #157 – make the finished steps of the progress bar clickable; explain with a screenshot first,
+  then implement."
+
 ## Milestone: Remove grey information box on the project input screen (issue #155) – 2026-11-05
 Summary (same as the pull request):
 - The grey box "Please check the text and correct it if needed …" after dictation is removed (EN/DE)

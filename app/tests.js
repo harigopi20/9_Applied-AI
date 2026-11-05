@@ -1452,6 +1452,62 @@
     }
   });
 
+  test("#157", "Progress bar: finished steps are buttons that go back (Store, Project, Questions, List); current and later steps are not; answers and text are kept; back/forward still work", async () => {
+    const A = window.BBApp, s = A.state;
+    const box = document.getElementById("sandbox");
+    const bar = () => { box.replaceChildren(A.viewProgress(A.progressStep())); return box; };
+    const jumps = () => [...bar().querySelectorAll("[data-progress-jump]")].map((b) => b.dataset.progressJump);
+    try {
+      freshFlow();
+      s.inputText = "Regal aufhängen";
+      eq(s.screen, "result");
+      eq(jumps(), ["store", "project", "questions"], "list: only finished steps are buttons");
+      eq(bar().querySelectorAll(".progress-step.current button, .progress-step.todo button").length, 0, "current and later steps cannot be tapped");
+      eq(bar().querySelector('[data-progress-jump="project"]').getAttribute("aria-label"), "Go back to: Project");
+      // Questions → first question, answers kept
+      let p = popped();
+      bar().querySelector('[data-progress-jump="questions"]').click();
+      await p;
+      eq([s.screen, s.questionId], ["question", "Q1"], "questions: first question");
+      eq(s.facts.wall_type.value, "concrete", "answers kept");
+      eq(jumps(), ["store", "project"], "on questions: store and project");
+      // Project → project input, typed text kept
+      p = popped();
+      bar().querySelector('[data-progress-jump="project"]').click();
+      await p;
+      eq([s.screen, s.inputText], ["choose", "Regal aufhängen"], "project: text kept");
+      eq(jumps(), ["store"], "first step: only store");
+      // browser forward still works and re-checks
+      await histForward(); await histForward();
+      eq([s.screen, s.result.state], ["result", "validated"], "forward: back to the list");
+      // Shopping → List
+      A.go("shopping");
+      eq(jumps(), ["store", "project", "questions", "list"], "shopping: list is finished too");
+      p = popped();
+      bar().querySelector('[data-progress-jump="list"]').click();
+      await p;
+      eq(s.screen, "result", "list");
+      // Store from a question → back to that question
+      p = popped();
+      bar().querySelector('[data-progress-jump="questions"]').click();
+      await p;
+      bar().querySelector('[data-progress-jump="store"]').click();
+      eq([s.screen, s.storeReturn], ["store", "question"], "store search opened");
+      eq(jumps(), [], "on the store search nothing can be tapped");
+      p = popped();
+      A.leaveStoreSearch();
+      await p;
+      eq([s.screen, s.questionId], ["question", "Q1"], "without a store: back to the question");
+      // no history (e.g. tests.html without initHistory): only Store can be tapped
+      A.disableHistory();
+      eq(A.progressTarget("project"), null, "no history → no jump");
+      eq(typeof A.progressTarget("store"), "function");
+    } finally {
+      A.disableHistory();
+      box.replaceChildren();
+    }
+  });
+
   test("#101 (B)", "Back on the first step with a list asks 'Leave your list?' (save / stay / leave); without a list the app is left as usual", async () => {
     const A = window.BBApp, s = A.state;
     const orig = { go: A.nav.go, back: A.nav.back };

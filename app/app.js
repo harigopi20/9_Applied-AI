@@ -246,13 +246,49 @@
     const ol = el("ol", { class: "progress-steps", "data-step": p.step, "data-stop": p.stop ? "1" : "0" });
     STEPS.forEach((s, i) => {
       const status = i < at ? "done" : i === at ? (p.stop ? "stop" : "current") : "todo";
-      ol.appendChild(el("li", { class: "progress-step " + status, "data-progress": s, "aria-current": i === at ? "step" : null }, [
+      const parts = [
         el("span", { class: "progress-seg", "aria-hidden": "true" }),
         el("span", { class: "progress-label", text: t("step_" + s) }),
         el("span", { class: "sr-only", text: " – " + t("step_status_" + status) })
-      ]));
+      ];
+      // Issue #157: a finished step is a button that goes back to it; the current and later steps are not.
+      const jump = status === "done" ? progressTarget(s) : null;
+      const inner = jump
+        ? [el("button", { type: "button", class: "progress-jump", "data-progress-jump": s, "aria-label": t("step_jump", { step: t("step_" + s) }), onclick: jump }, parts)]
+        : parts;
+      ol.appendChild(el("li", { class: "progress-step " + status, "data-progress": s, "aria-current": i === at ? "step" : null }, inner));
     });
     return ol;
+  }
+
+  /** Issue #157: which progress step a history entry belongs to (the store search is never kept in history). */
+  function stepOfKey(key) {
+    const sc = String(key).split(":")[0];
+    if (["choose", "recognized", "high_risk"].includes(sc)) return "project";
+    if (sc === "question" || (PV && PV.screens[sc])) return "questions";
+    if (sc === "result") return "list";
+    if (sc === "shopping") return "shopping";
+    return null;
+  }
+
+  /**
+   * Issue #157: what a tap on a finished step does, or null (then the step is not tappable).
+   * Store opens the store search (it comes back to this screen). Project, Questions and List jump back in
+   * the browser history to the first entry of that step – the same as tapping Back several times, so the
+   * answers are kept and re-checked (SR-08) and browser back/forward keep working.
+   */
+  function progressTarget(step) {
+    if (state.leaveAsk) return null;
+    if (step === "store") return () => openStoreSearch(state.screen);
+    if (!nav.enabled) return null;
+    const want = STEPS.indexOf(step);
+    let idx = -1;
+    for (let i = 1; i < nav.pos; i++) {
+      const at = STEPS.indexOf(stepOfKey(nav.keys[i]));
+      if (at < want) idx = -1;                 // an earlier step came again – the step starts after it
+      else if (at === want && idx < 0) idx = i;
+    }
+    return idx > 0 ? () => nav.go(idx - nav.pos) : null;
   }
 
   /**
@@ -1946,7 +1982,16 @@
     state.plzInput = "";      // the PLZ is not kept
     state.storeSearch = null;
     // D-3: a store change only looks up aisle/shelf again – checks stay identical (RB-17).
-    go(["result", "shopping"].includes(state.storeReturn) && state.result ? state.storeReturn : "choose");
+    go(storeReturnScreen(state.storeReturn));
+  }
+
+  /** Issue #157: after the store search, go back to the screen it was opened from when that screen can still be shown. */
+  function storeReturnScreen(sc) {
+    if (["result", "shopping"].includes(sc)) return state.result ? sc : "choose";
+    if (sc === "question") return state.template && state.questionId ? sc : "choose";
+    if (sc === "recognized") return state.recognized ? sc : "choose";
+    if (PV && PV.screens[sc]) return PV.ready(sc) ? sc : "choose";
+    return "choose";
   }
 
   /** Turns validated adapter facts into guesses for the template's required facts. */
@@ -2053,7 +2098,7 @@
   window.BBApp = Object.freeze({
     state, viewResult, viewItem, viewQuestion, viewChoose, viewRecognized, viewHighRisk,
     recompute, startTemplate, submitText, micTap, consentAccept, consentDecline,
-    renderHeader, viewLeave, navButtons, canGoBack, initHistory, disableHistory, nav, go, viewStore, viewList, viewShopping, aisleRoute, viewProgress, progressStep, openStoreSearch, searchStores, chooseStore, leaveStoreSearch, buildListHtml, saveList, collapseSafety
+    renderHeader, viewLeave, navButtons, canGoBack, initHistory, disableHistory, nav, go, viewStore, viewList, viewShopping, aisleRoute, viewProgress, progressStep, progressTarget, openStoreSearch, searchStores, chooseStore, leaveStoreSearch, buildListHtml, saveList, collapseSafety
   });
 
   document.addEventListener("DOMContentLoaded", () => {
