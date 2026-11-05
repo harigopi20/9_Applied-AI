@@ -404,7 +404,17 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 16px 32px; outline: none; 
 
 /* Evidence (DR-07) */
 .evidence { margin-top: 18px; }
-.evidence summary { min-height: var(--touch); display: flex; align-items: center; cursor: pointer; font-family: var(--font-head); font-size: 1.3rem; font-weight: 700; color: var(--brand-text); }
+.evidence summary { min-height: var(--touch); display: flex; align-items: center; gap: 10px; cursor: pointer; list-style: none; font-family: var(--font-head); font-size: 1.3rem; font-weight: 700; color: var(--brand-text); }
+/* Issue #151 (variant B): info circle left, open/close arrow right, small second line */
+.evidence { border-top: 1px solid var(--line); }
+.evidence summary::-webkit-details-marker { display: none; }
+.evidence summary::before { content: "i"; flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center; font-family: var(--font); font-size: .95rem; font-weight: 700; }
+.evidence summary::after { content: "▾"; margin-left: auto; font-family: var(--font); font-size: 1.2rem; color: var(--ink); }
+.evidence[open] summary::after { content: "▴"; }
+.evidence summary:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.evidence-title { display: flex; flex-direction: column; line-height: 1.15; padding: 6px 0; }
+.evidence-sub { font-family: var(--font); font-size: .82rem; font-weight: 500; color: var(--muted); margin-top: 2px; }
 .table-wrap { overflow-x: auto; }
 .evidence table { border-collapse: collapse; font-size: .8rem; width: 100%; }
 .evidence th, .evidence td { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; vertical-align: top; }

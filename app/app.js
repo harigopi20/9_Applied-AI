@@ -1624,7 +1624,13 @@
 
   // Evidence log (DR-07)
   function viewEvidence(r) {
-    const d = el("details", { class: "evidence" }, [el("summary", { text: t("evidence_title") })]);
+    // Issue #151 (variant B): info circle, two-line title, open/close arrow like the other sections
+    const d = el("details", { class: "evidence" }, [el("summary", {}, [
+      el("span", { class: "evidence-title" }, [
+        el("span", { text: t("evidence_title") }),
+        el("span", { class: "evidence-sub", text: t("evidence_sub") })
+      ])
+    ])]);
     const table = el("table", {}, [el("thead", {}, [el("tr", {}, [
       el("th", { text: t("evidence_rule") }), el("th", { text: t("evidence_check") }),
       el("th", { text: t("evidence_result") }), el("th", { text: t("evidence_source") })
