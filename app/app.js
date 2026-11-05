@@ -1021,7 +1021,7 @@
         el("span", { class: "tag sample", text: t("sample_note") }),
         pillButton({ class: "store-change", id: "change-store", onclick: () => openStoreSearch("result") }, t("store_change"))]
       : [el("p", { class: "hint", text: t("no_store_hint") }),
-        el("button", { class: "btn small", id: "add-plz", text: t("store_add_plz"), onclick: () => openStoreSearch("result") })]));
+        pillButton({ class: "store-change", id: "add-plz", onclick: () => openStoreSearch("result") }, t("store_add_plz"))]));
 
     // FR-31: summary of items the chosen store cannot supply
     if (state.storeId) {

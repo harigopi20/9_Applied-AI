@@ -10,7 +10,7 @@ when they are released to `main`.
 Summary (same as the pull request):
 - New button "Have it all" / "Hab ich alles" beside the headings Tools and Safety gear (from 2 parts that may be owned); turns into "Buy all after all" / "Doch alles kaufen"
 - Same rule as the single "I already have this" (C-8 / SR-15); not for Materials – plugs and screws always stay on the list
-- "Have it all", "I already have this" and "Change store" are now small outline pills; "Change store" sits on the right; touch target stays 44 px (NFR-08)
+- "Have it all", "I already have this", "Change store" and "Enter postcode" are now small outline pills; the store buttons sit on the right; touch target stays 44 px (NFR-08)
 - New test #145 (UI); 128 tests passing; test results saved; README updated
 
 - **2026-11-05 – List: "Change store" as the same small pill, on the right.** `app/app.js`: the button
@@ -18,6 +18,10 @@ Summary (same as the pull request):
   The touch target stays 44 px. Checked in the browser at 420 and 360 px.
   *Why:* the big button looked out of place next to the new pills. *Prompt (paraphrased):* "Make the
   Change store pill the same size and align it to the right."
+- **2026-11-05 – List without a store: "Enter postcode" as the same small pill, on the right.**
+  `app/app.js`: the button `#add-plz` in the store bar uses `pillButton()` with the same class as
+  "Change store". Checked in the browser at 360 px. *Why:* same look in both store-bar states.
+  *Prompt (paraphrased):* "Yes, Enter postcode as a pill too."
 - **2026-11-05 – Shopping list: "Have it all" for Tools and Safety gear (issue #145); small pill buttons.**
   `app/app.js`: new `sectionHead()` puts "Have it all" / "Hab ich alles" beside the headings *Tools* and
   *Safety gear* (only from 2 parts that may be owned). It marks every part the single "I already have this"
