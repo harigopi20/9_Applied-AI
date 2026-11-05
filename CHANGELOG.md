@@ -6,6 +6,24 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Shopping list – dark header band per section (Materials, Tools, Safety gear) – 2026-11-05
+Summary (same as the pull request):
+- Each section of the list is its own block with a dark header band: orange icon, name and part count ("6 parts" / "6 Teile")
+- "Have it all" / "Buy all after all" sits on the right of the band as a white pill; it never wraps under the name
+- Band runs edge to edge on phones and flush with the content on wide screens; saved list and shopping route unchanged
+- New test "Section bands (UI)"; 132 tests passing; test results saved; README updated
+
+- **2026-11-05 – Shopping list: dark header band per section (variant B).** `app/app.js`: each section of the
+  list is wrapped in `<section class="list-section" aria-labelledby>`; `sectionHead()` shows an icon
+  (`sec_materials`, `sec_tools`, `sec_safety` in `ICONS`), the name and the part count (`section_count`,
+  `section_count_one`, EN/DE in `app/i18n.js`). `app/style.css`: dark band (`--ink`) with orange icon and a
+  white pill; on phones the band runs edge to edge, from 792 px it is flush with the content; a long name
+  keeps the pill on the right (the count moves under the name). Works for the new D-13/D-14 flow as well
+  (same `viewList`). New test "Section bands (UI)" (132 tests, all green). Checked in the browser at 360,
+  390 and 900 px, EN/DE, no horizontal scroll. README updated.
+  *Why:* the categories were hard to tell apart while scrolling. *Prompt (paraphrased):* "How could the
+  categories Materials, Tools, Safety gear be set apart better? – Implement variant B."
+
 ## Milestone: Mounting logic D-13 / D-14 as the normal flow, used-parts check kept – 2026-11-05
 Summary (same as the pull request):
 - Shelf, wall cabinet and anti-tip use the new flow by default: wall → size → summary → plug "up to X kg" → confirm

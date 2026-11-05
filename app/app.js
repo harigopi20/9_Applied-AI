@@ -89,7 +89,11 @@
     sliding_door: ["M3 4h18", "M5 6h8v15H5z", "M13 6h6v15h-6", "M7 13h2"],
     wallpaper: ["M5 3h10v18H5z", "M15 5h3a1 1 0 0 1 1 1v3", "M8 7l4 4", "M8 12l4 4"],
     mic: ["M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z", "M5 11a7 7 0 0 0 14 0", "M12 18v3"],
-    stop: ["M7 7h10v10H7z"]
+    stop: ["M7 7h10v10H7z"],
+    // List section headers (user request 5 Nov 2026, variant B)
+    sec_materials: ["M3 7h18v10H3z", "M7 7v10", "M12 7v10", "M17 7v10"],
+    sec_tools: ["M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"],
+    sec_safety: ["M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"]
   };
   const ACCENTS = { shelf: "M14 4h6v5h-6z", picture: "M15 7h3v3h-3z", store: "M15 2h6v4h-6z" };
   function icon(name, accent) {
@@ -1039,20 +1043,23 @@
     ["materials", "tools", "safety"].forEach((section) => {
       const items = r.items.filter((i) => i.section === section);
       if (!items.length) return;
-      box.appendChild(sectionHead(section, items));
+      // One block per section with a dark header band (user request 5 Nov 2026, variant B)
+      const sec = el("section", { class: "list-section", "data-section": section, "aria-labelledby": "sec-" + section });
+      box.appendChild(sec);
+      sec.appendChild(sectionHead(section, items));
       // Issue #145 follow-up: a tools / safety-gear section the customer has completely is folded
       // into one line; "Show items" opens the normal list again.
       const folded = sectionAllOwned(section, items);
       const open = !folded || state.ownedOpen.has(section);
-      if (folded) box.appendChild(viewOwnedSummary(section, items, open));
+      if (folded) sec.appendChild(viewOwnedSummary(section, items, open));
       const ul = el("ul", { class: "items", id: "items-" + section });
       if (!open) ul.hidden = true;
       items.forEach((i) => ul.appendChild(viewItem(i)));
-      box.appendChild(ul);
+      sec.appendChild(ul);
       // FR-34 (D-3): subtotal per section; owned parts are not counted
       const st = r.subtotals && r.subtotals[section];
       if (st && open) {
-        box.appendChild(el("p", { class: "subtotal", "data-subtotal": section, "data-amount": st.amount === null ? "none" : String(st.amount) },
+        sec.appendChild(el("p", { class: "subtotal", "data-subtotal": section, "data-amount": st.amount === null ? "none" : String(st.amount) },
           st.amount !== null
             ? [el("span", { class: "subtotal-label", text: t("subtotal", { section: t("section_" + section) }) }), priceEl(st.amount, "subtotal-value")]
             : [el("span", { class: "muted", text: t("subtotal_none", { section: t("section_" + section) }) })]));
@@ -1168,7 +1175,11 @@
    * refused parts (ST-06) stay. Shown only from 2 such parts; with one part the item button is enough.
    */
   function sectionHead(section, items) {
-    const head = el("div", { class: "section-head" }, [el("h3", { text: t("section_" + section) })]);
+    const head = el("div", { class: "section-head" }, [el("h3", { id: "sec-" + section }, [
+      el("span", { class: "sec-icon" }, [icon("sec_" + section)]),
+      el("span", { class: "sec-label", text: t("section_" + section) }),
+      el("span", { class: "sec-count", text: t(items.length === 1 ? "section_count_one" : "section_count", { n: items.length }) })
+    ])]);
     if (!OWNED_ALL_SECTIONS.includes(section)) return head;
     const ownable = items.filter((i) => i.ownable && !i.owned_auto && !i.owned_refused);
     if (ownable.length < 2) return head;
