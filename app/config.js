@@ -50,9 +50,43 @@ window.BB_CONFIG = Object.freeze({
     howtoHosts: ["www.youtube.com", "www.obi.de", "www.obi.ch"]
   },
 
-  // FR-29 – confirmed by the team 2026-10-25 (design DD-6).
+  // FR-29 – confirmed by the team 2026-10-25 (design DD-6); D-8 / D-11 (29 Oct 2026):
+  // all sample stores are listed, max. 6 (incl. OBI Schwabach).
   store: {
     maxDistanceKm: 50,   // "no store near you" when the nearest store is farther
-    maxStoresShown: 5    // number of stores listed after a valid PLZ
+    maxStoresShown: 6    // number of stores listed after a valid PLZ
+  },
+
+  // R-17 (D-13 / D-14): fixing type per wall (sheet "Fixing chain") → product
+  // variant group of the plug and which screw column of the chain to use.
+  // No load values here – they all come from sheet "System ratings" (DR-09).
+  mounting: {
+    fixingTypes: {
+      plug_universal: { plugVariant: "wall-plug-universal-d13", screw: "std" },
+      plug_long:      { plugVariant: "wall-plug-long-d13",      screw: "long" },
+      plug_aerated:   { plugVariant: "wall-plug-aerated-d13",   screw: "long" },
+      cavity_anchor:  { plugVariant: "cavity-anchor-d13",       screw: "own" },  // anchor brings its own screw
+      screw:          { plugVariant: null,                      screw: "std" }   // wood: screw in a pilot hole
+    }
+  },
+
+  // Preview of the D-13/D-14 logic: http://localhost:8000/app/?preview=d13 (app/preview-d13.js).
+  // Without "?preview=d13" none of this is used. Loads come from sheet "System ratings";
+  // rail ratings from the rail products (= the values in sheet Cabinet).
+  preview: {
+    d13: {
+      workbook: "../data/product_catalogue_03_11_26.xlsx",
+      pictureTemplate: "hang_picture",       // picture keeps its weight question (D-2) – existing flow
+      plugsPerBracket: 2,                    // confirmed by the team 3 Nov 2026 (slide: 3 brackets → 6 plugs)
+      maxShelfLengthCm: 200,                 // longer → split into equal shelves or cut (D-13)
+      maxCabinetWidthCm: 75,                 // usual wall cabinets are max. 60–75 cm wide (team, 4 Nov 2026)
+      minSuggestedSizeCm: 10,                // "use this size" buttons for a too heavy cabinet never go below this
+      longLevelFromCm: 120,                  // spirit level P371 (120 cm) above this length (FR-37)
+      products: { spiritLevel: "P032", spiritLevelLong: "P371", antiTipKit: "P100", detector: "P034", drillHammer: "P040", drill: "P039" },
+      // Template roles with fixed products that the new logic replaces (spirit level P032/P371 by length,
+      // the exact drill bit instead of a bit set); all other tools and safety gear stay as in the templates.
+      skipTemplateRoles: ["spirit_level", "drill_bit_set"],
+      variants: { board: "shelf-board-d13", bracket: "shelf-bracket-d13", rail: "cabinet-rail-d13", hangers: "cabinet-hanger-d13", cavityAnchor: "cavity-anchor-d13" }
+    }
   }
 });

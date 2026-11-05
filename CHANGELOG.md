@@ -6,6 +6,124 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: D-13/D-14 mounting logic preview, cabinet size check and 75 cm cabinet limit – 2026-11-05
+Summary (same as the pull request):
+- Catalogue data v3 with 6 stores (incl. OBI Schwabach): `product_catalogue.xlsx`, `products.csv`, `store_stock.csv`, `stores.csv` replaced; max. 6 stores shown (D-13/D-14 Step 1)
+- New rule functions: fixing chain R-17 and capacity R-18 from sheet *System ratings* (D-13/D-14 Step 2)
+- Preview mode `?preview=d13`: new mounting logic for shelf, wall cabinet and anti-tip inside the normal app; without `?preview=d13` the app works as before
+- Preview size screen checks while typing: max. depth/width beside the field, "too heavy" notice with sizes that fit, "I'll weigh my cabinet" (team decision open: `tpjm/change-proposal-CP-D14-W.md`)
+- Wall cabinet max. 75 cm wide (was 120 cm) – in the preview and in the released app; wider → several cabinets side by side (CAB-S1)
+- One-file trial build for testers: `node tools/build_trial.js` → `trial/Baumarkt-Buddy-Trial.html` (not in git)
+- Open for the team: update 120 → 75 cm in `data/project_catalogue.xlsx`; decide CP-D14-W
+- 127 tests passing; test results saved
+
+- **2026-11-04 – Preview: wall cabinet max. 75 cm wide (was 120 cm).** `app/config.js`
+  `preview.d13.maxCabinetWidthCm` 120 → 75; too-wide text now "wall cabinets are max. 75 cm wide"
+  (EN/DE); test CP-D14-W checks 75 cm allowed, 76 cm too wide. Released flow (template stop rule,
+  CAB-S1 split) unchanged. *Why:* 120 cm wall cabinets are not sold; usual widths are 60–75 cm.
+  *Prompt (paraphrased):* "Max. width 120 cm is too much – it should be 60 or 75 cm" (chose 75 cm).
+- **2026-11-04 – Released app: wall cabinet max. 75 cm wide per cabinet (was 120 cm).**
+  `app/data/templates/hang-wall-cabinet.json`: stop rule ST-04 width > 75, CAB-S1 `max_length` 75,
+  the "one or several cabinets?" question and its texts from 75 cm (EN/DE). Wider → several cabinets of
+  the same width (e.g. 150 cm → 2 × 75 cm), each with its own rail. Tests updated (cabinet sample
+  60 cm instead of 80 cm; split 150 → 2 × 75; 110 cm as 2 cabinets → 2 rails). README updated.
+  Open: `data/project_catalogue.xlsx` (source of the template, DR-04) still says 120 cm – the team
+  updates it. *Prompt (paraphrased):* "Yes, change the released app too."
+- **2026-11-04 – One-file trial of the app for testers.** New `tools/build_trial.js` builds
+  `trial/Baumarkt-Buddy-Trial.html`: all scripts, styles, fonts and data files embedded, `fetch()` of
+  the data answered from the embedded copy, D-13/D-14 preview always on. The file opens with a
+  double-click (no server, no git, no `?preview=d13`); checked headless from a separate folder:
+  store search, perforated brick 70 × 40 × 90 cm → size notice → weighed 21 kg → 12/14 mm plugs, no
+  console errors. `trial/` is in `.gitignore`; README updated. `app/` itself is unchanged.
+  *Why:* a colleague could not get the preview running and still saw the old stop.
+  *Prompt (paraphrased):* "Make a workaround so my colleague can simply open the app and try some
+  values – no tests, no code."
+
+- **2026-11-04 – Preview: size screen checks while typing; clearer "cabinet too heavy"; weigh your
+  cabinet (CP-D14-W).** `app/preview-d13.js`: the size is checked as soon as all fields hold a number
+  (no need to press Continue). The max. depth (cabinet: also max. width) is shown to the right of the
+  field instead of the line "✓ wall: up to X cm deep"; on a phone it moves below the field. A wall
+  cabinet too heavy for the wall now gets a notice on the size page: estimated weight, heaviest
+  cabinet the wall takes (strongest plug ÷ min. plug factor 1.5), buttons with the largest height,
+  width or depth that fits (`cabinetSizeFit`, min. 10 cm, `config.preview.d13.minSuggestedSizeCm`)
+  and "I'll weigh my cabinet". A weighed weight up to that max. gives the plug options (contents =
+  plug max. − weighed weight), shown on the summary, as a list note and in the evidence log; above it
+  the stop screen names the weighed weight. Stop text rewritten: it no longer reads as if the cabinet
+  weighed 1.5 × its weight. `calc` is now exported without `?preview=d13` (screens stay inactive) so
+  `tests.html` can test it; new test `D-14 / CP-D14-W` (127 tests, all green). Checked in the browser:
+  70 × 40 × 90 cm on perforated brick (32 kg, max. 23 kg, sizes 56 / 45 / 21 cm, weighed 30 kg → stop,
+  21 kg → 12 and 14 mm plugs with 14 kg contents), EN/DE, phone width. README updated; team decision
+  needed on the weighed weight: `tpjm/change-proposal-CP-D14-W.md`.
+  *Why:* the stop came only after Continue, misnamed 48 kg as the cabinet weight and gave no way forward.
+  *Prompt:* "Check the dimensions in the background as they are entered and say on the page if there is a stop –
+  change the size or weigh the cabinet; if the weight is below the max., show the plugs; put the
+  permitted depth to the right of the field."
+
+- **2026-11-03 – Preview keeps all features of the app; only the new logic for shelf, wall cabinet
+  and anti-tip.** `?preview=d13` now shows the normal project page (free text, voice, all six
+  projects, groups) instead of a reduced chooser. Tiles, free text and voice lead shelf, wall
+  cabinet and anti-tip into the new flow (a recognised wall type is pre-selected, still confirmed
+  by tap); after "Confirm" the normal list screen shows the result, so subtotals, "I already have
+  this", availability and referral, shopping by aisle, save/share, the facts summary with "Change",
+  the evidence log and the tab-bar Back work as before. Tools and safety gear come from the project
+  templates; drill: hammer drill P040 when hammer mode is on, else P039. Picture, painting and
+  wallpaper are unchanged. `app/app.js`: hooks in `startTemplate`, `recompute`, `editQuestion`,
+  history and render – all inactive without `?preview=d13`. Existing tests unchanged and green;
+  checked in the browser (all handover cases, store SCH, EN/DE).
+  *Why:* colleagues should try the new logic in the app as they know it.
+  *Prompt:* "Keep the project page as it is now, show the other projects with their old logic, provide
+  all other features of the previous version except the logic behind the mounting projects; and a way
+  to share it with colleagues without committing to the main repository."
+
+- **2026-11-03 – Preview mode for the D-13/D-14 mounting logic (`?preview=d13`).** New
+  `app/preview-d13.js` / `app/preview-d13.css`: with `?preview=d13` the app loads
+  `data/product_catalogue_03_11_26.xlsx` and offers *Hang a shelf*, *Hang a wall cabinet*,
+  *Hang a picture* and *Anti-tip*. Shelf, cabinet and anti-tip follow the new flow wall → size →
+  summary (board and brackets / cabinet weight and rail / kits) → plug options with "max. X kg"
+  → confirm → shopping list, all loads from sheet *System ratings* via `fixingChain` (R-17) and
+  `capacity` (R-18); rail ratings from the rail products (80 / 150 kg as in sheet *Cabinet*);
+  2 plugs per bracket; spirit level P032 / P371 above 120 cm; too deep → hint with the max. depth;
+  stops only for "I don't know" and a cabinet too heavy for the wall. *Hang a picture* keeps its
+  weight question (D-2) and opens the existing flow. Store choice (6 stores incl. Schwabach) with
+  aisle and stock; texts in English (default) and German. `app/app.js`: small hooks, active only
+  in preview mode; `app/index.html` loads the preview script; `app/config.js` → `preview.d13`.
+  Checked in the browser: all six manual cases of the handover give the expected values.
+  Existing tests unchanged and green. README updated.
+  *Why:* see the new logic in the app before the full rebuild (Steps 3–5).
+  *Prompt:* "Build a preview mode at /app/?preview=d13 for shelf, wall cabinet and anti-tip … also add
+  Hang a picture, keep the rail ratings as in the Cabinet sheet, 2 plugs per bracket, English and German, 6 stores."
+
+- **2026-11-03 – D-13/D-14 Step 2: engine basics – System ratings, fixing chain (R-17), capacity (R-18).**
+  `app/data.js`: new `buildMounting` reads the sheets *System ratings* and *Fixing chain*
+  (system rating per wall and plug size, wall cap, max. depths, bracket pairs, boards, safety
+  factor, reference depth, cabinet and anti-tip tables, fixing chain rows, plug type and hammer
+  mode per wall) into `data.mounting`; a missing table or value gives `data.mountingError`
+  instead of guessed values; "n/a" or a blank rating stays `null` (not offered), never 0.
+  `app/rules.js`: new `fixingChain` (R-17) and `capacity` (R-18, shelf and cabinet; rounded down
+  as in sheet Capacity). `app/config.js`: `mounting.fixingTypes` maps each fixing type to its plug
+  product group and screw column (no load values). Tests: DR-09 (sheet loading), TC-108
+  (all 224 cells of sheet Capacity), R-18 (factors, caps, too deep, cabinet against sheet Cabinet),
+  TC-115 / RB-27 (screw fits hole, plug type and hammer match the wall), NFR-03 (broken sheet →
+  clear error). No screen change. README updated.
+  *Why:* handover D-13/D-14, Step 2 – the shelf, wall-cabinet and anti-tip steps build on these functions.
+  *Prompt:* "Show Step 2 plan" → plan with rounding down and the open rail-rating question → "OK, go ahead."
+
+- **2026-11-03 – D-13/D-14 Step 1: catalogue data v3 with 6 stores (TC-107).** The dated
+  workbook `data/product_catalogue_03_11_26.xlsx` is now `data/product_catalogue.xlsx`
+  (288 products P001–P105 + P201–P384; store SCH – OBI Schwabach; new sheets Fixing chain,
+  System ratings, Capacity, Cabinet, Anti-tip, D-13 mapping). `products.csv`, `store_stock.csv`
+  and `stores.csv` re-exported (identical to the dated CSVs). `data/03-design.md` replaced by the
+  dated version (R-17 … R-22, §6.1). `app/config.js`: `maxStoresShown` 5 → 6 (FR-29: all sample
+  stores, max. 6). Tests: DR-08 expects 6 stores, DR-01 expects 288 products, new TC-107
+  (91126 → Schwabach first, 91052 → Schwabach by distance, all 6 shown, none preselected).
+  README.md and data/README.md updated. The new sheets are not read by the app yet (Step 2).
+  *Note:* Python is not installed on this machine, so `tools/add_rule_columns.py` could not run.
+  The workbook's rule-engine columns are already filled, so the script would not change it;
+  a read-only Node check with the app's SheetJS, following the script's `export()` logic,
+  gave byte-identical CSVs to the dated exports, which were then copied into place.
+  *Why:* handover D-13/D-14, Step 1 (data) – D-11 data delivered.
+  *Prompt:* "Read the handover and CLAUDE.md; local only; start with Step 1 (Data); show the plan first." → "OK, go ahead."
+
 ## Milestone: "Already have" button in the price row – 2026-11-03
 Summary (same as the pull request):
 - "I already have this" moved from its own row to the right of the price row (variant B)

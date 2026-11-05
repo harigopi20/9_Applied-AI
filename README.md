@@ -93,9 +93,9 @@ It is hidden on the start notice.
 4. **Check:** "Did we understand you correctly?" – recognised values are guesses.
 5. **Questions (max. 3 screens):** e.g. wall type, weight, sizes, condition checklists (mould, used-item defects) – guesses are pre-filled, you confirm by tapping. Stop rules from the catalogue (ST-01…ST-14) end the flow with a hand-off to staff or a specialist.
    **Weight (D-2, FR-04, SR-14):** "I know it", "Weigh it" (bathroom-scale tip), "Estimate for me" (shelf only: 1 kg per 4 cm of shelf for books, rule SHELF-E1 – shown as estimate, counts only after "Confirm") or "I don't know". *I don't know* plans for the project's worst case = its highest allowed load (shelf 50 kg, cabinet 50 kg, picture 25 kg, sliding door 60 kg; team decision 31 Oct 2026). If that worst case is above the wall's limit or no part can carry it, the app stops with ST-05 "please weigh it or ask OBI staff".
-   **Size limits shown before input (3 Nov 2026):** every number field shows the limit of this guide, read from the project's stop rules (e.g. cabinet width up to 120 cm, room height up to 2.5 m, lock backset only 55 mm, rule ST-04) and, where a part's size depends on the answer, the sizes in our catalogue (shelf boards, sliding-door leaves). Typing a value beyond a limit shows a warning straight away. If the app stops for a size, the stop names the value given and the limit ("Length: your value 300 cm · this guide: up to 120 cm").
+   **Size limits shown before input (3 Nov 2026):** every number field shows the limit of this guide, read from the project's stop rules (e.g. cabinet width up to 75 cm, room height up to 2.5 m, lock backset only 55 mm, rule ST-04) and, where a part's size depends on the answer, the sizes in our catalogue (shelf boards, sliding-door leaves). Typing a value beyond a limit shows a warning straight away. If the app stops for a size, the stop names the value given and the limit ("Length: your value 300 cm · this guide: up to 120 cm").
    **Several shelf boards (rule SHELF-S1):** a shelf longer than 120 cm can be built from several equal boards side by side (e.g. 300 cm → 3 boards of 100 cm). The choice appears under the length as soon as it is above 120 cm, and the size stop offers it as a button. Each board gets its own brackets, plugs and screws and is checked on its own for the **full** weight given – the weight is never divided (only the books estimate SHELF-E1 is per board). The list says to have longer boards cut to size in the store.
-   **Several wall cabinets (rule CAB-S1):** the same for a wall cabinet wider than 120 cm: several cabinets of the same width side by side (e.g. 240 cm → 2 cabinets of 120 cm). Each cabinet gets its own hanging rail, plugs and screws and is checked on its own for the full weight; depth, height and the plasterboard table (ST-03) are checked per cabinet. Cabinets of different widths are planned one by one. The texts of the split option come from the project template (`segments.texts`).
+   **Several wall cabinets (rule CAB-S1):** the same for a wall cabinet wider than 75 cm (was 120 cm until 4 Nov 2026 – wall cabinets are sold up to 60–75 cm wide): several cabinets of the same width side by side (e.g. 150 cm → 2 cabinets of 75 cm). Each cabinet gets its own hanging rail, plugs and screws and is checked on its own for the full weight; depth, height and the plasterboard table (ST-03) are checked per cabinet. Cabinets of different widths are planned one by one. The texts of the split option come from the project template (`segments.texts`).
 6. **List:** mark parts you **already have** (button "Have it already" / "Hab ich schon" on the right of the price row – the item stays visible, marked, and is not counted; the page stays where you clicked and the focus stays on the button, issue #119; never for plugs and screws; a used load-bearing part with a reported defect stays on the list; own tools and safety gear get the hint "Keep the right tool and gear to ensure safety.", SR-17). Each section shows its **subtotal**; the total is the sum of the subtotals (FR-34). There is no tick box any more (D-3). Change a variant, your answers or the store, open the OBI how-to links (projects 5–9). "Why these products?" opens the evidence log.
 7. **Save list (FR-17, DR-06):** "Save list" downloads one HTML file in the app design (orange header, safety notes first, one row per item with the price on the right, aisle and shelf as chips, subtotals, total box, items you already have in their own section, clickable how-to links – issue #135). It has no script and loads nothing from the internet, opens in any browser and can be printed to PDF. It contains products, quantities, prices, section subtotals and total, items you already have, aisle/shelf/stock of the chosen store, product warnings, safety notes and how-to links. It is built on the device – nothing is sent, your postcode is not in the file. Where the browser supports it, "Share list" opens the phone's share sheet with the same file.
 8. **Shopping by aisle:** the orange button "Start shopping by aisle" under the list opens the same checked list sorted for the walk through the chosen store – grouped by aisle (ascending, numbered), within an aisle by shelf, with packs per item. Items you already have are left out; items the store cannot supply are listed under "Not on the route in this store" with the nearest store that has them or "please ask staff" (FR-31). Safety notices stay visible. Without a store the app asks for a postcode first. It only reorders the list – no tick boxes (D-3), no new decision.
@@ -159,7 +159,7 @@ typing and the project buttons always work.
 ## Store selection by PLZ (FR-29, FR-30)
 - The PLZ is checked in code: exactly 5 digits **and** present in the PLZ table. Spaces and other non-digits are removed while typing or pasting (" 91126" works, issue #109).
 - Number answers accept only digits with one decimal comma or point ("4", "4,5", "4.5"); "1e1", "0x10" and the like are rejected (issue #108).
-- Valid → stores within `store.maxDistanceKm` (50 km), sorted by straight-line distance, at most `store.maxStoresShown` (5), with address and opening hours.
+- Valid → stores within `store.maxDistanceKm` (50 km), sorted by straight-line distance, at most `store.maxStoresShown` (6 = all sample stores, D-8 / D-11), with address and opening hours.
 - Invalid, unknown or no store in range → message plus the full store list.
 - **A store is never selected automatically** – not even the nearest one or the only one in range; the customer taps it (RB-16, SR-06). *Team decision 25 Oct 2026: no preselection* – FR-29, design D-11 and TC-38 say the same.
 - Skipped → the complete list with identical checks; aisle, shelf and stock show "not available" plus an "Add postcode" button.
@@ -183,6 +183,38 @@ python3 -m http.server 8000          # in the repository root
 ```
 `tests.html` runs all automated tests in the browser against the real data files,
 fixture copies of the catalogue, the AI `mock` mode and a simulated Web Speech API.
+Without Python, `npx http-server -p 8000 -c-1` in the repository root does the same.
+
+### Preview of the new mounting logic (D-13 / D-14)
+Open **http://localhost:8000/app/?preview=d13** to try the new logic before the full
+rebuild. Without `?preview=d13` the app works exactly as before.
+
+- The app looks and works as usual (project page with free text and voice, all projects,
+  store search, list with subtotals, "I already have this", availability and referral,
+  shopping by aisle, save/share, facts with "Change", evidence log, back navigation).
+- Only *Hang a shelf*, *Hang a wall cabinet* and *Anchor a shelf to the wall (anti-tip)* use the
+  new flow **wall → size → summary → plug options "max. X kg" → confirm**; the result is shown on
+  the normal list screen. *Hang a picture* keeps its weight question (D-2); painting and wallpaper
+  are unchanged.
+- Data: `data/product_catalogue_03_11_26.xlsx`; every load value from sheet *System
+  ratings* (`BBRules.fixingChain` R-17, `BBRules.capacity` R-18); rail ratings from the
+  rail products (80 / 150 kg, as in sheet *Cabinet*); 2 plugs per bracket.
+- Store selection (6 stores incl. OBI Schwabach) with aisle and stock on the list; English and German.
+- Code: `app/preview-d13.js` + `app/preview-d13.css`; settings in `app/config.js` → `preview.d13`.
+  Stops only for wall "I don't know" and a wall cabinet too heavy for the wall; too deep → hint with the max. depth.
+- **Size screen checks while you type:** the max. depth (and for a cabinet the max. width, 75 cm) is shown to
+  the right of the field. As soon as all fields are filled, the size is checked without pressing
+  *Continue*. A wall cabinet too heavy for the wall shows a notice on the same page: estimated weight,
+  heaviest cabinet the wall takes (strongest plug ÷ 1.5), buttons with a height, width or depth that
+  fits, and **"I'll weigh my cabinet"**. A weighed weight up to that max. leads to the plug options
+  (contents = plug max. − weighed weight) and is named on the list; above it the app stops.
+  The weighed-weight path is a proposal for the team (`tpjm/change-proposal-CP-D14-W.md`).
+
+#### One-file trial for testers (no server, no git)
+`node tools/build_trial.js` writes **`trial/Baumarkt-Buddy-Trial.html`**: the whole app (scripts,
+styles, fonts, workbook, templates, PLZ table) in one file, with the D-13/D-14 preview always on.
+Send that file to a tester; they double-click it and it opens in their browser – no install, no
+local server, no `?preview=d13`. Rebuild it after every change (the file is not in git).
 
 ### Save test results
 The browser page shows the results only while it is open. To keep them as a file:
@@ -229,7 +261,8 @@ The team's workbook (exports: `products.csv`, `store_stock.csv`, `stores.csv`):
 |---|---|
 | `Products` | Product data once for all stores: `product_nr`, `product_name`, `category`, `size`, `description`, `material`, `colour`, `price_eur`, `max_load_kg`, `suitable_wall_types`, `compatible_with`, `use_cases`, `requires_professional`, `safety_note` – plus the **rule-engine columns** `variant_group`, `pack_qty` (pieces per sales unit; empty = unclear), `pack_unit`, `specs` (`key=value;…`, e.g. `diameter_mm=8`), `data_note` |
 | `Store stock` | Per product and store: `<store_id>_aisle_nr`, `_aisle_name`, `_shelf_nr`, `_qty` (empty aisle = not carried, qty 0 = out of stock) |
-| `Stores` | 5 stores: `store_id`, `store_name`, `street`, `plz`, `city`, `opening_hours`, `lat`, `lon` |
+| `Stores` | 6 stores (incl. SCH – OBI Schwabach, D-11): `store_id`, `store_name`, `street`, `plz`, `city`, `opening_hours`, `lat`, `lon` |
+| `Fixing chain`, `System ratings`, `Capacity`, `Cabinet`, `Anti-tip`, `D-13 mapping` | New in data v3 (3 Nov 2026) for the shelf / wall-cabinet / anti-tip logic (D-13, D-14). All load values come from *System ratings* (sample until the fischer recommended loads are entered). The app reads *System ratings* and *Fixing chain* into `data.mounting` (`BBData.buildMounting`; a missing table or value → `data.mountingError`, no guessed values). The rule engine uses them in `BBRules.fixingChain` (R-17: wall → plug type and hammer mode, plug size → screw Ø → smallest bracket with screw Ø ≤ hole − 0.5 mm) and `BBRules.capacity` (R-18: MIN(system × f, bracket pair or rail × f, board) ÷ 1.25, capped by the wall cap, rounded down). No screen uses them yet. *Capacity* and *Cabinet* are the reference tables the tests compare against (TC-108). The mapping of a fixing type to its plug product group is in `app/config.js` → `mounting.fixingTypes`. |
 
 The app finds the header row in each sheet (title rows above it are fine) and
 skips legend or note rows. The rule-engine columns are added or refreshed with
@@ -340,12 +373,12 @@ usability test or by hand.
 2-week MVP sprint starting 19 Oct 2026 → final pitch.
 
 ## Limitations
-Sample catalogue (105 products), invented prices, stock and aisle positions, 5 sample
+Sample catalogue (288 products, data v3), invented prices, stock and aisle positions, 6 sample
 stores in a fictional partnership scenario (addresses and opening hours to be verified
 by the team), approximate PLZ distances, 9 project templates not yet reviewed by the team.
 Open points from the project catalogue: wall type "wood" and fixings for aerated
 concrete (D-5) are not built yet – the catalogue has no wood or aerated-concrete
-fixings; the 6th store Schwabach (D-11) is not in the data yet; "estimate for me" exists
+fixings; "estimate for me" exists
 only for the shelf (other projects: no team estimate rule yet); cavity anchors and anchor bolts are assumed to bring their
 own screw; the sliding-door plug (10 mm, 50 kg) limits the door to 40 kg although the
 catalogue allows 60 kg (every part must carry the whole load × 1.25, SR-04).

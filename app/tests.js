@@ -19,6 +19,7 @@
   let INACTIVE = [];     // templates not offered in the app (config inactiveTemplates) – still tested
   let productRows = null; // raw Products rows for fixtures
   let stockRows = null;   // raw "Store stock" rows for fixtures
+  let sheetGrids = null;  // raw grids of System ratings, Fixing chain, Capacity, Cabinet (D-13/D-14)
 
   // ---------------------------------------------------------------------
   // Mini test framework
@@ -82,8 +83,8 @@
   // ---------------------------------------------------------------------
   // Data (DR-01..DR-04, SR-10)
   // ---------------------------------------------------------------------
-  test("DR-01", "Single Excel file loads with ~100 products (v2), stores and stock", () => {
-    assert(D.catalogue.all.length >= 100, "products: " + D.catalogue.all.length);
+  test("DR-01", "Single Excel file loads with 288 products (v3, 3 Nov 2026), stores and stock", () => {
+    eq(D.catalogue.all.length, 288, "products in data v3");
     assert(D.stores.length >= 2, "at least 2 stores");
     assert(D.stock.size > 100, "stock rows");
     assert(D.stores.every((s) => s.data_status === "sample"), "stores labelled sample (NFR-05)");
@@ -888,7 +889,7 @@
 
   test("DR-08", "PLZ reference table loaded and store coordinates match their PLZ centre", () => {
     assert(D.plzTable && D.plzTable.size > 8000, "postcodes: " + (D.plzTable && D.plzTable.size));
-    eq(D.stores.length, 5, "5 sample stores (DR-01)");
+    eq(D.stores.length, 6, "6 sample stores incl. SCH (DR-01, D-11)");
     D.stores.forEach((st) => {
       const p = D.plzTable.get(st.plz);
       assert(p, "store PLZ in table: " + st.plz);
@@ -1101,6 +1102,26 @@
     eq(box.querySelectorAll(".btn.store.selected").length, 0, "nothing highlighted as chosen");
   });
 
+  test("TC-107 / FR-29 / DR-01", "6 stores in data v3: PLZ 91126 → OBI Schwabach first; 91052 → Schwabach by distance; all 6 shown, none preselected", () => {
+    const sch = D.stores.find((x) => x.store_id === "SCH");
+    assert(sch, "store SCH in sheet Stores");
+    eq(sch.plz, "91126");
+    assert(D.stock.size > 0 && R.storeInfo(D.stock, "SCH", "P044"), "SCH has store-stock columns");
+    for (const plz of ["91126", "91052"]) {
+      const s = storeSetup();
+      const res = window.BBApp.searchStores(plz);
+      eq(res.status, "nearby", "status for " + plz);
+      eq(res.stores.length, 6, "all 6 stores listed for " + plz);
+      res.stores.forEach((x, i) => { if (i) assert(res.stores[i - 1].km <= x.km, plz + ": sorted by distance"); });
+      assert(res.stores.some((x) => x.store.store_id === "SCH"), plz + ": Schwabach listed");
+      if (plz === "91126") eq(res.stores[0].store.store_id, "SCH", "Schwabach first for 91126");
+      eq(s.storeId, null, plz + ": no automatic preselection");
+      const box = renderStore();
+      eq(box.querySelectorAll("[data-store]").length, 6, plz + ": 6 store buttons");
+      eq(box.querySelectorAll(".btn.store.selected").length, 0, plz + ": nothing highlighted as chosen");
+    }
+  });
+
   // ---------------------------------------------------------------------
   // Stage 5 – transparency
   // ---------------------------------------------------------------------
@@ -1196,7 +1217,7 @@
     const lim = (id) => R.guideLimits(tpl(id)).map((l) => l.facts.join("*") + (l.when ? "[" + l.when.values.join(",") + "]" : "") + ":" + l.min + "-" + l.max);
     eq(lim("hang_shelf").filter((x) => x.startsWith("shelf_length")), ["shelf_length_cm:null-120"]);
     const cab = lim("hang_wall_cabinet");
-    ["cabinet_width_cm:null-120", "cabinet_depth_cm:null-60", "cabinet_height_cm:30-100"].forEach((x) => assert(cab.includes(x), "cabinet " + x));
+    ["cabinet_width_cm:null-75", "cabinet_depth_cm:null-60", "cabinet_height_cm:30-100"].forEach((x) => assert(cab.includes(x), "cabinet " + x));
     const paint = lim("paint_wall");
     assert(paint.includes("wall_width_m*room_height_m:null-60"), "paint area");
     assert(paint.includes("room_height_m:null-2.5"), "paint height");
@@ -1205,8 +1226,8 @@
     // every limit equals the stop rule: the value on the limit passes, just beyond it stops
     const cabT = tpl("hang_wall_cabinet");
     const lc = R.guideLimits(cabT).find((l) => l.facts[0] === "cabinet_width_cm");
-    eq(R.limitCheck(lc, confirmed({ cabinet_width_cm: 120 })).violated, false);
-    eq(R.limitCheck(lc, confirmed({ cabinet_width_cm: 121 })).violated, true);
+    eq(R.limitCheck(lc, confirmed({ cabinet_width_cm: 75 })).violated, false);
+    eq(R.limitCheck(lc, confirmed({ cabinet_width_cm: 76 })).violated, true);
   });
 
   test("ST-04 / FR-04 (limits A, UI)", "Questions show the guide limits and catalogue sizes before input; typing beyond a limit warns; the stop names the crossed limit", () => {
@@ -1218,7 +1239,7 @@
     ask(tpl("hang_wall_cabinet"), "Q2");
     ["cabinet_depth_cm", "cabinet_height_cm"].forEach((k) => assert(box.querySelector('[data-guide-hint="' + k + '"]'), "hint " + k));
     assert(box.querySelector('[data-guide-hint="cabinet_depth_cm"]').textContent.includes("bis 60 cm"), "limit text");
-    assert(box.querySelector('[data-split-hint="cabinet_width_cm"]').textContent.includes("120 cm"), "width: split hint with the limit (CAB-S1)");
+    assert(box.querySelector('[data-split-hint="cabinet_width_cm"]').textContent.includes("75 cm"), "width: split hint with the limit (CAB-S1, 75 cm since 4 Nov 2026)");
     const warn = box.querySelector('[data-guide-warn="cabinet_depth_cm"]');
     eq(warn.hidden, true, "no warning before input");
     const inp = box.querySelector("#in-cabinet_depth_cm");
@@ -1235,7 +1256,7 @@
     assert(box.querySelector('[data-catalogue-hint="leaf"]'), "leaf sizes shown");
     // the stop names the crossed limit
     window.BBI18n.setLang("en");
-    renderResult(tpl("hang_wall_cabinet"), confirmed({ wall_type: "concrete", cabinet_width_cm: 80, cabinet_depth_cm: 70, cabinet_height_cm: 60, load_kg: 20, condition: [] }), null);
+    renderResult(tpl("hang_wall_cabinet"), confirmed({ wall_type: "concrete", cabinet_width_cm: 60, cabinet_depth_cm: 70, cabinet_height_cm: 60, load_kg: 20, condition: [] }), null);
     const lines = box.querySelector("[data-stop-limits]");
     assert(lines, "limit list on the stop");
     assert(/70 cm.*up to 60 cm/.test(lines.textContent), "value and limit: " + lines.textContent);
@@ -1265,13 +1286,13 @@
     eq([r2.segments.count, r2.segments.length, item(r2, "board").product.specs.length_mm], [2, 65, 800]);
   });
 
-  test("CAB-S1", "Wall cabinet wider than 120 cm: several cabinets of the same width, each with its own rail and fixings, checked for the full weight", () => {
-    const base = Object.assign({}, CAB_OK, { wall_type: "concrete", cabinet_width_cm: 240, cabinet_layout: "multiple" });
+  test("CAB-S1", "Wall cabinet wider than 75 cm: several cabinets of the same width, each with its own rail and fixings, checked for the full weight", () => {
+    const base = Object.assign({}, CAB_OK, { wall_type: "concrete", cabinet_width_cm: 150, cabinet_layout: "multiple" });
     const r = run(CAB(), confirmed(base));
     eq(r.state, "validated");
-    eq([r.segments.count, r.segments.length, r.segments.load_from], [2, 120, "full"]);
+    eq([r.segments.count, r.segments.length, r.segments.load_from], [2, 75, "full"]);
     eq(r.segments.load_kg, CAB_OK.load_kg, "weight not divided");
-    const one = run(CAB(), confirmed(Object.assign({}, base, { cabinet_width_cm: 120, cabinet_layout: undefined })));
+    const one = run(CAB(), confirmed(Object.assign({}, base, { cabinet_width_cm: 75, cabinet_layout: undefined })));
     ["rail", "wall_plug", "screw"].forEach((role) => eq(item(r, role).quantity.units, 2 * item(one, role).quantity.units, role + " × 2"));
     eq(item(r, "drill").quantity.units, 1, "tools not multiplied");
     assert(r.notices.some((n) => n.id === "segments" && n.cut_from === null), "notice, no cut hint");
@@ -1282,7 +1303,7 @@
     // texts come from the cabinet template
     window.BBI18n.setLang("de");
     renderResult(CAB(), confirmed(base), null);
-    assert(window.BBApp.viewResult().textContent.includes("2 Schränke à 120 cm"), "German cabinet text");
+    assert(window.BBApp.viewResult().textContent.includes("2 Schränke à 75 cm"), "German cabinet text");
     window.BBI18n.setLang("en");
   });
 
@@ -1531,7 +1552,7 @@
   const LOCK = () => tpl("change_interior_door_lock");
   const SLIDE = () => tpl("install_sliding_door");
   const WP = () => tpl("hang_nonwoven_wallpaper");
-  const CAB_OK = { wall_type: "concrete", cabinet_width_cm: 80, cabinet_depth_cm: 35, cabinet_height_cm: 60, load_kg: 30, condition: [] };
+  const CAB_OK = { wall_type: "concrete", cabinet_width_cm: 60, cabinet_depth_cm: 35, cabinet_height_cm: 60, load_kg: 30, condition: [] };
   const PAINT_OK = { wall_width_m: 14, room_height_m: 2.5, surface: "painted", mould: "none", health: "no", old_coating: "no" };
   const WP_OK = { wall_width_m: 14, room_height_m: 2.5, pattern_repeat_cm: 0, mould: "none", health: "no", wall_state: [] };
   const GLASS_OK = { frame: "yes", leaf_size: "standard", din_side: "left", glass: "new" };
@@ -1555,15 +1576,15 @@
     });
   });
 
-  test("PRJ-02", "Wall cabinet on concrete: 30 kg → 1 rail + 4 heavy-duty plugs; 45 kg and 110 cm → 2 rails + 8 anchor bolts, no extra screws", () => {
+  test("PRJ-02", "Wall cabinet on concrete: 30 kg → 1 rail + 4 heavy-duty plugs; 45 kg and 110 cm as 2 cabinets of 55 cm → 2 rails + 8 anchor bolts, no extra screws", () => {
     let r = run(CAB(), confirmed(CAB_OK));
     eq(r.state, "validated");
     eq([item(r, "rail").product.product_nr, units(r, "rail")], ["P102", 1]);
     eq([item(r, "wall_plug").product.product_nr, units(r, "wall_plug")], ["P045", 4]);
     eq(item(r, "screw").product.product_nr, "P050");
-    r = run(CAB(), confirmed(Object.assign({}, CAB_OK, { cabinet_width_cm: 110, load_kg: 45 })));
+    r = run(CAB(), confirmed(Object.assign({}, CAB_OK, { cabinet_width_cm: 110, cabinet_layout: "multiple", load_kg: 45 })));
     eq(r.state, "validated");
-    eq(units(r, "rail"), 2, "2 rails above 100 cm");
+    eq(units(r, "rail"), 2, "1 rail per cabinet (max. 75 cm wide since 4 Nov 2026)");
     eq([item(r, "wall_plug").product.product_nr, units(r, "wall_plug")], ["P047", 8]);
     eq(item(r, "screw"), undefined, "anchor bolt brings its own screw");
   });
@@ -1572,18 +1593,18 @@
     const pb = (w, d, kg) => run(CAB(), confirmed(Object.assign({}, CAB_OK, { wall_type: "plasterboard", cabinet_width_cm: w, cabinet_depth_cm: d, load_kg: kg })));
     let r = pb(70, 35, 20);
     eq([r.state, stopOf(r), r.blocked.limit_kg], ["safety_blocked", "ST-03", 16.5]);
-    r = pb(80, 30, 10);
+    r = pb(75, 30, 10);
     eq(r.state, "validated", "10 kg fits");
     eq(item(r, "wall_plug").product.product_nr, "P046");
     eq(stopOf(pb(35, 30, 5)), "ST-03", "narrower than the table → stop");
   });
 
-  test("PRJ-02 / ST-02 / ST-04", "Cabinet: aerated concrete, width > 120, depth > 60, height < 30 or > 100 → stop with catalogue text", () => {
+  test("PRJ-02 / ST-02 / ST-04", "Cabinet: aerated concrete, width > 75, depth > 60, height < 30 or > 100 → stop with catalogue text", () => {
     const c = (x) => run(CAB(), confirmed(Object.assign({}, CAB_OK, x)));
     eq(stopOf(c({ wall_type: "aerated_concrete" })), "ST-02");
-    // CAB-S1 (3 Nov 2026): above 120 cm the customer first chooses one cabinet or several
-    eq(c({ cabinet_width_cm: 121 }).missing_facts, ["cabinet_layout"]);
-    [{ cabinet_width_cm: 121, cabinet_layout: "single" }, { cabinet_depth_cm: 61 }, { cabinet_height_cm: 25 }, { cabinet_height_cm: 101 }].forEach((x) => {
+    // CAB-S1 (3 Nov 2026): above 75 cm (was 120 cm until 4 Nov 2026) the customer first chooses one cabinet or several
+    eq(c({ cabinet_width_cm: 76 }).missing_facts, ["cabinet_layout"]);
+    [{ cabinet_width_cm: 76, cabinet_layout: "single" }, { cabinet_depth_cm: 61 }, { cabinet_height_cm: 25 }, { cabinet_height_cm: 101 }].forEach((x) => {
       const r = c(x);
       eq([r.state, stopOf(r)], ["safety_blocked", "ST-04"], JSON.stringify(x));
       assert(r.blocked.message.de.includes("außerhalb"), "German text");
@@ -1982,7 +2003,7 @@
     const pre = confirmed({ wall_type: "concrete" });
     let { s, box } = questionSetup(CAB(), "Q2", Object.assign({}, pre));
     const fill = (b) => {
-      b.querySelector("#in-cabinet_width_cm").value = "80";
+      b.querySelector("#in-cabinet_width_cm").value = "60";
       b.querySelector("#in-cabinet_depth_cm").value = "35";
       b.querySelector("#in-cabinet_height_cm").value = "60";
       b.querySelector("#in-load_kg").value = "30";
@@ -2064,14 +2085,237 @@
   });
 
   // ---------------------------------------------------------------------
+  // D-13 / D-14 engine basics: System ratings, fixing chain (R-17), capacity (R-18)
+  // Expected values are read from the workbook at test time – never typed here (DR-09).
+  // ---------------------------------------------------------------------
+  const FT = () => CFG.mounting.fixingTypes;
+  const chainOf = (wall, mm) => R.fixingChain(wall, mm, D.mounting, D.catalogue, FT());
+  const cellStr = (v) => (v === null || v === undefined ? "" : String(v).trim());
+  /** Data rows below the header row whose first cells are `head`. */
+  function gridRows(grid, head, rowKey) {
+    const h = grid.findIndex((r) => r && head.every((c, i) => cellStr(r[i]).toLowerCase() === c));
+    assert(h >= 0, "header '" + head.join(", ") + "' found");
+    const out = [];
+    for (let i = h + 1; i < grid.length && grid[i] && rowKey.test(cellStr(grid[i][0])); i++) out.push(grid[i]);
+    return { header: grid[h].map(cellStr), rows: out };
+  }
+
+  test("DR-09", "Sheets System ratings and Fixing chain load: 6 walls, plug sizes 6–14 mm, brackets, boards, safety factor", () => {
+    eq(D.mountingError, null, "no mounting data error");
+    const M = D.mounting;
+    assert(M, "mounting data loaded");
+    eq(Object.keys(M.walls), ["concrete", "solid_brick", "brick_unknown", "aerated_concrete", "wood", "plasterboard"]);
+    const { header, rows } = gridRows(sheetGrids.ratings, ["wall", "6 mm"], /^[a-z_]+$/);
+    rows.forEach((r) => {
+      const w = M.walls[cellStr(r[0])];
+      header.forEach((h, i) => {
+        const mm = (/^(\d+) mm$/.exec(h) || [])[1];
+        if (!mm) return;
+        const cell = cellStr(r[i]);
+        eq(w.system[mm], cell === "n/a" ? null : Number(cell), w.wall + " " + mm + " mm");
+      });
+    });
+    eq(M.walls.plasterboard.system["6"], null, "n/a stays null, never 0 (RB-06)");
+    eq(M.brackets.length, 5);
+    eq(M.boards.map((b) => b.thicknessMm), [18, 25]);
+    assert(M.safetyFactor > 1, "safety factor from the sheet");
+  });
+
+  test("TC-108 / SR-18 / DR-09", "Capacity per wall × plug × depth equals sheet Capacity; '–' options are not offered", () => {
+    const g = sheetGrids.capacity;
+    const h = g.findIndex((r) => r && cellStr(r[0]) === "wall" && cellStr(r[1]) === "plug mm");
+    assert(h >= 0, "Capacity header row");
+    const depths = g[h].map((c, i) => ({ cm: Number((/^(\d+) cm$/.exec(cellStr(c)) || [])[1]), i })).filter((d) => d.cm);
+    eq(depths.length, 8, "8 depth columns");
+    let cells = 0, hidden = 0;
+    const seen = new Set();
+    for (let i = h + 1; i < g.length; i++) {
+      const r = g[i];
+      if (!r || !D.mounting.walls[cellStr(r[0])]) continue;
+      const wall = cellStr(r[0]), mm = Number(r[1]);
+      seen.add(wall + "|" + mm);
+      const c = chainOf(wall, mm);
+      assert(c.ok, wall + " " + mm + " mm: fixing chain (" + c.reason + ")");
+      eq((c.plug || c.screw).product_nr, cellStr(r[2]), wall + " " + mm + " mm: fixing");
+      eq(c.bracketClass, cellStr(r[3]), wall + " " + mm + " mm: bracket class");
+      depths.forEach((d) => {
+        const res = R.capacity({ kind: "shelf", wall, plugMm: mm, depthCm: d.cm, bracketClass: c.bracketClass, boardMm: 25 }, D.mounting);
+        const want = cellStr(r[d.i]);
+        cells++;
+        if (want === "–" || want === "-") { hidden++; assert(!res.offered, wall + " " + mm + " mm @" + d.cm + " cm must not be offered"); }
+        else { assert(res.offered, wall + " " + mm + " mm @" + d.cm + " cm offered (" + res.reason + ")"); eq(res.maxKg, Number(want), wall + " " + mm + " mm @" + d.cm + " cm"); }
+      });
+    }
+    eq(seen.size, 28, "28 wall × plug rows");
+    // plug sizes missing from the sheet are not offered at all
+    Object.keys(D.mounting.walls).forEach((wall) => D.mounting.plugSizes.forEach((mm) => {
+      if (seen.has(wall + "|" + mm)) return;
+      const c = chainOf(wall, mm);
+      const res = R.capacity({ kind: "shelf", wall, plugMm: mm, depthCm: 25, bracketClass: c.bracketClass, boardMm: 25 }, D.mounting);
+      assert(!c.ok || !res.offered, wall + " " + mm + " mm must not be offered");
+    }));
+    return cells + " cells checked, " + hidden + " not offered";
+  });
+
+  test("R-18 / SR-18", "Capacity: depth factor, safety factor, wall cap, rounding down; too deep → max. depth; cabinet f = MIN(1, H ÷ D)", () => {
+    const M = D.mounting;
+    const shelf = (wall, mm, depth, board) => R.capacity({ kind: "shelf", wall, plugMm: mm, depthCm: depth, bracketClass: chainOf(wall, mm).bracketClass, boardMm: board || 25 }, M);
+    const a = shelf("concrete", 6, 30);
+    const f = M.referenceDepthCm / 30;
+    eq(a.f, f, "f = 25 ÷ 30");
+    eq(a.maxKg, Math.floor(Math.min(M.walls.concrete.system["6"] * f, M.brackets[0].pairKg * f, M.boards[1].kg) / M.safetyFactor), "rounded down");
+    eq(a.limitedBy, "bracket");
+    eq(shelf("concrete", 14, 15).limitedBy, "wall_cap");
+    eq(shelf("concrete", 14, 15).maxKg, M.walls.concrete.wallCapKg);
+    const deep = shelf("aerated_concrete", 10, 40);
+    eq([deep.offered, deep.reason, deep.maxDepthCm], [false, "deeper_than_wall", M.walls.aerated_concrete.shelfMaxDepthCm]);
+    eq(shelf("concrete", 6, 35).reason, "deeper_than_bracket");
+    eq(shelf("concrete", 12, 40, 18).reason, "deeper_than_board", "18 mm board max. 30 cm");
+    eq(R.capacity({ kind: "shelf", wall: "plasterboard", plugMm: 6, depthCm: 20, bracketClass: "B5", boardMm: 25 }, M).reason, "no_system_rating");
+    eq(R.capacity({ kind: "shelf", wall: "concrete", plugMm: 8, depthCm: 20 }, null).reason, "no_data");
+    // Cabinet: compare with the example in sheet Cabinet (size read from the sheet)
+    const g = sheetGrids.cabinet;
+    const val = (label) => Number((g.find((r) => r && cellStr(r[0]) === label) || [])[1]);
+    const D_ = val("Depth cm"), H = val("Height cm");
+    assert(D_ > 0 && H > 0, "cabinet size in sheet");
+    const { rows } = gridRows(g, ["wall", "plug mm", "fixing", "total max. kg"], /^[a-z_]+$/);
+    let n = 0;
+    rows.filter((r) => /^\d+$/.test(cellStr(r[1]))).forEach((r) => {
+      const res = R.capacity({ kind: "cabinet", wall: cellStr(r[0]), plugMm: Number(r[1]), depthCm: D_, heightCm: H }, M);
+      assert(res.offered, cellStr(r[0]) + " " + r[1] + " mm cabinet offered (" + res.reason + ")");
+      eq(res.maxKg, Number(r[3]), "cabinet " + cellStr(r[0]) + " " + r[1] + " mm total max. kg");
+      n++;
+    });
+    assert(n >= 25, "cabinet rows checked: " + n);
+    eq(R.capacity({ kind: "cabinet", wall: "concrete", plugMm: 10, depthCm: 40, heightCm: 20 }, M).f, 0.5, "f = H ÷ D");
+    return n + " cabinet rows checked";
+  });
+
+  test("D-14 / CP-D14-W", "Cabinet too heavy (preview): estimate from the size, heaviest cabinet the wall takes, sizes that fit, weighed weight", () => {
+    const M = D.mounting, C = window.BBPreviewD13.calc;
+    assert(C && C.cabinetPlan, "preview calculation loaded without ?preview=d13");
+    eq(window.BBPreviewD13.active, false, "preview screens stay inactive in tests.html");
+    const plan = (wall, w, d, h, kg) => C.cabinetPlan(M, D.catalogue, wall, w, d, h, kg);
+    // User case 4 Nov 2026: 70 × 40 × 90 cm on perforated brick
+    const wall = "brick_unknown", W = 70, D_ = 40, H = 90;
+    const p = plan(wall, W, D_, H);
+    const surface = (2 * H * D_ + 3 * W * D_ + 2 * W * H) / 10000;
+    eq(p.estimateKg, Math.ceil(surface * M.cabinet.panelKgPerM2 - 1e-9), "estimate = ROUNDUP(surface × kg/m²)");
+    eq([p.weighed, p.weightKg], [false, p.estimateKg], "no weighed weight → estimate decides");
+    const best = Math.max(...M.plugSizes.map((mm) => {
+      const c = R.capacity({ kind: "cabinet", wall, plugMm: mm, depthCm: D_, heightCm: H }, M);
+      return c.offered ? c.maxKg : 0;
+    }));
+    eq(p.bestTotalKg, best, "strongest plug option on this wall");
+    eq(p.maxCabinetKg, Math.floor(best / M.cabinet.minPlugFactor + 1e-9), "heaviest cabinet = strongest ÷ min. plug factor");
+    assert(p.estimateKg > p.maxCabinetKg && p.options.length === 0, "estimate " + p.estimateKg + " kg > max. " + p.maxCabinetKg + " kg → no plug offered");
+    // Sizes that fit: the suggested value fits, 1 cm more does not
+    const fit = C.cabinetSizeFit(M, D.catalogue, wall, W, D_, H);
+    const ok = (w, d, h) => { const x = plan(wall, w, d, h); return !x.tooDeep && !x.tooWide && x.options.length > 0; };
+    [["height", (v) => ok(W, D_, v)], ["width", (v) => ok(v, D_, H)], ["depth", (v) => ok(W, v, H)]].forEach(([k, fits]) => {
+      assert(fit[k] !== null, k + " suggested");
+      assert(fits(fit[k]), k + " " + fit[k] + " cm fits");
+      assert(!fits(fit[k] + 1), k + " " + (fit[k] + 1) + " cm does not fit (largest value suggested)");
+      assert(plan(wall, k === "width" ? fit[k] : W, k === "depth" ? fit[k] : D_, k === "height" ? fit[k] : H).estimateKg <= p.maxCabinetKg, k + ": estimate within the max.");
+    });
+    // Weighed weight (CP-D14-W): up to the max. → plugs offered, contents = total − weighed; above → none
+    const atMax = plan(wall, W, D_, H, p.maxCabinetKg);
+    eq([atMax.weighed, atMax.weightKg], [true, p.maxCabinetKg]);
+    assert(atMax.options.length > 0, "weighed " + p.maxCabinetKg + " kg → plugs offered");
+    atMax.options.forEach((o) => eq(o.kg, Math.floor(o.total - p.maxCabinetKg + 1e-9), o.mm + " mm: contents = total − weighed weight"));
+    const over = plan(wall, W, D_, H, p.maxCabinetKg + 0.5);
+    eq(over.options.length, 0, "weighed above the max. → no plug offered (stop)");
+    // A cabinet that fits by the estimate is unchanged
+    const small = plan(wall, fit.width, D_, H);
+    assert(small.options.length > 0 && !small.weighed, "fitting size: plugs offered from the estimate");
+    // Max. width of a wall cabinet: 75 cm (4 Nov 2026) – 75 cm is checked, 76 cm is too wide
+    const maxW = window.BB_CONFIG.preview.d13.maxCabinetWidthCm;
+    eq(maxW, 75, "max. cabinet width");
+    eq(!!plan("concrete", maxW, 30, 60).tooWide, false, maxW + " cm allowed");
+    eq(plan("concrete", maxW + 1, 30, 60).tooWide, true, (maxW + 1) + " cm too wide");
+    return "max. " + p.maxCabinetKg + " kg cabinet; fit " + fit.height + " / " + fit.width + " / " + fit.depth + " cm (H / W / D)";
+  });
+
+  test("TC-115 / FR-09 / RB-27", "Fixing chain: screw Ø ≤ hole Ø − 0.5 mm, plug type and hammer mode match the wall, bit = plug size", () => {
+    const M = D.mounting;
+    const walls = gridRows(sheetGrids.chain, ["wall", "fixing type"], /^[a-z_]+$/).rows;
+    const chainRows = gridRows(sheetGrids.chain, ["plug size mm (= drill bit)", "screw ø mm"], /^\d+$/).rows;
+    const label = (wall) => wall.replace("_unknown", "").replace("_", " ");
+    let ok = 0;
+    walls.forEach((wr) => {
+      const wall = cellStr(wr[0]);
+      eq(M.walls[wall].hammer, cellStr(wr[2]).toLowerCase() === "on", wall + ": hammer as in sheet");
+      M.plugSizes.forEach((mm) => {
+        const c = chainOf(wall, mm);
+        if (!c.ok) return;
+        ok++;
+        const where = wall + " " + mm + " mm";
+        assert(c.screwMm <= c.bracketHoleMm - R.HOLE_CLEARANCE_MM, where + ": screw " + c.screwMm + " fits hole " + c.bracketHoleMm);
+        eq(c.hammer, M.walls[wall].hammer, where + ": hammer");
+        const type = FT()[M.walls[wall].fixingType];
+        if (type.plugVariant) {
+          eq(c.plug.variant_group, type.plugVariant, where + ": plug type");
+          assert(c.plug.suitable_wall_types.includes(label(wall)), where + ": plug made for " + label(wall));
+          eq(c.drillBit.specs.diameter_mm, mm, where + ": drill bit = plug size");
+        } else {
+          eq(c.plug, null, where + ": no plug in wood");
+          assert(c.screw.suitable_wall_types.includes("wood"), where + ": wood screw");
+          assert(c.drillBit.use_cases.includes("drilling wood"), where + ": pilot bit");
+        }
+        if (c.ownScrew) {
+          eq(c.screw, null, where + ": cavity anchor brings its own screw");
+        } else {
+          eq(c.screw.specs.diameter_mm, c.screwMm, where + ": screw Ø");
+          eq(c.screw.specs.plug_mm, mm, where + ": screw for this plug size");
+          if (type.plugVariant) assert(c.screw.compatible_with.includes(c.plug.product_nr), where + ": screw listed as compatible with the plug");
+          // for plugs the sheet's own bracket column must agree with the rule
+          const sheetCls = (/^B[\d.]+/.exec(cellStr((chainRows.find((r) => Number(r[0]) === mm) || [])[2])) || [])[0];
+          eq(c.bracketClass, sheetCls, where + ": bracket class as in sheet Fixing chain");
+        }
+      });
+    });
+    assert(ok >= 28, "options checked: " + ok);
+    // RB-27: a screw that does not fit is never matched to a bracket
+    eq(R.bracketForScrew(5, M).cls, "B6.5", "5 mm screw does not fit B5 (5 mm hole)");
+    eq(R.bracketForScrew(4.5, M).cls, "B5", "4.5 mm screw fits B5");
+    eq(R.bracketForScrew(99, M), null, "no bracket for a too thick screw");
+    eq(chainOf("plasterboard", 6).ok, false, "no 6 mm cavity anchor");
+    eq(chainOf("unknown_wall", 8).reason, "unknown_wall");
+    return ok + " options checked";
+  });
+
+  test("NFR-03 / DR-09 / RB-06", "Broken System ratings → clear data error, no guessed values; blank rating is 'not offered', never 0", () => {
+    const copy = () => sheetGrids.ratings.map((r) => (r ? r.slice() : r));
+    const build = (g) => window.BBData.buildMounting(g, sheetGrids.chain);
+    const throwsWith = (g, text) => {
+      try { build(g); } catch (e) { assert(e.message.includes(text), "message '" + e.message + "' names " + text); return; }
+      throw new AssertionError("no error for missing " + text);
+    };
+    let g = copy(); g = g.filter((r) => !(r && cellStr(r[0]) === "Safety factor"));
+    throwsWith(g, "Safety factor");
+    g = copy(); g = g.filter((r) => !(r && cellStr(r[0]) === "class"));
+    throwsWith(g, "class");
+    g = copy(); const capRow = g.findIndex((r) => r && cellStr(r[0]) === "concrete");
+    g[capRow][6] = null; // wall cap of concrete blank
+    throwsWith(g, "wall cap of concrete");
+    g = copy(); const row = g.findIndex((r) => r && cellStr(r[0]) === "concrete");
+    g[row][2] = null; // 8 mm on concrete blank
+    const M = build(g);
+    eq(M.walls.concrete.system["8"], null, "blank → null");
+    eq(R.capacity({ kind: "shelf", wall: "concrete", plugMm: 8, depthCm: 20, bracketClass: "B6.5", boardMm: 25 }, M).reason, "no_system_rating");
+  });
+
+  // ---------------------------------------------------------------------
   // Runner
   // ---------------------------------------------------------------------
   async function loadRawRows() {
     const res = await fetch(CFG.data.workbook, { cache: "no-cache" });
     const wb = XLSX.read(await res.arrayBuffer(), { type: "array" });
+    const grid = (name) => window.BBData.sheetGrid(XLSX, wb.Sheets[name]);
     return {
       products: window.BBData.sheetRows(XLSX, wb.Sheets.Products, "product_nr"),
-      stock: window.BBData.sheetRows(XLSX, wb.Sheets["Store stock"], "product_nr")
+      stock: window.BBData.sheetRows(XLSX, wb.Sheets["Store stock"], "product_nr"),
+      grids: { ratings: grid("System ratings"), chain: grid("Fixing chain"), capacity: grid("Capacity"), cabinet: grid("Cabinet") }
     };
   }
 
@@ -2096,6 +2340,7 @@
       const raw = await loadRawRows();
       productRows = raw.products;
       stockRows = raw.stock;
+      sheetGrids = raw.grids;
     } catch (e) {
       report({ id: "SETUP", name: "Load data files" }, "fail", e.message);
     }

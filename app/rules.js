@@ -1071,7 +1071,123 @@
     return role ? rolePool(role, catalogue).filter((p) => !p.requires_professional) : [];
   }
 
+  // ---------------------------------------------------------------------
+  // D-13 / D-14 mounting logic – engine basics (no screen uses these yet).
+  // `mounting` is the data built by BBData.buildMounting from the sheets
+  // "System ratings" and "Fixing chain" (DR-09). No load value is written here.
+  // ---------------------------------------------------------------------
+
+  /** Screw Ø must be at least this much smaller than the bracket hole / rail slot (R-17). */
+  const HOLE_CLEARANCE_MM = 0.5;
+
+  /** Smallest bracket class whose hole takes the screw: screw Ø ≤ hole Ø − 0.5 mm (R-17). */
+  function bracketForScrew(screwMm, mounting) {
+    if (!mounting || !Number.isFinite(screwMm)) return null;
+    return mounting.brackets.find((b) => screwMm <= b.holeMm - HOLE_CLEARANCE_MM + 1e-9) || null;
+  }
+
+  /**
+   * R-17 fixing chain for one plug option on one wall:
+   * wall → plug type + hammer mode; plug size (= drill bit) → screw Ø → bracket class.
+   * Returns { ok: false, reason } when the option does not exist – then it is never offered.
+   */
+  function fixingChain(wall, plugMm, mounting, catalogue, fixingTypes) {
+    const no = (reason) => Object.freeze({ ok: false, rule: "R-17", wall, plugMm, reason });
+    if (!mounting) return no("no_data");
+    const w = mounting.walls[wall];
+    if (!w) return no("unknown_wall");
+    const row = mounting.chain[plugMm];
+    if (!row) return no("no_chain_row");
+    const type = (fixingTypes || {})[w.fixingType];
+    if (!type) return no("unknown_fixing_type");
+    const product = (nr) => (nr && catalogue ? catalogue.get(nr) : null);
+
+    let plug = null, screw = null, screwMm = row.screwMm;
+    if (type.plugVariant) {
+      const key = type.screw === "own" ? "hole_mm" : "diameter_mm";
+      plug = catalogue.all.find((p) => p.variant_group === type.plugVariant && p.specs[key] === plugMm) || null;
+      if (!plug) return no("no_plug_product");
+    }
+    if (type.screw === "own") {
+      // cavity anchor: its own screw, thread "M5" → 5 mm
+      const m = /^M(\d+(?:\.\d+)?)$/i.exec(String(plug.specs.thread || ""));
+      if (!m) return no("no_anchor_thread");
+      screwMm = Number(m[1]);
+    } else {
+      screw = product(type.screw === "long" ? row.screwLong : row.screwStd);
+      if (!screw) return no("no_screw_product");
+    }
+    const drillBit = product(w.fixingType === "screw" ? row.woodBit : row.masonryBit);
+    if (!drillBit) return no("no_drill_bit");
+    const bracket = bracketForScrew(screwMm, mounting);
+    if (!bracket) return no("no_bracket_fits");
+    return Object.freeze({
+      ok: true, rule: "R-17", wall, plugMm,
+      fixingType: w.fixingType,
+      hammer: w.hammer,
+      plug, screw, ownScrew: type.screw === "own", screwMm,
+      drillBit,
+      bracketClass: bracket.cls, bracketHoleMm: bracket.holeMm
+    });
+  }
+
+  /**
+   * R-18 capacity ("max. X kg") of one plug option (SR-18):
+   *   MIN(system × f, bracket pair or rail × f, board) ÷ safety factor, capped by the wall cap.
+   *   shelf:   f = MIN(1, reference depth ÷ depth), wall cap = shelf cap
+   *   cabinet: f = MIN(1, height ÷ depth),          wall cap = cabinet cap
+   * Rounded DOWN to whole kg (as in sheet Capacity). Plug ratings are never added up (SR-04).
+   * Returns { offered: false, reason, maxDepthCm? } when the option is not shown.
+   *
+   * opts: { kind: "shelf"|"cabinet", wall, plugMm, depthCm,
+   *         shelf: bracketClass, boardMm · cabinet: heightCm, railKg (optional) }
+   */
+  function capacity(opts, mounting) {
+    const o = opts || {};
+    const no = (reason, extra) => Object.freeze(Object.assign({ offered: false, rule: "R-18", reason }, extra || {}));
+    if (!mounting) return no("no_data");
+    const w = mounting.walls[o.wall];
+    if (!w) return no("unknown_wall");
+    const system = w.system[o.plugMm];
+    if (system === null || system === undefined) return no("no_system_rating");
+    const depth = Number(o.depthCm);
+    if (!(depth > 0)) return no("no_depth");
+
+    let f, parts, capKg;
+    if (o.kind === "shelf") {
+      if (depth > w.shelfMaxDepthCm) return no("deeper_than_wall", { maxDepthCm: w.shelfMaxDepthCm });
+      const br = mounting.brackets.find((b) => b.cls === o.bracketClass);
+      if (!br) return no("unknown_bracket");
+      if (depth * 10 > br.maxArmMm) return no("deeper_than_bracket", { maxDepthCm: br.maxArmMm / 10 });
+      const board = mounting.boards.find((b) => b.thicknessMm === Number(o.boardMm));
+      if (!board) return no("unknown_board");
+      if (depth > board.maxDepthCm) return no("deeper_than_board", { maxDepthCm: board.maxDepthCm });
+      f = Math.min(1, mounting.referenceDepthCm / depth);
+      parts = { system: system * f, bracket: br.pairKg * f, board: board.kg };
+      capKg = w.wallCapKg;
+    } else if (o.kind === "cabinet") {
+      if (depth > w.cabinetMaxDepthCm) return no("deeper_than_wall", { maxDepthCm: w.cabinetMaxDepthCm });
+      const height = Number(o.heightCm);
+      if (!(height > 0)) return no("no_height");
+      f = Math.min(1, height / depth);
+      parts = { system: system * f };
+      if (o.railKg !== undefined && o.railKg !== null) parts.rail = Number(o.railKg) * f;
+      capKg = w.cabinetCapKg;
+    } else {
+      return no("unknown_kind");
+    }
+    const weakest = Object.keys(parts).reduce((a, b) => (parts[b] < parts[a] ? b : a));
+    const raw = parts[weakest] / mounting.safetyFactor;
+    return Object.freeze({
+      offered: true, rule: "R-18",
+      maxKg: Math.floor(Math.min(raw, capKg) + 1e-9),
+      limitedBy: raw >= capKg ? "wall_cap" : weakest,
+      f, parts: Object.freeze(parts), safetyFactor: mounting.safetyFactor, capKg
+    });
+  }
+
   root.BBRules = Object.freeze({
+    HOLE_CLEARANCE_MM, bracketForScrew, fixingChain, capacity,
     STATUS, UNKNOWN_VALUE, makeFact, trustedValue, editDistance, typoMatch, phraseTypoMatch,
     evaluate, storeInfo, availability, variantOptions, compatible, checkPlz, distanceKm, findStores,
     guardGeneratedText, impliesClearance, checkScope, findPhrase,

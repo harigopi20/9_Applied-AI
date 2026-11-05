@@ -12,6 +12,9 @@
   const { t, pick } = window.BBI18n;
   const R = window.BBRules;
   const CFG = window.BB_CONFIG;
+  // D-13/D-14 preview (app/preview-d13.js): only active with "?preview=d13" in the URL.
+  // Without it PV is null and every line below behaves exactly as before.
+  const PV = window.BBPreviewD13 && window.BBPreviewD13.active ? window.BBPreviewD13 : null;
 
   const state = {
     data: null,
@@ -175,7 +178,9 @@
     const m = main();
     m.replaceChildren();
     const screens = { loading: viewLoading, error: viewError, start: viewStart, store: viewStore, choose: viewChoose, recognized: viewRecognized, high_risk: viewHighRisk, question: viewQuestion, result: viewResult, shopping: viewShopping };
-    m.appendChild(state.leaveAsk ? viewLeave() : screens[state.screen]());
+    if (PV) Object.assign(screens, PV.screens);
+    const view = state.leaveAsk ? viewLeave() : screens[state.screen]();
+    m.appendChild(PV ? PV.decorate(view) : view);
     renderNav();
     renderProgress();
     document.getElementById("footer-text").textContent = t("footer");
@@ -207,6 +212,7 @@
   /** Which step a screen belongs to, and whether the flow stopped there (safety stop). */
   function progressStep() {
     const sc = state.screen;
+    if (PV) { const p = PV.progress(sc); if (p) return p; }
     if (["loading", "error", "start"].includes(sc)) return null;
     if (sc === "store") return { step: "store", stop: false };
     if (sc === "choose" || sc === "recognized") return { step: "project", stop: false };
@@ -1505,7 +1511,7 @@
   // B: one guard entry before the first step. Reaching it while a list exists
   //    asks "Leave your list?" instead of closing the app.
   // ---------------------------------------------------------------------
-  const STEP_SCREENS = ["choose", "recognized", "high_risk", "store", "question", "result", "shopping"];
+  const STEP_SCREENS = ["choose", "recognized", "high_risk", "store", "question", "result", "shopping"].concat(PV ? Object.keys(PV.screens) : []);
   const nav = {
     enabled: false, pos: 0, keys: [], restoring: false,
     go: (n) => window.history.go(n),       // replaceable in tests.html
@@ -1581,6 +1587,7 @@
       const needsProject = ["question", "result", "shopping"].includes(sc);
       if (!state.data || (needsProject && !state.template)) sc = state.data ? "choose" : "start";
       if (sc === "recognized" && !state.recognized) sc = "choose";
+      if (PV && PV.screens[sc] && !PV.ready(sc)) sc = "choose";
       if (sc === "question") {
         const q = state.template.questions.find((x) => x.id === st.questionId);
         if (!q) { recompute(true); return; }
@@ -1700,6 +1707,7 @@
 
   /** Starts a template; guesses (from text) become "observed" facts – never confirmed (SR-01). */
   function startTemplate(tpl, guesses) {
+    if (PV && PV.handles(tpl)) { stopRecognizer(true); PV.start(tpl, guesses); return; } // preview: new D-13/D-14 flow
     state.template = tpl;
     state.facts = {};
     Object.entries(guesses || {}).forEach(([k, f]) => {
@@ -1726,6 +1734,14 @@
 
   function recompute(askNext, renderOpts) {
     stopRecognizer(true); // leaving the entry screen ends any recording
+    if (PV && PV.owns(state.template)) { // preview list: same list screen, result from the new logic
+      const pr = PV.result(Array.from(state.owned));
+      if (!pr) { resetProject(); return; }
+      state.result = pr;
+      state.screen = "result";
+      render(renderOpts);
+      return;
+    }
     const r = R.evaluate(state.template, state.facts, state.data.catalogue, state.data.safetyRules,
       { overrides: state.overrides, owned: Array.from(state.owned) });
     state.result = r;
@@ -1740,6 +1756,7 @@
   }
 
   function editQuestion(id) {
+    if (PV && PV.owns(state.template)) { PV.edit(id); return; }
     state.questionId = id;
     state.editOnly = true;
     go("question");
@@ -1852,7 +1869,10 @@
     state.screen = "loading";
     render();
     try {
-      state.data = await window.BBData.loadAll(CFG);
+      // Preview: same loader, but the dated workbook named in config.preview.d13 (D-13/D-14).
+      const cfg = PV ? Object.assign({}, CFG, { data: Object.assign({}, CFG.data, { workbook: PV.workbook }) }) : CFG;
+      state.data = await window.BBData.loadAll(cfg);
+      if (PV) PV.init({ state, el, icon, productName, go, render, recompute, resetProject });
       state.ai = createAdapter(CFG.aiMode);
       state.screen = "start";
     } catch (e) {
