@@ -336,6 +336,11 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 16px 32px; outline: none; 
 /* Section heading with "Have it all" on the right (issue #145) */
 .section-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin: 26px 0 6px; }
 .card .section-head h3 { margin: 0; }
+/* Folded "all in hand" section (tools / safety gear) */
+.owned-summary { background: var(--ok-bg); border-left: 5px solid var(--ok); padding: 6px 14px; margin: 4px 0 8px; }
+.owned-summary-line { margin: 6px 0 0; font-weight: 600; color: var(--ok); }
+.owned-summary-toggle { min-height: var(--touch); padding: 0; border: 0; background: none; font: inherit; font-size: .95rem;
+  color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 /* Checklist questions (C-7 defects, wall condition) */
 .checklist { display: grid; gap: 6px; }
 .check-option { display: flex; align-items: center; gap: 6px; min-height: var(--touch); cursor: pointer; }

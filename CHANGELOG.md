@@ -6,6 +6,19 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-11-05 – Shopping list: a tools / safety-gear section you have completely folds to one line.**
+  `app/app.js`: new `sectionAllOwned()` and `viewOwnedSummary()`. When every part of *Tools* or *Safety gear*
+  is marked "I already have this" (from 2 parts, by "Have it all" or one by one), the section shows one green
+  line "All in hand – n parts, not counted" and "Show items ▾" under the heading; items and the section
+  subtotal are hidden. "Show items" shows them again (incl. "Buy after all"); the choice stays on re-renders
+  and resets for a new project (`state.ownedOpen`). Materials never fold. **SR-17 deviation:** the hint
+  "Keep the right tool and gear …" is shown only with the items, not in the folded line – team decision in
+  `tpjm/change-proposal-CP-SR17-FOLD.md`. `app/i18n.js`: 3 texts EN/DE; `app/style.css`: summary styles.
+  New test `#145 fold (UI)` (130 tests, all green). Checked in the browser at 390 px. README updated.
+  *Why:* after "Have it all" the list stayed almost as long. *Prompt (paraphrased):* "When I press 'Have it
+  all' for tools & safety gear the list should fold – more compact, without the names and the hint;
+  'Show items' under the category" (hint only when opened, chosen by the user).
+
 ## Milestone: Shopping list safety notes in a box that closes on the first scroll (issue #144) – 2026-11-05
 Summary (same as the pull request):
 - All safety notes of the list (incl. the customer's own warnings) in one box "Safety notes (n)" at the top

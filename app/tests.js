@@ -2116,6 +2116,43 @@
     }
   });
 
+  test("#145 fold (UI)", "Tools all in hand → section folded to one line + 'Show items' under the heading; items, subtotal and SR-17 hint only when opened; materials never folded", () => {
+    const A = window.BBApp, s = A.state;
+    try {
+      window.BBI18n.setLang("de");
+      s.data = D; s.overrides = {}; s.storeId = null;
+      A.startTemplate(SHELF(), {});
+      s.facts = confirmed(SHELF_OK); s.owned = new Set();
+      A.recompute(false);
+      const box = document.getElementById("sandbox");
+      box.replaceChildren(A.viewResult());
+      assert(!box.querySelector("[data-owned-summary]"), "nothing folded before");
+      box.querySelector('[data-owned-all="tools"]').click();
+      box.replaceChildren(A.viewResult());
+      const sum = box.querySelector('[data-owned-summary="tools"]');
+      const n = s.result.items.filter((i) => i.section === "tools").length;
+      assert(sum && sum.previousElementSibling.classList.contains("section-head"), "summary right under the Tools heading");
+      eq(sum.querySelector(".owned-summary-line").textContent, "✓ Alles vorhanden – " + n + " Teile, nicht berechnet");
+      const tg = sum.querySelector("[data-owned-toggle-list]");
+      eq([tg.textContent, tg.getAttribute("aria-expanded")], ["Einzeln anzeigen ▾", "false"]);
+      assert(box.querySelector("#items-tools").hidden, "items hidden");
+      assert(!box.querySelector('[data-subtotal="tools"]'), "no tools subtotal while folded");
+      assert(!sum.textContent.includes("Behalten Sie"), "SR-17 hint not in the folded line (user decision 5 Nov 2026)");
+      assert(!box.querySelector('[data-owned-summary="materials"]'), "materials never folded");
+      tg.click();
+      box.replaceChildren(A.viewResult());
+      const tg2 = box.querySelector('[data-owned-toggle-list="tools"]');
+      eq([tg2.textContent, tg2.getAttribute("aria-expanded")], ["Einzeln ausblenden ▴", "true"]);
+      assert(!box.querySelector("#items-tools").hidden, "items shown");
+      assert(box.querySelector('#items-tools [data-owned-gear-hint]'), "SR-17 hint shown with the items");
+      box.querySelector('#items-tools [data-role="drill"] .owned-toggle').click(); // buy one after all
+      box.replaceChildren(A.viewResult());
+      assert(!box.querySelector('[data-owned-summary="tools"]') && !box.querySelector("#items-tools").hidden, "one part to buy → section unfolded");
+    } finally {
+      window.BBI18n.setLang("en"); s.owned = new Set(); s.ownedOpen = new Set();
+    }
+  });
+
   test("ST rules (UI)", "Stop screen shows the catalogue text and hand-off (EN + DE), never a list", () => {
     try {
       ["en", "de"].forEach((lang) => {
