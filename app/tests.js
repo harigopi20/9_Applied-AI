@@ -1994,6 +1994,10 @@
     assert(/default-src 'none'/.test(doc.querySelector('meta[http-equiv="Content-Security-Policy"]').content), "own CSP");
     assert(doc.querySelector("header .brand") && doc.querySelector(".total b"), "app design: brand header and total box");
     eq(doc.querySelector(".safety") === doc.querySelector("main").querySelector("p.safety"), true, "safety notes before the items");
+    // Issue #168: saved list marks tools and safety gear "(optional)", materials not
+    const heads = [...doc.querySelectorAll("h2.head")].map((h) => h.textContent);
+    assert(heads.includes("Materials"), "materials heading without (optional): " + heads.join(" | "));
+    ["Tools", "Safety gear"].forEach((name) => assert(heads.includes(name + " (optional)"), name + " (optional): " + heads.join(" | ")));
     const r = s.result;
     r.items.filter((i) => !i.owned).forEach((i) => assert(txt.includes(i.product.product_nr), "product " + i.product.product_nr));
     assert(txt.includes(window.BBI18n.formatPrice(r.total.amount)), "total");
@@ -2175,7 +2179,10 @@
           assert(sec, section + " block");
           const h3 = sec.querySelector(".section-head h3");
           assert(h3.querySelector(".sec-icon svg"), section + " icon");
-          eq(h3.querySelector(".sec-label").textContent, window.BBI18n.t("section_" + section));
+          // Issue #168: "(optional)" after Tools and Safety gear only, as its own smaller span
+          const opt = section === "materials" ? "" : " " + window.BBI18n.t("section_optional");
+          eq(h3.querySelector(".sec-label").textContent, window.BBI18n.t("section_" + section) + opt, section + " label " + lang);
+          eq(!!h3.querySelector('.sec-optional[data-optional="' + section + '"]'), section !== "materials", section + " (optional) " + lang);
           eq(h3.querySelector(".sec-count").textContent, n === 1 ? window.BBI18n.t("section_count_one") : n + " " + word, section + " count " + lang);
           eq(sec.getAttribute("aria-labelledby"), h3.id);
           eq(sec.querySelectorAll(":scope > ul.items > .item").length, n, section + " items inside");

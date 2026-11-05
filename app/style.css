@@ -350,6 +350,8 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 16px 32px; outline: none; 
 .sec-icon { display: inline-flex; color: var(--brand); }
 .sec-icon .icon { width: 24px; height: 24px; stroke-width: 2; }
 .sec-count { font-family: var(--font); font-weight: 500; font-size: .95rem; color: #cfcfcf; }
+/* Issue #168: "(optional)" after Tools / Safety gear – smaller and not bold, stays on one line */
+.sec-optional { font-weight: 400; font-size: .7em; letter-spacing: 0; color: #e6e6e6; white-space: nowrap; }
 .list-section .section-head .pill-btn { color: #fff; }
 .list-section .section-head .pill-label { border-color: #fff; }
 .list-section .section-head .pill-btn:hover .pill-label { background: rgba(255,255,255,.12); }
