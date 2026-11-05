@@ -6,6 +6,19 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-11-05 – Shopping list: "Have it all" for Tools and Safety gear (issue #145); small pill buttons.**
+  `app/app.js`: new `sectionHead()` puts "Have it all" / "Hab ich alles" beside the headings *Tools* and
+  *Safety gear* (only from 2 parts that may be owned). It marks every part the single "I already have this"
+  button could mark (same rule C-8 / SR-15, refused parts ST-06 stay) and turns into "Buy all after all" /
+  "Doch alles kaufen"; the page stays at the section (issue #119). Not for *Materials* – plugs and screws
+  always stay on the list. New `pillButton()`: "Have it all" and the single "I already have this" are now
+  small outline pills (0.95 rem, thin border) in line with the heading; the button keeps the 44 px touch
+  target (NFR-08). `app/i18n.js`: 2 new texts EN/DE. `app/style.css`: pill and section-head styles.
+  New test `#145 (UI)` (128 tests, all green). Checked in the browser (DE, 420 px). README updated.
+  *Why:* customers who own all tools had to tap every tool separately; the first button looked too big
+  next to the heading. *Prompt (paraphrased):* "Implement variant A, but only for Tools and Safety gear,
+  and use the same pill for the single selection of materials."
+
 ## Milestone: D-13/D-14 mounting logic preview, cabinet size check and 75 cm cabinet limit – 2026-11-05
 Summary (same as the pull request):
 - Catalogue data v3 with 6 stores (incl. OBI Schwabach): `product_catalogue.xlsx`, `products.csv`, `store_stock.csv`, `stores.csv` replaced; max. 6 stores shown (D-13/D-14 Step 1)
