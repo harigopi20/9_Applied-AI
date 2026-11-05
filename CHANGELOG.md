@@ -6,12 +6,11 @@ when they are released to `main`.
 
 ## Unreleased
 
-## Milestone: Shopping list "Have it all" for Tools and Safety gear (issue #145) – 2026-11-05
+## Milestone: Store bar buttons as small pills ("Change store", "Enter postcode") – 2026-11-05
 Summary (same as the pull request):
-- New button "Have it all" / "Hab ich alles" beside the headings Tools and Safety gear (from 2 parts that may be owned); turns into "Buy all after all" / "Doch alles kaufen"
-- Same rule as the single "I already have this" (C-8 / SR-15); not for Materials – plugs and screws always stay on the list
-- "Have it all", "I already have this", "Change store" and "Enter postcode" are now small outline pills; the store buttons sit on the right; touch target stays 44 px (NFR-08)
-- New test #145 (UI); 128 tests passing; test results saved; README updated
+- "Change store" / "Markt ändern" and "Enter postcode" / "PLZ eingeben" in the store bar of the list are now the same small outline pill as "I already have this", on the right edge
+- Touch target stays 44 px (NFR-08); 128 tests passing; test results saved; README updated
+- Follow-up to PR #147 (these two commits were pushed after #147 was merged)
 
 - **2026-11-05 – List: "Change store" as the same small pill, on the right.** `app/app.js`: the button
   in the store bar now uses `pillButton()`; `app/style.css`: `.store-bar .store-change { margin-left: auto; }`.
@@ -22,6 +21,14 @@ Summary (same as the pull request):
   `app/app.js`: the button `#add-plz` in the store bar uses `pillButton()` with the same class as
   "Change store". Checked in the browser at 360 px. *Why:* same look in both store-bar states.
   *Prompt (paraphrased):* "Yes, Enter postcode as a pill too."
+
+## Milestone: Shopping list "Have it all" for Tools and Safety gear (issue #145) – 2026-11-05
+Summary (same as the pull request):
+- New button "Have it all" / "Hab ich alles" beside the headings Tools and Safety gear (from 2 parts that may be owned); turns into "Buy all after all" / "Doch alles kaufen"
+- Same rule as the single "I already have this" (C-8 / SR-15); not for Materials – plugs and screws always stay on the list
+- "Have it all" and "I already have this" are now small outline pills; touch target stays 44 px (NFR-08)
+- New test #145 (UI); 128 tests passing; test results saved; README updated
+
 - **2026-11-05 – Shopping list: "Have it all" for Tools and Safety gear (issue #145); small pill buttons.**
   `app/app.js`: new `sectionHead()` puts "Have it all" / "Hab ich alles" beside the headings *Tools* and
   *Safety gear* (only from 2 parts that may be owned). It marks every part the single "I already have this"
