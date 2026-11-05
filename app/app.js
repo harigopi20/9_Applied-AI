@@ -458,9 +458,9 @@
       box.appendChild(el("p", { class: "recording-indicator", role: "status", "data-speech": "listening" }, [
         el("span", { class: "rec-dot", "aria-hidden": "true" }), el("span", { text: t("speech_listening") })
       ]));
-    } else if (sp.transcribed) {
-      box.appendChild(el("p", { class: "hint", "data-speech": "check", text: t("speech_check") }));
     }
+    // Issue #155: no extra "please check the text" box after dictation – the text stays editable and is
+    // only used after "Continue" (FR-25).
     if (sp.error) box.appendChild(el("p", { class: "hint warn-hint", role: "alert", "data-speech": "error-" + sp.error, text: t("speech_error_" + sp.error) }));
     return box;
   }

@@ -764,7 +764,7 @@
     eq(s.recognized, null);
     eq(s.speech.transcribed, true);
     box.replaceChildren(window.BBApp.viewChoose());
-    assert(box.querySelector('[data-speech="check"]'), "hint: check and confirm");
+    assert(!box.querySelector('[data-speech="check"]'), "no extra check box after dictation (issue #155)");
     box.querySelector("#project-text").value = "Ich möchte ein Regal aufhängen"; // editable
     box.querySelector("#project-text").dispatchEvent(new Event("input"));
     eq(s.inputText, "Ich möchte ein Regal aufhängen");

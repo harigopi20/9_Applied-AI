@@ -6,6 +6,21 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Remove grey information box on the project input screen (issue #155) – 2026-11-05
+Summary (same as the pull request):
+- The grey box "Please check the text and correct it if needed …" after dictation is removed (EN/DE)
+- Unused translation key `speech_check` removed; typing, dictation and "Continue" unchanged
+- Test "FR-25 / NFR-02" now checks that the box is gone; 132 tests passing; test results saved
+
+- **2026-11-05 – Project input: grey "check the text" box removed (issue #155).** `app/app.js`
+  (`viewSpeechStatus`): after a dictation no `[data-speech="check"]` hint is shown any more;
+  `app/i18n.js`: key `speech_check` (EN/DE) deleted; `app/tests.js`: test "FR-25 / NFR-02" asserts the
+  box is absent – the rest of the test (transcript editable, nothing processed before the tap) is
+  unchanged. FR-25 still holds: the dictated text stays editable and is only used after "Continue".
+  Checked in the browser with a simulated dictation. README unchanged (it does not mention this box).
+  *Why:* simplify the project input screen. *Prompt (paraphrased):* "Issue #155 – remove the grey
+  information text on the project input screen; explain with a screenshot first, then implement."
+
 ## Milestone: Remove postcode information text on the store screen (issue #154) – 2026-11-05
 Summary (same as the pull request):
 - The note "Your postcode is only used on this device …" below the postcode field is removed (EN/DE)
