@@ -6,6 +6,21 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Evidence log with info circle and open/close arrow (issue #151) – 2026-11-05
+Summary (same as the pull request):
+- "Why these products?" gets an info circle on the left and the arrow ▾/▴ on the right, like the other open/close sections
+- "Evidence log" / "Nachweis-Protokoll" moves to a small second line; thin line above the section
+- New test #151 (UI); 131 tests passing; test results saved; README updated
+
+- **2026-11-05 – List: evidence log with info circle, two-line title and open/close arrow (issue #151, variant B).**
+  `app/app.js` (`viewEvidence`): the title is now two texts – "Why these products?" and a small second line
+  "Evidence log" (`evidence_sub`, EN/DE in `app/i18n.js`). `app/style.css`: the browser's hidden marker is
+  replaced by "▾" (closed) / "▴" (open) on the right, a black "i" circle on the left and a thin line above;
+  still a native `<details>` (keyboard and screen reader unchanged). New test `#151 (UI)` (131 tests, all
+  green). Checked in the browser at 390 px, EN/DE. README updated.
+  *Why:* without an arrow nobody saw that the section opens. *Prompt (paraphrased):* "Give 'Why these
+  products?' an open arrow like the others – variant B with 'Evidence log' much smaller."
+
 ## Milestone: Shopping list – fold a fully owned tools / safety-gear section (issue #145 follow-up) – 2026-11-05
 Summary (same as the pull request):
 - Tools / Safety gear with every part marked "I already have this" fold to one green line "All in hand – n parts, not counted" with "Show items ▾" under the heading

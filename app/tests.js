@@ -2079,6 +2079,30 @@
     }
   });
 
+  test("#151 (UI)", "Evidence log: two-line title (EN + DE), closed at first, opens and closes on tap, table inside", () => {
+    const A = window.BBApp, s = A.state;
+    try {
+      s.data = D; s.template = SHELF(); s.facts = confirmed(SHELF_OK); s.overrides = {}; s.owned = new Set(); s.storeId = null;
+      A.recompute(false);
+      const box = document.getElementById("sandbox");
+      [["en", "Why these products?", "Evidence log"], ["de", "Warum diese Produkte?", "Nachweis-Protokoll"]].forEach(([lang, title, sub]) => {
+        window.BBI18n.setLang(lang);
+        box.replaceChildren(A.viewResult());
+        const d = box.querySelector("details.evidence");
+        const spans = d.querySelectorAll("summary .evidence-title > span");
+        eq([spans[0].textContent, spans[1].textContent], [title, sub], lang);
+        assert(spans[1].classList.contains("evidence-sub"), "second line is the small one");
+        assert(!d.open, "closed at first");
+        d.querySelector("summary").click();
+        assert(d.open && d.querySelector("table tbody tr"), "opens on tap, rows inside");
+        d.querySelector("summary").click();
+        assert(!d.open, "closes on tap");
+      });
+    } finally {
+      window.BBI18n.setLang("en");
+    }
+  });
+
   test("#145 (UI)", "'Have it all' only for tools and safety gear: marks every tool, tools subtotal 0, plugs/screws stay; 'Buy all after all' brings them back", () => {
     const s = window.BBApp.state;
     try {
