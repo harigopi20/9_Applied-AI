@@ -6,6 +6,22 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Store bar buttons as small pills ("Change store", "Enter postcode") – 2026-11-05
+Summary (same as the pull request):
+- "Change store" / "Markt ändern" and "Enter postcode" / "PLZ eingeben" in the store bar of the list are now the same small outline pill as "I already have this", on the right edge
+- Touch target stays 44 px (NFR-08); 128 tests passing; test results saved; README updated
+- Follow-up to PR #147 (these two commits were pushed after #147 was merged)
+
+- **2026-11-05 – List: "Change store" as the same small pill, on the right.** `app/app.js`: the button
+  in the store bar now uses `pillButton()`; `app/style.css`: `.store-bar .store-change { margin-left: auto; }`.
+  The touch target stays 44 px. Checked in the browser at 420 and 360 px.
+  *Why:* the big button looked out of place next to the new pills. *Prompt (paraphrased):* "Make the
+  Change store pill the same size and align it to the right."
+- **2026-11-05 – List without a store: "Enter postcode" as the same small pill, on the right.**
+  `app/app.js`: the button `#add-plz` in the store bar uses `pillButton()` with the same class as
+  "Change store". Checked in the browser at 360 px. *Why:* same look in both store-bar states.
+  *Prompt (paraphrased):* "Yes, Enter postcode as a pill too."
+
 ## Milestone: Shopping list "Have it all" for Tools and Safety gear (issue #145) – 2026-11-05
 Summary (same as the pull request):
 - New button "Have it all" / "Hab ich alles" beside the headings Tools and Safety gear (from 2 parts that may be owned); turns into "Buy all after all" / "Doch alles kaufen"

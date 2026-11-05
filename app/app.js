@@ -1019,9 +1019,9 @@
     box.appendChild(el("div", { class: "store-bar", "data-store-bar": store ? store.store_id : "none" }, store
       ? [el("span", { text: t("store_selected") + ": " }), el("strong", { text: store.name + " (" + store.city + ")" }),
         el("span", { class: "tag sample", text: t("sample_note") }),
-        el("button", { class: "btn small", id: "change-store", text: t("store_change"), onclick: () => openStoreSearch("result") })]
+        pillButton({ class: "store-change", id: "change-store", onclick: () => openStoreSearch("result") }, t("store_change"))]
       : [el("p", { class: "hint", text: t("no_store_hint") }),
-        el("button", { class: "btn small", id: "add-plz", text: t("store_add_plz"), onclick: () => openStoreSearch("result") })]));
+        pillButton({ class: "store-change", id: "add-plz", onclick: () => openStoreSearch("result") }, t("store_add_plz"))]));
 
     // FR-31: summary of items the chosen store cannot supply
     if (state.storeId) {
