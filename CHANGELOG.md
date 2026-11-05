@@ -6,6 +6,20 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-11-05 – Shopping list: safety notes in a box that closes on the first scroll (issue #144, variant A).**
+  `app/app.js`: new `viewSafetyBox()` puts every safety note of the list (detector limits SR-05, wall not
+  checked SR-02, worst-case weight, shelf boards, the customer's own warnings like ST-06 and project
+  warnings) into one box "Safety notes (n)". It is open when the list appears; the customer's first scroll
+  closes it (`watchFirstScroll`, 24 px threshold, scrolling done by the app does not count) and the content
+  under the finger stays in place (no jump). Closed, the title, the count and short labels stay visible
+  (e.g. "Detectors do not find everything · Wall not checked"); a tap opens/closes it (`aria-expanded`,
+  44 px). It stays closed on re-renders and opens again for a new project (`state.safetyCollapsed`).
+  The notes stay in the page; saved list and shopping route unchanged. `app/i18n.js`: title and 9 short
+  labels EN/DE. `app/style.css`: box styles. New test `#144 (UI)` (129 tests, all green). Checked in the
+  browser at 390 px with real scrolling. README updated.
+  *Why:* the notes pushed the products far down the list. *Prompt (paraphrased):* "Implement variant A;
+  the box closes on the first scroll, and the customer-specific warnings go inside it as well."
+
 ## Milestone: Store bar buttons as small pills ("Change store", "Enter postcode") – 2026-11-05
 Summary (same as the pull request):
 - "Change store" / "Markt ändern" and "Enter postcode" / "PLZ eingeben" in the store bar of the list are now the same small outline pill as "I already have this", on the right edge
