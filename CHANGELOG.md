@@ -8,10 +8,10 @@ when they are released to `main`.
 
 ## Milestone: Mounting logic D-13 / D-14 as the normal flow, used-parts check kept – 2026-11-05
 Summary (same as the pull request):
-- Shelf, wall cabinet and anti-tip use the new flow by default (wall → size → plug "max. X kg" → confirm); preview bar removed
-- `?logic=old` shows the previous flow; `tests.html` keeps the previous flow for its UI tests
-- Shelf and cabinet keep the used-parts defect checklist (C-7); a defect shows the warning and keeps used load-bearing parts on the list (ST-06)
-- All other features unchanged; README updated; 131 tests passing, results saved
+- Shelf, wall cabinet and anti-tip use the new flow by default: wall → size → summary → plug "up to X kg" → confirm
+- Preview bar removed; `?logic=old` still shows the previous flow; tests.html keeps the previous flow for its UI tests
+- Shelf and cabinet ask the used-parts checklist again (C-7); a defect shows the warning and keeps used load-bearing parts on the list (ST-06)
+- Picture, painting, wallpaper and all other app features unchanged; README updated; 131 tests passing, results saved
 
 - **2026-11-05 – Mounting logic D-13 / D-14 is now the normal flow; used-parts checklist kept.**
   `app/preview-d13.js`: the new flow (wall → size → summary → plug "max. X kg" → confirm) is on by default for
