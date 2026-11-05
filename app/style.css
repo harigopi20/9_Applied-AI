@@ -236,6 +236,8 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 16px 32px; outline: none; 
 .btn.store .muted { font-family: var(--font); font-weight: 400; }
 .store-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; }
 .store-bar .hint { margin: 0; flex: 1 1 100%; }
+/* "Change store" as the small pill, on the right edge (user request 5 Nov 2026) */
+.store-bar .store-change { margin-left: auto; }
 
 /* ---------------------------------------------------------------------
    Questions
