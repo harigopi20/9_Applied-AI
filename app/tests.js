@@ -2040,6 +2040,43 @@
     eq(s.result.total.amount, before, "back in the total");
   });
 
+  test("#145 (UI)", "'Have it all' only for tools and safety gear: marks every tool, tools subtotal 0, plugs/screws stay; 'Buy all after all' brings them back", () => {
+    const s = window.BBApp.state;
+    try {
+      window.BBI18n.setLang("en");
+      s.data = D; s.template = SHELF(); s.facts = confirmed(SHELF_OK); s.overrides = {}; s.owned = new Set(); s.storeId = null;
+      window.BBApp.recompute(false);
+      const box = document.getElementById("sandbox");
+      box.replaceChildren(window.BBApp.viewResult());
+      const before = s.result.total.amount;
+      assert(!box.querySelector('[data-owned-all="materials"]'), "no 'Have it all' for materials (plugs/screws stay, SR-15)");
+      const btn = box.querySelector('[data-owned-all="tools"]');
+      assert(btn && btn.closest(".section-head") && btn.closest(".section-head").querySelector("h3"), "button sits beside the Tools heading");
+      eq([btn.textContent, btn.getAttribute("aria-pressed")], ["Have it all", "false"]);
+      assert(btn.querySelector(".pill-label") && box.querySelector('[data-role="drill"] .owned-toggle .pill-label'), "same small pill as 'I already have this'");
+      const tools = s.result.items.filter((i) => i.section === "tools" && i.ownable && !i.owned_auto);
+      assert(tools.length >= 2, "shelf list has several tools");
+      btn.click();
+      box.replaceChildren(window.BBApp.viewResult());
+      assert(tools.every((i) => s.owned.has(i.role)), "every tool marked as owned");
+      assert(s.result.items.filter((i) => i.section === "tools").every((i) => i.owned), "all tools shown as owned");
+      assert(!s.owned.has("wall_plug") && !s.owned.has("screw"), "plugs and screws stay on the list");
+      assert(s.result.total.amount < before, "total lower");
+      const st = s.result.subtotals.tools;
+      assert(!st || st.amount === null || st.amount === 0, "tools subtotal not counted");
+      const again = box.querySelector('[data-owned-all="tools"]');
+      eq([again.textContent, again.getAttribute("aria-pressed")], ["Buy all after all", "true"]);
+      again.click();
+      eq(s.owned.size, 0, "all tools back on the list");
+      eq(s.result.total.amount, before, "back in the total");
+      window.BBI18n.setLang("de");
+      box.replaceChildren(window.BBApp.viewResult());
+      eq(box.querySelector('[data-owned-all="tools"]').textContent, "Hab ich alles");
+    } finally {
+      window.BBI18n.setLang("en"); s.owned = new Set();
+    }
+  });
+
   test("ST rules (UI)", "Stop screen shows the catalogue text and hand-off (EN + DE), never a list", () => {
     try {
       ["en", "de"].forEach((lang) => {

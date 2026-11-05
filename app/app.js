@@ -1038,7 +1038,7 @@
     ["materials", "tools", "safety"].forEach((section) => {
       const items = r.items.filter((i) => i.section === section);
       if (!items.length) return;
-      box.appendChild(el("h3", { text: t("section_" + section) }));
+      box.appendChild(sectionHead(section, items));
       const ul = el("ul", { class: "items" });
       items.forEach((i) => ul.appendChild(viewItem(i)));
       box.appendChild(ul);
@@ -1072,16 +1072,44 @@
     return box;
   }
 
+  /** Small outline "pill" button (issue #145): the visible pill is small, the button keeps the 44 px touch target (NFR-08). */
+  function pillButton(attrs, label) {
+    return el("button", Object.assign({ type: "button" }, attrs, { class: "pill-btn " + (attrs.class || "") }),
+      [el("span", { class: "pill-label", text: label })]);
+  }
+
+  /** Sections that get "Have it all" (issue #145). Not materials: plugs and screws always stay on the list (SR-15). */
+  const OWNED_ALL_SECTIONS = ["tools", "safety"];
+
+  /**
+   * Section heading; for tools and safety gear with "Have it all" / "Buy all after all" (issue #145).
+   * It marks every part the single "I already have this" button could mark – same rule (C-8, SR-15),
+   * refused parts (ST-06) stay. Shown only from 2 such parts; with one part the item button is enough.
+   */
+  function sectionHead(section, items) {
+    const head = el("div", { class: "section-head" }, [el("h3", { text: t("section_" + section) })]);
+    if (!OWNED_ALL_SECTIONS.includes(section)) return head;
+    const ownable = items.filter((i) => i.ownable && !i.owned_auto && !i.owned_refused);
+    if (ownable.length < 2) return head;
+    const all = ownable.every((i) => i.owned);
+    const sel = '[data-owned-all="' + section + '"]';
+    head.appendChild(pillButton({ class: "owned-all", "data-owned-all": section, "aria-pressed": all ? "true" : "false",
+      onclick: () => {
+        ownable.forEach((i) => { if (all) state.owned.delete(i.role); else state.owned.add(i.role); });
+        recompute(false, { anchor: sel, focus: sel }); // issue #119: stay at this section
+      } }, all ? t("owned_need_all") : t("owned_have_all")));
+    return head;
+  }
+
   /** "I already have this" (C-8). Plugs and screws are never ownable (SR-15); rules.js decides. */
   function ownedButton(i) {
     if (!i.ownable || i.owned_auto) return null;
-    return el("button", { type: "button", class: "btn small owned-toggle", "data-owned": i.owned ? "yes" : "no",
-      text: i.owned ? t("owned_need") : t("owned_have"),
+    return pillButton({ class: "owned-toggle", "data-owned": i.owned ? "yes" : "no",
       onclick: () => {
         if (i.owned) state.owned.delete(i.role); else state.owned.add(i.role);
         // Issue #119: stay at this item instead of jumping back to the top of the list
         recompute(false, { anchor: '.item[data-role="' + i.role + '"]', focus: ".owned-toggle" });
-      } });
+      } }, i.owned ? t("owned_need") : t("owned_have"));
   }
 
   function viewItem(i) {
