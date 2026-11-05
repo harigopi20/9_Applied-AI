@@ -185,9 +185,10 @@ python3 -m http.server 8000          # in the repository root
 fixture copies of the catalogue, the AI `mock` mode and a simulated Web Speech API.
 Without Python, `npx http-server -p 8000 -c-1` in the repository root does the same.
 
-### Preview of the new mounting logic (D-13 / D-14)
-Open **http://localhost:8000/app/?preview=d13** to try the new logic before the full
-rebuild. Without `?preview=d13` the app works exactly as before.
+### Mounting logic D-13 / D-14 (released flow)
+Since 5 Nov 2026 the new mounting logic is the **normal flow** of the app (no `?preview=d13` needed,
+no preview bar). **http://localhost:8000/app/?logic=old** still shows the previous flow for comparison.
+`tests.html` keeps the previous flow for its UI tests; the new calculation is tested via `BBPreviewD13.calc`.
 
 - The app looks and works as usual (project page with free text and voice, all projects,
   store search, list with subtotals, "I already have this", availability and referral,
@@ -196,6 +197,10 @@ rebuild. Without `?preview=d13` the app works exactly as before.
   new flow **wall → size → summary → plug options "max. X kg" → confirm**; the result is shown on
   the normal list screen. *Hang a picture* keeps its weight question (D-2); painting and wallpaper
   are unchanged.
+- **Used parts (C-7):** on the size screen, *Hang a shelf* and *Hang a wall cabinet* ask the same checklist
+  as before ("Using an old board or brackets? / Used item? Tick any defect"). A ticked defect shows the
+  warning "Please replace this part" on the list, and a used load-bearing part (board, bracket, rail,
+  hangers) with a defect cannot be marked "Have it already" – it stays on the list (ST-06).
 - Data: `data/product_catalogue_03_11_26.xlsx`; every load value from sheet *System
   ratings* (`BBRules.fixingChain` R-17, `BBRules.capacity` R-18); rail ratings from the
   rail products (80 / 150 kg, as in sheet *Cabinet*); 2 plugs per bracket.
@@ -212,9 +217,9 @@ rebuild. Without `?preview=d13` the app works exactly as before.
 
 #### One-file trial for testers (no server, no git)
 `node tools/build_trial.js` writes **`trial/Baumarkt-Buddy-Trial.html`**: the whole app (scripts,
-styles, fonts, workbook, templates, PLZ table) in one file, with the D-13/D-14 preview always on.
+styles, fonts, workbook, templates, PLZ table) in one file, with the D-13/D-14 logic on.
 Send that file to a tester; they double-click it and it opens in their browser – no install, no
-local server, no `?preview=d13`. Rebuild it after every change (the file is not in git).
+local server. Rebuild it after every change (the file is not in git).
 
 ### Save test results
 The browser page shows the results only while it is open. To keep them as a file:

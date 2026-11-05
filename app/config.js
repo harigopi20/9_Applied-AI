@@ -70,8 +70,8 @@ window.BB_CONFIG = Object.freeze({
     }
   },
 
-  // Preview of the D-13/D-14 logic: http://localhost:8000/app/?preview=d13 (app/preview-d13.js).
-  // Without "?preview=d13" none of this is used. Loads come from sheet "System ratings";
+  // D-13/D-14 mounting logic (app/preview-d13.js) – the released flow for shelf, cabinet and anti-tip.
+  // "?logic=old" shows the previous flow. Loads come from sheet "System ratings";
   // rail ratings from the rail products (= the values in sheet Cabinet).
   preview: {
     d13: {
