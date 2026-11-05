@@ -6,6 +6,18 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-11-05 – Mounting logic D-13 / D-14 is now the normal flow; used-parts checklist kept.**
+  `app/preview-d13.js`: the new flow (wall → size → summary → plug "max. X kg" → confirm) is on by default for
+  *Hang a shelf*, *Hang a wall cabinet* and *Anchor a shelf to the wall*; the orange preview bar is removed;
+  `?logic=old` shows the previous flow; `tests.html` keeps the previous flow for its UI tests. The size screen of
+  shelf and cabinet now asks the used-parts checklist from the project template (C-7), like the previous flow;
+  a ticked defect shows the template warning (ST-06) and a used load-bearing part with a defect cannot be
+  taken off the list. Everything else (store pills, "Have it all", folded sections, safety-notes box, evidence
+  log) is unchanged. Comments in `app/app.js` and `app/config.js`, README updated. 131 tests passing.
+  *Why:* the team wants the released app to use the new mounting logic, without losing the old-parts question.
+  *Prompt (paraphrased):* "Apply the new mounting logic in the released app, but keep the question about using
+  old parts; do it first in my fork, then tell me how to bring it to my colleague's repository."
+
 ## Milestone: Evidence log with info circle and open/close arrow (issue #151) – 2026-11-05
 Summary (same as the pull request):
 - "Why these products?" gets an info circle on the left and the arrow ▾/▴ on the right, like the other open/close sections

@@ -1,9 +1,9 @@
 /*
- * Baumarkt-Buddy – PREVIEW of the D-13 / D-14 mounting logic.
+ * Baumarkt-Buddy – D-13 / D-14 mounting logic (released flow since 5 Nov 2026).
  *
- * Active ONLY with "?preview=d13" in the URL (http://localhost:8000/app/?preview=d13).
- * Without it this file only sets BBPreviewD13 = { active: false, calc } and app.js runs
- * exactly as before. tests.html loads this file for the pure calculation (calc) only.
+ * Active by default. "?logic=old" in the URL shows the previous flow for comparison.
+ * tests.html keeps it off (its UI tests drive the previous flow) and loads this file
+ * for the pure calculation (calc) only. Off → BBPreviewD13 = { active: false, calc }.
  *
  * Everything of the normal app stays (project page, free text, voice, store
  * search, list, shopping by aisle, save/share, "I already have this", other
@@ -21,9 +21,9 @@
 (function (root) {
   "use strict";
 
-  // Without "?preview=d13" only the pure calculation is exported (BBPreviewD13.calc, used by tests.html);
-  // no screen, hook or style of the preview is active.
-  const active = !!(root.location && new URLSearchParams(root.location.search).get("preview") === "d13");
+  // On by default (team decision 5 Nov 2026). Off with "?logic=old" and in tests.html: then only the
+  // pure calculation is exported (BBPreviewD13.calc) and no screen, hook or style of this file is active.
+  const active = !!(root.location && new URLSearchParams(root.location.search).get("logic") !== "old" && !/tests\.html$/.test(root.location.pathname));
 
   const CFG = root.BB_CONFIG;
   const R = root.BBRules;
@@ -35,7 +35,6 @@
   // ---------------------------------------------------------------------
   const TEXT = {
     en: {
-      banner: "Preview D-13 / D-14 – new mounting logic with sample values (sheet System ratings). Not the released app.",
       prj_shelf: "Hang a shelf", prj_cabinet: "Hang a wall cabinet", prj_antitip: "Anchor a shelf to the wall",
       step_of: "{p} · {n} of 2",
       wall_q: "What is the wall made of?", wall_label: "Wall",
@@ -55,7 +54,7 @@
       n_weighed: "Cabinet weight given by the customer: {kg} kg (estimate from the size: {est} kg).",
       use_max: "Use {max} cm", width_max: "Too wide: wall cabinets are max. {max} cm wide.",
       antitip_too_deep: "Deeper than {max} cm: please ask a store associate.",
-      enter_number: "Please enter a number greater than 0 for every field.",
+      enter_number: "Please enter a number greater than 0 for every field.", defect_required: "Please tick at least one box for the used parts.",
       next: "Continue", confirm: "Confirm", start_over: "Start again",
       board_title: "Your board", board: "Board {l} × {d} mm", board_none: "No board in the catalogue for this size – please ask a store associate.",
       cut: "Other length? The board is cut to size in the store.", split: "Over {max} cm: split into {n} equal shelves of {len} cm each (or cut).",
@@ -85,12 +84,11 @@
       n_confirmed_shelf: "You confirmed: max. {kg} kg on the shelf ({plug}). Safety factor {f} included.",
       n_confirmed_cabinet: "You confirmed: max. {kg} kg inside the cabinet (cabinet ≈ {w} kg, {plug}). Safety factor {f} included.",
       n_hammer: "Drilling: hammer mode {mode} for this wall.", on: "ON", off: "OFF", n_pilot: "Wood: pre-drill a pilot hole, no wall plug.",
-      method: "New logic D-13 / D-14 (preview): plug options from sheet System ratings",
+      method: "Mounting logic D-13 / D-14: plug options from sheet System ratings",
       l_board: "Shelf board", l_bracket: "Shelf bracket", l_plug: "Wall plug", l_anchor: "Cavity anchor", l_screw: "Screw",
       l_bit: "Drill bit", l_drill: "Drill", l_level: "Spirit level", l_rail: "Mounting rail", l_hanger: "Cabinet hangers", l_kit: "Anti-tip kit"
     },
     de: {
-      banner: "Vorschau D-13 / D-14 – neue Montagelogik mit Beispielwerten (Blatt System ratings). Nicht die freigegebene App.",
       prj_shelf: "Regal aufhängen", prj_cabinet: "Hängeschrank aufhängen", prj_antitip: "Regal an der Wand sichern",
       step_of: "{p} · {n} von 2",
       wall_q: "Woraus ist die Wand?", wall_label: "Wand",
@@ -110,7 +108,7 @@
       n_weighed: "Schrankgewicht vom Kunden angegeben: {kg} kg (Schätzung aus der Größe: {est} kg).",
       use_max: "{max} cm übernehmen", width_max: "Zu breit: Hängeschränke sind max. {max} cm breit.",
       antitip_too_deep: "Tiefer als {max} cm: bitte frag eine Fachberatung im Markt.",
-      enter_number: "Bitte gib in jedes Feld eine Zahl größer als 0 ein.",
+      enter_number: "Bitte gib in jedes Feld eine Zahl größer als 0 ein.", defect_required: "Bitte kreuze bei den gebrauchten Teilen mindestens ein Feld an.",
       next: "Weiter", confirm: "Bestätigen", start_over: "Neu starten",
       board_title: "Dein Brett", board: "Brett {l} × {d} mm", board_none: "Kein Brett im Katalog für diese Größe – bitte frag im Markt.",
       cut: "Andere Länge? Das Brett wird im Markt zugeschnitten.", split: "Über {max} cm: in {n} gleiche Regale à {len} cm teilen (oder zuschneiden).",
@@ -140,7 +138,7 @@
       n_confirmed_shelf: "Du hast bestätigt: max. {kg} kg auf dem Regal ({plug}). Sicherheitsfaktor {f} eingerechnet.",
       n_confirmed_cabinet: "Du hast bestätigt: max. {kg} kg im Schrank (Schrank ≈ {w} kg, {plug}). Sicherheitsfaktor {f} eingerechnet.",
       n_hammer: "Bohren: Schlagbohren {mode} bei dieser Wand.", on: "AN", off: "AUS", n_pilot: "Holz: vorbohren, kein Dübel.",
-      method: "Neue Logik D-13 / D-14 (Vorschau): Dübel-Optionen aus Blatt System ratings",
+      method: "Montagelogik D-13 / D-14: Dübel-Optionen aus Blatt System ratings",
       l_board: "Regalboden", l_bracket: "Regalträger", l_plug: "Dübel", l_anchor: "Hohlraumdübel", l_screw: "Schraube",
       l_bit: "Bohrer", l_drill: "Bohrmaschine", l_level: "Wasserwaage", l_rail: "Montageschiene", l_hanger: "Schrankaufhänger", l_kit: "Kippsicherung"
     }
@@ -304,6 +302,14 @@
     }
   }
 
+  /** The project's used-item checklist (C-7, fact "condition") from its template; null if it has none (anti-tip). */
+  function conditionField() {
+    for (const q of (pv.tpl && pv.tpl.questions) || []) {
+      for (const f of (q.type === "group" ? q.fields : [q])) if (f.fact === "condition") return f;
+    }
+    return null;
+  }
+
   /** The three projects with the new logic. */
   const handles = (tpl) => !!(tpl && PROJECTS[tpl.template_id]);
   /** The template object of a finished preview list (built in toList). */
@@ -313,7 +319,7 @@
   function start(tpl, guesses) {
     pv.project = PROJECTS[tpl.template_id].id;
     pv.tpl = tpl;
-    pv.wall = null; pv.size = {}; pv.plan = null; pv.opt = null; pv.weighing = false; pv.weighedKg = null; pv.checkedSize = null;
+    pv.wall = null; pv.size = {}; pv.plan = null; pv.opt = null; pv.weighing = false; pv.weighedKg = null; pv.checkedSize = null; pv.condition = null;
     const g = guesses || {};
     const wallGuess = g.wall_type && g.wall_type.value;
     const wallMap = { brick: "brick_unknown" };
@@ -359,6 +365,7 @@
     const opts = {};
     WALLS[pv.project].forEach((w) => { opts[w] = lbl("wall_" + w); });
     const sizeFields = SIZE_FIELDS[pv.project].map((f) => ({ fact: "pv_" + f + "_cm", type: "number", label: lbl(f), unit: "cm" }));
+    if (conditionField()) sizeFields.push(conditionField()); // used parts (C-7) as in the project's template
     const plugLabels = {};
     if (pv.opt) {
       const k = pv.project === "cabinet" ? "plug_kg_contents" : "plug_kg";
@@ -380,6 +387,7 @@
     f.pv_wall = R.makeFact(pv.wall, R.STATUS.CONFIRMED, src);
     SIZE_FIELDS[pv.project].forEach((k) => { f["pv_" + k + "_cm"] = R.makeFact(pv.size[k], R.STATUS.CONFIRMED, src); });
     if (pv.opt) f.pv_plug = R.makeFact(pv.opt.mm, R.STATUS.CONFIRMED, src);
+    if (conditionField()) f.condition = R.makeFact(pv.condition || [], R.STATUS.CONFIRMED, src);
     return f;
   }
 
@@ -473,8 +481,13 @@
     notices.push({ id: "no_wall_certification", rule_id: "SR-02" });
 
     const ownedSet = new Set(owned || []);
+    // C-7 / ST-06: a used load-bearing part with a reported defect is not accepted – it stays on the list.
+    const defect = Array.isArray(pv.condition) && pv.condition.length > 0;
     const items = parts.map((x) => {
-      const isOwned = !!x.ownable && ownedSet.has(x.role);
+      const wantOwned = !!x.ownable && ownedSet.has(x.role);
+      const refused = wantOwned && !!x.load_bearing && defect;
+      const isOwned = wantOwned && !refused;
+      if (refused) log("ST-06", "customer has " + x.role, "not accepted – defect reported, new part stays on the list", "fact:customer");
       const q = { rule_id: pv.project === "shelf" ? "D-13" : "D-14", units: x.units, packs: null, pack_qty: null, clear: false, estimate: true };
       if (x.product) {
         q.pack_qty = x.product.pack_qty;
@@ -486,13 +499,18 @@
       return {
         role: x.role, section: x.section, label: x.label, rule_ids: [x.rule],
         status: x.product ? "ok" : "none", on_none: "unresolved", overridden: false,
-        ownable: !!x.ownable, load_bearing: !!x.load_bearing, owned: isOwned, owned_auto: false, owned_refused: false,
+        ownable: !!x.ownable, load_bearing: !!x.load_bearing, owned: isOwned, owned_auto: false, owned_refused: refused,
         required_rating_kg: x.load_bearing && loadKg !== null ? Math.round(loadKg * sf * 10) / 10 : null,
         product: x.product || null, safety_note: x.product ? x.product.safety_note : "", hint: "",
         checks: [], failed_checks: [], quantity: q, line_price: linePrice
       };
     });
+    if (items.some((i) => i.owned_refused)) notices.push({ id: "owned_defect", rule_id: "ST-06" });
     if (items.some((i) => i.owned && i.load_bearing)) notices.push({ id: "owned_load_bearing", rule_id: "SR-15" });
+    if (defect) (pv.tpl.warnings || []).filter((w) => w.id === "used_item_defect").forEach((w) => {
+      notices.push({ id: w.id, rule_id: w.rule_id, text: w.text });
+      log(w.rule_id, "warning " + w.id, "shown (" + pv.condition.join(", ") + ")", "template " + pv.tpl.template_id);
+    });
 
     const buy = items.filter((i) => !i.owned);
     const res = {
@@ -518,8 +536,7 @@
   // ---------------------------------------------------------------------
   // Screens (the tab bar "Back" goes one step back, as everywhere in the app)
   // ---------------------------------------------------------------------
-  const banner = () => X.el("p", { class: "pv-banner", role: "note", "data-preview": "d13", text: tr("banner") });
-  const card = (cls, children) => X.el("section", { class: "card " + (cls || ""), "data-preview-screen": X.state.screen }, [banner()].concat(children.filter(Boolean)));
+  const card = (cls, children) => X.el("section", { class: "card " + (cls || ""), "data-preview-screen": X.state.screen }, children.filter(Boolean));
   const btn = (text, onclick, cls, extra) => X.el("button", Object.assign({ type: "button", class: "btn " + (cls || ""), text, onclick }, extra || {}));
   const radio = (group, value) => group.querySelectorAll(".choice").forEach((c) => {
     const on = c.getAttribute("data-value") === String(value);
@@ -570,7 +587,7 @@
   function viewSize() {
     const fields = SIZE_FIELDS[pv.project];
     const inputs = {};
-    const form = X.el("form", { class: "card question pv-size", novalidate: true, "data-preview-screen": "pv_size" }, [banner(),
+    const form = X.el("form", { class: "card question pv-size", novalidate: true, "data-preview-screen": "pv_size" }, [
       X.el("p", { class: "muted small", text: tr("step_of", { p: title(), n: 2 }) }),
       X.el("h2", { text: tr("size_q_" + pv.project) })]);
     fields.forEach((f) => {
@@ -587,6 +604,34 @@
     });
     const notice = X.el("div", { role: "status", "aria-live": "polite" });
     form.appendChild(notice);
+
+    // Used parts (C-7): the same checklist as in the project's template ("None of these" is an explicit answer)
+    const cf = conditionField();
+    let readCondition = () => null;
+    if (cf) {
+      const pick = (o) => (o && (o[lang()] || o.en)) || "";
+      const ticked = new Set(Array.isArray(pv.condition) ? pv.condition : []);
+      const boxes = [];
+      const list = X.el("div", { class: "checklist", role: "group", "aria-labelledby": "pv-cond-q" });
+      const mk = (value, label) => {
+        const input = X.el("input", { type: "checkbox", id: "pv-cond-" + value, class: "check", "data-value": value,
+          checked: value === "none" ? (Array.isArray(pv.condition) && !pv.condition.length) : ticked.has(value) });
+        input.addEventListener("change", () => {
+          if (input.checked) boxes.forEach((b) => { if (b !== input && (value === "none" || b.getAttribute("data-value") === "none")) b.checked = false; });
+        });
+        boxes.push(input);
+        return X.el("label", { for: input.id, class: "check-option" }, [input, X.el("span", { text: label })]);
+      };
+      cf.options.forEach((o) => list.appendChild(mk(o, pick(cf.option_labels && cf.option_labels[o]) || o)));
+      list.appendChild(mk("none", pick(cf.none_label)));
+      form.appendChild(X.el("div", { class: "field" }, [X.el("p", { class: "field-label", id: "pv-cond-q", text: pick(cf.label) }), list]));
+      // [] = none; undefined = nothing ticked on a required checklist
+      readCondition = () => {
+        const on = boxes.filter((b) => b.checked).map((b) => b.getAttribute("data-value"));
+        if (!on.length) return cf.optional ? [] : undefined;
+        return on.filter((v) => v !== "none");
+      };
+    }
     const err = X.el("p", { class: "error", role: "alert" });
     const m = data().mounting, cat = data().catalogue;
 
@@ -684,6 +729,9 @@
       err.textContent = "";
       const c = check();
       if (!c) { err.textContent = tr("enter_number"); return; }
+      const condition = readCondition();
+      if (condition === undefined) { err.textContent = tr("defect_required"); return; }
+      pv.condition = condition;
       let plan = c.plan;
       if (plan.tooDeep || plan.tooWide) return; // the hint with the max. is on this page
       if (pv.project === "cabinet" && !plan.options.length) {
@@ -808,18 +856,14 @@
       text = tr(p.weighed ? "stop_cabinet_heavy_weighed" : "stop_cabinet_heavy", { w: num(p.weightKg), need: num(p.minKg), best: p.bestTotalKg });
     }
     return X.el("section", { class: "card stop", role: "alert", "data-preview-screen": "pv_stop" }, [
-      banner(),
       X.el("h2", { text: tr("stop_title") }),
       X.el("p", { "data-pv-stop": pv.wall === "unknown" ? "unknown_wall" : "too_heavy", text }),
       X.el("div", { class: "actions" }, [btn(tr("start_over"), () => X.resetProject(), "primary")])
     ]);
   }
 
-  /** Small preview bar above the normal screens too, so testers always see which version they use. */
-  function decorate(node) {
-    if (X && node && !node.querySelector("[data-preview]")) node.insertBefore(banner(), node.firstChild); // X is set after loading
-    return node;
-  }
+  /** Hook of app.js for every screen; the released flow adds nothing (the former preview bar is gone). */
+  const decorate = (node) => node;
 
   const PROGRESS = { pv_wall: "questions", pv_size: "questions", pv_summary: "questions", pv_plug: "questions", pv_fix: "questions", pv_confirm: "questions" };
   function progress(sc) {

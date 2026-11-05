@@ -12,8 +12,8 @@
   const { t, pick } = window.BBI18n;
   const R = window.BBRules;
   const CFG = window.BB_CONFIG;
-  // D-13/D-14 preview (app/preview-d13.js): only active with "?preview=d13" in the URL.
-  // Without it PV is null and every line below behaves exactly as before.
+  // D-13/D-14 mounting flow (app/preview-d13.js) for shelf, cabinet and anti-tip: on by default, off with "?logic=old".
+  // When off (also in tests.html) PV is null and every line below runs the previous flow.
   const PV = window.BBPreviewD13 && window.BBPreviewD13.active ? window.BBPreviewD13 : null;
 
   const state = {
