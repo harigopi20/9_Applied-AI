@@ -6,6 +6,13 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Shopping list – fold a fully owned tools / safety-gear section (issue #145 follow-up) – 2026-11-05
+Summary (same as the pull request):
+- Tools / Safety gear with every part marked "I already have this" fold to one green line "All in hand – n parts, not counted" with "Show items ▾" under the heading
+- Items and the section subtotal hidden while folded; "Show items" shows them again; materials never fold
+- SR-17 hint ("Keep the right tool …") only with the items – needs a team decision: `tpjm/change-proposal-CP-SR17-FOLD.md`
+- New test #145 fold (UI); 130 tests passing; test results saved; README updated
+
 - **2026-11-05 – Shopping list: a tools / safety-gear section you have completely folds to one line.**
   `app/app.js`: new `sectionAllOwned()` and `viewOwnedSummary()`. When every part of *Tools* or *Safety gear*
   is marked "I already have this" (from 2 parts, by "Have it all" or one by one), the section shows one green
