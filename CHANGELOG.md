@@ -6,6 +6,25 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Mark tools and safety gear as "(optional)" in the shopping list (issue #168) – 2026-11-05
+Summary (same as the pull request):
+- "Tools (optional)" / "Werkzeug (optional)" and "Safety gear (optional)" / "Schutzausrüstung (optional)" in the section bands; Materials unchanged
+- "(optional)" is smaller and not bold, so "Schutzausrüstung (optional)" fits on one line on phones (variant B)
+- Saved list headings marked the same way; totals, "Have it already" / "Have it all" and safety checks unchanged
+- Tests extended; 133 tests passing; test results saved; README updated
+
+- **2026-11-05 – Shopping list: "(optional)" after Tools and Safety gear (issue #168).** `app/app.js`:
+  `sectionHead()` adds `<span class="sec-optional">(optional)</span>` inside the section name for
+  `OPTIONAL_SECTIONS` (tools, safety); `buildListHtml()` adds it to the saved-list headings (`.head .opt`).
+  `app/i18n.js`: new key `section_optional` (EN/DE "(optional)"). `app/style.css`: `.sec-optional`
+  smaller (0.7 em), regular weight, no line break. Tests "Section bands (UI)" and the saved-list test
+  check the label (EN/DE) and that Materials stay without it. Checked in the browser at 390 px, EN/DE,
+  no horizontal scroll. README updated.
+  *Why:* it was not clear that tools and safety gear only need to be bought if missing. Wearing safety
+  gear stays required – only buying it is optional. *Prompt (paraphrased):* "Issue #168 – just put
+  '(optional)' in brackets after the categories; show a screenshot first – implement variant B
+  (smaller, not bold)."
+
 ## Milestone: Tap finished steps in the progress bar to go back (issue #157) – 2026-11-05
 Summary (same as the pull request):
 - Finished steps in the progress bar (Store, Project, Questions, List) are buttons that go back to that step

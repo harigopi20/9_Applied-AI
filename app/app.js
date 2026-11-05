@@ -1203,6 +1203,7 @@
 
   /** Sections that get "Have it all" (issue #145). Not materials: plugs and screws always stay on the list (SR-15). */
   const OWNED_ALL_SECTIONS = ["tools", "safety"];
+  const OPTIONAL_SECTIONS = ["tools", "safety"]; // issue #168
 
   /**
    * Section heading; for tools and safety gear with "Have it all" / "Buy all after all" (issue #145).
@@ -1212,7 +1213,10 @@
   function sectionHead(section, items) {
     const head = el("div", { class: "section-head" }, [el("h3", { id: "sec-" + section }, [
       el("span", { class: "sec-icon" }, [icon("sec_" + section)]),
-      el("span", { class: "sec-label", text: t("section_" + section) }),
+      // Issue #168: tools and safety gear are only bought if missing – "(optional)" after the name (smaller, not bold).
+      el("span", { class: "sec-label" }, OPTIONAL_SECTIONS.includes(section)
+        ? [t("section_" + section), " ", el("span", { class: "sec-optional", "data-optional": section, text: t("section_optional") })]
+        : [t("section_" + section)]),
       el("span", { class: "sec-count", text: t(items.length === 1 ? "section_count_one" : "section_count", { n: items.length }) })
     ])]);
     if (!OWNED_ALL_SECTIONS.includes(section)) return head;
@@ -1432,7 +1436,7 @@
   const SAVE_CSS = [
     ":root{--brand:#FF7313;--ink:#1a1a1a;--muted:#5c5c5c;--line:#d6d6d6;--warn:#8a3b00;--ok:#1f9d3a}",
     "body{margin:0;font-family:Barlow,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:var(--ink);background:#fff;font-size:16px;line-height:1.4}",
-    ".head{font-family:'Barlow Condensed','Avenir Next Condensed','Roboto Condensed','Arial Narrow',sans-serif;font-stretch:condensed;font-weight:800}",
+    ".head{font-family:'Barlow Condensed','Avenir Next Condensed','Roboto Condensed','Arial Narrow',sans-serif;font-stretch:condensed;font-weight:800}.head .opt{font-weight:400;font-size:.7em}",
     "header{background:var(--brand);padding:16px 16px 34px;clip-path:polygon(0 0,100% 0,100% 72%,0 100%)}",
     ".brand{display:inline-block;background:#fff;color:#c85000;font-size:1.6rem;padding:2px 10px}",
     ".badge{display:inline-block;background:var(--ink);color:#fff;font-size:.85rem;padding:3px 8px;margin-top:6px;text-transform:uppercase}",
@@ -1490,7 +1494,7 @@
       const items = r.items.filter((i) => i.section === section && !i.owned);
       r.items.filter((i) => i.section === section && i.owned).forEach((i) => owned.push(i));
       if (!items.length) return;
-      H.push("<h2 class=\"head\">" + e(t("section_" + section)) + "</h2><ul class=\"items\">");
+      H.push("<h2 class=\"head\">" + e(t("section_" + section)) + (OPTIONAL_SECTIONS.includes(section) ? " <span class=\"opt\">" + e(t("section_optional")) + "</span>" : "") + "</h2><ul class=\"items\">");
       items.forEach((i) => {
         const p = i.product;
         if (!p) { H.push("<li><p class=\"nm\">" + e(pick(i.label)) + "</p><p class=\"ref\">" + e(t("unresolved_item")) + "</p></li>"); return; }
