@@ -6,6 +6,20 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Remove postcode information text on the store screen (issue #154) – 2026-11-05
+Summary (same as the pull request):
+- The note "Your postcode is only used on this device …" below the postcode field is removed (EN/DE)
+- Unused translation key `store_privacy` removed; postcode field and store search unchanged
+- 132 tests passing; test results saved
+
+- **2026-11-05 – Store screen: postcode information text removed (issue #154).** `app/app.js`: the
+  `<p class="muted small">` with `store_privacy` is no longer rendered in the PLZ form; `app/i18n.js`: the
+  key `store_privacy` (EN/DE) is deleted. Privacy behaviour (NFR-04) is unchanged – the PLZ still stays on
+  the device. Checked in the browser: the text is gone, searching "10117" still lists the stores.
+  README unchanged (it does not mention this text).
+  *Why:* the note was not wanted on the store screen. *Prompt (paraphrased):* "Issue #154 – remove the
+  postcode information text; explain with a screenshot first, then implement."
+
 ## Milestone: Shopping list – dark header band per section (Materials, Tools, Safety gear) – 2026-11-05
 Summary (same as the pull request):
 - Each section of the list is its own block with a dark header band: orange icon, name and part count ("6 parts" / "6 Teile")
