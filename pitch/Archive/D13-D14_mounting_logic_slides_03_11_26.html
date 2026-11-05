@@ -1,0 +1,1122 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Shelf Logic D-13</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: store-signage deck. Chapter sign pinned to the top of each slide, content centred in the space below. Top menu (M) lists all chapters. */
+:root{
+  --bg:#E9ECEA; --panel:#F7F8F6; --ink:#1B2430; --muted:#5A6570; --line:#C9CFCB;
+  --signal:#FF7E21; --signal-ink:#2B1300; --go:#2F7D5B; --stop:#B4412F; --soft:#DDE3DF;
+  --bubble:#F2F2F0; --bubble-ink:#1B2430; --bubble-line:#6B6F72;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#14181C; --panel:#1C2228; --ink:#E7EBE8; --muted:#A3ADB5; --line:#323B43;
+  --signal:#FF7E21; --signal-ink:#2B1300; --go:#5DBB8E; --stop:#E07A66; --soft:#252D34; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14181C; --panel:#1C2228; --ink:#E7EBE8; --muted:#A3ADB5; --line:#323B43;
+  --signal:#FF7E21; --signal-ink:#2B1300; --go:#5DBB8E; --stop:#E07A66; --soft:#252D34; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.45;
+  padding-block:24px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:14px}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;line-height:1.05;margin:0;text-wrap:balance}
+h2{font-size:38.4px}
+h3{font-size:19px;font-weight:600;letter-spacing:.01em}
+p{margin:0}
+
+/* slide frame: header on top, body centred below */
+.slide{display:none;background:var(--panel);border:1px solid var(--line);border-radius:6px;
+  width:1120px;height:630px;padding:31.2px 38.4px;flex-direction:column;gap:12px}
+.slide.on{display:flex}
+.shead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex:none;margin-bottom:16px}
+.stime{display:none}
+.sbody{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:safe center;gap:20.0px}
+.sign{display:flex;align-items:stretch;font-family:var(--f-display);font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;font-size:14px;border-radius:3px;overflow:hidden}
+.sign b{background:var(--signal);color:var(--signal-ink);padding:5px 10px}
+.sign span{background:var(--ink);color:var(--panel);padding:5px 12px}
+.lead{font-size:18.0px;color:var(--muted);max-width:64ch}
+
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.box{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.box p,.box li{color:var(--muted);font-size:15px}
+.box ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+.kicker{font-family:var(--f-mono);font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:12px;font-weight:500;
+  padding:2px 7px;border:1px solid var(--line);background:var(--panel);border-radius:2px;white-space:nowrap;align-self:flex-start}
+.tag.must{background:var(--signal);color:var(--signal-ink);border-color:var(--signal)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.todo{display:inline-block;font-family:var(--f-mono);font-size:12px;color:var(--ink);border:1.5px dashed var(--signal);border-radius:2px;padding:1px 6px;white-space:nowrap}
+.principle{border-left:4px solid var(--signal);padding:3px 0 3px 14px;font-family:var(--f-display);font-size:24.0px;font-weight:600}
+
+/* title */
+.title h1{font-size:88.8px;letter-spacing:-.01em}
+.title h1 em{font-style:normal;background:var(--signal);color:var(--signal-ink);padding:0 .12em}
+.hook{font-family:var(--f-display);font-size:26.4px;font-weight:500;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.ruler{height:14px;background:repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 10px),
+  repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 50px);background-size:100% 6px,100% 14px;
+  background-repeat:no-repeat;opacity:.35}
+
+/* problems */
+.prob .p{font-family:var(--f-display);font-weight:700;font-size:28px;line-height:1;color:var(--signal)}
+
+/* capability chain */
+.chain{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.cap{background:var(--bg);border:1px solid var(--line);border-top:5px solid var(--go);border-radius:4px;padding:10px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.cap.later{border-top-color:var(--line);opacity:.75}
+.cap strong{font-family:var(--f-display);font-size:19px;font-weight:600;line-height:1.1}
+.cap small{font-size:13px;color:var(--muted);line-height:1.3}
+.kpi{display:flex;flex-direction:column;gap:2px}
+.kpi b{font-family:var(--f-display);font-size:36.0px;line-height:1;font-variant-numeric:tabular-nums}
+.kpi span{font-size:14px;color:var(--muted)}
+
+/* journey */
+.journey{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:center}
+.steps{display:flex;flex-direction:column;gap:9px}
+.step{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;font-size:15.5px}
+.step i{font-style:normal;font-family:var(--f-display);font-weight:700;font-size:16px;width:28px;height:28px;display:grid;place-items:center;
+  border:2px solid var(--ink);border-radius:50%}
+.step span{color:var(--muted)}
+.receipt{background:var(--bg);border:1px dashed var(--muted);border-radius:4px;padding:14px;font-family:var(--f-mono);font-size:12.5px;display:flex;flex-direction:column;gap:5px;min-width:0}
+.receipt .row{display:grid;grid-template-columns:42px minmax(0,1fr) 62px 50px;gap:8px;align-items:baseline}
+.receipt .row.h{color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:4px}
+.receipt .row span:nth-child(3),.receipt .row span:nth-child(4){text-align:right;font-variant-numeric:tabular-nums}
+.receipt .tot{border-top:1px solid var(--line);padding-top:6px;display:flex;justify-content:space-between;gap:8px}
+.ends{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.end{border-radius:4px;padding:8px 12px;font-size:14px;display:flex;flex-direction:column;gap:1px}
+.end b{font-family:var(--f-display);font-size:17px}
+.end.ok{border:1.5px solid var(--go)}
+.end.no{border:1.5px solid var(--stop)}
+.end.fb{border:1.5px dashed var(--muted)}
+
+/* demo */
+.demo{border-top:5px solid var(--go)}
+.demo.stop{border-top-color:var(--stop)}
+.demo.fb{border-top-color:var(--muted)}
+.say{font-family:var(--f-display);font-size:18px;font-weight:600;line-height:1.15}
+.arrow{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+
+/* V model */
+.v{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px 8px;align-items:center}
+.vn{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:5px 10px;display:flex;flex-direction:column;gap:2px;min-width:0;align-items:center;text-align:center}
+.vn strong{font-family:var(--f-display);font-size:17px;font-weight:600;line-height:1.1}
+.vn small{font-size:12px;color:var(--muted);line-height:1.3}
+.vn.agent{border-color:var(--go)}
+.vn.build{background:var(--signal);color:var(--signal-ink);border-color:var(--signal)}
+.vn.build small{color:var(--signal-ink)}
+.who{font-family:var(--f-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--go)}
+.vn.build .who{color:var(--signal-ink)}
+.pair{border-top:1.5px dashed var(--muted);text-align:center;font-family:var(--f-mono);font-size:11px;color:var(--muted);padding-top:4px}
+.trace{display:grid;grid-template-columns:auto repeat(4,minmax(0,1fr));gap:8px;align-items:stretch}
+.trace .lbl{font-family:var(--f-display);font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:14px;align-self:center}
+.tr{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:5px 10px;font-size:13.5px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tr .kicker{font-size:10.5px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:13px;height:13px;border-radius:2px;border:1.5px solid var(--line);background:var(--bg)}
+.sw.a{border-color:var(--go)} .sw.b{background:var(--signal);border-color:var(--signal)}
+
+/* lists of learnings */
+.ok{color:var(--go)} .no{color:var(--stop)}
+.mark{list-style:none;padding:0!important}
+.mark li{display:grid;grid-template-columns:18px minmax(0,1fr);gap:6px}
+
+/* table */
+.tbl{overflow-x:auto;min-width:0}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:500}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* roadmap */
+.road{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.rel{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.rel.now{border:2px solid var(--signal)}
+.rel .r{font-family:var(--f-display);font-weight:700;font-size:30px;line-height:1}
+.rel ul{margin:0;padding-left:18px;font-size:14.5px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+
+/* photos */
+.pane{display:flex;flex-direction:column;gap:10px;min-width:0}
+.shot{position:relative;margin:0;border-radius:4px;overflow:hidden;border:1px solid var(--line);max-width:100%}
+.shot img{display:block;width:100%;height:auto}
+.shot-tag{position:absolute;left:10px;bottom:10px}
+.tag.no-bg{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.bubble{position:absolute;top:0;right:0;width:39%;height:25.5%;display:grid;place-items:center;text-align:center;
+  background:var(--bubble);color:var(--bubble-ink);border-left:2px solid var(--bubble-line);border-bottom:2px solid var(--bubble-line);
+  border-bottom-left-radius:48px;font-family:var(--f-display);font-weight:600;font-size:19.2px;line-height:1.1}
+.puff{position:absolute;aspect-ratio:1;border-radius:50%;background:var(--bubble);border:2px solid var(--bubble-line)}
+.puff.p1{left:76.5%;top:23.5%;width:5%}
+.puff.p2{left:73.8%;top:26.5%;width:2.8%}
+.puff.p3{left:71.6%;top:31%;width:1.7%}
+.plist{margin:0;padding-left:18px;font-size:15px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.dpf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.dpf div{display:flex;flex-direction:column;gap:2px;font-size:14px;color:var(--muted);min-width:0}
+.dpf b{font-family:var(--f-display);font-size:18px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink)}
+.dpf svg{width:30px;height:30px;fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.persona{gap:10px}
+.phead{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:center}
+.phead img{width:96px;aspect-ratio:1;object-fit:cover;border-radius:3px;display:block}
+.phead h3{font-size:22px}
+.notfor{display:grid;grid-template-columns:auto repeat(3,112px) minmax(0,1fr);gap:12px;align-items:center;
+  border:1.5px solid var(--stop);border-radius:4px;padding:10px 14px}
+.notfor figure{margin:0;position:relative;display:flex;flex-direction:column;gap:3px}
+.notfor img{width:72px;aspect-ratio:1;object-fit:cover;border-radius:2px;display:block;filter:grayscale(.5)}
+.notfor figure::after{content:"";position:absolute;left:0;top:0;width:72px;height:72px;
+  background:linear-gradient(to top right,transparent calc(50% - 1.5px),var(--stop) calc(50% - 1.5px),var(--stop) calc(50% + 1.5px),transparent calc(50% + 1.5px))}
+.notfor figcaption{font-size:11.5px;line-height:1.2;color:var(--muted)}
+.notfor p{font-size:14.5px;color:var(--muted)}
+.vslot{min-height:40px;border:1.5px dashed var(--muted);border-radius:4px;display:grid;place-items:center;text-align:center;
+  font-size:13px;color:var(--muted);padding:8px}
+
+/* problem / solution cards: same size, "today" dull, "with Baumarkt-Buddy" bright */
+.ps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
+.card{display:flex;flex-direction:column;border-radius:6px;overflow:hidden;min-width:0;border:1px solid var(--line)}
+.card .shot{aspect-ratio:2/1;border:0;border-radius:0}
+.card .shot img{width:100%;height:100%;object-fit:cover;object-position:center 35%}
+.cbody{flex:1;display:flex;flex-direction:column;gap:8px;padding:12px 16px 14px}
+.ctag{font-family:var(--f-display);font-weight:700;font-size:20px;text-transform:uppercase;letter-spacing:.05em}
+.card .bubble{width:44%;height:30%;font-size:16.8px;padding:4px 8px}
+.card .puff.p1{top:29%}
+.card .puff.p2{top:34%}
+.card.before{background:var(--soft)}
+.card.before .shot img{filter:grayscale(.75) brightness(.88)}
+.card.before .ctag{color:var(--muted)}
+.card.after{background:var(--panel);border:2px solid var(--signal);box-shadow:0 0 0 4px rgba(255,126,33,.14)}
+.card.after .ctag{color:var(--signal)}
+.card .dpf{gap:12px}
+.card .dpf span{font-size:13.5px}
+.card .dpf svg{width:26px;height:26px;stroke:var(--signal)}
+
+/* build steps: hidden until revealed (space is kept, so nothing jumps) */
+[data-step]{visibility:hidden;opacity:0;transform:translateY(10px)}
+[data-step].shown{visibility:visible;opacity:1;transform:none}
+@media (prefers-reduced-motion:no-preference){[data-step]{transition:opacity .5s ease,transform .5s ease,visibility 0s linear .5s}[data-step].shown{transition:opacity .5s ease,transform .5s ease,visibility 0s}}
+
+
+/* audio button */
+.narr{background:var(--panel);color:var(--ink);border:1px solid var(--line);font-size:14px;padding:6px 12px;font-variant-numeric:tabular-nums}
+.narr.playing{background:var(--signal);color:var(--signal-ink);border-color:var(--signal)}
+.narr.playing kbd{color:var(--signal-ink);border-color:var(--signal-ink)}
+.narr[disabled]{opacity:.45}
+
+/* backup: MoSCoW scope */
+.msc-box{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:10px 14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.msc-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:4px}
+.msc-head h3{font-size:21px}
+.msc-head .kicker{font-size:11px}
+.msc-count{font-family:var(--f-display);font-size:28px;font-weight:700;line-height:1}
+.msc-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.msc-col{display:flex;flex-direction:column;gap:3px;min-width:0}
+.msc-col h4{margin:0 0 2px;font-family:var(--f-mono);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.msc-r{display:grid;grid-template-columns:54px minmax(0,1fr);gap:7px;align-items:center;font-size:12.5px;line-height:1.2}
+.msc-r .tag{justify-content:center;font-size:10.5px;padding:1px 4px;align-self:center}
+.msc-wrap{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,1fr);gap:12px;align-items:stretch}
+.msc-side{display:flex;flex-direction:column;gap:12px;min-width:0}
+.msc-side .msc-box{flex:none}
+.msc-side .msc-box:last-child{flex:1}
+.msc-list{display:flex;flex-direction:column;gap:3px}
+.msc-later{display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--muted);line-height:1.3}
+.msc-later b{font-family:var(--f-display);font-size:15px;color:var(--ink);font-weight:600}
+.msc-note{font-size:11.5px;color:var(--muted)}
+
+
+/* backup: end-to-end workflow (swimlanes = who, columns = V-model phase) */
+.wf{display:grid;grid-template-columns:78px repeat(7,minmax(0,1fr));gap:5px 6px;align-items:stretch}
+.wf-ph{display:flex;flex-direction:column;gap:1px;padding:5px 7px;border-radius:3px;background:var(--bg);border-top:4px solid var(--muted);min-width:0}
+.wf-ph b{font-family:var(--f-display);font-size:15px;font-weight:600;line-height:1.05}
+.wf-ph span{font-family:var(--f-mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.wf-ph.l{border-top-color:var(--ink)}
+.wf-ph.c{border-top-color:var(--signal)}
+.wf-ph.r{border-top-color:var(--go)}
+.wf-lane{font-family:var(--f-display);font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:.05em;
+  display:flex;align-items:center;padding:4px 0 4px 8px;border-left:4px solid var(--line);min-width:0}
+.wf-lane.team{border-left-color:var(--ink)}
+.wf-lane.agent{border-left-color:var(--go)}
+.wf-lane.code{border-left-color:var(--signal)}
+.wf-lane.user{border-left-color:var(--muted)}
+.wf-cell{min-width:0;display:flex;flex-direction:column;gap:4px;border-radius:3px;background:repeating-linear-gradient(90deg,var(--line) 0 4px,transparent 4px 9px) center/100% 1px no-repeat}
+.wf-c{position:relative;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:4px 7px 5px 25px;font-size:11px;line-height:1.2;min-width:0}
+.wf-c strong{display:block;font-family:var(--f-display);font-size:13.5px;font-weight:600;line-height:1.1}
+.wf-c span{color:var(--muted)}
+.wf-c i{position:absolute;left:5px;top:5px;font-style:normal;font-family:var(--f-mono);font-size:10px;width:16px;height:16px;border-radius:50%;
+  display:grid;place-items:center;background:var(--ink);color:var(--panel)}
+.wf-c.agent{border-color:var(--go)}
+.wf-c.agent i{background:var(--go);color:var(--panel)}
+.wf-c.code{background:var(--signal);border-color:var(--signal);color:var(--signal-ink)}
+.wf-c.code span{color:var(--signal-ink)}
+.wf-c.code i{background:var(--signal-ink);color:var(--signal)}
+.wf-c.user{border-style:dashed;border-color:var(--muted)}
+.wf-c.gate{padding-right:18px}
+.wf-c.gate::after{content:"";position:absolute;right:6px;top:7px;width:9px;height:9px;background:var(--signal);transform:rotate(45deg)}
+.wf-foot{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--muted);align-items:center}
+.wf-foot span{display:inline-flex;align-items:center;gap:6px}
+.wf-dia{width:9px;height:9px;background:var(--signal);transform:rotate(45deg);display:inline-block}
+.wf-num{font-family:var(--f-mono);font-size:10px;width:16px;height:16px;border-radius:50%;display:inline-grid;place-items:center;background:var(--ink);color:var(--panel)}
+
+
+/* key takeaways & lessons learned */
+.kt{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
+.kt-col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.kt-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:4px}
+.kt-head h3{font-size:22px}
+.kt-card{flex:1;display:grid;grid-template-columns:112px minmax(0,1fr);gap:14px;align-items:center;background:var(--bg);border:1px solid var(--line);
+  border-left:5px solid var(--signal);border-radius:4px;padding:10px 14px;min-width:0}
+.kt-big{font-family:var(--f-display);font-weight:700;font-size:31.2px;line-height:.95;color:var(--signal)}
+.kt-big small{display:block;font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.kt-card strong{font-family:var(--f-display);font-size:18px;font-weight:600;line-height:1.1}
+.kt-card p{font-size:14px;color:var(--muted);margin-top:2px}
+.kt-card p b{color:var(--ink);font-weight:600}
+.ll{flex:1;display:flex;flex-direction:column;gap:10px}
+.ll-item{flex:1;display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:10px 14px}
+.ll-item i{font-style:normal;font-family:var(--f-display);font-weight:700;font-size:18px;width:34px;height:34px;display:grid;place-items:center;border:2px solid var(--go);color:var(--go);border-radius:50%}
+.ll-item strong{font-family:var(--f-display);font-size:18px;font-weight:600;line-height:1.1}
+.ll-item p{font-size:14px;color:var(--muted);margin-top:2px}
+
+
+/* backup: app workflow (5 phone screens + result) */
+.aw{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) minmax(0,1.45fr);gap:22px;align-items:start}
+.aw-step{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;text-align:center}
+.aw-step:not(:last-of-type)::after,.aw-step.last::after{content:"›";position:absolute;right:-17px;top:118px;font-family:var(--f-display);font-weight:700;font-size:26px;line-height:1;color:var(--signal)}
+.aw-n{width:26px;height:26px;border-radius:50%;background:var(--signal);color:var(--signal-ink);display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:15px}
+.ph{width:100%;max-width:132px;aspect-ratio:9/15;border:2px solid var(--ink);border-radius:14px;overflow:hidden;background:var(--panel);display:flex;flex-direction:column;text-align:left}
+.ph-top{background:var(--signal);padding:6px 7px}
+.ph-top span{background:var(--panel);color:var(--signal);font-family:var(--f-body);font-weight:600;font-size:8px;padding:1px 4px;border-radius:2px}
+.ph-b{flex:1;padding:7px;display:flex;flex-direction:column;gap:4px;font-size:8px;line-height:1.2;min-height:0}
+.ph-t{font-family:var(--f-body);font-weight:600;font-size:9.5px;line-height:1.15;color:var(--ink)}
+.ph-s{font-size:7.5px;color:var(--muted)}
+.ph-o{border:1px solid var(--line);border-radius:3px;padding:3px 5px;color:var(--ink)}
+.ph-o.on{border-color:var(--signal);background:color-mix(in srgb,var(--signal) 14%,transparent);font-weight:600}
+.ph-o em{display:block;font-style:normal;font-weight:600;font-size:7px;color:var(--signal)}
+.ph-row{display:flex;gap:4px}
+.ph-row>*{flex:1}
+.ph-btn{border-radius:10px;padding:3px 5px;text-align:center;font-weight:600;background:var(--ink);color:var(--panel)}
+.ph-btn.o{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.ph-sp{flex:1}
+.ph-sk{height:4px;border-radius:2px;background:var(--line)}
+.aw-step h3{font-size:17px;margin-top:2px}
+.aw-step p{font-size:12px;color:var(--muted);line-height:1.3}
+.aw-res{display:flex;flex-direction:column;gap:10px;min-width:0}
+.aw-res>.kicker{text-align:center}
+.aw-box{border-radius:5px;padding:9px 12px;display:flex;flex-direction:column;gap:4px;background:var(--bg);font-size:12px;color:var(--muted);line-height:1.3}
+.aw-box strong{font-family:var(--f-display);font-size:18px;font-weight:700;line-height:1.1}
+.aw-box.ok{border:2px solid var(--go)} .aw-box.ok strong{color:var(--go)}
+.aw-box.no{border:2px solid var(--stop)} .aw-box.no strong{color:var(--stop)}
+.aw-li{display:flex;justify-content:space-between;gap:8px;font-family:var(--f-mono);font-size:10.5px;color:var(--ink);border-top:1px solid var(--line);padding-top:3px;font-variant-numeric:tabular-nums}
+.aw-li.tot{font-weight:600}
+.aw-notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.aw-notes p{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:8px 12px;font-size:13px;color:var(--muted);line-height:1.35}
+.aw-notes b{color:var(--signal);font-weight:600}
+
+
+/* market & competitors */
+.mk{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:16px;align-items:stretch}
+.mk-col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.mk-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-bottom:2px solid var(--ink);padding-bottom:3px}
+.mk-h h3{font-size:19px}
+.mk-h .kicker{font-size:10.5px}
+.mk-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mk-stat{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:8px 10px;display:flex;flex-direction:column;gap:2px}
+.mk-stat b{font-family:var(--f-display);font-size:28px;line-height:1;font-variant-numeric:tabular-nums}
+.mk-stat span{font-size:12.5px;color:var(--muted);line-height:1.25}
+.gap{display:flex;flex-direction:column;gap:7px;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:9px 12px}
+.gap-row{display:grid;grid-template-columns:118px minmax(0,1fr) 70px;gap:10px;align-items:center;font-size:12.5px}
+.gap-tr{position:relative;height:12px;background:var(--soft);border-radius:2px}
+.gap-tr .act{position:absolute;left:0;top:0;bottom:0;background:var(--muted);border-radius:2px}
+.gap-tr .ideal{position:absolute;top:-3px;bottom:-3px;width:3px;background:var(--signal);border-radius:1px}
+.gap-row .v{white-space:nowrap;font-family:var(--f-mono);font-size:11px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.gap-ax{display:grid;grid-template-columns:118px minmax(0,1fr) 70px;gap:10px;font-family:var(--f-mono);font-size:10px;color:var(--muted)}
+.gap-ax div{display:flex;justify-content:space-between}
+.gap-lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11.5px;color:var(--muted)}
+.gap-lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.mk-tbl{overflow-x:auto;min-width:0}
+.mk-tbl table{font-size:12.5px}
+.mk-tbl th,.mk-tbl td{padding:4px 6px;text-align:center;vertical-align:middle}
+.mk-tbl th:first-child,.mk-tbl td:first-child{text-align:left;font-family:var(--f-body);white-space:normal}
+.mk-tbl th{font-size:10px;line-height:1.2}
+.mk-tbl td small{display:block;font-size:10.5px;color:var(--muted)}
+.mk-tbl tr.us td{background:color-mix(in srgb,var(--signal) 14%,transparent);font-weight:600}
+.d{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--go);vertical-align:middle}
+.d.f{background:var(--go)}
+.d.h{border-color:var(--signal);background:linear-gradient(90deg,var(--signal) 50%,transparent 50%)}
+.d.n{width:10px;height:2px;border:0;border-radius:1px;background:var(--muted)}
+.mk-lg{display:flex;gap:10px;font-size:11px;color:var(--muted);align-items:center}
+.mk-lg span{display:inline-flex;align-items:center;gap:4px}
+.mk-cases{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mk-case{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:7px 10px;font-size:12px;color:var(--muted);line-height:1.3}
+.mk-case b{display:block;font-family:var(--f-display);font-size:15px;color:var(--ink);font-weight:600}
+.mk-src{font-family:var(--f-mono);font-size:10px;color:var(--muted)}
+
+
+/* same heading position on every slide; the content below is centred in the remaining space */
+.sbody>h2:first-child{margin-bottom:auto}
+.sbody>h2:first-child~*:last-child{margin-bottom:auto}
+
+/* market slide v2: competitor matrix */
+.mk-x table{font-size:12px;table-layout:fixed}
+.mk-x th:first-child,.mk-x td:first-child{width:24%}
+.mk-x th{font-size:9.5px;letter-spacing:.03em;padding:4px 3px;vertical-align:bottom}
+.mk-x th small{display:block;font-family:var(--f-body);text-transform:none;letter-spacing:0;font-size:9.5px;color:var(--muted);font-weight:400}
+.mk-x td{padding:5px 3px}
+.mk-x td small{font-size:9.5px;line-height:1.1;margin-top:2px}
+.mk-x .us{background:color-mix(in srgb,var(--signal) 14%,transparent);color:var(--ink);font-weight:600}
+.mk-x tr.hl td{border-top:1.5px solid var(--signal);border-bottom:1.5px solid var(--signal)}
+.mk-x tr.hl td:first-child b{color:var(--ink)}
+.mk-so{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--muted);line-height:1.3;margin:0}
+.mk-so li{display:grid;grid-template-columns:16px minmax(0,1fr);gap:6px}
+
+/* backup: UML diagrams (inline SVG, colours from the theme tokens) */
+.uml-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.uml-p{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:8px 10px 6px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.uml-p .mk-h{border-bottom-width:1.5px}
+.uml{display:block;width:100%;height:auto;font-family:var(--f-body)}
+.uml .u-t,.uml .u-n{fill:var(--ink);font-size:11.5px}
+.uml .u-n{font-weight:600}
+.uml .u-cn{fill:var(--ink);font-size:12.5px;font-weight:700;font-family:var(--f-display);letter-spacing:.02em}
+.uml .u-k{fill:var(--muted);font-size:9.5px;font-family:var(--f-mono)}
+.uml .u-at{fill:var(--muted);font-size:10.5px;font-family:var(--f-mono)}
+.uml .u-m{fill:var(--ink);font-size:11.5px}
+.uml .u-mr{fill:var(--muted);font-size:11px;font-style:italic}
+.uml .u-g{fill:var(--go);font-size:11px;font-family:var(--f-mono)}
+.uml .u-g.stop{fill:var(--stop)}
+.uml .u-sys{fill:var(--panel);stroke:var(--ink);stroke-width:1.5}
+.uml .u-uc{fill:var(--panel);stroke:var(--ink);stroke-width:1.2}
+.uml .u-uc.acc{fill:var(--signal);stroke:var(--signal)}
+.uml .u-uc.inc{stroke:var(--go);stroke-width:1.6}
+.uml .u-uc.stop{stroke:var(--stop);stroke-width:1.8}
+.uml .u-box{fill:var(--panel);stroke:var(--ink);stroke-width:1.2}
+.uml .u-box.acc{stroke:var(--signal);stroke-width:2}
+.uml .u-box.stop{stroke:var(--stop);stroke-width:2}
+.uml .u-box.act{stroke-dasharray:4 3}
+.uml .u-hd{fill:var(--soft);stroke:none}
+.uml .u-hd.acc{fill:var(--signal)}
+.uml .u-sep{stroke:var(--line);stroke-width:1}
+.uml .u-act circle,.uml .u-act line{fill:var(--panel);stroke:var(--ink);stroke-width:1.6}
+.uml .u-ln{stroke:var(--ink);stroke-width:1.1;fill:none}
+.uml .u-dash{stroke:var(--muted);stroke-width:1.1;stroke-dasharray:5 4;fill:none}
+.uml .u-life{stroke:var(--line);stroke-width:1.2;stroke-dasharray:4 4}
+.uml .u-actv{fill:var(--soft);stroke:var(--muted);stroke-width:1}
+.uml .u-frame{fill:none;stroke:var(--muted);stroke-width:1.2}
+.uml .u-tab{fill:var(--soft);stroke:var(--muted);stroke-width:1.2}
+.uml .u-ah{fill:var(--ink);stroke:none}
+.uml .u-ao{fill:none;stroke:var(--muted);stroke-width:1.3}
+.uml .on-acc{fill:var(--signal-ink)}
+
+/* backup: tool stack */
+.ts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;align-items:stretch}
+.ts-col{background:var(--bg);border:1px solid var(--line);border-top:5px solid var(--ink);border-radius:4px;padding:9px 11px;display:flex;flex-direction:column;gap:7px;min-width:0}
+.ts-col.b{border-top-color:var(--signal)} .ts-col.t{border-top-color:var(--go)} .ts-col.r{border-top-color:var(--muted)}
+.ts-col h3{font-size:18px}
+.ts-i{display:flex;flex-direction:column;gap:1px;border-top:1px solid var(--line);padding-top:6px}
+.ts-i b{font-family:var(--f-display);font-size:15.5px;font-weight:600;line-height:1.1}
+.ts-i span{font-size:12px;color:var(--muted);line-height:1.25}
+.ts-foot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ts-foot p{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:7px 11px;font-size:12.5px;color:var(--muted);line-height:1.3}
+.ts-foot b{color:var(--signal);font-weight:600}
+
+/* Q&A slide: big QR code on the right */
+.slide.has-qr{position:relative}
+.slide.has-qr .sbody{padding-right:300px}
+.qa-qr{position:absolute;right:44px;top:50%;transform:translateY(-42%);margin:0;display:flex;flex-direction:column;align-items:center;gap:8px}
+.qa-qr img{width:250px;height:250px;display:block;background:#fff;padding:12px;border:2px solid var(--ink);border-radius:6px;image-rendering:pixelated}
+.qa-qr figcaption{font-family:var(--f-mono);font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+
+/* narrator video bubble (slides 2-3): sits top right, plays in place of the audio */
+.slide.has-pip{position:relative}
+.has-pip .narr{margin-right:150px}
+.has-pip .sbody>h2{padding-right:150px}
+.pip{position:absolute;top:14px;right:44px;width:132px;height:132px;border-radius:50%;overflow:hidden;
+  border:3px solid var(--signal);background:var(--soft);box-shadow:0 4px 14px rgba(0,0,0,.18);z-index:2}
+.pip video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+.pip video.on{display:block}
+
+/* slide 3 "Not our users": bigger pictures, centred captions, app screenshot */
+.notfor{grid-template-columns:auto repeat(3,124px) minmax(0,1.15fr);gap:14px;padding:8px 16px}
+.notfor figure{align-items:center;text-align:center;gap:5px}
+.notfor figure img{width:96px;height:96px}
+.notfor figure::after{left:calc(50% - 48px);width:96px;height:96px}
+.notfor figcaption{font-size:12px;line-height:1.2}
+.nf-side{display:flex;flex-direction:column;gap:8px;min-width:0}
+.nf-side p{font-size:15px;color:var(--muted)}
+.notfor .nf-side img{width:100%;height:auto;aspect-ratio:auto;object-fit:contain;filter:none;border:1px solid var(--line);border-radius:4px}
+
+.r3{font-family:var(--f-mono);font-size:11px;font-weight:600;color:var(--signal)}
+.mk-lg .r3{margin-right:2px}
+
+/* backup demo scenarios: app screenshots in the bottom row */
+.demo-shots .kicker{text-align:center}
+.demo-shots img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:4px}
+
+/* app messages recreated in HTML (same look as in the app, both themes) */
+.appmsg{border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;line-height:1.35}
+.appmsg.ok{background:#DCF5E3;color:#1E6B3A;border:1px solid #A9DDB8}
+.appmsg.ok b{font-family:var(--f-display);font-size:18px;font-weight:600;line-height:1.2}
+.appmsg.stop{background:#FDE3E7;color:#1B2430;border:1px solid #F3B4BF}
+.appmsg.stop strong{font-family:var(--f-display);font-size:22px;font-weight:700;color:#B0101E;line-height:1.1}
+.appmsg.stop p{font-size:13.5px;font-weight:500;color:#1B2430;margin:0}
+
+.applist{display:flex;flex-direction:column;gap:4px;margin-top:4px}
+.applist .aw-li{font-size:11.5px}
+
+/* backup: traceability matrix */
+.tx{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px;align-items:stretch}
+.tx-col{display:flex;flex-direction:column;gap:8px;min-width:0}
+.tm{display:flex;flex-direction:column;gap:5px}
+.tm-row{display:grid;grid-template-columns:40px minmax(0,1fr);gap:6px;align-items:center}
+.tm-l{font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.04em;display:flex;align-items:baseline;gap:4px}
+.tm-l small{font-family:var(--f-mono);font-size:10px;font-weight:400;color:var(--muted)}
+.tm-tiles{display:flex;flex-wrap:wrap;gap:3px}
+.tm-t{width:24px;height:24px;border-radius:3px;display:grid;place-items:center;font-family:var(--f-mono);font-size:10.5px;font-style:normal;font-variant-numeric:tabular-nums;cursor:default;border:1.5px solid transparent}
+.tm-t.ok{background:var(--go);color:var(--panel)}
+.tm-t.pa{background:var(--signal);color:var(--signal-ink)}
+.tm-t.no{background:transparent;color:var(--stop);border-color:var(--stop)}
+.tm-t.sh{border-style:dashed;border-color:var(--ink)}
+.tm-t.no.sh{border-color:var(--stop)}
+.tm-c{font-family:var(--f-mono);font-size:11px;color:var(--muted);text-align:right;white-space:nowrap}
+.tm-c b{font-weight:600}
+.tm-c b.ok,.tm-lg b{color:var(--go)} .tm-c b.pa{color:var(--signal)} .tm-c b.no,.fn-r b.no{color:var(--stop)}
+.tm-lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted);align-items:center}
+.tm-lg span{display:inline-flex;align-items:center;gap:5px}
+.tm-lg .tm-t{width:12px;height:12px;border-radius:2px}
+.tm-lg b{color:var(--ink);font-family:var(--f-mono);font-size:11.5px}
+.fn{display:flex;flex-direction:column;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:7px 10px}
+.fn-r{display:grid;grid-template-columns:136px minmax(0,1fr) 54px;gap:10px;align-items:center;font-size:12.5px}
+.fn-b{height:10px;background:var(--soft);border-radius:2px;overflow:hidden}
+.fn-b i{display:block;height:100%;background:var(--ink)}
+.fn-b i.g{background:var(--go)}
+.fn-r b{font-family:var(--f-mono);font-size:11.5px;text-align:right;font-variant-numeric:tabular-nums}
+.tx-src{font-family:var(--f-mono);font-size:9.5px;color:var(--muted);line-height:1.35}
+.tc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;counter-reset:tc}
+.tc li{position:relative;padding:5px 10px 7px 30px;font-size:12.5px;line-height:1.3;color:var(--muted);border-left:2px solid var(--line);margin-left:9px}
+.tc li::before{counter-increment:tc;content:counter(tc);position:absolute;left:-10px;top:5px;width:18px;height:18px;border-radius:50%;background:var(--ink);color:var(--panel);
+  font-family:var(--f-mono);font-size:10px;display:grid;place-items:center}
+.tc li:last-child{border-left-color:transparent}
+.tc li .kicker{display:block;font-size:10px;margin-bottom:1px}
+.tc li b{color:var(--ink);font-weight:600}
+.tc li em{font-style:normal;font-family:var(--f-mono);font-size:10px;font-weight:600;color:var(--panel);background:var(--go);border-radius:2px;padding:0 4px;margin-left:4px}
+.tc li.pass::before{background:var(--go)}
+.tc li.warn{background:color-mix(in srgb,var(--signal) 12%,transparent);border-radius:0 4px 4px 0}
+.tc li.warn::before{background:var(--signal);color:var(--signal-ink)}
+.gp{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.gp p{background:var(--bg);border:1px solid var(--line);border-top:3px solid var(--stop);border-radius:4px;padding:6px 10px;font-size:11.5px;color:var(--muted);line-height:1.3}
+.gp b{color:var(--stop);font-weight:600}
+
+/* stage: every slide is laid out at 1120 x 630 and scaled to fit the window */
+.stage{position:relative;flex:none}
+.deck{position:absolute;left:0;top:0;width:1120px;height:630px;transform-origin:0 0}
+.nav{width:100%}
+@media (max-width:860px){.tools kbd{display:none}}
+@media (max-width:560px){.tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* nav */
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.btns,.tools{display:flex;gap:8px;align-items:center}
+button{font-family:var(--f-display);font-weight:600;font-size:16px;letter-spacing:.04em;text-transform:uppercase;
+  background:var(--ink);color:var(--panel);border:0;border-radius:3px;padding:9px 16px;cursor:pointer}
+button:disabled{opacity:.35;cursor:default}
+button:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+.tools button{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border-radius:2px;padding:0 4px;margin-left:6px;color:var(--muted);text-transform:none;letter-spacing:0}
+.dots{display:flex;gap:5px;flex-wrap:wrap}
+.dot{width:16px;height:8px;border-radius:1px;background:var(--line);border:0;padding:0}
+.dot.on{background:var(--signal)}
+.pos{font-family:var(--f-mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* top menu */
+.topmenu{position:fixed;inset:0 0 auto;z-index:20;background:var(--panel);border-bottom:2px solid var(--ink);
+  padding-top:calc(10px + env(safe-area-inset-top,0px));padding-bottom:12px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.topmenu .in{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.mhead{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.mhead .kicker{font-size:11.5px}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.tabs button{background:var(--bg);color:var(--ink);border:1px solid var(--line);text-align:left;padding:8px 9px;
+  display:flex;flex-direction:column;gap:2px;font-size:15px;line-height:1.1;min-width:0}
+.tabs button span{font-family:var(--f-mono);font-size:11px;color:var(--muted);letter-spacing:0}
+.tabs button:hover,.tabs button.hi{background:var(--ink);color:var(--panel)}
+.tabs button:hover span,.tabs button.hi span{color:var(--signal)}
+.tabs button[aria-current="true"]{border-color:var(--signal);box-shadow:inset 0 -3px 0 var(--signal)}
+.preview{display:flex;justify-content:space-between;align-items:baseline;gap:14px;border-top:1px solid var(--line);padding-top:8px;min-height:30px}
+.preview strong{font-family:var(--f-display);font-size:21px;font-weight:600}
+.preview span{font-family:var(--f-mono);font-size:12px;color:var(--muted);white-space:nowrap}
+
+/* fullscreen */
+.wrap:fullscreen .nav{display:none}
+.wrap:fullscreen{max-width:none;background:var(--bg);justify-content:safe center;align-items:center;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px));overflow:auto}
+
+
+@media (max-width:980px){.tabs{grid-template-columns:repeat(5,minmax(0,1fr))}}
+
+
+@media (prefers-reduced-motion:no-preference){
+  .slide.on{animation:in .25s ease-out}@keyframes in{from{opacity:.4}to{opacity:1}}
+  .topmenu:not([hidden]){animation:drop .18s ease-out}@keyframes drop{from{transform:translateY(-12px);opacity:.6}to{transform:none;opacity:1}}
+}
+
+/* cabinet branch slide */
+.cb{display:grid;grid-template-columns:minmax(0,2.3fr) minmax(0,1fr);gap:18px;align-items:start}
+.cb-flow{display:flex;flex-direction:column;align-items:center;gap:0}
+.cb-box{background:var(--bg);border:1.5px solid var(--ink);border-radius:5px;padding:8px 14px;text-align:center;font-family:var(--f-display);font-size:18px;font-weight:600;line-height:1.15}
+.cb-box small{display:block;font-family:var(--f-body);font-size:12.5px;font-weight:400;color:var(--muted)}
+.cb-q{background:var(--signal);border-color:var(--signal);color:var(--signal-ink)}
+.cb-q small{color:var(--signal-ink)}
+.cb-end{background:var(--go);border-color:var(--go);color:var(--panel)}
+.cb-end small{color:var(--panel)}
+.cb-dn{width:2px;height:16px;background:var(--ink);position:relative}
+.cb-dn::after{content:"";position:absolute;left:-5px;bottom:-2px;border:6px solid transparent;border-top-color:var(--ink);border-bottom:0}
+.cb-split{width:78%;height:14px;border:2px solid var(--ink);border-bottom:0;border-radius:4px 4px 0 0}
+.cb-join{width:78%;height:14px;border:2px solid var(--ink);border-top:0;border-radius:0 0 4px 4px}
+.cb-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%}
+.cb-col{display:flex;flex-direction:column;align-items:center;gap:0}
+.cb-ans{font-family:var(--f-mono);font-size:12px;font-weight:500;border:1.5px solid var(--ink);border-radius:20px;padding:3px 12px;background:var(--panel)}
+.cb-add{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:8px 10px;display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--muted);min-height:96px}
+.cb-add b{font-family:var(--f-display);font-size:16.5px;color:var(--ink);font-weight:600}
+.cb-add .pl{font-family:var(--f-mono);font-size:11.5px;color:var(--ink)}
+.cb-rules{display:flex;flex-direction:column;gap:10px}
+
+/* D-13 explainer slides */
+.nw-keep{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);border:1px dashed var(--line);border-radius:3px;padding:4px 8px}
+.nw-keep b{color:var(--ink);font-weight:500}
+.aw-box.hint{border:2px solid var(--signal)} .aw-box.hint strong{color:var(--signal)}
+.sk-lg{display:flex;gap:6px}
+.sk{font-style:normal;font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.04em;padding:2px 7px;border-radius:2px;text-align:center;align-self:center;white-space:nowrap}
+.sk.stop{background:var(--stop);color:var(--panel)}
+.sk.hint{background:var(--signal);color:var(--signal-ink)}
+.sk.ask{border:1.5px solid var(--ink);color:var(--ink);padding:1px 6px}
+.sk.auto{background:var(--go);color:var(--panel)}
+.sk-wrap{display:grid;grid-template-columns:minmax(0,2.1fr) minmax(0,1fr);gap:16px;align-items:start}
+.sk-tbl{display:flex;flex-direction:column}
+.sk-r{display:grid;grid-template-columns:20px 92px minmax(0,1fr) minmax(0,1.35fr) 54px;gap:10px;align-items:center;padding:6px 4px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.3;color:var(--muted)}
+.sk-r>span:first-child{font-family:var(--f-mono);font-size:11px;color:var(--signal);font-weight:600}
+.sk-r>b{font-family:var(--f-display);font-size:16px;font-weight:600;color:var(--ink);line-height:1.1}
+.sk-r>span:nth-child(3){color:var(--ink)}
+.sk-r.h{font-family:var(--f-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid var(--ink);padding-top:0}
+.sk-r.h>span:first-child{color:var(--muted)}
+.sk-side{display:flex;flex-direction:column;gap:12px;min-width:0}
+.sk-box{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.sk-d{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:4px}
+.sk-d b{font-family:var(--f-mono);font-size:12.5px;color:var(--ink);font-weight:500;white-space:nowrap}
+.sk-n{font-size:12px;color:var(--muted)}
+.sk-p{display:flex;flex-direction:column;gap:1px;border-top:1px solid var(--line);padding-top:5px}
+.sk-p b{font-family:var(--f-display);font-size:15.5px;font-weight:600;line-height:1.1}
+.sk-p span{font-size:12.5px;color:var(--muted);line-height:1.3}
+
+</style>
+
+<div class="wrap">
+
+<div class="topmenu" id="menu" hidden>
+  <div class="in">
+    <div class="mhead"><span class="kicker">Chapters · hover to preview, click to open</span><span class="kicker">Esc to close</span></div>
+    <div class="tabs" id="tabs" role="menu"></div>
+    <div class="preview" id="preview"><strong></strong><span></span></div>
+  </div>
+</div>
+
+<div class="stage" id="stage"><div class="deck" id="deck">
+
+<!-- D-13 · 1/2 New shelf logic -->
+<section class="slide" data-chapter="D-13 · New shelf logic" data-time="2:00" aria-label="New shelf logic: the app shows what your shelf can hold">
+  <header class="shead"><div class="sign"><b>D-13</b><span>Hang a shelf · new logic</span></div><span class="nw-keep">Start · Store · Describe: <b>unchanged</b></span></header>
+  <div class="sbody" style="gap:12px">
+    <h2>The app no longer asks for the weight. It shows what the shelf can hold.</h2>
+
+    <div class="aw">
+      <div class="aw-step">
+        <span class="aw-n">1</span>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+          <div class="ph-b"><div class="ph-s">Hang a shelf · 1 of 2</div><div class="ph-t">What is the wall made of?</div>
+            <div class="ph-o on">Concrete</div><div class="ph-o">Solid brick</div><div class="ph-o">Perforated brick</div><div class="ph-o">Aerated concrete</div><div class="ph-o">Plasterboard · Wood</div><div class="ph-o">I don't know</div></div></div>
+        <h3>Wall</h3><p>The app now knows plug type, max. load and max. depth.</p>
+      </div>
+
+      <div class="aw-step">
+        <span class="aw-n">2</span>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+          <div class="ph-b"><div class="ph-s">Hang a shelf · 2 of 2</div><div class="ph-t">How big is your shelf?</div>
+            <div class="ph-s">Length</div><div class="ph-o">120 cm</div>
+            <div class="ph-s">Depth</div><div class="ph-o">45 cm</div>
+            <div class="ph-o on">✓ Concrete: up to 50 cm deep<em>too deep? we show the max.</em></div>
+            <div class="ph-sp"></div><div class="ph-btn">Continue</div></div></div>
+        <h3>Size</h3><p>Length × depth. Too deep for the wall → hint, not stop.</p>
+      </div>
+
+      <div class="aw-step">
+        <span class="aw-n">3</span>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+          <div class="ph-b"><div class="ph-t">Your board</div>
+            <div class="ph-o on">Board 1200 × 450 × 25 mm</div>
+            <div class="ph-o">3 brackets · 450 mm arm</div>
+            <div class="ph-o">Other length? Cut to size in store</div>
+            <div class="ph-o">Over 200 cm? Split or cut</div>
+            <div class="ph-sp"></div><div class="ph-btn">Continue</div></div></div>
+        <h3>Board</h3><p>The app picks board and number of brackets.</p>
+      </div>
+
+      <div class="aw-step">
+        <span class="aw-n">4</span>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+          <div class="ph-b"><div class="ph-t">Choose your plug</div>
+            <div class="ph-s">How much will you put on it?</div>
+            <div class="ph-o">10 mm plug<em>up to 26 kg</em></div>
+            <div class="ph-o">12 mm plug<em>up to 35 kg</em></div>
+            <div class="ph-o on">14 mm plug<em>up to 44 kg</em></div>
+            <div class="ph-s">Screws and brackets follow automatically</div></div></div>
+        <h3>Plug</h3><p>Each plug shows its max. load. Nothing preselected.</p>
+      </div>
+
+      <div class="aw-step last">
+        <span class="aw-n">5</span>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+          <div class="ph-b"><div class="ph-t">Please confirm</div>
+            <div class="ph-o on">I will load max. 44 kg<em>14 mm plugs · 3 brackets</em></div>
+            <div class="ph-s">Safety factor 1.25 already included</div>
+            <div class="ph-sp"></div><div class="ph-row"><div class="ph-btn o">Back</div><div class="ph-btn">Confirm</div></div></div></div>
+        <h3>Confirm</h3><p>The customer confirms the max. load.</p>
+      </div>
+
+      <div class="aw-res">
+        <span class="kicker">Result</span>
+        <div class="aw-box ok"><strong>✓ Shopping list</strong>
+          <div class="aw-li"><span>Board 1200 × 450 × 25</span><span>×1</span></div>
+          <div class="aw-li"><span>Bracket B12.5 · 450 mm</span><span>×3</span></div>
+          <div class="aw-li"><span>Plug 14 mm · screw 12 × 100</span><span>×6</span></div>
+          <div class="aw-li"><span>Bit 14 mm · hammer on</span><span>×1</span></div>
+          <div class="aw-li"><span>Spirit level 60 cm</span><span>×1</span></div>
+        </div>
+        <div class="aw-box hint"><strong>! Hint, flow continues</strong>
+          <span>Too deep → max. depth offered · too long → split or cut</span></div>
+        <div class="aw-box no"><strong>✕ Stop</strong>
+          <span>Only: wall "I don't know" or high-risk work</span></div>
+      </div>
+    </div>
+
+    <div class="aw-notes">
+      <p><b>Plug decides the rest:</b> plug size = drill bit → screw → bracket hole. One chain, no guessing.</p>
+      <p><b>Weakest part wins:</b> max. kg = weakest of plug in this wall, bracket pair, board ÷ 1.25. Deeper shelf = less kg.</p>
+      <p><b>What changed:</b> before, the app asked the weight and often stopped. Now it shows options, and the customer chooses.</p>
+    </div>
+  </div>
+</section>
+
+<!-- D-13 · 2/2 Safety logic and worst cases -->
+<section class="slide" data-chapter="D-13 · Safety logic" data-time="2:00" aria-label="Safety logic: every case has a defined answer">
+  <header class="shead"><div class="sign"><b>D-13</b><span>Safety logic · worst cases</span></div>
+    <span class="sk-lg"><i class="sk stop">STOP</i><i class="sk hint">HINT</i><i class="sk ask">ASK</i><i class="sk auto">AUTO</i></span></header>
+  <div class="sbody" style="gap:10px">
+    <h2>Every worst case has a defined answer, checked in a fixed order</h2>
+
+    <div class="sk-wrap">
+      <div class="sk-tbl">
+        <div class="sk-r h"><span>#</span><span>Check</span><span>Worst case</span><span>What the app does</span><span></span></div>
+        <div class="sk-r"><span>0</span><b>High-risk text</b><span>"Paint the wall and move the socket"</span><span>Refuse, hand off to a professional. Also for Basic projects.</span><i class="sk stop">STOP</i></div>
+        <div class="sk-r"><span>1</span><b>Wall type</b><span>"I don't know"</span><span>No plug can be chosen → ask a store associate</span><i class="sk stop">STOP</i></div>
+        <div class="sk-r"><span>2</span><b>Depth</b><span>60 cm on concrete · 40 cm on aerated concrete</span><span>Offer the wall's max. depth (50 / 30 cm); customer adjusts</span><i class="sk hint">HINT</i></div>
+        <div class="sk-r"><span>3</span><b>Length</b><span>70 cm</span><span>Next board up (80 cm), "cut in store"</span><i class="sk auto">AUTO</i></div>
+        <div class="sk-r"><span></span><b></b><span>250 cm</span><span>Split into equal shelves, or cut</span><i class="sk ask">ASK</i></div>
+        <div class="sk-r"><span>4</span><b>Load</b><span>Needs more than the strongest plug offers</span><span>Suggest a shallower or second shelf. Over 50 kg → professional</span><i class="sk hint">HINT</i></div>
+        <div class="sk-r"><span></span><b></b><span>Plasterboard, 3 shelves</span><span>25 kg shared → max. 8 kg per shelf</span><i class="sk auto">AUTO</i></div>
+        <div class="sk-r"><span>5</span><b>Old parts</b><span>Bracket bent, board swollen</span><span>Old part refused, new part stays on the list</span><i class="sk auto">AUTO</i></div>
+        <div class="sk-r"><span>6</span><b>Store</b><span>Item out of stock · not carried anywhere</span><span>Nearest store with stock · "please ask staff". Never swapped</span><i class="sk auto">AUTO</i></div>
+        <div class="sk-r"><span>7</span><b>Any change</b><span>Customer edits wall, size or plug</span><span>Everything is checked again from step 1</span><i class="sk auto">AUTO</i></div>
+      </div>
+
+      <div class="sk-side">
+        <div class="sk-box"><span class="kicker">Max. depth by wall</span>
+          <div class="sk-d"><span>Concrete · solid brick · wood</span><b>50 cm</b></div>
+          <div class="sk-d"><span>Perforated brick</span><b>35 cm</b></div>
+          <div class="sk-d"><span>Aerated concrete · plasterboard</span><b>30 cm</b></div>
+          <p class="sk-n">Deeper = longer lever: max. kg × 25 ÷ depth</p>
+        </div>
+        <div class="sk-box"><span class="kicker">Same gates for every project</span>
+          <div class="sk-p"><b>Basic</b><span>Paint, wallpaper, door lock: no wall or load question. Checks 0, 6, 7 + own stops (mould, old paint)</span></div>
+          <div class="sk-p"><b>Mounting light</b><span>Picture: wall + weight, hooks or plugs</span></div>
+          <div class="sk-p"><b>Mounting full</b><span>Shelf (D-13), wall cabinet and anti-tip (D-14), doors: all checks 0–7</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- D-14 · 1/2 Wall cabinet -->
+<section class="slide" data-chapter="D-14 · Wall cabinet" data-time="1:30" aria-label="Wall cabinet: bigger cabinet, bigger plugs">
+  <header class="shead"><div class="sign"><b>D-14</b><span>Hang a wall cabinet · new logic</span></div><span class="nw-keep">Same 5 steps as the shelf</span></header>
+  <div class="sbody" style="gap:12px">
+    <h2>Bigger cabinet, bigger plugs. The app works out the cabinet weight itself.</h2>
+
+    <div class="aw">
+      <div class="aw-step">
+        <span class="aw-n">1</span>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+          <div class="ph-b"><div class="ph-s">Wall cabinet · 1 of 2</div><div class="ph-t">What is the wall made of?</div>
+            <div class="ph-o on">Concrete</div><div class="ph-o">Solid brick</div><div class="ph-o">Perforated brick</div><div class="ph-o">Aerated concrete</div><div class="ph-o">Plasterboard · Wood</div><div class="ph-o">I don't know</div></div></div>
+        <h3>Wall</h3><p>Sets plug type, max. load and max. depth.</p>
+      </div>
+
+      <div class="aw-step">
+        <span class="aw-n">2</span>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+          <div class="ph-b"><div class="ph-s">Wall cabinet · 2 of 2</div><div class="ph-t">How big is your cabinet?</div>
+            <div class="ph-row"><div class="ph-o">W 80</div><div class="ph-o">D 35</div><div class="ph-o">H 70</div></div>
+            <div class="ph-s">cm · width up to 120, depth up to 60</div>
+            <div class="ph-o on">✓ Concrete: up to 60 cm deep<em>too deep? we show the max.</em></div>
+            <div class="ph-sp"></div><div class="ph-btn">Continue</div></div></div>
+        <h3>Size</h3><p>Width × depth × height. No weight question.</p>
+      </div>
+
+      <div class="aw-step">
+        <span class="aw-n">3</span>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+          <div class="ph-b"><div class="ph-t">Your cabinet</div>
+            <div class="ph-o on">Estimated weight: 27 kg<em>from the size, safety margin included</em></div>
+            <div class="ph-o">Mounting rail 800 mm</div>
+            <div class="ph-o">4 fixing points</div>
+            <div class="ph-sp"></div><div class="ph-btn">Continue</div></div></div>
+        <h3>Weight</h3><p>Estimated from the size, never asked.</p>
+      </div>
+
+      <div class="aw-step">
+        <span class="aw-n">4</span>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+          <div class="ph-b"><div class="ph-t">Choose your plug</div>
+            <div class="ph-s">How much will you put inside?</div>
+            <div class="ph-o">10 mm plug<em>up to 29 kg contents</em></div>
+            <div class="ph-o">12 mm plug<em>up to 45 kg contents</em></div>
+            <div class="ph-o on">14 mm plug<em>up to 53 kg contents</em></div>
+            <div class="ph-s">6 and 8 mm hidden: too small for this cabinet</div></div></div>
+        <h3>Plug</h3><p>Only plugs strong enough for the cabinet are shown.</p>
+      </div>
+
+      <div class="aw-step last">
+        <span class="aw-n">5</span>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+          <div class="ph-b"><div class="ph-t">Please confirm</div>
+            <div class="ph-o on">I will put max. 53 kg inside<em>14 mm plugs · rail 800 mm</em></div>
+            <div class="ph-s">Glass doors or stone top? Ask a store associate</div>
+            <div class="ph-sp"></div><div class="ph-row"><div class="ph-btn o">Back</div><div class="ph-btn">Confirm</div></div></div></div>
+        <h3>Confirm</h3><p>The customer confirms the max. contents.</p>
+      </div>
+
+      <div class="aw-res">
+        <span class="kicker">Result</span>
+        <div class="aw-box ok"><strong>✓ Shopping list</strong>
+          <div class="aw-li"><span>Mounting rail 800 mm</span><span>×1</span></div>
+          <div class="aw-li"><span>Plug 14 mm · screw 12 × 100</span><span>×4</span></div>
+          <div class="aw-li"><span>Bit 14 mm · hammer on</span><span>×1</span></div>
+          <div class="aw-li"><span>Spirit level 60 cm</span><span>×1</span></div>
+        </div>
+        <div class="aw-box hint"><strong>! Hint, flow continues</strong>
+          <span>Too deep → max. depth offered</span></div>
+        <div class="aw-box no"><strong>✕ Stop</strong>
+          <span>Wall unknown, high-risk work, or cabinet too heavy for the wall (max. 80 kg)</span></div>
+      </div>
+    </div>
+
+    <div class="aw-notes">
+      <p><b>Weight from the size:</b> panels × 11 kg/m². The estimate is about 20 % above the real weight, so it stays on the safe side.</p>
+      <p><b>Bigger cabinet, bigger plug:</b> the smallest plug offered carries 1.5 × the cabinet weight. Screws and rail follow.</p>
+      <p><b>Wall cap stays:</b> bigger plugs can't make a weak wall stronger. Perforated brick 35 kg · aerated 40 kg · plasterboard 25 kg.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- D-14 · 2/2 Anti-tip -->
+<section class="slide" data-chapter="D-14 · Anti-tip" data-time="1:30" aria-label="Anti-tip: depth decides the plug, width decides how many kits">
+  <header class="shead"><div class="sign"><b>D-14</b><span>Anchor a shelf to the wall · anti-tip</span></div><span class="nw-keep">Same 5 steps as the shelf</span></header>
+  <div class="sbody" style="gap:12px">
+    <h2>No weight needed. Depth decides the plug, width decides how many kits.</h2>
+
+    <div class="aw">
+      <div class="aw-step">
+        <span class="aw-n">1</span>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+          <div class="ph-b"><div class="ph-s">Anti-tip · 1 of 2</div><div class="ph-t">What is the wall made of?</div>
+            <div class="ph-o">Concrete</div><div class="ph-o">Solid brick</div><div class="ph-o">Perforated brick</div><div class="ph-o">Aerated concrete</div><div class="ph-o on">Plasterboard</div><div class="ph-o">I don't know</div></div></div>
+        <h3>Wall</h3><p>Sets the plug type and drill mode.</p>
+      </div>
+
+      <div class="aw-step">
+        <span class="aw-n">2</span>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+          <div class="ph-b"><div class="ph-s">Anti-tip · 2 of 2</div><div class="ph-t">How big is the furniture?</div>
+            <div class="ph-s">Width</div><div class="ph-o">80 cm</div>
+            <div class="ph-s">Depth</div><div class="ph-o">28 cm</div>
+            <div class="ph-s">Height</div><div class="ph-o">202 cm</div>
+            <div class="ph-sp"></div><div class="ph-btn">Continue</div></div></div>
+        <h3>Size</h3><p>Width, depth, height. Nothing else.</p>
+      </div>
+
+      <div class="aw-step">
+        <span class="aw-n">3</span>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+          <div class="ph-b"><div class="ph-t">Your anti-tip set</div>
+            <div class="ph-o on">Depth 28 cm → anchor M4<em>tall: one size up → M5</em></div>
+            <div class="ph-o">Width 80 cm → 1 kit</div>
+            <div class="ph-o">Height 202 cm → 2 fixings per kit</div>
+            <div class="ph-sp"></div><div class="ph-btn">Continue</div></div></div>
+        <h3>Kit</h3><p>The app picks plug size and number of kits.</p>
+      </div>
+
+      <div class="aw-step">
+        <span class="aw-n">4</span>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+          <div class="ph-b"><div class="ph-t">How to fix it</div>
+            <div class="ph-s">Plasterboard wall</div>
+            <div class="ph-o on">Cavity anchor M5<em>2 pieces</em></div>
+            <div class="ph-o">Stud found behind?<em>wood screw, stronger</em></div>
+            <div class="ph-s">Screws follow automatically</div></div></div>
+        <h3>Fixing</h3><p>Plug follows wall and depth. Stud hint on plasterboard.</p>
+      </div>
+
+      <div class="aw-step last">
+        <span class="aw-n">5</span>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+          <div class="ph-b"><div class="ph-t">Please confirm</div>
+            <div class="ph-o on">I fix it to the top or side panel<em>never to the thin back panel</em></div>
+            <div class="ph-sp"></div><div class="ph-row"><div class="ph-btn o">Back</div><div class="ph-btn">Confirm</div></div></div></div>
+        <h3>Confirm</h3><p>One safety confirmation, then the list.</p>
+      </div>
+
+      <div class="aw-res">
+        <span class="kicker">Result</span>
+        <div class="aw-box ok"><strong>✓ Shopping list</strong>
+          <div class="aw-li"><span>Anti-tip kit</span><span>×1</span></div>
+          <div class="aw-li"><span>Cavity anchor M5</span><span>×2</span></div>
+          <div class="aw-li"><span>Bit 10 mm · hammer off</span><span>×1</span></div>
+          <div class="aw-li"><span>Detector</span><span>×1</span></div>
+        </div>
+        <div class="aw-box hint"><strong>! Hint, flow continues</strong>
+          <span>Plasterboard: fix into a stud if you can</span></div>
+        <div class="aw-box no"><strong>✕ Stop</strong>
+          <span>Only: wall "I don't know" or high-risk work</span></div>
+      </div>
+    </div>
+
+    <div class="aw-notes">
+      <p><b>Depth decides the plug:</b> up to 30 cm → 6 mm (M4) · 31–50 cm → 8 mm (M5) · 51–75 cm → 10 mm (M6). The wall decides the plug type.</p>
+      <p><b>Width decides how many:</b> 1 kit per 90 cm, rounded up. 80 cm → 1 kit · 160 cm → 2 kits.</p>
+      <p><b>Tall furniture, stronger fixing:</b> over 180 cm → next bigger plug and 2 fixings per kit.</p>
+    </div>
+  </div>
+</section>
+
+</div></div>
+
+<nav class="nav" id="navbar" aria-label="Slide navigation">
+  <div class="btns"><button id="prev" type="button">← Back</button><button id="next" type="button">Next →</button></div>
+  <div class="dots" id="dots"></div>
+  <div class="tools">
+    <span class="pos" id="pos">1 / 4</span>
+    <button id="menuBtn" type="button" aria-expanded="false" aria-controls="menu">☰ Menu<kbd>M</kbd></button>
+    <button id="themeBtn" type="button">☾ Dark<kbd>T</kbd></button>
+    <button id="fsBtn" type="button">⛶ Fullscreen<kbd>F</kbd></button>
+  </div>
+</nav>
+</div>
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var dots=document.getElementById('dots'),pos=document.getElementById('pos');
+  var prev=document.getElementById('prev'),next=document.getElementById('next');
+  var menu=document.getElementById('menu'),tabs=document.getElementById('tabs'),preview=document.getElementById('preview');
+  var menuBtn=document.getElementById('menuBtn');
+  var i=0,hi=0;
+
+  function info(n){var s=slides[n];return{ch:s.getAttribute('data-chapter'),t:s.getAttribute('aria-label'),time:s.getAttribute('data-time')}}
+
+  slides.forEach(function(s,n){
+    var d=document.createElement('button');d.className='dot';d.type='button';
+    d.setAttribute('aria-label','Go to slide '+(n+1)+': '+info(n).ch);
+    d.addEventListener('click',function(){go(n)});dots.appendChild(d);
+
+    var b=document.createElement('button');b.type='button';b.setAttribute('role','menuitem');
+    var num=document.createElement('span');num.textContent=String(n+1).padStart(2,'0')+' · '+info(n).time;
+    var lab=document.createElement('strong');lab.textContent=info(n).ch;
+    b.appendChild(num);b.appendChild(lab);
+    b.addEventListener('mouseenter',function(){highlight(n)});
+    b.addEventListener('focus',function(){highlight(n)});
+    b.addEventListener('click',function(){go(n);toggleMenu(false)});
+    tabs.appendChild(b);
+  });
+
+  function highlight(n){
+    hi=n;
+    [].forEach.call(tabs.children,function(b,k){b.classList.toggle('hi',k===n)});
+    var x=info(n);
+    preview.firstChild.textContent=x.t;
+    preview.lastChild.textContent='Slide '+(n+1)+' of '+slides.length+' · ~'+x.time+' min';
+  }
+
+  /* build steps: elements with data-step="1", "2", ... appear one per click.
+     data-audio = file to play, data-delay = wait in ms after the element appears. */
+  var stepOf=slides.map(function(){return 0});
+  function maxStep(k){var m=0;[].forEach.call(slides[k].querySelectorAll('[data-step]'),function(e){m=Math.max(m,+e.getAttribute('data-step'))});return m}
+  function showSteps(k,n){
+    stepOf[k]=n;
+    [].forEach.call(slides[k].querySelectorAll('[data-step]'),function(e){e.classList.toggle('shown',+e.getAttribute('data-step')<=n)});
+  }
+  function go(n,showAll){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    stopAudio();
+    showSteps(i,showAll?maxStep(i):0);
+    slides.forEach(function(s,k){s.classList.toggle('on',k===i)});
+    [].forEach.call(dots.children,function(d,k){d.classList.toggle('on',k===i);d.setAttribute('aria-current',k===i?'true':'false')});
+    [].forEach.call(tabs.children,function(b,k){b.setAttribute('aria-current',k===i?'true':'false')});
+    pos.textContent=(i+1)+' / '+slides.length;
+    navUi();
+  }
+  function navUi(){prev.disabled=i===0&&stepOf[i]===0;next.disabled=i===slides.length-1&&stepOf[i]>=maxStep(i)}
+  function forward(){
+    if(stepOf[i]<maxStep(i)){
+      showSteps(i,stepOf[i]+1);
+      var el=slides[i].querySelector('[data-step="'+stepOf[i]+'"][data-audio]');
+      stopAudio();
+      if(el)queueAudio(el.getAttribute('data-audio'),+(el.getAttribute('data-delay')||0),el.getAttribute('data-audio-label')||'Audio');
+      navUi();
+    } else go(i+1);
+  }
+  function back(){
+    if(stepOf[i]>0){stopAudio();showSteps(i,stepOf[i]-1);navUi()}
+    else go(i-1,true);
+  }
+
+  /* audio: one clip at a time, started after a delay, stopped when you move on */
+  var clips={},cur=null,curLabel='',timer=null;
+  var audioBtns=[].slice.call(document.querySelectorAll('.narr'));
+  function clip(src){
+    if(!clips[src]){
+      var a=document.querySelector('video[data-clip="'+src+'"]')||new Audio(src);a.preload='auto';
+      ['play','pause','ended','timeupdate','error','loadedmetadata'].forEach(function(ev){a.addEventListener(ev,audioUi)});
+      clips[src]=a;
+    }
+    return clips[src];
+  }
+  [].forEach.call(document.querySelectorAll('[data-audio]'),function(e){clip(e.getAttribute('data-audio'))});
+  function fmt(t){t=Math.max(0,Math.floor(t||0));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')}
+  function queueAudio(src,delay,label){
+    cur=clip(src);curLabel=label;cur.currentTime=0;audioUi();
+    timer=setTimeout(function(){timer=null;var r=cur.play();if(r&&r.catch)r.catch(function(){});audioUi()},delay);
+    audioUi();
+  }
+  function stopAudio(){
+    if(timer){clearTimeout(timer);timer=null}
+    if(cur){cur.pause();cur.currentTime=0}
+    cur=null;audioUi();
+  }
+  function toggleAudio(){
+    if(!cur)return;
+    if(timer){clearTimeout(timer);timer=null}
+    if(cur.paused){var r=cur.play();if(r&&r.catch)r.catch(function(){})}else cur.pause();
+  }
+  function audioUi(){
+    [].forEach.call(document.querySelectorAll('.pip'),function(p){
+      var vs=[].slice.call(p.querySelectorAll('video')),act=vs.indexOf(cur)>=0?cur:vs[0];
+      vs.forEach(function(v){v.classList.toggle('on',v===act)});
+    });
+    audioBtns.forEach(function(b){
+      var t;
+      if(!cur)t='▶ Video';
+      else if(cur.error)t='Video file missing';
+      else if(timer)t='♪ '+curLabel+' starts…';
+      else if(cur.ended)t='✓ '+curLabel+' done';
+      else if(cur.paused)t='▶ '+curLabel+' · '+fmt(cur.currentTime)+' / '+fmt(cur.duration);
+      else t='❚❚ '+curLabel+' · '+fmt(cur.currentTime)+' / '+fmt(cur.duration);
+      b.firstChild.textContent=t;
+      b.classList.toggle('playing',!!(cur&&!cur.paused));
+      b.disabled=!cur||!!cur.error;
+    });
+  }
+  audioBtns.forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();toggleAudio();b.blur()})});
+
+  prev.addEventListener('click',back);
+  next.addEventListener('click',forward);
+
+  function toggleMenu(open){
+    if(open===undefined)open=menu.hidden;
+    menu.hidden=!open;menuBtn.setAttribute('aria-expanded',open?'true':'false');
+    if(open){highlight(i);tabs.children[i].focus()}
+  }
+  menuBtn.addEventListener('click',function(e){e.stopPropagation();toggleMenu()});
+  document.addEventListener('click',function(e){if(!menu.hidden&&!menu.contains(e.target))toggleMenu(false)});
+  tabs.addEventListener('mouseleave',function(){highlight(i)});
+
+  var wrap=document.querySelector('.wrap'),fsBtn=document.getElementById('fsBtn');
+  function fsEl(){return document.fullscreenElement||document.webkitFullscreenElement}
+  function toggleFs(){
+    try{
+      if(fsEl()){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}
+      else{var req=wrap.requestFullscreen||wrap.webkitRequestFullscreen;var p=req&&req.call(wrap);if(p&&p.catch)p.catch(function(){})}
+    }catch(err){}
+  }
+  function syncFs(){fsBtn.firstChild.textContent=fsEl()?'⛶ Exit fullscreen':'⛶ Fullscreen'}
+  fsBtn.addEventListener('click',toggleFs);
+  document.addEventListener('fullscreenchange',syncFs);
+  document.addEventListener('webkitfullscreenchange',syncFs);
+
+  document.addEventListener('keydown',function(e){
+    if(e.target.tagName==='INPUT'||e.ctrlKey||e.metaKey||e.altKey)return;
+    var k=e.key;
+    if(k==='m'||k==='M'){e.preventDefault();toggleMenu();return}
+    if(k==='f'||k==='F'){e.preventDefault();toggleFs();return}
+    if(k==='t'||k==='T'){e.preventDefault();toggleTheme();return}
+    if((k==='a'||k==='A')&&menu.hidden){e.preventDefault();toggleAudio();return}
+    if(!menu.hidden){
+      if(k==='Escape'){toggleMenu(false);menuBtn.focus();return}
+      if(k==='ArrowRight'||k==='ArrowDown'){e.preventDefault();tabs.children[Math.min(slides.length-1,hi+1)].focus()}
+      if(k==='ArrowLeft'||k==='ArrowUp'){e.preventDefault();tabs.children[Math.max(0,hi-1)].focus()}
+      return;
+    }
+    if(k==='ArrowRight'||k==='PageDown'||k===' '){e.preventDefault();forward()}
+    if(k==='ArrowLeft'||k==='PageUp'){e.preventDefault();back()}
+    if(k==='Home'){e.preventDefault();go(0)}
+    if(k==='End'){e.preventDefault();go(slides.length-1)}
+  });
+  /* theme: light by default; T or the button switches to dark */
+  var themeBtn=document.getElementById('themeBtn');
+  function setTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    themeBtn.firstChild.textContent=t==='light'?'☾ Dark':'☀ Light';
+    try{localStorage.setItem('bb-theme',t)}catch(err){}
+  }
+  function toggleTheme(){setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark')}
+  themeBtn.addEventListener('click',function(){toggleTheme();themeBtn.blur()});
+  var saved=null;try{saved=localStorage.getItem('bb-theme')}catch(err){}
+  setTheme(saved==='dark'?'dark':'light');
+
+  /* fit: scale the 1120 x 630 slide to the largest size that fits the window */
+  var stage=document.getElementById('stage'),deck=document.getElementById('deck'),navbar=document.getElementById('navbar');
+  function fit(){
+    var fs=!!fsEl();
+    var cs=getComputedStyle(fs?wrap:document.body);
+    var availW=(fs?wrap.clientWidth:document.documentElement.clientWidth)-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+    var availH=window.innerHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom)-(fs?0:navbar.offsetHeight+14);
+    var sc=Math.max(0.2,Math.min(availW/1120,availH/630));
+    stage.style.width=(1120*sc)+'px';stage.style.height=(630*sc)+'px';
+    deck.style.transform='scale('+sc+')';
+    navbar.style.width=Math.max(1120*sc,Math.min(availW,320))+'px';
+  }
+  window.addEventListener('resize',fit);
+  document.addEventListener('fullscreenchange',function(){setTimeout(fit,50)});
+  document.addEventListener('webkitfullscreenchange',function(){setTimeout(fit,50)});
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+  fit();
+
+  go(0);
+})();
+</script>
+
+</body></html>
