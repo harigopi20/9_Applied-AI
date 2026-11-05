@@ -2103,6 +2103,34 @@
     }
   });
 
+  test("Section bands (UI)", "Each list section is its own block with a header band: icon, name and part count (EN + DE); items and subtotal inside the block", () => {
+    const A = window.BBApp, s = A.state;
+    try {
+      s.data = D; s.template = SHELF(); s.facts = confirmed(SHELF_OK); s.overrides = {}; s.owned = new Set(); s.storeId = null;
+      A.recompute(false);
+      const box = document.getElementById("sandbox");
+      [["en", "parts"], ["de", "Teile"]].forEach(([lang, word]) => {
+        window.BBI18n.setLang(lang);
+        box.replaceChildren(A.viewResult());
+        ["materials", "tools", "safety"].forEach((section) => {
+          const n = s.result.items.filter((i) => i.section === section).length;
+          if (!n) return;
+          const sec = box.querySelector('.list-section[data-section="' + section + '"]');
+          assert(sec, section + " block");
+          const h3 = sec.querySelector(".section-head h3");
+          assert(h3.querySelector(".sec-icon svg"), section + " icon");
+          eq(h3.querySelector(".sec-label").textContent, window.BBI18n.t("section_" + section));
+          eq(h3.querySelector(".sec-count").textContent, n === 1 ? window.BBI18n.t("section_count_one") : n + " " + word, section + " count " + lang);
+          eq(sec.getAttribute("aria-labelledby"), h3.id);
+          eq(sec.querySelectorAll(":scope > ul.items > .item").length, n, section + " items inside");
+          assert(sec.querySelector('[data-subtotal="' + section + '"]'), section + " subtotal inside");
+        });
+      });
+    } finally {
+      window.BBI18n.setLang("en");
+    }
+  });
+
   test("#145 (UI)", "'Have it all' only for tools and safety gear: marks every tool, tools subtotal 0, plugs/screws stay; 'Buy all after all' brings them back", () => {
     const s = window.BBApp.state;
     try {
