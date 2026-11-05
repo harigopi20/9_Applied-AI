@@ -6,6 +6,13 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Shopping list safety notes in a box that closes on the first scroll (issue #144) – 2026-11-05
+Summary (same as the pull request):
+- All safety notes of the list (incl. the customer's own warnings) in one box "Safety notes (n)" at the top
+- Open when the list appears; closes on the customer's first scroll without a jump; title, count and short labels stay visible
+- Tap on the title opens/closes it; stays closed on re-renders; a new project shows it open again
+- Saved list and shopping route unchanged (notes in full); new test #144 (UI); 129 tests passing; test results saved; README updated
+
 - **2026-11-05 – Shopping list: safety notes in a box that closes on the first scroll (issue #144, variant A).**
   `app/app.js`: new `viewSafetyBox()` puts every safety note of the list (detector limits SR-05, wall not
   checked SR-02, worst-case weight, shelf boards, the customer's own warnings like ST-06 and project
