@@ -50,6 +50,7 @@
     checked: new Set(),      // product_nr ticked off (FR: simple check-off)
     storeId: null,           // stage 4 – FR-30: no store = aisle/shelf "not available"
     safetyCollapsed: false,  // issue #144: safety box on the list closes on the first scroll (per project)
+    ownedOpen: new Set(),    // folded "all in hand" sections the customer opened again (issue #145 follow-up)
     result: null
   };
 
@@ -1039,12 +1040,18 @@
       const items = r.items.filter((i) => i.section === section);
       if (!items.length) return;
       box.appendChild(sectionHead(section, items));
-      const ul = el("ul", { class: "items" });
+      // Issue #145 follow-up: a tools / safety-gear section the customer has completely is folded
+      // into one line; "Show items" opens the normal list again.
+      const folded = sectionAllOwned(section, items);
+      const open = !folded || state.ownedOpen.has(section);
+      if (folded) box.appendChild(viewOwnedSummary(section, items, open));
+      const ul = el("ul", { class: "items", id: "items-" + section });
+      if (!open) ul.hidden = true;
       items.forEach((i) => ul.appendChild(viewItem(i)));
       box.appendChild(ul);
       // FR-34 (D-3): subtotal per section; owned parts are not counted
       const st = r.subtotals && r.subtotals[section];
-      if (st) {
+      if (st && open) {
         box.appendChild(el("p", { class: "subtotal", "data-subtotal": section, "data-amount": st.amount === null ? "none" : String(st.amount) },
           st.amount !== null
             ? [el("span", { class: "subtotal-label", text: t("subtotal", { section: t("section_" + section) }) }), priceEl(st.amount, "subtotal-value")]
@@ -1173,6 +1180,32 @@
         recompute(false, { anchor: sel, focus: sel }); // issue #119: stay at this section
       } }, all ? t("owned_need_all") : t("owned_have_all")));
     return head;
+  }
+
+  /** True when every part of a tools / safety-gear section is marked "I already have this" (from 2 parts). */
+  function sectionAllOwned(section, items) {
+    if (!OWNED_ALL_SECTIONS.includes(section)) return false;
+    const ownable = items.filter((i) => i.ownable && !i.owned_auto && !i.owned_refused);
+    return ownable.length >= 2 && items.every((i) => i.owned);
+  }
+
+  /**
+   * Folded section (user request 5 Nov 2026): one green line "All in hand – n parts, not counted" and
+   * "Show items" below it. The SR-17 hint ("Keep the right tool and gear …") is shown only when the
+   * items are shown – deviation from SR-17 (Must), team decision needed, see CHANGELOG.
+   */
+  function viewOwnedSummary(section, items, open) {
+    const sel = '[data-owned-toggle-list="' + section + '"]';
+    return el("div", { class: "owned-summary", "data-owned-summary": section }, [
+      el("p", { class: "owned-summary-line", text: "✓ " + t("owned_all_summary", { n: items.length }) }),
+      el("button", { type: "button", class: "owned-summary-toggle", "data-owned-toggle-list": section,
+        "aria-expanded": open ? "true" : "false", "aria-controls": "items-" + section,
+        text: open ? t("owned_hide_items") + " ▴" : t("owned_show_items") + " ▾",
+        onclick: () => {
+          if (open) state.ownedOpen.delete(section); else state.ownedOpen.add(section);
+          recompute(false, { anchor: sel, focus: sel });
+        } })
+    ]);
   }
 
   /** "I already have this" (C-8). Plugs and screws are never ownable (SR-15); rules.js decides. */
@@ -1810,6 +1843,7 @@
   /** Starts a template; guesses (from text) become "observed" facts – never confirmed (SR-01). */
   function startTemplate(tpl, guesses) {
     state.safetyCollapsed = false; // issue #144: a new project shows its safety notices open again
+    state.ownedOpen = new Set();
     if (PV && PV.handles(tpl)) { stopRecognizer(true); PV.start(tpl, guesses); return; } // preview: new D-13/D-14 flow
     state.template = tpl;
     state.facts = {};
