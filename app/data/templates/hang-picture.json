@@ -1,14 +1,14 @@
 {
   "template_id": "hang_picture",
   "project_id": "PRJ-03",
-  "version": "1.1.0",
-  "comment": "DR-04 project template. All limits and factors are MOCK values (design DD-3) and must be checked by the team before the demo (SR-10). Methods are tried in order; the first method whose safety-relevant parts all pass is used (R-15).",
+  "version": "1.2.0",
+  "comment": "DR-04 project template. All limits and factors are MOCK values (design DD-3) and must be checked by the team before the demo (SR-10). Methods are tried in order; the first method whose safety-relevant parts all pass is used (R-15). 1.2.0 (6 Nov 2026): same wall choices as shelf / wall cabinet (D-13) incl. aerated concrete and wood; aerated concrete and wood get their own method (PIC-M3 / PIC-M4, only for that wall) with the parts of sheet Fixing chain (R-17).",
   "review": {
     "status": "pending_team_review",
     "reviewed_by": null,
     "review_date": null,
     "created": "2026-10-25",
-    "updated": "2026-10-27",
+    "updated": "2026-11-06",
     "source": "data/project_catalogue.xlsx (draft v1, 27 Oct 2026)"
   },
   "title": { "en": "Hang a picture", "de": "Bild aufhängen" },
@@ -17,32 +17,34 @@
   "safety_level": "mounting_light",
   "safety_factor": 1.25,
   "max_load_kg": 25,
-  "wall_limits": {},
+  "wall_limits": {
+    "wood": { "max_load_kg": 20, "rule_id": "SR-13", "comment": "Wood: screw in a pilot hole, no plug. Sheet System ratings, wood 6 mm = 25 kg ÷ safety factor 1.25 = 20 kg per picture." }
+  },
   "wall_matches": {
     "concrete": ["concrete"],
     "solid_brick": ["solid brick", "brick"],
     "brick": ["brick"],
-    "plasterboard": ["plasterboard"]
+    "plasterboard": ["plasterboard"],
+    "aerated_concrete": ["aerated concrete"],
+    "wood": ["wood"]
   },
-  "stops": [
-    {
-      "id": "aerated_concrete",
-      "rule_id": "ST-02",
-      "when": { "wall_in": ["aerated_concrete"] },
-      "hand_off": "staff",
-      "message": {
-        "en": "Aerated concrete needs special plugs that are not in our catalogue. Please ask OBI staff.",
-        "de": "Porenbeton braucht Spezialdübel, die nicht in unserem Katalog sind. Bitte OBI-Personal fragen."
-      }
-    }
-  ],
+  "stops": [],
   "required_facts": ["wall_type", "load_kg", "picture_count", "points_per_picture"],
   "questions": [
     {
       "id": "Q1",
       "fact": "wall_type",
       "type": "choice",
-      "options": ["concrete", "solid_brick", "brick", "plasterboard", "aerated_concrete", "unknown"],
+      "options": ["concrete", "solid_brick", "brick", "aerated_concrete", "plasterboard", "wood", "unknown"],
+      "option_labels": {
+        "concrete": { "en": "Concrete", "de": "Beton" },
+        "solid_brick": { "en": "Solid brick", "de": "Vollziegel" },
+        "brick": { "en": "Perforated brick / brick of unknown type", "de": "Lochziegel / unbekannter Ziegel" },
+        "aerated_concrete": { "en": "Aerated concrete", "de": "Porenbeton" },
+        "plasterboard": { "en": "Plasterboard", "de": "Gipskarton" },
+        "wood": { "en": "Wood (solid or stud)", "de": "Holz (massiv oder Ständer)" },
+        "unknown": { "en": "I don't know", "de": "Weiß ich nicht" }
+      },
       "text": { "en": "What is the wall made of?", "de": "Woraus besteht die Wand?" },
       "help": {
         "en": "If you are not sure, choose \"I don't know\". We will not guess. Aerated concrete is often called Ytong.",
@@ -215,6 +217,144 @@
           "quantity": { "rule_id": "PIC-Q0", "units": 1 }
         }
       ]
+    },
+    {
+      "method_id": "drill_aerated",
+      "rule_id": "PIC-M3",
+      "when": { "wall_in": ["aerated_concrete"] },
+      "penetrates_wall": true,
+      "drilling": true,
+      "label": { "en": "Drill and fix with aerated concrete plugs", "de": "Bohren und mit Porenbetondübeln befestigen" },
+      "roles": [
+        {
+          "role": "aerated_plug",
+          "section": "materials",
+          "rule_ids": ["R-15", "R-01", "R-04", "R-07", "R-17"],
+          "label": { "en": "Aerated concrete plugs", "de": "Porenbetondübel" },
+          "select": {
+            "variant_groups": ["wall-plug-aerated-d13"],
+            "wall_suitable": true,
+            "load_rated": true,
+            "prefer": ["max_load_kg", "price_eur"]
+          },
+          "on_none": "stop",
+          "quantity": { "rule_id": "PIC-Q1", "units": { "var": "fixing_points" } }
+        },
+        {
+          "role": "aerated_screw",
+          "section": "materials",
+          "rule_ids": ["R-17"],
+          "comment": "Long screw of sheet Fixing chain for this plug size. The plug rating (sheet System ratings) is for plug and screw together, as in the shelf / cabinet logic.",
+          "label": { "en": "Screws", "de": "Schrauben" },
+          "select": {
+            "variant_groups": ["screw-d13", "screw-hex-d13"],
+            "compatible_with_roles": ["aerated_plug"],
+            "wall_suitable": true,
+            "prefer": ["price_eur"]
+          },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "PIC-Q1", "units": { "var": "fixing_points" } }
+        },
+        {
+          "role": "drill_bit", "ownable": true,
+          "section": "tools",
+          "rule_ids": ["R-05", "R-17"],
+          "comment": "Masonry bit of the plug size (sheet Fixing chain); drill without hammer mode.",
+          "label": { "en": "Drill bit", "de": "Bohrer" },
+          "select": {
+            "variant_groups": ["masonry-drill-bit"],
+            "compatible_with_roles": ["aerated_plug"],
+            "spec_eq_role": { "diameter_mm": "aerated_plug" },
+            "prefer": ["price_eur"]
+          },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "PIC-Q0", "units": 1 }
+        },
+        {
+          "role": "drill", "ownable": true,
+          "section": "tools",
+          "rule_ids": ["R-09", "R-17"],
+          "comment": "Sheet Fixing chain: aerated concrete is drilled with hammer mode off → cordless drill (as in the shelf / cabinet logic).",
+          "label": { "en": "Drill", "de": "Bohrmaschine" },
+          "select": { "product_nrs": ["P039"] },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "PIC-Q0", "units": 1 }
+        },
+        {
+          "role": "screwdriver", "ownable": true,
+          "section": "tools",
+          "rule_ids": ["PIC-T1"],
+          "label": { "en": "Screwdriver", "de": "Schraubendreher" },
+          "select": { "product_nrs": ["P031"] },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "PIC-Q0", "units": 1 }
+        },
+        {
+          "role": "dust_mask", "ownable": true,
+          "section": "safety",
+          "rule_ids": ["R-10"],
+          "label": { "en": "Dust mask", "de": "Staubmaske" },
+          "select": { "product_nrs": ["P029"] },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "PIC-Q0", "units": 1 }
+        }
+      ]
+    },
+    {
+      "method_id": "screw_wood",
+      "rule_id": "PIC-M4",
+      "when": { "wall_in": ["wood"] },
+      "penetrates_wall": true,
+      "drilling": true,
+      "label": { "en": "Screw into the wood (pilot hole, no plug)", "de": "Ins Holz schrauben (vorbohren, ohne Dübel)" },
+      "roles": [
+        {
+          "role": "wood_screw",
+          "section": "materials",
+          "rule_ids": ["R-15", "R-04", "R-17", "SR-13"],
+          "comment": "Sheet Fixing chain, wood: screw in a pilot hole, no plug. Weight limit: wall_limits.wood (sheet System ratings).",
+          "label": { "en": "Screws", "de": "Schrauben" },
+          "select": {
+            "variant_groups": ["screw-d13"],
+            "wall_suitable": true,
+            "prefer": ["price_eur"]
+          },
+          "on_none": "stop",
+          "quantity": { "rule_id": "PIC-Q1", "units": { "var": "fixing_points" } }
+        },
+        {
+          "role": "pilot_bit", "ownable": true,
+          "section": "tools",
+          "rule_ids": ["R-05", "R-17"],
+          "label": { "en": "Wood drill bit (pilot hole)", "de": "Holzbohrer (Vorbohren)" },
+          "select": {
+            "variant_groups": ["wood-drill-bit-d13"],
+            "compatible_with_roles": ["wood_screw"],
+            "wall_suitable": true,
+            "prefer": ["price_eur"]
+          },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "PIC-Q0", "units": 1 }
+        },
+        {
+          "role": "drill", "ownable": true,
+          "section": "tools",
+          "rule_ids": ["R-09", "R-17"],
+          "label": { "en": "Drill", "de": "Bohrmaschine" },
+          "select": { "product_nrs": ["P039"] },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "PIC-Q0", "units": 1 }
+        },
+        {
+          "role": "screwdriver", "ownable": true,
+          "section": "tools",
+          "rule_ids": ["PIC-T1"],
+          "label": { "en": "Screwdriver", "de": "Schraubendreher" },
+          "select": { "product_nrs": ["P031"] },
+          "on_none": "unresolved",
+          "quantity": { "rule_id": "PIC-Q0", "units": 1 }
+        }
+      ]
     }
   ],
   "common_roles": [
@@ -258,6 +398,8 @@
   "rule_texts": {
     "PIC-M1": { "en": "Light pictures: nail-in picture hooks, if rated for the weight and the wall.", "de": "Leichte Bilder: Bilderhaken zum Einschlagen, wenn für Gewicht und Wand zugelassen." },
     "PIC-M2": { "en": "Otherwise: drill and use wall plugs rated for the weight and the wall.", "de": "Sonst: bohren und Dübel verwenden, die für Gewicht und Wand zugelassen sind." },
+    "PIC-M3": { "en": "Aerated concrete: aerated concrete plug rated for the weight, long screw; drill without hammer mode.", "de": "Porenbeton: Porenbetondübel, der für das Gewicht zugelassen ist, lange Schraube; ohne Schlag bohren." },
+    "PIC-M4": { "en": "Wood: screw directly into the wood with a pilot hole, no plug; max. 20 kg per picture.", "de": "Holz: direkt ins Holz schrauben, vorbohren, ohne Dübel; max. 20 kg je Bild." },
     "PIC-Q0": { "en": "1 per project", "de": "1 pro Projekt" },
     "PIC-Q1": { "en": "1 fixing per hanging point (pictures × points)", "de": "1 Befestigung je Aufhängepunkt (Bilder × Punkte)" },
     "PIC-T1": { "en": "Tool that fits the fixing", "de": "Werkzeug passend zur Befestigung" },

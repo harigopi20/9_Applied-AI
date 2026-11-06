@@ -201,8 +201,12 @@ no preview bar). **http://localhost:8000/app/?logic=old** still shows the previo
   shopping by aisle, save/share, facts with "Change", evidence log, back navigation).
 - Only *Hang a shelf*, *Hang a wall cabinet* and *Anchor a shelf to the wall (anti-tip)* use the
   new flow **wall → size → summary → plug options "max. X kg" → confirm**; the result is shown on
-  the normal list screen. *Hang a picture* keeps its weight question (D-2); painting and wallpaper
-  are unchanged.
+  the normal list screen. *Hang a picture* keeps its weight question (D-2) but offers the same wall
+  choices (concrete, solid brick, perforated / unknown brick, aerated concrete, plasterboard, wood,
+  I don't know): aerated concrete gets aerated-concrete plugs P213–P217 sized by the weight (their
+  ratings from sheet *System ratings*), long screw and drill bit from sheet *Fixing chain*, no
+  hammer mode; wood gets a screw in a pilot hole (no plug), max. 20 kg per picture. Painting and
+  wallpaper are unchanged.
 - **Used parts (C-7):** on the size screen, *Hang a shelf* and *Hang a wall cabinet* ask the same checklist
   as before ("Using an old board or brackets? / Used item? Tick any defect"). A ticked defect shows the
   warning "Please replace this part" on the list, and a used load-bearing part (board, bracket, rail,
@@ -387,9 +391,8 @@ usability test or by hand.
 Sample catalogue (288 products, data v3), invented prices, stock and aisle positions, 6 sample
 stores in a fictional partnership scenario (addresses and opening hours to be verified
 by the team), approximate PLZ distances, 9 project templates not yet reviewed by the team.
-Open points from the project catalogue: wall type "wood" and fixings for aerated
-concrete (D-5) are not built yet – the catalogue has no wood or aerated-concrete
-fixings; "estimate for me" exists
+Aerated concrete and wood are built for the shelf, wall cabinet, anti-tip (aerated only) and
+picture; the other projects still stop on aerated concrete (ST-02). "Estimate for me" exists
 only for the shelf (other projects: no team estimate rule yet); cavity anchors and anchor bolts are assumed to bring their
 own screw; the sliding-door plug (10 mm, 50 kg) limits the door to 40 kg although the
 catalogue allows 60 kg (every part must carry the whole load × 1.25, SR-04).

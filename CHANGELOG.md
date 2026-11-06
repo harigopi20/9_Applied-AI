@@ -6,6 +6,24 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-11-06 – Hang a picture: wall choices of the new logic, aerated concrete and wood supported.**
+  `app/data/templates/hang-picture.json` (v1.2.0): the wall question keeps the old pattern but shows the
+  same choices, order and wording as *Hang a shelf* / *Hang a wall cabinet* (incl. "Wood (solid or stud)").
+  The ST-02 stop for aerated concrete is removed; new method PIC-M3 (aerated concrete only): aerated
+  concrete plug P213–P217 rated for the weight × 1.25, long screw P228–P232, masonry bit of the plug
+  size, cordless drill (no hammer mode, sheet *Fixing chain*), dust mask. New method PIC-M4 (wood
+  only): screw P223 in a 3 mm pilot hole (P237), no plug, wall limit 20 kg per picture (System ratings
+  wood 6 mm 25 kg ÷ 1.25). Existing walls and methods unchanged. Data: `max_load_kg` of P213–P217 filled
+  with the aerated-concrete values of sheet *System ratings* (10 / 18 / 25 / 32 / 40 kg, sample values,
+  team to verify) in both workbooks and CSV exports – only these 5 cells changed. `app/rules.js`: a
+  method may have a `when` condition (fail safe: not met → method skipped), so the wood method is never
+  used for another wall. `app/app.js`: the wall in "Your details" uses the question's labels.
+  `app/i18n.js`: label for wall "wood". New test PRJ-03 / PIC-M3 / PIC-M4; 134 tests passing.
+  *Why:* the picture project still had the old wall list and stopped on aerated concrete although the
+  catalogue has aerated-concrete plugs. *Prompt (paraphrased):* "Keep the old question pattern for hang
+  a picture but update the wall types and the products so aerated concrete no longer stops; change
+  nothing else; local only, the team decides about main."
+
 ## Milestone: Header – team logo top left – 2026-11-06
 Summary (same as the pull request):
 - The team's Baumarkt-Buddy logo (house with hammer + "Baumarkt-Buddy") replaces the toolbox icon and the title box top left
