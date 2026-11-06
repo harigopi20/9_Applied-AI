@@ -13,6 +13,13 @@ Summary (same as the pull request):
 - `pitch/logo/`: Baumarkt-Buddy logo as SVG (outlined, no font needed) and transparent PNG – dark text, white text, icon only
 - README folder table explains how to open the deck; no app, data or test changes
 
+- **2026-11-06 – Merge conflict with PR 183 resolved.** `main` already had an older `pitch/index.html`
+  (PR 183, first upload of the deck). The branch was brought up to date with `main` and the final deck
+  from this branch was kept (it contains every later change: logo, cover image, QR zoom, Buddy box).
+  Both changelog milestones (pitch deck, header logo) kept. *Why:* PR 184 showed 33 conflicts that
+  could not be resolved in the GitHub editor. *Prompt (paraphrased):* "PR 183 conflicts with PR 184,
+  please help me resolve it."
+
 - **2026-11-06 – Baumarkt-Buddy logo files.** `pitch/logo/`: the logo used in the deck (house-and-hammer
   icon + "Baumarkt-Buddy" in Barlow Condensed Bold, "Buddy" in orange #FF7E21) as SVG with the letters
   converted to outlines, plus transparent PNGs (2000 px wide; icon 512 px). Variants: dark text for light
@@ -25,6 +32,22 @@ Summary (same as the pull request):
   diagram, the test report and the Git / change log backup slide. README folder table updated.
   *Why:* keep the final deck versioned next to the app it presents. *Prompt (paraphrased):* "Save the
   pitch in my forked repository under the folder pitch, with subfolders for images and media."
+## Milestone: Header – team logo top left – 2026-11-06
+Summary (same as the pull request):
+- The team's Baumarkt-Buddy logo (house with hammer + "Baumarkt-Buddy") replaces the toolbox icon and the title box top left
+- The logo sits on a dark rounded box so the white "Baumarkt" lettering and the orange mark stay visible on the orange band
+- The title text stays in the h1 for screen readers (still set per language); the trial build embeds the logo
+- 133 tests passing; test results saved
+
+- **2026-11-06 – Header: team logo top left.** New `app/img/logo.png` (cropped from the logo file the
+  team provided). `app/index.html`: the round toolbox mark and the white title box are replaced by the
+  logo image inside the `h1`; the title text moved into a visually hidden `#app-title` span so app.js
+  still sets it per language and screen readers read "Baumarkt-Buddy". `app/style.css`: dark box
+  (`--ink`, radius 10 px) around the 30 px high logo, the old `.brand-mark` rules removed.
+  `tools/build_trial.js`: header images are embedded as data URIs in the single trial file. README
+  "Look and feel" updated. Why: the team now has its own logo. Prompt (paraphrased): "Put the attached
+  logo top left in our app instead of the current one – show a screenshot first"; after two previews
+  the version with the full logo on a dark box was chosen.
 
 ## Milestone: Section bands – part count on the same line as the category name – 2026-11-05
 Summary (same as the pull request):

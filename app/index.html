@@ -14,12 +14,10 @@
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="app-header">
     <div class="brand">
-      <!-- Own neutral mark (toolbox line icon) – no logo or mascot of a real company -->
-      <span class="brand-mark" aria-hidden="true">
-        <svg class="icon" viewBox="0 0 24 24"><path class="icon-accent" d="M3 12h18v3H3z"/><path d="M3 9h18v10H3z"/><path d="M9 9V6.5A1.5 1.5 0 0 1 10.5 5h3A1.5 1.5 0 0 1 15 6.5V9"/><path d="M10 13.5h4"/></svg>
-      </span>
       <div class="brand-text">
-        <h1 id="app-title">Baumarkt-Buddy</h1>
+        <!-- Team logo (house + hammer, "Baumarkt-Buddy"); white lettering, so it sits on a dark box.
+             The title text stays in the h1 for screen readers and is set per language by app.js. -->
+        <h1 class="brand-logo"><img src="img/logo.png" alt="" width="960" height="146"><span id="app-title" class="sr-only">Baumarkt-Buddy</span></h1>
         <p id="app-tagline" class="tagline"></p>
         <span id="sample-badge" class="badge">Sample data</span>
       </div>

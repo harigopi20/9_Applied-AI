@@ -4,7 +4,7 @@
  *   node tools/build_trial.js            → trial/Baumarkt-Buddy-Trial.html
  *
  * The tester double-clicks the file. No server, no git, no install:
- * all scripts, styles, fonts and data files (workbook, templates, PLZ table)
+ * all scripts, styles, fonts, images and data files (workbook, templates, PLZ table)
  * are embedded, and fetch() of those files is answered from the embedded copy.
  * The D-13/D-14 preview is always on in this copy (no "?preview=d13" needed).
  * The normal app in app/ is not changed by this script.
@@ -63,6 +63,8 @@ let html = read(path.join(APP, "index.html"));
 html = html.replace(/\s*<meta http-equiv="Content-Security-Policy"[^>]*>/, "");
 html = html.replace(/<title>[^<]*<\/title>/, "<title>Baumarkt-Buddy – Trial</title>");
 html = html.replace('<link rel="stylesheet" href="style.css">', `<style>\n${css}\n</style>`);
+// Images (header logo) as data URIs.
+html = html.replace(/<img src="(img\/[^"]+\.png)"/g, (_, f) => `<img src="data:image/png;base64,${b64(path.join(APP, f))}"`);
 let first = true;
 html = html.replace(/<script src="([^"]+)"><\/script>/g, (_, src) => {
   let js = read(path.join(APP, src));
