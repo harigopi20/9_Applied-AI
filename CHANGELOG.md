@@ -6,6 +6,26 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Final pitch deck with videos, closing slide, contribution list and dial menu – 2026-11-06
+Summary (same as the pull request):
+- Two warm-up video slides before Key takeaways & lessons learned (Anthropic clip, quiet and repeating silently; Matrix meme)
+- Key takeaways: "Code is cheap; decisions are the real work" (human in the loop) replaces "One integrated app"; 4th lesson learned on consolidated issues and reviews
+- Closing slide "Project done. Thank you!" with the new picture and falling confetti; contribution list as the last slide
+- Chapter menu (M) as a dial in the centre of the screen, without times
+- Deck images and videos now in `pitch/img/` and `pitch/media/`, so the repository copy works on its own
+
+- **2026-11-06 – Pitch deck: final version with videos, closing slide, contribution list and dial menu.**
+  `pitch/index.html` replaced by the team's current local deck (30 slides). New: video slides "Key takeaways"
+  (`media/anthropic.mp4`, starts after 1 s at 8 % volume, then repeats muted) and "Lessons learned"
+  (`media/matrix.mp4`, loops), both without player controls so the built-in captions stay visible; Key takeaways
+  reworked (Rules first, then "Code is cheap; decisions are the real work", then 100 % traceable) and a 4th lesson
+  learned; closing slide with `img/project_done.webp` and confetti; contribution list (who did which roles and
+  slides, all contributed equally) as the last slide; the chapter menu is a dial with slide number and topic only.
+  The images and videos the deck uses are added under `pitch/img/` and `pitch/media/` (before, the repository
+  copy had none of them). README updated.
+  *Why:* final presentation on 7 Nov 2026. *Prompt (paraphrased):* "Add the video slides, the closing slide and
+  the contribution list, simplify the menu, then push the new slides with the image updates so I can open the PR."
+
 ## Milestone: Hang a picture – new wall choices, aerated concrete and wood – 2026-11-06
 Summary (same as the pull request):
 - Hang a picture keeps its question pattern but shows the same 7 wall choices as shelf / wall cabinet (incl. wood)
