@@ -369,7 +369,7 @@ usability test or by hand.
 | `test/` | Test case descriptions (current version: `01_test_cases.md`; older dated copies in `test/archive/`) and saved test results in `test/results/` |
 | `diagrams/` | Architecture and planning diagrams |
 | `docs/` | Research documents: [competitor analysis](docs/competitor-analysis.md), [risk analysis](docs/risk-analysis.md) |
-| `pitch/` | Final pitch deck: open `pitch/index.html` in a browser (arrow keys or Next to move, M = menu, F = fullscreen). Pictures in `pitch/img/`, narrator videos in `pitch/media/`. The live demo slide shows the released app and needs internet |
+| `pitch/` | Final pitch deck: open `pitch/index.html` in a browser (arrow keys or Next to move, M = menu, F = fullscreen). Pictures in `pitch/img/`, narrator videos in `pitch/media/`. Logo files (SVG and transparent PNG) in `pitch/logo/`. The live demo slide shows the released app and needs internet |
 
 ## Team
 | Role | Member |

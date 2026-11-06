@@ -10,8 +10,15 @@ when they are released to `main`.
 Summary (same as the pull request):
 - `pitch/index.html`: the final pitch deck (26 slides), incl. live demo slide, sequence diagram, test report and Git / change log slide
 - `pitch/img/` (12 pictures) and `pitch/media/` (4 narrator videos), same structure as the team's local pitch folder
+- `pitch/logo/`: Baumarkt-Buddy logo as SVG (outlined, no font needed) and transparent PNG – dark text, white text, icon only
 - README folder table explains how to open the deck; no app, data or test changes
 
+- **2026-11-06 – Baumarkt-Buddy logo files.** `pitch/logo/`: the logo used in the deck (house-and-hammer
+  icon + "Baumarkt-Buddy" in Barlow Condensed Bold, "Buddy" in orange #FF7E21) as SVG with the letters
+  converted to outlines, plus transparent PNGs (2000 px wide; icon 512 px). Variants: dark text for light
+  backgrounds, white text for dark backgrounds, icon only.
+  *Why:* hand the logo to the team as files. *Prompt (paraphrased):* "Create the Baumarkt-Buddy logo so I
+  can give it to my colleague."
 - **2026-11-06 – Final pitch deck added to the repository.** `pitch/index.html` (26 slides) with its
   pictures in `pitch/img/` and narrator videos in `pitch/media/`, copied unchanged from the team's local
   pitch folder. Includes the live demo slide (released app inside the slide), the D-13 / D-14 sequence
