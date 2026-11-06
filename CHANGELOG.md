@@ -6,6 +6,13 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-11-06 – Final pitch deck added to the repository.** `pitch/index.html` (26 slides) with its
+  pictures in `pitch/img/` and narrator videos in `pitch/media/`, copied unchanged from the team's local
+  pitch folder. Includes the live demo slide (released app inside the slide), the D-13 / D-14 sequence
+  diagram, the test report and the Git / change log backup slide. README folder table updated.
+  *Why:* keep the final deck versioned next to the app it presents. *Prompt (paraphrased):* "Save the
+  pitch in my forked repository under the folder pitch, with subfolders for images and media."
+
 ## Milestone: Section bands – part count on the same line as the category name – 2026-11-05
 Summary (same as the pull request):
 - In the dark section bands the part count ("2 parts" / "2 Teile") now sits on the same baseline as the category name
