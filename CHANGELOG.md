@@ -6,6 +6,17 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Closing slide animation – 2026-11-06
+Summary (same as the pull request):
+- New `pitch/closing-animation.mp4`: Josie and Andrea (persona photos) celebrate their finished projects – "Shelf hung", "Wall painted", confetti, "Project done. Thank you!"
+- 1920 × 1080, 30 fps, 24 s, loops seamlessly every 8 s; deck colours and fonts
+- README folder table mentions the video
+
+- **2026-11-06 – Closing slide animation.** Added `pitch/closing-animation.mp4` for the
+  last slide of the pitch, using the persona photos from the Target users slide.
+  *Why:* the team wants a joyful closing slide showing the personas after their project.
+  *Prompt:* "Make an animated video of our personas dancing with joy … use it as the closing slide … push this in Git."
+
 ## Milestone: Hang a picture – new wall choices, aerated concrete and wood – 2026-11-06
 Summary (same as the pull request):
 - Hang a picture keeps its question pattern but shows the same 7 wall choices as shelf / wall cabinet (incl. wood)
