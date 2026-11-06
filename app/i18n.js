@@ -106,6 +106,7 @@
       wall_brick: "Brick, type unknown / perforated",
       wall_aerated_concrete: "Aerated concrete (e.g. Ytong)",
       wall_plasterboard: "Plasterboard (drywall)",
+      wall_wood: "Wood (solid or stud)",
       wall_unknown: "I don't know",
 
       // Facts summary (SR-01, SR-08)
@@ -390,6 +391,7 @@
       wall_brick: "Ziegel, Art unbekannt / Hochlochziegel",
       wall_aerated_concrete: "Porenbeton (z. B. Ytong)",
       wall_plasterboard: "Gipskarton (Trockenbau)",
+      wall_wood: "Holz (massiv oder Ständer)",
       wall_unknown: "Weiß ich nicht",
 
       facts_title: "Ihre Angaben",

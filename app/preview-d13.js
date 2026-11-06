@@ -78,6 +78,7 @@
       confirm_antitip: "I fix it to the top or side panel – never to the thin back panel.",
       safety_incl: "Safety factor {f} already included.",
       glass_hint: "Glass doors or a stone top? Please ask a store associate.",
+      wall_help: "If you are not sure, choose \"I don't know\". We will not guess.",
       stop_title: "Please ask a store associate", stop_unknown_wall: "Without the wall type no plug can be chosen safely.",
       stop_cabinet_heavy: "Your cabinet weighs about {w} kg. For safety, the wall fixing must hold 1.5 × that = {need} kg, but this wall holds max. {best} kg (strongest plug).",
       stop_cabinet_heavy_weighed: "You weighed your cabinet at {w} kg. For safety, the wall fixing must hold 1.5 × that = {need} kg, but this wall holds max. {best} kg (strongest plug).",
@@ -132,6 +133,7 @@
       confirm_antitip: "Ich befestige an der oberen oder seitlichen Platte – nie an der dünnen Rückwand.",
       safety_incl: "Sicherheitsfaktor {f} ist schon eingerechnet.",
       glass_hint: "Glastüren oder Steinplatte? Bitte frag eine Fachberatung im Markt.",
+      wall_help: "Wenn du unsicher bist, wähle „Weiß ich nicht“. Wir raten nicht.",
       stop_title: "Bitte frag eine Fachberatung im Markt", stop_unknown_wall: "Ohne die Wandart kann kein Dübel sicher gewählt werden.",
       stop_cabinet_heavy: "Dein Schrank wiegt etwa {w} kg. Zur Sicherheit muss die Befestigung das 1,5-fache halten = {need} kg, diese Wand trägt aber max. {best} kg (stärkster Dübel).",
       stop_cabinet_heavy_weighed: "Du hast deinen Schrank mit {w} kg gewogen. Zur Sicherheit muss die Befestigung das 1,5-fache halten = {need} kg, diese Wand trägt aber max. {best} kg (stärkster Dübel).",
@@ -555,6 +557,7 @@
     return card("question", [
       X.el("p", { class: "muted small", text: tr("step_of", { p: title(), n: 1 }) }),
       X.el("h2", { id: "pv-q", text: tr("wall_q") }),
+      X.el("p", { class: "muted", id: "pv-wall-help", text: tr("wall_help") }),
       group, err,
       X.el("div", { class: "actions" }, [btn(tr("next"), () => {
         if (!selected) { err.textContent = tr("choose_wall"); return; }
@@ -850,6 +853,18 @@
   }
 
   function viewStop() {
+    // "I don't know" the wall: the same R-01 stop as in the other projects (e.g. Hang a picture), texts of app i18n.
+    if (pv.wall === "unknown") {
+      const t = root.BBI18n.t;
+      return X.el("section", { class: "card stop", role: "alert", "data-preview-screen": "pv_stop", "data-state": "safety_blocked", "data-reason": "fact_unknown" }, [
+        X.el("h2", { text: t("stop_title") }),
+        X.el("p", { class: "stop-main", "data-pv-stop": "unknown_wall", text: t("stop_fact_unknown", { facts: t("fact_wall_type") }) }),
+        X.el("p", { text: t("stop_fact_unknown_help") }),
+        X.el("p", { class: "strong", "data-handoff": "default", text: t("stop_professional") }),
+        X.el("p", { class: "muted small", text: t("rule") + ": R-01" }),
+        X.el("div", { class: "actions" }, [btn(tr("start_over"), () => X.resetProject(), "primary")])
+      ]);
+    }
     let text = tr("stop_unknown_wall");
     const p = pv.plan;
     if (pv.wall !== "unknown" && pv.project === "cabinet" && p) {
