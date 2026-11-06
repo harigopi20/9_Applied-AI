@@ -6,6 +6,12 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Final pitch deck in the repository – 2026-11-06
+Summary (same as the pull request):
+- `pitch/index.html`: the final pitch deck (26 slides), incl. live demo slide, sequence diagram, test report and Git / change log slide
+- `pitch/img/` (12 pictures) and `pitch/media/` (4 narrator videos), same structure as the team's local pitch folder
+- README folder table explains how to open the deck; no app, data or test changes
+
 - **2026-11-06 – Final pitch deck added to the repository.** `pitch/index.html` (26 slides) with its
   pictures in `pitch/img/` and narrator videos in `pitch/media/`, copied unchanged from the team's local
   pitch folder. Includes the live demo slide (released app inside the slide), the D-13 / D-14 sequence
