@@ -6,6 +6,15 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Hang a picture – new wall choices, aerated concrete and wood – 2026-11-06
+Summary (same as the pull request):
+- Hang a picture keeps its question pattern but shows the same 7 wall choices as shelf / wall cabinet (incl. wood)
+- Aerated concrete no longer stops (ST-02 removed for pictures): aerated-concrete plug P213–P217 sized by weight, long screw, drill bit, cordless drill, dust mask
+- Wood: screw in a pilot hole, no plug, max. 20 kg per picture
+- Data: max_load_kg of P213–P217 = sheet System ratings (sample values, team to verify) – only these 5 cells changed
+- Rules engine: a method can be limited to some walls (`when`, fail safe); summary shows the question's wall label
+- New test PRJ-03 / PIC-M3 / PIC-M4; 134 tests passing; test results saved
+
 - **2026-11-06 – Hang a picture: wall choices of the new logic, aerated concrete and wood supported.**
   `app/data/templates/hang-picture.json` (v1.2.0): the wall question keeps the old pattern but shows the
   same choices, order and wording as *Hang a shelf* / *Hang a wall cabinet* (incl. "Wood (solid or stud)").
