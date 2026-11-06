@@ -914,7 +914,7 @@
       if (!v.length) return f && f.none_label ? pick(f.none_label) : "–";
       return v.map((o) => (f ? optionLabel(f, o) : String(o))).join(", ");
     }
-    if (key === "wall_type") return t("wall_" + v);
+    if (key === "wall_type") return f && f.option_labels && f.option_labels[v] ? pick(f.option_labels[v]) : t("wall_" + v);
     if (key === "load_kg" && v === R.UNKNOWN_VALUE) return t("load_unknown_worst");
     if (v === R.UNKNOWN_VALUE) return t("dont_know");
     if (key === "load_kg" && String(fact.source || "").includes(":estimate:")) return v + " kg (" + t("qty_estimate") + ")";

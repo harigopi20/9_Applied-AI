@@ -1791,6 +1791,29 @@
     eq(stopOf(sh({ shelf_length_cm: 130, shelf_layout: "single" })), "ST-04");
   });
 
+  test("PRJ-03 / PIC-M3 / PIC-M4", "Picture: same wall choices as shelf; aerated concrete → aerated plugs sized by weight; wood → screw with pilot hole, max. 20 kg", () => {
+    const q = PIC().questions.find((x) => x.fact === "wall_type");
+    eq(q.options, ["concrete", "solid_brick", "brick", "aerated_concrete", "plasterboard", "wood", "unknown"]);
+    const pic = (wall, kg) => run(PIC(), confirmed({ wall_type: wall, load_kg: kg, picture_count: 2, points_per_picture: 2 }));
+    // Aerated concrete: no ST-02 stop any more; plug size follows the weight (ratings of sheet System ratings)
+    const a = pic("aerated_concrete", 5);
+    eq([a.state, a.method.method_id], ["validated", "drill_aerated"]);
+    eq(nrs(a).filter((x) => !/^(detector|spirit_level|tape_measure|safety_glasses):/.test(x)),
+      ["aerated_plug:P213", "aerated_screw:P228", "drill_bit:P035", "drill:P039", "screwdriver:P031", "dust_mask:P029"]);
+    eq(item(a, "aerated_plug").quantity.units, 4, "1 plug per hanging point");
+    eq(item(pic("aerated_concrete", 12), "aerated_plug").product.product_nr, "P214", "12 kg × 1.25 = 15 kg → 8 mm plug (18 kg)");
+    eq(item(pic("aerated_concrete", 12), "drill_bit").product.product_nr, "P036", "drill bit follows the plug size");
+    eq(pic("aerated_concrete", 25).state, "validated", "25 kg (template max.) → 12 mm plug, 32 kg");
+    // Wood: screw in a pilot hole, no plug; above 20 kg per picture → wall limit
+    const w = pic("wood", 5);
+    eq([w.state, w.method.method_id], ["validated", "screw_wood"]);
+    eq(["wood_screw", "pilot_bit", "drill"].map((r) => item(w, r).product.product_nr), ["P223", "P237", "P039"]);
+    eq(pic("wood", 21).blocked.rule_id, "SR-13");
+    // The new methods are never used for other walls (method "when"): heavy picture on concrete stays blocked
+    eq(pic("concrete", 25).blocked.reason, "no_suitable_system");
+    eq(pic("brick", 3).method.method_id, "hook", "existing walls unchanged");
+  });
+
   test("FR-02 / FR-03 (catalogue)", "Keywords find the new projects and wall types (EN + DE); 'solid brick' wins over 'brick'", () => {
     const u = (txt) => window.BBAI.templateUnderstand(txt, D.lexicon, IDS());
     eq(u("Ich will mein Wohnzimmer streichen").intent, "paint_wall");

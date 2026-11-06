@@ -744,6 +744,12 @@
     for (const method of template.methods) {
       ctx.resolved = {};
       ctx.vars = {};
+      // A method can be limited to some answers, e.g. "only for aerated concrete" (PIC-M3).
+      // Fail safe: a condition that is not met or cannot be evaluated skips the method.
+      if (method.when && !conditionMet(method, ctx)) {
+        log(ctx, method.rule_id, "method " + method.method_id, "not for these answers", tplSource);
+        continue;
+      }
       const items = [];
       let failed = null;
       let customerMismatch = false; // an override that does not fit (RB-03)

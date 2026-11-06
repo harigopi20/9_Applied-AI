@@ -32,6 +32,50 @@ Summary (same as the pull request):
   diagram, the test report and the Git / change log backup slide. README folder table updated.
   *Why:* keep the final deck versioned next to the app it presents. *Prompt (paraphrased):* "Save the
   pitch in my forked repository under the folder pitch, with subfolders for images and media."
+## Milestone: Hang a picture – new wall choices, aerated concrete and wood – 2026-11-06
+Summary (same as the pull request):
+- Hang a picture keeps its question pattern but shows the same 7 wall choices as shelf / wall cabinet (incl. wood)
+- Aerated concrete no longer stops (ST-02 removed for pictures): aerated-concrete plug P213–P217 sized by weight, long screw, drill bit, cordless drill, dust mask
+- Wood: screw in a pilot hole, no plug, max. 20 kg per picture
+- Data: max_load_kg of P213–P217 = sheet System ratings (sample values, team to verify) – only these 5 cells changed
+- Rules engine: a method can be limited to some walls (`when`, fail safe); summary shows the question's wall label
+- Shelf, wall cabinet and anti-tip: hint "If you are not sure, choose 'I don't know'. We will not guess." under the wall question; "I don't know" stops with the same R-01 safety message as Hang a picture
+- Hang a picture: the wall hint no longer says "Aerated concrete is often called Ytong" (same hint as the other 3 mounting projects)
+- New test PRJ-03 / PIC-M3 / PIC-M4; 134 tests passing; test results saved
+
+- **2026-11-06 – Hang a picture: same wall hint as the other mounting projects.** `app/data/templates/hang-picture.json`:
+  the sentence "Aerated concrete is often called Ytong." / "Porenbeton heißt oft Ytong." is removed from the wall
+  question's help, so it reads like shelf, wall cabinet and anti-tip. *Why / prompt (paraphrased):* "Remove 'Aerated
+  concrete is often called Ytong' so the wall selection looks the same as the other 3 mounting projects; show it first,
+  then push."
+
+- **2026-11-06 – Unknown wall: same safety stop and hint in shelf, wall cabinet and anti-tip.** `app/preview-d13.js`:
+  the wall question of the D-13 / D-14 flow shows the hint "If you are not sure, choose 'I don't know'. We will
+  not guess." (DE: "Wenn du unsicher bist, wähle „Weiß ich nicht“. Wir raten nicht."); "I don't know" now shows
+  the stop of the other projects ("We stop here – for your safety", "We need to know Wall …", how to find
+  out, ask a store associate, Rule R-01) instead of the short text "Without the wall type no plug can be chosen
+  safely". Texts come from `app/i18n.js` (same as Hang a picture). Nothing else changed. *Why:* the stop and the
+  hint were only shown in Hang a picture. *Prompt (paraphrased):* "Use the 'I don't know' error message of hang a
+  picture for the other 3 mounting projects and show the 'not sure' hint at the wall question; push to my fork."
+
+- **2026-11-06 – Hang a picture: wall choices of the new logic, aerated concrete and wood supported.**
+  `app/data/templates/hang-picture.json` (v1.2.0): the wall question keeps the old pattern but shows the
+  same choices, order and wording as *Hang a shelf* / *Hang a wall cabinet* (incl. "Wood (solid or stud)").
+  The ST-02 stop for aerated concrete is removed; new method PIC-M3 (aerated concrete only): aerated
+  concrete plug P213–P217 rated for the weight × 1.25, long screw P228–P232, masonry bit of the plug
+  size, cordless drill (no hammer mode, sheet *Fixing chain*), dust mask. New method PIC-M4 (wood
+  only): screw P223 in a 3 mm pilot hole (P237), no plug, wall limit 20 kg per picture (System ratings
+  wood 6 mm 25 kg ÷ 1.25). Existing walls and methods unchanged. Data: `max_load_kg` of P213–P217 filled
+  with the aerated-concrete values of sheet *System ratings* (10 / 18 / 25 / 32 / 40 kg, sample values,
+  team to verify) in both workbooks and CSV exports – only these 5 cells changed. `app/rules.js`: a
+  method may have a `when` condition (fail safe: not met → method skipped), so the wood method is never
+  used for another wall. `app/app.js`: the wall in "Your details" uses the question's labels.
+  `app/i18n.js`: label for wall "wood". New test PRJ-03 / PIC-M3 / PIC-M4; 134 tests passing.
+  *Why:* the picture project still had the old wall list and stopped on aerated concrete although the
+  catalogue has aerated-concrete plugs. *Prompt (paraphrased):* "Keep the old question pattern for hang
+  a picture but update the wall types and the products so aerated concrete no longer stops; change
+  nothing else; local only, the team decides about main."
+
 ## Milestone: Header – team logo top left – 2026-11-06
 Summary (same as the pull request):
 - The team's Baumarkt-Buddy logo (house with hammer + "Baumarkt-Buddy") replaces the toolbox icon and the title box top left
