@@ -6,6 +6,23 @@ when they are released to `main`.
 
 ## Unreleased
 
+## Milestone: Header – team logo top left – 2026-11-06
+Summary (same as the pull request):
+- The team's Baumarkt-Buddy logo (house with hammer + "Baumarkt-Buddy") replaces the toolbox icon and the title box top left
+- The logo sits on a dark rounded box so the white "Baumarkt" lettering and the orange mark stay visible on the orange band
+- The title text stays in the h1 for screen readers (still set per language); the trial build embeds the logo
+- 133 tests passing; test results saved
+
+- **2026-11-06 – Header: team logo top left.** New `app/img/logo.png` (cropped from the logo file the
+  team provided). `app/index.html`: the round toolbox mark and the white title box are replaced by the
+  logo image inside the `h1`; the title text moved into a visually hidden `#app-title` span so app.js
+  still sets it per language and screen readers read "Baumarkt-Buddy". `app/style.css`: dark box
+  (`--ink`, radius 10 px) around the 30 px high logo, the old `.brand-mark` rules removed.
+  `tools/build_trial.js`: header images are embedded as data URIs in the single trial file. README
+  "Look and feel" updated. Why: the team now has its own logo. Prompt (paraphrased): "Put the attached
+  logo top left in our app instead of the current one – show a screenshot first"; after two previews
+  the version with the full logo on a dark box was chosen.
+
 ## Milestone: Section bands – part count on the same line as the category name – 2026-11-05
 Summary (same as the pull request):
 - In the dark section bands the part count ("2 parts" / "2 Teile") now sits on the same baseline as the category name
