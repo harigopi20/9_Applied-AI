@@ -201,6 +201,8 @@ no preview bar). **http://localhost:8000/app/?logic=old** still shows the previo
   shopping by aisle, save/share, facts with "Change", evidence log, back navigation).
 - Only *Hang a shelf*, *Hang a wall cabinet* and *Anchor a shelf to the wall (anti-tip)* use the
   new flow **wall → size → summary → plug options "max. X kg" → confirm**; the result is shown on
+  ("I don't know" as wall shows the hint *If you are not sure, choose "I don't know". We will not
+  guess.* and stops with the same R-01 safety message as *Hang a picture*)
   the normal list screen. *Hang a picture* keeps its weight question (D-2) but offers the same wall
   choices (concrete, solid brick, perforated / unknown brick, aerated concrete, plasterboard, wood,
   I don't know): aerated concrete gets aerated-concrete plugs P213–P217 sized by the weight (their

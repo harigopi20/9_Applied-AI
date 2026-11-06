@@ -13,7 +13,17 @@ Summary (same as the pull request):
 - Wood: screw in a pilot hole, no plug, max. 20 kg per picture
 - Data: max_load_kg of P213–P217 = sheet System ratings (sample values, team to verify) – only these 5 cells changed
 - Rules engine: a method can be limited to some walls (`when`, fail safe); summary shows the question's wall label
+- Shelf, wall cabinet and anti-tip: hint "If you are not sure, choose 'I don't know'. We will not guess." under the wall question; "I don't know" stops with the same R-01 safety message as Hang a picture
 - New test PRJ-03 / PIC-M3 / PIC-M4; 134 tests passing; test results saved
+
+- **2026-11-06 – Unknown wall: same safety stop and hint in shelf, wall cabinet and anti-tip.** `app/preview-d13.js`:
+  the wall question of the D-13 / D-14 flow shows the hint "If you are not sure, choose 'I don't know'. We will
+  not guess." (DE: "Wenn du unsicher bist, wähle „Weiß ich nicht“. Wir raten nicht."); "I don't know" now shows
+  the stop of the other projects ("We stop here – for your safety", "We need to know Wall …", how to find
+  out, ask a store associate, Rule R-01) instead of the short text "Without the wall type no plug can be chosen
+  safely". Texts come from `app/i18n.js` (same as Hang a picture). Nothing else changed. *Why:* the stop and the
+  hint were only shown in Hang a picture. *Prompt (paraphrased):* "Use the 'I don't know' error message of hang a
+  picture for the other 3 mounting projects and show the 'not sure' hint at the wall question; push to my fork."
 
 - **2026-11-06 – Hang a picture: wall choices of the new logic, aerated concrete and wood supported.**
   `app/data/templates/hang-picture.json` (v1.2.0): the wall question keeps the old pattern but shows the
