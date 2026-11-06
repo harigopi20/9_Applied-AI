@@ -14,7 +14,14 @@ Summary (same as the pull request):
 - Data: max_load_kg of P213–P217 = sheet System ratings (sample values, team to verify) – only these 5 cells changed
 - Rules engine: a method can be limited to some walls (`when`, fail safe); summary shows the question's wall label
 - Shelf, wall cabinet and anti-tip: hint "If you are not sure, choose 'I don't know'. We will not guess." under the wall question; "I don't know" stops with the same R-01 safety message as Hang a picture
+- Hang a picture: the wall hint no longer says "Aerated concrete is often called Ytong" (same hint as the other 3 mounting projects)
 - New test PRJ-03 / PIC-M3 / PIC-M4; 134 tests passing; test results saved
+
+- **2026-11-06 – Hang a picture: same wall hint as the other mounting projects.** `app/data/templates/hang-picture.json`:
+  the sentence "Aerated concrete is often called Ytong." / "Porenbeton heißt oft Ytong." is removed from the wall
+  question's help, so it reads like shelf, wall cabinet and anti-tip. *Why / prompt (paraphrased):* "Remove 'Aerated
+  concrete is often called Ytong' so the wall selection looks the same as the other 3 mounting projects; show it first,
+  then push."
 
 - **2026-11-06 – Unknown wall: same safety stop and hint in shelf, wall cabinet and anti-tip.** `app/preview-d13.js`:
   the wall question of the D-13 / D-14 flow shows the hint "If you are not sure, choose 'I don't know'. We will

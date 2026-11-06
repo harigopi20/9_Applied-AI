@@ -47,8 +47,8 @@
       },
       "text": { "en": "What is the wall made of?", "de": "Woraus besteht die Wand?" },
       "help": {
-        "en": "If you are not sure, choose \"I don't know\". We will not guess. Aerated concrete is often called Ytong.",
-        "de": "Wenn Sie unsicher sind, wählen Sie „Weiß ich nicht“. Wir raten nicht. Porenbeton heißt oft Ytong."
+        "en": "If you are not sure, choose \"I don't know\". We will not guess.",
+        "de": "Wenn Sie unsicher sind, wählen Sie „Weiß ich nicht“. Wir raten nicht."
       }
     },
     {
