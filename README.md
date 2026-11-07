@@ -375,7 +375,7 @@ usability test or by hand.
 | `test/` | Test case descriptions (current version: `01_test_cases.md`; older dated copies in `test/archive/`) and saved test results in `test/results/` |
 | `diagrams/` | Architecture and planning diagrams |
 | `docs/` | Research documents: [competitor analysis](docs/competitor-analysis.md), [risk analysis](docs/risk-analysis.md) |
-| `pitch/` | Pitch deck |
+| `pitch/` | Pitch deck; `closing-animation.mp4` = closing slide video (personas celebrating, 24 s loop) |
 
 ## Team
 | Role | Member |
