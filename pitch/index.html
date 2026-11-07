@@ -60,7 +60,7 @@ p{margin:0}
 
 /* title */
 .title h1{font-size:88.8px;letter-spacing:-.01em}
-.title h1 em{font-style:normal;background:var(--signal);color:var(--signal-ink);padding:0 .12em}
+.title h1 em{font-style:normal;background:var(--signal);color:var(--signal-ink);padding:0 .12em;display:inline-block;line-height:.84;padding-top:0;padding-bottom:.285em}
 .hook{font-family:var(--f-display);font-size:26.4px;font-weight:500;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:var(--f-mono);font-size:13px;color:var(--muted)}
 .ruler{height:14px;background:repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 10px),
@@ -730,17 +730,151 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 /* slide 10: highlighted block headings */
 .box>.kicker.hd{font-family:var(--f-display);font-size:20px;font-weight:700;letter-spacing:.02em;text-transform:none;color:var(--ink);border-bottom:3px solid var(--signal);padding-bottom:4px;margin-bottom:4px;align-self:flex-start}
 /* Q&A: QR code appears 2 s after the slide opens */
-@keyframes qrIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+@keyframes qrIn{from{opacity:0;scale:.2}to{opacity:1;scale:1}}
 .slide.has-qr .qa-qr{opacity:0}
-.slide.has-qr.on .qa-qr{animation:qrIn .6s ease 2s forwards}
+.slide.has-qr.on .qa-qr{animation:qrIn .6s cubic-bezier(.2,.9,.3,1.15) .4s forwards}
+/* title: faded background image behind the original title */
+.slide.cover{position:relative;overflow:hidden;isolation:isolate}
+.cover-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:-1;pointer-events:none;
+  opacity:.28;-webkit-mask-image:linear-gradient(90deg,transparent 0%,transparent 34%,#000 80%);mask-image:linear-gradient(90deg,transparent 0%,transparent 34%,#000 80%)}
+.slide.cover>.shead,.slide.cover>.sbody{position:relative}
+/* logo top right on every slide */
+.bb-logo{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-family:var(--f-display);font-weight:700;font-size:25px;letter-spacing:0;color:var(--ink);white-space:nowrap;line-height:1}
+.bb-logo svg{width:32px;height:32px;flex:none}
+.bb-logo b{color:var(--signal);font-weight:700}
+.bb-logo+.narr{margin-left:14px}
+.has-qr .shead{position:relative;z-index:1}
+/* slide 5: the logo in the phone header */
+.ph-top .ph-logo{display:inline-flex;align-items:center;gap:3px;background:var(--panel);padding:2px 5px 2px 3px;border-radius:3px;font-family:var(--f-display);font-weight:700;font-size:10px;line-height:1;color:var(--ink)}
+.ph-top .ph-logo svg{width:11px;height:11px;flex:none}
+.ph-top .ph-logo b{color:var(--signal);font-weight:700}
+.ph-top .ph-logo span{background:none;padding:0;border-radius:0;color:inherit;font:inherit}
+
+
+/* video slides (Key takeaways / Lessons learned warm-ups): the clip at its own size with its captions, plays when the slide opens */
+.vs-g{flex:1;min-height:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:center}
+.vs-frame{background:#000;border-radius:18px;padding:8px;box-shadow:0 14px 34px rgba(0,0,0,.25);transform:rotate(-1.5deg)}
+.vs-frame video{cursor:pointer;display:block;height:400px;width:auto;max-width:480px;object-fit:contain;border-radius:12px;background:#000}
+.vs-side{display:flex;flex-direction:column;gap:12px}
+.vs-vs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch}
+.vs-vs>div{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.vs-vs>b{align-self:center;font-family:var(--f-display);font-size:22px;color:var(--signal)}
+.vs-vs strong,.vs-card strong{display:block;font-family:var(--f-display);font-size:19px;line-height:1.1;margin-bottom:4px}
+.vs-vs p,.vs-card p{font-size:14px;color:var(--muted)}
+.vs-card{background:var(--bg);border:1px solid var(--line);border-left:4px solid var(--signal);border-radius:6px;padding:12px 14px}
+.vs-card.go{border-left-color:var(--go)}
+.vs-think{border:2px dashed var(--signal);border-radius:10px;padding:12px 16px;background:color-mix(in srgb,var(--signal) 8%,transparent)}
+.vs-think .kicker{color:var(--signal)}
+.vs-think p{font-family:var(--f-display);font-size:20px;line-height:1.15;margin-top:4px}
+.vs-emoji{font-size:22px;margin-right:6px}
+@media (prefers-reduced-motion:no-preference){.vslide.on .vs-frame{animation:vsIn .6s cubic-bezier(.2,.9,.3,1.2) both}.vslide.on .vs-side>*{animation:celeUp .5s ease-out both}
+  .vslide.on .vs-side>:nth-child(2){animation-delay:.15s}.vslide.on .vs-side>:nth-child(3){animation-delay:.3s}.vslide.on .vs-side>:nth-child(4){animation-delay:.45s}}
+@keyframes vsIn{from{opacity:0;transform:translateY(20px) rotate(-6deg)}to{opacity:1;transform:rotate(-1.5deg)}}
+/* closing celebration slide: Josie and Andrea, projects done */
+.slide.cele{position:relative;overflow:hidden;isolation:isolate}
+.cele .cover-img{opacity:.14;filter:blur(6px) saturate(1.1);-webkit-mask-image:none;mask-image:none}
+.cele::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(120% 90% at 50% 100%,color-mix(in srgb,var(--signal) 22%,transparent),transparent 60%)}
+.cele .shead{position:relative;z-index:2}
+.cele-stage{position:relative;flex:1;min-height:0;display:grid;grid-template-columns:300px 1fr 300px;align-items:center;gap:22px;padding:0 20px 10px}
+.cele-p{margin:0;position:relative;z-index:1;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 10px 12px;box-shadow:0 14px 34px rgba(0,0,0,.18)}
+.cele-p.p1{transform:rotate(-3deg)}.cele-p.p2{transform:rotate(3deg)}
+.cele-scene{position:relative;height:330px;border-radius:10px;overflow:hidden}
+.cele-scene>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cele-scene>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.cele-face{position:absolute;bottom:-6px;width:150px;height:170px;border-radius:50% 50% 12px 12px;overflow:hidden;border:4px solid var(--panel);box-shadow:0 8px 20px rgba(0,0,0,.28);background:var(--panel)}
+.cele-face img{width:100%;height:100%;object-fit:cover;display:block}
+.p1 .cele-face{right:10px}.p1 .cele-face img{object-position:58% 20%;transform:scale(1.55);transform-origin:58% 26%}
+.p2 .cele-face{left:10px}.p2 .cele-face img{object-position:62% 12%;transform:scale(1.7);transform-origin:64% 22%}
+.cele-bubble{position:absolute;background:#fff;color:#1d2328;font-family:var(--f-display);font-weight:700;font-size:16px;padding:6px 12px;border-radius:14px;box-shadow:0 6px 14px rgba(0,0,0,.18)}
+.p1 .cele-bubble{right:118px;bottom:150px;border-bottom-right-radius:2px}
+.p2 .cele-bubble{left:118px;bottom:150px;border-bottom-left-radius:2px}
+.cele-p figcaption{display:flex;align-items:center;gap:10px;margin-top:10px;font-family:var(--f-display);font-weight:700;font-size:22px;line-height:1.05}
+.cele-p figcaption small{display:block;font-family:inherit;font-weight:500;font-size:13px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.cele-tick{flex:none;width:38px;height:38px;border-radius:50%;background:var(--go);color:#fff;display:grid;place-items:center;font-size:22px;box-shadow:0 0 0 4px color-mix(in srgb,var(--go) 25%,transparent)}
+.cele-mid{text-align:center;position:relative;z-index:1}
+.cele-mid h1{font-size:58px;line-height:.98;margin:6px 0 12px}
+.cele-mid h1 em{display:block;color:var(--signal);font-style:normal}
+.cele-mid .lead{font-size:17px;max-width:360px;margin:0 auto}
+.cele-list{display:inline-flex;flex-direction:column;gap:6px;margin-top:16px;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 16px;font-size:15px}
+.cele-list span::before{content:"✓";color:var(--go);font-weight:700;margin-right:8px}
+.cele-conf{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+.cele-conf i{position:absolute;top:-24px;left:var(--x);width:var(--w);height:calc(var(--w)*1.6);background:var(--c);border-radius:2px;opacity:0}
+.cele-conf i.r{border-radius:50%;height:var(--w)}
+@media (prefers-reduced-motion:no-preference){
+  .cele.on .cover-img{animation:celeZoom 12s ease-out both}
+  .cele.on .cele-p.p1{animation:celeInL .8s cubic-bezier(.2,.9,.3,1.2) .2s both}
+  .cele.on .cele-p.p2{animation:celeInR .8s cubic-bezier(.2,.9,.3,1.2) .5s both}
+  .cele.on .cele-scene>svg,.cele.on .cele-scene>img{animation:celeZoom 9s ease-out 1s both}
+  .cele.on .cele-bubble{animation:celePop .5s cubic-bezier(.2,.9,.3,1.4) both}
+  .cele.on .p1 .cele-bubble{animation-delay:1.3s}.cele.on .p2 .cele-bubble{animation-delay:1.6s}
+  .cele.on .cele-p figcaption{animation:celePop .5s cubic-bezier(.2,.9,.3,1.4) both}
+  .cele.on .cele-p.p1 figcaption{animation-delay:1.1s}.cele.on .cele-p.p2 figcaption{animation-delay:1.4s}
+  .cele.on .cele-mid>*{animation:celeUp .7s ease-out both}
+  .cele.on .cele-mid>:nth-child(1){animation-delay:2s}.cele.on .cele-mid>:nth-child(2){animation-delay:2.2s}
+  .cele.on .cele-mid>:nth-child(3){animation-delay:2.5s}.cele.on .cele-mid>:nth-child(4){animation-delay:2.8s}
+  .cele.on .cele-conf i{animation:celeFall var(--d) linear var(--t) infinite}
+}
+@keyframes celeInL{from{opacity:0;transform:translateX(-80px) rotate(-14deg)}to{opacity:1;transform:rotate(-3deg)}}
+@keyframes celeInR{from{opacity:0;transform:translateX(80px) rotate(14deg)}to{opacity:1;transform:rotate(3deg)}}
+@keyframes celeZoom{from{transform:scale(1)}to{transform:scale(1.06)}}
+@keyframes celePop{0%{opacity:0;transform:scale(.4)}100%{opacity:1;transform:scale(1)}}
+@keyframes celeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes celeFall{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:.9;transform:translate(var(--dx),700px) rotate(var(--rot))}}
+@media (prefers-reduced-motion:reduce){.cele-conf{display:none}}
+
+/* closing slide v2: the title image full size, slow zoom, confetti falling, "Project done. Thank you!" pops in */
+.slide.cele2{position:relative;overflow:hidden;padding:0;isolation:isolate}
+.cele2-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.cele2 .cele-conf{z-index:2}
+.cele2-card{position:absolute;left:34px;top:205px;z-index:3;display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.94);color:#1d2328;border-radius:16px;padding:14px 22px 14px 16px;box-shadow:0 14px 30px rgba(0,0,0,.18);border:2px solid var(--signal)}
+.cele2-card b,.cele2-card em{display:block;font-family:var(--f-display);font-weight:700;font-size:34px;line-height:1}
+.cele2-card em{font-style:normal;color:var(--signal)}
+@media (prefers-reduced-motion:no-preference){
+  .cele2.on .cele2-img{animation:celeZoom 14s ease-out both}
+  .cele2.on .cele2-card{animation:celePop .6s cubic-bezier(.2,.9,.3,1.4) 1.2s both}
+  .cele2.on .cele-conf i{animation:celeFall var(--d) linear var(--t) infinite}
+}
+
+/* contribution list (last slide) */
+.cl{flex:1;display:flex;flex-direction:column;gap:8px;min-height:0}
+.cl-row{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px 16px;flex:1}
+.cl-row.cl-h{background:none;border:0;border-bottom:2px solid var(--ink);border-radius:0;padding:0 16px 4px;flex:none}
+.cl-name{display:flex;align-items:center;gap:12px}
+.cl-name i{flex:none;width:40px;height:40px;border-radius:50%;background:var(--signal);color:var(--signal-ink);display:grid;place-items:center;font-style:normal;font-family:var(--f-display);font-weight:700;font-size:16px}
+.cl-name strong{font-family:var(--f-display);font-size:21px;font-weight:600;line-height:1.1}
+.cl-what{display:flex;flex-wrap:wrap;gap:6px}
+.cl-role,.cl-slide{font-size:14px;line-height:1.2;padding:5px 10px;border-radius:999px;white-space:nowrap}
+.cl-role{background:var(--ink);color:var(--panel);font-weight:600}
+.cl-slide{border:1px solid var(--signal);color:var(--ink);background:color-mix(in srgb,var(--signal) 10%,transparent)}
+
+/* chapter menu: a dial in the middle of the screen (M) – scroll, arrow keys or click */
+.topmenu.dial{inset:0;display:grid;place-items:center;background:rgba(10,14,18,.5);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);border:0;box-shadow:none;padding:16px}
+.topmenu.dial[hidden]{display:none}
+.dial-box{width:min(560px,94vw);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px 20px 14px;box-shadow:0 24px 60px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:10px}
+.dial-wrap{position:relative;height:322px}
+.dial-band{position:absolute;left:0;right:0;top:50%;height:46px;transform:translateY(-50%);border-radius:10px;background:color-mix(in srgb,var(--signal) 14%,transparent);border:2px solid var(--signal);pointer-events:none}
+.dial .tabs{display:block;height:322px;overflow-y:auto;scroll-snap-type:y mandatory;padding:138px 0;scrollbar-width:none;outline:none;perspective:600px;
+  -webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
+.dial .tabs::-webkit-scrollbar{display:none}
+.dial .tabs button{display:flex;flex-direction:row;align-items:center;gap:14px;width:100%;height:46px;scroll-snap-align:center;background:none;border:0;box-shadow:none;
+  padding:0 16px;text-transform:none;letter-spacing:0;font-size:22px;color:var(--muted);transform-origin:50% 50%;transition:color .15s}
+.dial .tabs button span{font-family:var(--f-mono);font-size:13px;color:var(--muted);width:24px;text-align:right}
+.dial .tabs button strong{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dial .tabs button em{margin-left:auto;font-style:normal;font-family:var(--f-mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.dial .tabs button.hi{color:var(--ink)}
+.dial .tabs button.hi strong{font-weight:700}
+.dial .tabs button.hi span{color:var(--signal)}
+.dial .tabs button[aria-current="true"] strong::after{content:" ●";color:var(--signal);font-size:12px;vertical-align:middle}
+.dial .preview{border-top:1px solid var(--line);padding-top:8px;min-height:30px}
+.dial .preview strong{font-size:19px}
 </style>
 
 <div class="wrap">
 
-<div class="topmenu" id="menu" hidden>
-  <div class="in">
-    <div class="mhead"><span class="kicker">Chapters · hover to preview, click to open</span><span class="kicker">Esc to close</span></div>
-    <div class="tabs" id="tabs" role="menu"></div>
+<div class="topmenu dial" id="menu" hidden>
+  <div class="dial-box" role="dialog" aria-label="Chapters">
+    <div class="mhead"><span class="kicker">Chapters · scroll or ↑ ↓, Enter or click to open</span><span class="kicker">Esc to close</span></div>
+    <div class="dial-wrap"><div class="dial-band" aria-hidden="true"></div><div class="tabs" id="tabs" role="menu" tabindex="0"></div></div>
     <div class="preview" id="preview"><strong></strong><span></span></div>
   </div>
 </div>
@@ -748,8 +882,9 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 <div class="stage" id="stage"><div class="deck" id="deck">
 
 <!-- 1 Title -->
-<section class="slide title on" data-chapter="Title" data-time="1:30" aria-label="Baumarkt-Buddy">
-  <header class="shead"><div class="sign"><b>Final pitch</b><span>Applied AI · MBA Digital Business &amp; AI</span></div><span class="stime">~1:30</span></header>
+<section class="slide title cover on" data-chapter="Title" data-time="1:30" aria-label="Baumarkt-Buddy">
+  <img class="cover-img" src="img/bb_front.png" alt="" aria-hidden="true">
+  <header class="shead"><div class="sign"><b>Final pitch</b><span>Applied AI · MBA Digital Business &amp; AI</span></div><span class="stime">~1:30</span><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody">
     <p class="hook">Have you ever come home from the DIY store with the wrong wall plug?</p>
     <h1>Baumarkt-<em>Buddy</em></h1>
@@ -761,7 +896,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
 <!-- 2 Problem & Solution -->
 <section class="slide has-pip" data-chapter="Problem &amp; Solution" data-time="1:30" aria-label="DIY projects often fail before they even begin">
-  <header class="shead"><div class="sign"><b>01</b><span>Problem &amp; Solution</span></div><button class="narr" type="button" disabled>♪ Audio<kbd>A</kbd></button></header>
+  <header class="shead"><div class="sign"><b>01</b><span>Problem &amp; Solution</span></div><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span><button class="narr" type="button" disabled>♪ Audio<kbd>A</kbd></button></header>
   <div class="pip" aria-label="Narrator video"><video src="media/Part1.mp4" data-clip="media/Part1.mp4" preload="auto" playsinline></video><video src="media/Part2.mp4" data-clip="media/Part2.mp4" preload="auto" playsinline></video></div>
   <div class="sbody">
     <h2>DIY projects often fail before they even begin</h2>
@@ -800,10 +935,10 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
 <!-- 3 Target users -->
 <section class="slide has-pip" data-chapter="Target users" data-time="1:30" aria-label="We help DIY beginners turn ideas into achievable projects">
-  <header class="shead"><div class="sign"><b>02</b><span>Target users</span></div><button class="narr" type="button" disabled>♪ Audio<kbd>A</kbd></button></header>
+  <header class="shead"><div class="sign"><b>02</b><span>Target users</span></div><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span><button class="narr" type="button" disabled>♪ Audio<kbd>A</kbd></button></header>
   <div class="pip" aria-label="Narrator video"><video src="media/Part3_1.mp4" data-clip="media/Part3_1.mp4" preload="auto" playsinline></video><video src="media/Part3_2.mp4" data-clip="media/Part3_2.mp4" preload="auto" playsinline></video></div>
   <div class="sbody">
-    <h2>We help DIY beginners turn ideas into achievable projects</h2>
+    <h2>We help DIY customers turn ideas into achievable projects</h2>
     <div class="grid g2" data-step="1" data-audio="media/Part3_1.mp4" data-audio-label="Part 3a" data-delay="900">
       <div class="box persona">
         <div class="phead">
@@ -842,7 +977,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
 <!-- 4 Market & competitors -->
 <section class="slide" data-chapter="Market &amp; Competitors" data-time="2:00" aria-label="Why this project: no German chain covers the full DIY journey">
-  <header class="shead"><div class="sign"><b>03</b><span>Market &amp; Competitors</span></div><span class="stime">~2:00</span></header>
+  <header class="shead"><div class="sign"><b>03</b><span>Market &amp; Competitors</span></div><span class="stime">~2:00</span><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:10px">
     <h2>Why this project: no German chain covers the full DIY journey</h2>
     <div class="mk" style="grid-template-columns:minmax(0,.82fr) minmax(0,1.5fr)">
@@ -859,7 +994,8 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
         <ul class="mark mk-so">
           <li><span class="no">✗</span><span>Not "the first AI DIY assistant": the US already runs them at scale</span></li>
           <li><span class="ok">✓</span><span>Chains fight for share: a tool that fills baskets sells</span></li>
-          <li><span class="ok">✓</span><span>White-label for mid-sized chains (toom, hagebau, Globus), with a staff mode</span></li>
+          <li><span class="ok">✓</span><span>Scalable guidance despite limited and costly store staff</span></li>
+          <li><span class="ok">✓</span><span>German DIY customers need guidance, but recommendations must remain safe</span></li>
         </ul>
       </div>
 
@@ -879,24 +1015,24 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
             </tbody>
           </table>
         </div>
-        <p class="mk-src">"Offered" = stated by the company itself. "Not found" = not in public sources, not proof it doesn't exist. Desk research, Oct 2026: company news, trade press, app pages.</p>
+        <p class="mk-src">"Offered" = stated by the company itself. "Not found" = not in public sources. Desk research, Oct 2026: company news, trade press, app pages.</p>
       </div>
 
     </div>
-    <div class="principle" data-step="2">Our gap: the full journey in one app, with safety stops, for German chains.</div>
+    <div class="principle" data-step="2">Our opportunity: the full journey in one app, with safety stops, for German chains.</div>
   </div>
 </section>
 
 <!-- 5 App workflow -->
 <section class="slide" data-chapter="App workflow" data-time="2:00" aria-label="From a project idea to a checked shopping list in 5 steps">
-  <header class="shead"><div class="sign"><b>04</b><span>App workflow · R1 prototype</span></div><span class="stime">~2:00</span></header>
+  <header class="shead"><div class="sign"><b>04</b><span>App workflow · R1 prototype</span></div><span class="stime">~2:00</span><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:12px">
     <h2>From project idea to checked shopping list in 5 steps</h2>
 
     <div class="aw">
       <div data-step="1" class="aw-step">
         <span class="aw-n">1</span>
-        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span class="ph-logo"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></div>
           <div class="ph-b"><div class="ph-t">Before you start</div>
             <div class="ph-sk"></div><div class="ph-sk" style="width:80%"></div><div class="ph-sk"></div><div class="ph-sk" style="width:65%"></div>
             <div class="ph-sp"></div><div class="ph-btn">Start</div></div></div>
@@ -905,7 +1041,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
       <div data-step="2" class="aw-step">
         <span class="aw-n">2</span>
-        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span class="ph-logo"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></div>
           <div class="ph-b"><div class="ph-t">Choose your store (optional)</div>
             <div class="ph-row"><div class="ph-o">91056</div><div class="ph-btn" style="flex:none">Find</div></div>
             <div class="ph-o on">OBI Erlangen West · 0 km</div>
@@ -917,18 +1053,18 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
       <div data-step="3" class="aw-step">
         <span class="aw-n">3</span>
-        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span class="ph-logo"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></div>
           <div class="ph-b"><div class="ph-t">What do you want to do?</div>
             <div class="ph-o">"Hang an 80 cm shelf on a concrete wall"</div>
             <div class="ph-row"><div class="ph-btn o">🎤 Speak</div><div class="ph-btn">Continue</div></div>
             <div class="ph-s">… or choose a project:</div>
-            <div class="ph-o">Hang a shelf</div><div class="ph-o">Paint a wall</div><div class="ph-o">Install a sliding door</div></div></div>
-        <h3>Describe</h3><p>Text, speech or one of 9 project templates.</p>
+            <div class="ph-o">Hang a shelf</div><div class="ph-o">Paint a wall</div><div class="ph-o">Hang a picture</div></div></div>
+        <h3>Describe</h3><p>Text, speech or one of 6 project templates.</p>
       </div>
 
       <div data-step="4" class="aw-step">
         <span class="aw-n">4</span>
-        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span class="ph-logo"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></div>
           <div class="ph-b"><div class="ph-t">Did we understand you correctly?</div>
             <div class="ph-o">Project: Hang a shelf<em>guess – please confirm</em></div>
             <div class="ph-o">Wall: Concrete<em>guess – please confirm</em></div>
@@ -939,7 +1075,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
       <div data-step="5" class="aw-step last">
         <span class="aw-n">5</span>
-        <div class="ph" aria-hidden="true"><div class="ph-top"><span>Baumarkt-Buddy</span></div>
+        <div class="ph" aria-hidden="true"><div class="ph-top"><span class="ph-logo"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></div>
           <div class="ph-b"><div class="ph-s">Wall: concrete ✓ · Size: 80 × 20 cm ✓</div><div class="ph-t">Choose your plug</div>
             <div class="ph-s">How much will you put on it?</div>
             <div class="ph-o">6 mm plug<em>up to 20 kg</em></div><div class="ph-o on">8 mm plug<em>up to 32 kg</em></div><div class="ph-o">10 mm plug<em>up to 48 kg</em></div><div class="ph-o">12 mm plug<em>up to 50 kg</em></div>
@@ -972,7 +1108,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
 <!-- 6 Live demo (app inside the slide) -->
 <section class="slide" data-chapter="Live demo" data-time="3:00" aria-label="Live demo: hang a shelf in under 2 minutes">
-  <header class="shead"><div class="sign"><b>05</b><span>Live demo · released app</span></div><span class="stime">~3:00</span></header>
+  <header class="shead"><div class="sign"><b>05</b><span>Live demo · released app</span></div><span class="stime">~3:00</span><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:10px">
     <h2>Live demo: from idea to checked list in under 2 minutes</h2>
     <div class="demo-g">
@@ -1010,19 +1146,19 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
 <!-- 6 UML sequence (moved from backup) -->
 <section class="slide" data-chapter="UML sequence" data-time="1:30" aria-label="One request, step by step: hang an 80 cm shelf">
-  <header class="shead"><div class="sign"><b>06</b><span>UML · sequence diagram</span></div><span class="stime">~1:30</span></header>
+  <header class="shead"><div class="sign"><b>06</b><span>UML · sequence diagram</span></div><span class="stime">~1:30</span><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:10px">
     <h2>One request, step by step: hang an 80 cm shelf</h2>
     <div class="seq">
-    <div class="uml-p"><svg viewBox="0 0 870 506" class="uml" role="img" aria-label="Sequence diagram for hanging an 80 cm shelf with the D-13 mounting logic"><defs><marker id="sq-as" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="u-ah"/></marker><marker id="sq-os" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10" class="u-ao"/></marker></defs><g data-step="1"><line x1="70" y1="46" x2="70" y2="504" class="u-life"/><rect x="3" y="2" width="134" height="42" rx="4" class="u-box act"/><text x="70" y="20" class="u-cn" text-anchor="middle">Customer</text><text x="70" y="35" class="u-k" text-anchor="middle">DIY beginner</text><line x1="215" y1="46" x2="215" y2="504" class="u-life"/><rect x="148" y="2" width="134" height="42" rx="4" class="u-box "/><text x="215" y="20" class="u-cn" text-anchor="middle">App UI</text><text x="215" y="35" class="u-k" text-anchor="middle">browser, no login</text><line x1="360" y1="46" x2="360" y2="504" class="u-life"/><rect x="293" y="2" width="134" height="42" rx="4" class="u-box stop"/><text x="360" y="20" class="u-cn" text-anchor="middle">Safety filter</text><text x="360" y="35" class="u-k" text-anchor="middle">G0 high-risk</text><line x1="505" y1="46" x2="505" y2="504" class="u-life"/><rect x="438" y="2" width="134" height="42" rx="4" class="u-box "/><text x="505" y="20" class="u-cn" text-anchor="middle">Intent parser</text><text x="505" y="35" class="u-k" text-anchor="middle">keyword · no AI</text><line x1="650" y1="46" x2="650" y2="504" class="u-life"/><rect x="583" y="2" width="134" height="42" rx="4" class="u-box acc"/><text x="650" y="20" class="u-cn" text-anchor="middle">Rule engine</text><text x="650" y="35" class="u-k" text-anchor="middle">deterministic code</text><line x1="800" y1="46" x2="800" y2="504" class="u-life"/><rect x="733" y="2" width="134" height="42" rx="4" class="u-box "/><text x="800" y="20" class="u-cn" text-anchor="middle">Catalogue</text><text x="800" y="35" class="u-k" text-anchor="middle">Excel · System ratings</text></g><g data-step="2"><rect x="211" y="58" width="8" height="444" class="u-actv"/><line x1="74" y1="70" x2="210" y2="70" class="u-ln" marker-end="url(#sq-as)"/><text x="142.5" y="64" class="u-m" text-anchor="middle">1  "80 cm shelf, concrete"</text><line x1="219" y1="96" x2="355" y2="96" class="u-ln" marker-end="url(#sq-as)"/><text x="287.5" y="90" class="u-m" text-anchor="middle">2  high-risk words?</text><line x1="356" y1="118" x2="220" y2="118" class="u-dash" marker-end="url(#sq-os)"/><text x="287.5" y="112" class="u-mr" text-anchor="middle">none found: continue</text></g><g data-step="3"><line x1="219" y1="146" x2="500" y2="146" class="u-ln" marker-end="url(#sq-as)"/><text x="360.0" y="140" class="u-m" text-anchor="middle">3  parse(text)</text><line x1="501" y1="168" x2="220" y2="168" class="u-dash" marker-end="url(#sq-os)"/><text x="360.0" y="162" class="u-mr" text-anchor="middle">guesses: shelf · concrete · 80 cm</text></g><g data-step="4"><line x1="211" y1="194" x2="75" y2="194" class="u-ln" marker-end="url(#sq-as)"/><text x="142.5" y="188" class="u-m" text-anchor="middle">4  confirm the guesses?</text><line x1="74" y1="216" x2="210" y2="216" class="u-ln" marker-end="url(#sq-as)"/><text x="142.5" y="210" class="u-m u-hi" text-anchor="middle">yes ✓</text></g><g data-step="5"><line x1="211" y1="242" x2="75" y2="242" class="u-ln" marker-end="url(#sq-as)"/><text x="142.5" y="236" class="u-m" text-anchor="middle">5  wall? · size? · old parts?</text><line x1="74" y1="264" x2="210" y2="264" class="u-ln" marker-end="url(#sq-as)"/><text x="142.5" y="258" class="u-m u-hi" text-anchor="middle">concrete · 80 × 20 · new ✓</text></g><g data-step="6"><rect x="646" y="282" width="8" height="220" class="u-actv"/><line x1="219" y1="290" x2="645" y2="290" class="u-ln" marker-end="url(#sq-as)"/><text x="432.5" y="284" class="u-m" text-anchor="middle">6  plan(confirmed facts)</text><line x1="654" y1="316" x2="795" y2="316" class="u-ln" marker-end="url(#sq-as)"/><text x="725.0" y="310" class="u-m" text-anchor="middle">7  board, brackets, plugs</text><line x1="796" y1="338" x2="655" y2="338" class="u-dash" marker-end="url(#sq-os)"/><text x="725.0" y="332" class="u-mr" text-anchor="middle">ratings per plug and wall</text><path d="M654,348 h30 v16 h-26" class="u-ln" fill="none" marker-end="url(#sq-as)"/><text x="640" y="362" class="u-m" text-anchor="end">8  max. depth · weakest part · × 1.25</text></g><g data-step="7"><line x1="646" y1="392" x2="220" y2="392" class="u-dash" marker-end="url(#sq-os)"/><text x="432.5" y="386" class="u-mr" text-anchor="middle">plugs: up to 20 · 32 · 48 · 50 kg</text><line x1="211" y1="392" x2="75" y2="392" class="u-ln" marker-end="url(#sq-as)"/><text x="142.5" y="386" class="u-m" text-anchor="middle">9  choose a plug</text><line x1="74" y1="414" x2="210" y2="414" class="u-ln" marker-end="url(#sq-as)"/><text x="142.5" y="408" class="u-m u-hi" text-anchor="middle">8 mm · max. 32 kg ✓</text></g><g data-step="8"><rect x="14" y="424" width="688" height="78" class="u-frame"/><path d="M14,424 h34 v12 l-6,6 h-28 z" class="u-tab"/><text x="28" y="437" class="u-k" text-anchor="middle">alt</text><text x="58" y="437" class="u-g" text-anchor="start">[all checks pass]</text><line x1="646" y1="454" x2="220" y2="454" class="u-dash" marker-end="url(#sq-os)"/><text x="432.5" y="448" class="u-mr" text-anchor="middle">checked list + evidence log (rule IDs)</text><line x1="211" y1="454" x2="75" y2="454" class="u-dash" marker-end="url(#sq-os)"/><text x="142.5" y="448" class="u-mr" text-anchor="middle">list · total €184.58</text><line x1="14" y1="462" x2="702" y2="462" class="u-sep" stroke-dasharray="5 4"/><text x="22" y="476" class="u-g stop" text-anchor="start">[wall unknown or too deep]</text><line x1="646" y1="494" x2="220" y2="494" class="u-dash" marker-end="url(#sq-os)"/><text x="432.5" y="488" class="u-mr" text-anchor="middle">STOP: rule ID + reason</text><line x1="211" y1="494" x2="75" y2="494" class="u-dash" marker-end="url(#sq-os)"/><text x="142.5" y="488" class="u-mr" text-anchor="middle">"ask a store associate"</text></g></svg></div>
-    <div class="seq-notes"><div class="seq-note intro"><span class="kicker">Hang a shelf · D-13</span><strong>Click to build the diagram</strong><p>8 steps, from the first sentence to the checked list.</p></div><div class="seq-note" data-step="1"><b class="n">1</b><strong>Six players, one request</strong><p>The <em>customer</em> and the <em>app</em> in the browser. Filter, parser and rule engine are plain code. Products and plug ratings come from our <em>Excel catalogue</em>. No AI model decides.</p></div><div class="seq-note" data-step="2"><b class="n">2</b><strong>Describe, safety first</strong><p>The customer types or speaks the project. Before anything else, filter <em>G0</em> looks for high-risk work: electrics, gas, load-bearing walls. Here nothing is found.</p></div><div class="seq-note" data-step="3"><b class="n">3</b><strong>Understand: only guesses</strong><p>The keyword parser reads project, wall and length from the sentence. These are <em>only guesses</em>; nothing is decided yet.</p></div><div class="seq-note" data-step="4"><b class="n">4</b><strong>The customer confirms</strong><p>Every guess is shown as <em>"guess – please confirm"</em>. Nothing unconfirmed reaches the rule engine (SR-01).</p></div><div class="seq-note" data-step="5"><b class="n">5</b><strong>Two short questions</strong><p>Screen 1: <em>wall type</em>. Screen 2: <em>size</em> plus the <em>used-parts check</em>. A defect in an old board or bracket means: buy new (ST-06).</p></div><div class="seq-note" data-step="6"><b class="n">6</b><strong>The rule engine plans</strong><p>Board and brackets follow the size. Each plug's rating comes from sheet <em>System ratings</em>. The weakest part decides, safety factor <em>1.25</em> included, depth checked against the wall.</p></div><div class="seq-note" data-step="7"><b class="n">7</b><strong>The customer chooses the load</strong><p>The app shows what each plug holds: <em>6 mm up to 20 kg … 12 mm up to 50 kg</em>. The customer picks one and confirms "I will load max. 32 kg".</p></div><div class="seq-note" data-step="8"><b class="n">8</b><strong>List or stop</strong><p><em>All checks pass:</em> checked list with aisle, shelf and evidence log. <em>Wall unknown or shelf too deep:</em> no list, rule ID shown, ask a store associate.</p></div></div>
+    <div class="uml-p"><svg viewBox="0 0 870 506" class="uml" role="img" aria-label="Sequence diagram for hanging an 80 cm shelf with the D-13 mounting logic"><defs><marker id="sq-as" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="u-ah"/></marker><marker id="sq-os" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10" class="u-ao"/></marker></defs><g data-step="1"><line x1="70" y1="46" x2="70" y2="504" class="u-life"/><rect x="3" y="2" width="134" height="42" rx="4" class="u-box act"/><text x="70" y="20" class="u-cn" text-anchor="middle">Customer</text><text x="70" y="35" class="u-k" text-anchor="middle">DIY beginner</text><line x1="215" y1="46" x2="215" y2="504" class="u-life"/><rect x="148" y="2" width="134" height="42" rx="4" class="u-box "/><text x="215" y="20" class="u-cn" text-anchor="middle">App UI</text><text x="215" y="35" class="u-k" text-anchor="middle">browser, no login</text><line x1="360" y1="46" x2="360" y2="504" class="u-life"/><rect x="293" y="2" width="134" height="42" rx="4" class="u-box stop"/><text x="360" y="20" class="u-cn" text-anchor="middle">Safety filter</text><text x="360" y="35" class="u-k" text-anchor="middle">G0 high-risk</text><line x1="505" y1="46" x2="505" y2="504" class="u-life"/><rect x="438" y="2" width="134" height="42" rx="4" class="u-box "/><text x="505" y="20" class="u-cn" text-anchor="middle">Intent parser</text><text x="505" y="35" class="u-k" text-anchor="middle">keyword · no AI</text><line x1="650" y1="46" x2="650" y2="504" class="u-life"/><rect x="583" y="2" width="134" height="42" rx="4" class="u-box acc"/><text x="650" y="20" class="u-cn" text-anchor="middle">Rule engine</text><text x="650" y="35" class="u-k" text-anchor="middle">deterministic code</text><line x1="800" y1="46" x2="800" y2="504" class="u-life"/><rect x="733" y="2" width="134" height="42" rx="4" class="u-box "/><text x="800" y="20" class="u-cn" text-anchor="middle">Catalogue</text><text x="800" y="35" class="u-k" text-anchor="middle">Excel · System ratings</text></g><g data-step="1"><rect x="211" y="58" width="8" height="444" class="u-actv"/><line x1="74" y1="70" x2="210" y2="70" class="u-ln" marker-end="url(#sq-as)"/><text x="142.5" y="64" class="u-m" text-anchor="middle">1  "80 cm shelf, concrete"</text><line x1="219" y1="96" x2="355" y2="96" class="u-ln" marker-end="url(#sq-as)"/><text x="287.5" y="90" class="u-m" text-anchor="middle">2  high-risk words?</text><line x1="356" y1="118" x2="220" y2="118" class="u-dash" marker-end="url(#sq-os)"/><text x="287.5" y="112" class="u-mr" text-anchor="middle">none found: continue</text></g><g data-step="2"><line x1="219" y1="146" x2="500" y2="146" class="u-ln" marker-end="url(#sq-as)"/><text x="360.0" y="140" class="u-m" text-anchor="middle">3  parse(text)</text><line x1="501" y1="168" x2="220" y2="168" class="u-dash" marker-end="url(#sq-os)"/><text x="360.0" y="162" class="u-mr" text-anchor="middle">guesses: shelf · concrete · 80 cm</text></g><g data-step="2"><line x1="211" y1="194" x2="75" y2="194" class="u-ln" marker-end="url(#sq-as)"/><text x="142.5" y="188" class="u-m" text-anchor="middle">4  confirm the guesses?</text><line x1="74" y1="216" x2="210" y2="216" class="u-ln" marker-end="url(#sq-as)"/><text x="142.5" y="210" class="u-m u-hi" text-anchor="middle">yes ✓</text></g><g data-step="2"><line x1="211" y1="242" x2="75" y2="242" class="u-ln" marker-end="url(#sq-as)"/><text x="142.5" y="236" class="u-m" text-anchor="middle">5  wall? · size? · old parts?</text><line x1="74" y1="264" x2="210" y2="264" class="u-ln" marker-end="url(#sq-as)"/><text x="142.5" y="258" class="u-m u-hi" text-anchor="middle">concrete · 80 × 20 · new ✓</text></g><g data-step="3"><rect x="646" y="282" width="8" height="220" class="u-actv"/><line x1="219" y1="290" x2="645" y2="290" class="u-ln" marker-end="url(#sq-as)"/><text x="432.5" y="284" class="u-m" text-anchor="middle">6  plan(confirmed facts)</text><line x1="654" y1="316" x2="795" y2="316" class="u-ln" marker-end="url(#sq-as)"/><text x="725.0" y="310" class="u-m" text-anchor="middle">7  board, brackets, plugs</text><line x1="796" y1="338" x2="655" y2="338" class="u-dash" marker-end="url(#sq-os)"/><text x="725.0" y="332" class="u-mr" text-anchor="middle">ratings per plug and wall</text><path d="M654,348 h30 v16 h-26" class="u-ln" fill="none" marker-end="url(#sq-as)"/><text x="640" y="362" class="u-m" text-anchor="end">8  max. depth · weakest part · × 1.25</text></g><g data-step="3"><line x1="646" y1="392" x2="220" y2="392" class="u-dash" marker-end="url(#sq-os)"/><text x="432.5" y="386" class="u-mr" text-anchor="middle">plugs: up to 20 · 32 · 48 · 50 kg</text><line x1="211" y1="392" x2="75" y2="392" class="u-ln" marker-end="url(#sq-as)"/><text x="142.5" y="386" class="u-m" text-anchor="middle">9  choose a plug</text><line x1="74" y1="414" x2="210" y2="414" class="u-ln" marker-end="url(#sq-as)"/><text x="142.5" y="408" class="u-m u-hi" text-anchor="middle">8 mm · max. 32 kg ✓</text></g><g data-step="3"><rect x="14" y="424" width="688" height="78" class="u-frame"/><path d="M14,424 h34 v12 l-6,6 h-28 z" class="u-tab"/><text x="28" y="437" class="u-k" text-anchor="middle">alt</text><text x="58" y="437" class="u-g" text-anchor="start">[all checks pass]</text><line x1="646" y1="454" x2="220" y2="454" class="u-dash" marker-end="url(#sq-os)"/><text x="432.5" y="448" class="u-mr" text-anchor="middle">checked list + evidence log (rule IDs)</text><line x1="211" y1="454" x2="75" y2="454" class="u-dash" marker-end="url(#sq-os)"/><text x="142.5" y="448" class="u-mr" text-anchor="middle">list · total €184.58</text><line x1="14" y1="462" x2="702" y2="462" class="u-sep" stroke-dasharray="5 4"/><text x="22" y="476" class="u-g stop" text-anchor="start">[wall unknown or too deep]</text><line x1="646" y1="494" x2="220" y2="494" class="u-dash" marker-end="url(#sq-os)"/><text x="432.5" y="488" class="u-mr" text-anchor="middle">STOP: rule ID + reason</text><line x1="211" y1="494" x2="75" y2="494" class="u-dash" marker-end="url(#sq-os)"/><text x="142.5" y="488" class="u-mr" text-anchor="middle">"ask a store associate"</text></g></svg></div>
+    <div class="seq-notes"><div class="seq-note intro"><span class="kicker">Hang a shelf · D-13</span><strong>Click to build the diagram</strong><p>3 steps, from the first sentence to the checked list.</p></div><div class="seq-note" data-step="1"><b class="n">1</b><strong>Six players · safety first</strong><p>The <em>customer</em> and the <em>app</em> in the browser; filter, parser and rule engine are plain code; products and plug ratings come from our <em>Excel catalogue</em>. The customer describes the project, and filter <em>G0</em> first looks for high-risk work (electrics, gas, load-bearing walls). Nothing found.</p></div><div class="seq-note" data-step="2"><b class="n">2</b><strong>Guess, confirm, two questions</strong><p>The keyword parser reads project, wall and length: <em>only guesses</em>. The customer confirms each one; nothing unconfirmed reaches the rule engine (SR-01). Then <em>wall type</em>, <em>size</em> and the <em>used-parts check</em> (ST-06).</p></div><div class="seq-note" data-step="3"><b class="n">3</b><strong>Plan, choose, list or stop</strong><p>Plug ratings from sheet <em>System ratings</em>; the weakest part decides, safety factor <em>1.25</em> included. The customer picks a plug (<em>"max. 32 kg"</em>). <em>All checks pass:</em> checked list with evidence log. <em>Wall unknown or too deep:</em> stop with rule ID, ask a store associate.</p></div></div>
     </div>
   </div>
 </section>
 
 <!-- 7 V-model -->
 <section class="slide" data-chapter="V-model" data-time="2:30" aria-label="Defined on the left, proven on the right">
-  <header class="shead"><div class="sign"><b>07</b><span>V-model</span></div><span class="stime">~2:30</span></header>
+  <header class="shead"><div class="sign"><b>07</b><span>V-model</span></div><span class="stime">~2:30</span><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:10px">
     <h2>Defined on the left, proven on the right</h2>
     <div class="v">
@@ -1036,9 +1172,9 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
       <div class="vn" data-step="1" style="grid-column:3;grid-row:3"><span class="who">Team + agent</span><strong>Design</strong><small>Components, rule engine, data</small></div>
       <div class="pair" data-step="2" style="grid-column:4;grid-row:3">rules → tests</div>
-      <div class="vn agent" data-step="2" style="grid-column:5;grid-row:3"><span class="who">Agent + CI</span><strong>Testing</strong><small>128 automated tests PASS on every PR</small></div>
+      <div class="vn agent" data-step="2" style="grid-column:5;grid-row:3"><span class="who">Agent + CI</span><strong>Testing</strong><small>134 automated tests PASS on every PR</small></div>
 
-      <div class="vn build" data-step="1" style="grid-column:3/6;grid-row:4"><span class="who">Vibe coding</span><strong>Implementation</strong><small>276 commits · 100 pull requests, each reviewed by a person</small></div>
+      <div class="vn build" data-step="1" style="grid-column:3/6;grid-row:4"><span class="who">Vibe coding</span><strong>Implementation</strong><small>303 commits · 115 pull requests, each reviewed by a person</small></div>
       <svg class="v-arrows" viewBox="0 0 1042 338" aria-hidden="true"><defs><marker id="v-ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z"/></marker></defs><g data-step="1"><line x1="40" y1="80" x2="283" y2="323" marker-end="url(#v-ah)"/><text x="161" y="219" text-anchor="middle" transform="rotate(45 161 201)">Decomposition</text></g><g data-step="2"><line x1="759" y1="323" x2="1002" y2="80" marker-end="url(#v-ah)"/><text x="881" y="219" text-anchor="middle" transform="rotate(-45 881 201)">Integration</text></g></svg>
     </div>
     <div class="trace" data-step="2">
@@ -1054,19 +1190,19 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
 <!-- 8 Architecture & zero cost -->
 <section class="slide" data-chapter="Architecture &amp; zero cost" data-time="2:00" aria-label="The AI proposes, the code decides, and it costs nothing to run">
-  <header class="shead"><div class="sign"><b>08</b><span>Architecture · zero cost</span></div><span class="stime">~2:00</span></header>
+  <header class="shead"><div class="sign"><b>08</b><span>Architecture · zero cost</span></div><span class="stime">~2:00</span><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:12px">
     <h2>The AI proposes, the code decides, and it costs nothing to run</h2>
     <div class="chain">
       <div data-step="1" class="cap"><span class="kicker">1 · Input</span><strong>Type, speak, tap</strong><small>Text, voice or one of 6 project buttons</small></div>
-      <div data-step="2" class="cap" style="border-top-color:var(--stop)"><span class="kicker">2 · Filter G0</span><strong>High-risk stop</strong><small>Electrics, gas, load-bearing walls refused first</small></div>
-      <div data-step="3" class="cap" style="border-top-color:var(--signal)"><span class="kicker">3 · Understand</span><strong>Guess only</strong><small>Project and values read from the text</small></div>
-      <div data-step="4" class="cap" style="border-top-color:var(--signal)"><span class="kicker">4 · Confirm</span><strong>Max. 3 questions</strong><small>Customer taps to confirm each guess</small></div>
-      <div data-step="5" class="cap"><span class="kicker">5 · Rule engine</span><strong>Code decides</strong><small>Products, quantities, fit, load × 1.25</small></div>
-      <div data-step="6" class="cap"><span class="kicker">6 · Result</span><strong>Checked list</strong><small>Aisle and shelf in your store, with the reasons</small></div>
+      <div data-step="1" class="cap" style="border-top-color:var(--stop)"><span class="kicker">2 · Filter G0</span><strong>High-risk stop</strong><small>Electrics, gas, load-bearing walls refused first</small></div>
+      <div data-step="2" class="cap" style="border-top-color:var(--signal)"><span class="kicker">3 · Understand</span><strong>Guess only</strong><small>Project and values read from the text</small></div>
+      <div data-step="2" class="cap" style="border-top-color:var(--signal)"><span class="kicker">4 · Confirm</span><strong>Max. 3 questions</strong><small>Customer taps to confirm each guess</small></div>
+      <div data-step="3" class="cap"><span class="kicker">5 · Rule engine</span><strong>Code decides</strong><small>Products, quantities, fit, load × 1.25</small></div>
+      <div data-step="3" class="cap"><span class="kicker">6 · Result</span><strong>Checked list</strong><small>Aisle and shelf in your store, with the reasons</small></div>
     </div>
     <div class="grid g2">
-      <div class="box" data-step="7"><span class="kicker">Running cost: 0 €</span>
+      <div class="box" data-step="4"><span class="kicker">Running cost: 0 €</span>
         <div class="tbl"><table>
           <tr><td>Hosting</td><td>GitHub Pages, no server, no build step</td></tr>
           <tr><td>Logic</td><td>Runs entirely in the customer's browser</td></tr>
@@ -1075,7 +1211,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
           <tr><td>Data</td><td>Team catalogue in Excel, open postcode data</td></tr>
         </table></div>
       </div>
-      <div class="box" data-step="7"><span class="kicker">Gray box, not black box</span>
+      <div class="box" data-step="4"><span class="kicker">Gray box, not black box</span>
         <ul class="mark">
           <li><span class="ok">✓</span><span><b>Closed product world:</b> the AI never picks a product, so it cannot invent one</span></li>
           <li><span class="ok">✓</span><span><b>Fail-safe:</b> unknown wall or load → stop, never a guess</span></li>
@@ -1089,21 +1225,21 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
 <!-- 9 Vibe coding process -->
 <section class="slide" data-chapter="Vibe coding process" data-time="3:00" aria-label="Partnership coding: the agent builds, tests verify, the team decides">
-  <header class="shead"><div class="sign"><b>09</b><span>Implementation · vibe coding</span></div><span class="stime">~3:00</span></header>
+  <header class="shead"><div class="sign"><b>09</b><span>Implementation · vibe coding</span></div><span class="stime">~3:00</span><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:12px">
     <h2>Partnership coding: the agent builds, tests verify, the team decides</h2>
     <div class="grid g4">
       <div class="kpi"><b>3 weeks</b><span>from first commit to MVP</span></div>
-      <div class="kpi"><b>276</b><span>commits</span></div>
-      <div class="kpi"><b>100</b><span>pull requests, each reviewed</span></div>
-      <div class="kpi"><b>128</b><span>automated tests, all passing</span></div>
+      <div class="kpi"><b>303</b><span>commits</span></div>
+      <div class="kpi"><b>115</b><span>pull requests, each reviewed</span></div>
+      <div class="kpi"><b>134</b><span>automated tests, all passing</span></div>
     </div>
     <div class="grid g2">
       <div class="box" data-step="1"><span class="kicker hd">The process is written in markdown</span>
         <div class="steps">
           <div class="step"><i>1</i><div><b>Team</b> <span>sets requirements, catalogue, safety rules and decisions D-1 to D-14</span></div></div>
           <div class="step"><i>2</i><div><b>Agent</b> <span>codes on its own branch, never on main. Each commit names its prompt (CLAUDE.md)</span></div></div>
-          <div class="step"><i>3</i><div><b>CI</b> <span>runs all 128 tests on every pull request. Red means not done</span></div></div>
+          <div class="step"><i>3</i><div><b>CI</b> <span>runs all 134 tests on every pull request. Red means not done</span></div></div>
           <div class="step"><i>4</i><div><b>Human gate</b> <span>reviews and merges. App code and AI proxy need owner approval (CODEOWNERS)</span></div></div>
         </div>
       </div>
@@ -1119,9 +1255,47 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
   </div>
 </section>
 
+<!-- Video 1 (warm-up before the takeaways) -->
+<section class="slide vslide" data-chapter="Key takeaways (video)" data-time="0:45" aria-label="Key takeaway number zero: people are building insane things with AI">
+  <header class="shead"><div class="sign"><b>Key takeaways</b><span>Warm-up · AI in our daily life</span></div><span class="stime">~0:45</span><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
+  <div class="sbody">
+    <h2>Key takeaway #0: people are building insane things with AI</h2>
+    <div class="vs-g">
+      <div class="vs-frame"><video class="vfull" src="media/anthropic.mp4" data-volume="0.08" data-delay="1000" data-repeat-muted playsinline preload="auto" title="Click to pause or play" aria-label="Video: people are building insane things with Claude Opus 5.5"></video></div>
+      <div class="vs-side">
+        <span class="kicker">Spot the difference</span>
+        <div class="vs-vs">
+          <div><strong><span class="vs-emoji" aria-hidden="true">🪩</span>Him</strong><p>A laser show in his living room, built with an AI agent.</p></div>
+          <b>vs.</b>
+          <div><strong><span class="vs-emoji" aria-hidden="true">🔩</span>Us</strong><p>The right wall plug for Josie's shelf, built with the same kind of agent.</p></div>
+        </div>
+        <div class="vs-card"><strong>Same tool, different ambition</strong><p>Ours just has more rules and fewer lasers.</p></div>
+        <div class="vs-think"><span class="kicker">Think about it</span><p>Where did AI help you today before 9 am? Maps, music, spam filter, autocorrect … and soon your DIY list.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Video 2 (warm-up before the lessons) -->
+<section class="slide vslide" data-chapter="Lessons learned (video)" data-time="0:45" aria-label="Lesson learned number zero: full access plus please be careful is not a safety concept">
+  <header class="shead"><div class="sign"><b>Lessons learned</b><span>Warm-up · AI in our daily life</span></div><span class="stime">~0:45</span><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
+  <div class="sbody">
+    <h2>Lesson learned #0: "please be careful" is not a safety concept</h2>
+    <div class="vs-g">
+      <div class="vs-frame"><video class="vfull" src="media/matrix.mp4" loop playsinline preload="auto" title="Click to pause or play" aria-label="Video: my AI agents after I give them full access and tell them to be careful"></video></div>
+      <div class="vs-side">
+        <span class="kicker">What the meme shows</span>
+        <div class="vs-card"><strong><span class="vs-emoji" aria-hidden="true">🕶️</span>Agents do what they can, not what you meant</strong><p>"Be careful" is a wish. Limits are a rule.</p></div>
+        <div class="vs-card go"><strong><span class="vs-emoji" aria-hidden="true">🛡️</span>What we did instead</strong><p>Permission prompts, tests on every change, and a person reviews every pull request. The AI proposes, rules decide.</p></div>
+        <div class="vs-think"><span class="kicker">Think about it</span><p>Which app on your phone has "full access" to your life right now?</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- 10 Key takeaways & lessons learned -->
 <section class="slide" data-chapter="Takeaways &amp; lessons" data-time="2:00" aria-label="What we built, and what we learned building it">
-  <header class="shead"><div class="sign"><b>10</b><span>Key takeaways &amp; lessons learned</span></div><span class="stime">~2:00</span></header>
+  <header class="shead"><div class="sign"><b>10</b><span>Key takeaways &amp; lessons learned</span></div><span class="stime">~2:00</span><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody">
     <h2>What we built, and what we learned building it</h2>
     <div class="kt">
@@ -1129,14 +1303,14 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
       <div class="kt-col" data-step="1">
         <div class="kt-head"><h3>Key takeaways</h3><span class="kicker">The product</span></div>
         <div class="kt-card">
-          <div class="kt-big">&lt; 2 min<small>idea to list</small></div>
-          <div><strong>One integrated app, end to end</strong>
-            <p>Describe the project, answer the questions, get the checked shopping list in under two minutes.</p></div>
-        </div>
-        <div class="kt-card">
           <div class="kt-big">Rules<small>not LLM decisions</small></div>
           <div><strong>Rule-based decisions instead of LLM judgement</strong>
             <p><b>Safety:</b> no hallucinated products, loads or fixings. <b>Security:</b> no LLM decision harness or API exposed to constant attack.</p></div>
+        </div>
+        <div class="kt-card">
+          <div class="kt-big">Human<small>in the loop</small></div>
+          <div><strong>Code is cheap; decisions are the real work</strong>
+            <p>The agent writes code in minutes. People set the requirements and rules, review every change and own the result.</p></div>
         </div>
         <div class="kt-card">
           <div class="kt-big">100 %<small>traceable</small></div>
@@ -1154,6 +1328,8 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
             <p>Clear instructions and explicit off-limits prevent hallucination.</p></div></div>
           <div class="ll-item"><i>3</i><div><strong>Safety must be deterministic</strong>
             <p>The model suggests. Code checks catalogue, fit and load.</p></div></div>
+          <div class="ll-item"><i>4</i><div><strong>Consolidated issues and reviews make vibe coding easy</strong>
+            <p>One issue list, reviewed before every change, turned ideas into small, clear coding steps.</p></div></div>
         </div>
       </div>
 
@@ -1164,7 +1340,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
 <!-- 10 Q&A -->
 <section class="slide title has-qr" data-chapter="Q&amp;A" data-time="1:00" aria-label="Questions">
-  <header class="shead"><div class="sign"><b>Q&amp;A</b><span>Thank you</span></div><span class="stime">~1:00</span></header>
+  <header class="shead"><div class="sign"><b>Q&amp;A</b><span>Thank you</span></div><span class="stime">~1:00</span><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody">
     <h1>Questions<em>?</em></h1>
     <p class="lead">Baumarkt-Buddy: one project in, a safe and compatible shopping list out.</p>
@@ -1174,9 +1350,15 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
   <figure class="qa-qr"><img src="img/QR_code.png" alt="QR code: open the Baumarkt-Buddy app"><figcaption>Scan to try the app</figcaption></figure>
 </section>
 
+<!-- Closing: projects done (title image, falling confetti) -->
+<section class="slide cele2" data-chapter="Project done" data-time="0:20" aria-label="Project done. Thank you!">
+  <img class="cele2-img" src="img/project_done.webp" alt="Project done, thank you: Josie next to her hung shelf and Andrea at her painted wall, two happy DIYers">
+  <div class="cele-conf" aria-hidden="true"><i class="r" style="--x:41%;--w:8px;--c:var(--signal);--d:4.1s;--t:0.47s;--dx:90px;--rot:377deg"></i><i style="--x:12%;--w:9px;--c:var(--go);--d:4.6s;--t:3.48s;--dx:-66px;--rot:-644deg"></i><i style="--x:11%;--w:10px;--c:#FFC83D;--d:4.2s;--t:1.14s;--dx:21px;--rot:149deg"></i><i style="--x:7%;--w:11px;--c:#4A90E2;--d:3.5s;--t:1.08s;--dx:40px;--rot:473deg"></i><i class="r" style="--x:7%;--w:11px;--c:#E94F7A;--d:4.6s;--t:0.47s;--dx:-64px;--rot:-625deg"></i><i style="--x:71%;--w:8px;--c:#FF7E21;--d:3.9s;--t:0.80s;--dx:-90px;--rot:449deg"></i><i style="--x:39%;--w:11px;--c:var(--signal);--d:5.2s;--t:0.93s;--dx:28px;--rot:449deg"></i><i style="--x:81%;--w:8px;--c:var(--go);--d:4.1s;--t:2.22s;--dx:-104px;--rot:435deg"></i><i class="r" style="--x:7%;--w:11px;--c:#FFC83D;--d:3.7s;--t:2.68s;--dx:-11px;--rot:-77deg"></i><i style="--x:59%;--w:11px;--c:#4A90E2;--d:5.4s;--t:1.57s;--dx:-57px;--rot:-352deg"></i><i style="--x:89%;--w:8px;--c:#E94F7A;--d:3.4s;--t:1.35s;--dx:6px;--rot:-17deg"></i><i style="--x:93%;--w:10px;--c:#FF7E21;--d:3.9s;--t:3.73s;--dx:-90px;--rot:328deg"></i><i class="r" style="--x:53%;--w:8px;--c:var(--signal);--d:5.0s;--t:0.83s;--dx:5px;--rot:143deg"></i><i style="--x:5%;--w:12px;--c:var(--go);--d:3.4s;--t:2.25s;--dx:82px;--rot:-78deg"></i><i style="--x:43%;--w:12px;--c:#FFC83D;--d:4.0s;--t:2.04s;--dx:84px;--rot:214deg"></i><i style="--x:8%;--w:7px;--c:#4A90E2;--d:5.5s;--t:1.96s;--dx:50px;--rot:-587deg"></i><i class="r" style="--x:7%;--w:12px;--c:#E94F7A;--d:4.9s;--t:2.56s;--dx:54px;--rot:192deg"></i><i style="--x:36%;--w:12px;--c:#FF7E21;--d:4.1s;--t:2.64s;--dx:-115px;--rot:225deg"></i><i style="--x:45%;--w:8px;--c:var(--signal);--d:4.7s;--t:2.03s;--dx:-65px;--rot:-132deg"></i><i style="--x:16%;--w:12px;--c:var(--go);--d:3.8s;--t:1.67s;--dx:103px;--rot:296deg"></i><i class="r" style="--x:10%;--w:8px;--c:#FFC83D;--d:4.3s;--t:2.22s;--dx:106px;--rot:-440deg"></i><i style="--x:55%;--w:11px;--c:#4A90E2;--d:3.9s;--t:1.75s;--dx:-29px;--rot:678deg"></i><i style="--x:48%;--w:8px;--c:#E94F7A;--d:3.6s;--t:0.92s;--dx:-61px;--rot:628deg"></i><i style="--x:29%;--w:7px;--c:#FF7E21;--d:4.4s;--t:2.36s;--dx:-53px;--rot:-143deg"></i><i class="r" style="--x:0%;--w:8px;--c:var(--signal);--d:4.2s;--t:1.59s;--dx:24px;--rot:-68deg"></i><i style="--x:16%;--w:12px;--c:var(--go);--d:5.3s;--t:3.63s;--dx:47px;--rot:664deg"></i><i style="--x:94%;--w:7px;--c:#FFC83D;--d:4.3s;--t:3.35s;--dx:103px;--rot:673deg"></i><i style="--x:71%;--w:10px;--c:#4A90E2;--d:4.2s;--t:1.68s;--dx:3px;--rot:579deg"></i><i class="r" style="--x:51%;--w:7px;--c:#E94F7A;--d:3.7s;--t:3.75s;--dx:-8px;--rot:-388deg"></i><i style="--x:14%;--w:9px;--c:#FF7E21;--d:4.6s;--t:0.66s;--dx:25px;--rot:-411deg"></i><i style="--x:68%;--w:7px;--c:var(--signal);--d:5.5s;--t:2.45s;--dx:-102px;--rot:-295deg"></i><i style="--x:78%;--w:10px;--c:var(--go);--d:3.6s;--t:1.18s;--dx:-32px;--rot:513deg"></i><i class="r" style="--x:46%;--w:10px;--c:#FFC83D;--d:3.5s;--t:3.27s;--dx:-1px;--rot:263deg"></i><i style="--x:61%;--w:9px;--c:#4A90E2;--d:3.4s;--t:0.66s;--dx:-33px;--rot:-178deg"></i><i style="--x:61%;--w:12px;--c:#E94F7A;--d:3.6s;--t:0.38s;--dx:15px;--rot:20deg"></i><i style="--x:18%;--w:12px;--c:#FF7E21;--d:4.5s;--t:0.39s;--dx:15px;--rot:-110deg"></i><i class="r" style="--x:82%;--w:7px;--c:var(--signal);--d:4.9s;--t:1.21s;--dx:-27px;--rot:-378deg"></i><i style="--x:45%;--w:8px;--c:var(--go);--d:4.5s;--t:3.03s;--dx:-36px;--rot:583deg"></i><i style="--x:28%;--w:11px;--c:#FFC83D;--d:5.1s;--t:3.75s;--dx:98px;--rot:-321deg"></i><i style="--x:30%;--w:10px;--c:#4A90E2;--d:5.0s;--t:1.09s;--dx:12px;--rot:289deg"></i><i class="r" style="--x:45%;--w:12px;--c:#E94F7A;--d:3.3s;--t:0.40s;--dx:-49px;--rot:247deg"></i><i style="--x:33%;--w:8px;--c:#FF7E21;--d:4.9s;--t:3.65s;--dx:-6px;--rot:-5deg"></i><i style="--x:46%;--w:7px;--c:var(--signal);--d:3.7s;--t:1.09s;--dx:-70px;--rot:-29deg"></i><i style="--x:26%;--w:10px;--c:var(--go);--d:4.7s;--t:3.45s;--dx:95px;--rot:-717deg"></i><i class="r" style="--x:61%;--w:12px;--c:#FFC83D;--d:4.0s;--t:2.55s;--dx:93px;--rot:632deg"></i><i style="--x:15%;--w:10px;--c:#4A90E2;--d:5.1s;--t:2.93s;--dx:2px;--rot:-355deg"></i></div>
+</section>
+
 <!-- 12 Backup: end-to-end workflow, concept to operation -->
 <section class="slide" data-chapter="Backup: Workflow" data-time="–" aria-label="From concept to operation: who does what">
-  <header class="shead"><div class="sign"><b>Backup</b><span>Process · end-to-end workflow</span></div></header>
+  <header class="shead"><div class="sign"><b>Backup</b><span>Process · end-to-end workflow</span></div><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:10px">
     <h2>People decide, agents draft, code builds</h2>
 
@@ -1242,7 +1424,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
 <!-- Backup: Agentic AI in the development process -->
 <section class="slide" data-chapter="Backup: Agentic AI" data-time="–" aria-label="Agentic AI built the app; the app itself is not agentic">
-  <header class="shead"><div class="sign"><b>Backup</b><span>Process · agentic AI in development</span></div></header>
+  <header class="shead"><div class="sign"><b>Backup</b><span>Process · agentic AI in development</span></div><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:10px">
     <h2>An AI agent built the app – the app itself is not agentic</h2>
     <div class="ag">
@@ -1274,7 +1456,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
         <text x="482" y="54" class="u-n">Read / edit code</text>
         <text x="482" y="78" class="u-n">Shell, Node.js</text>
         <text x="482" y="102" class="u-n">Git + GitHub</text>
-        <text x="482" y="126" class="u-n">Test runner (128)</text>
+        <text x="482" y="126" class="u-n">Test runner (134)</text>
         <text x="482" y="150" class="u-n">Browser (MCP)</text>
         <text x="482" y="174" class="u-n">Excel / PDF reader</text>
         <text x="482" y="194" class="u-at">MCP = open JSON-RPC standard</text>
@@ -1309,7 +1491,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
 <!-- Backup: Tool stack -->
 <section class="slide" data-chapter="Backup: Tool stack" data-time="–" aria-label="Tool stack: from requirements to the running app">
-  <header class="shead"><div class="sign"><b>Backup</b><span>Process · tool stack</span></div></header>
+  <header class="shead"><div class="sign"><b>Backup</b><span>Process · tool stack</span></div><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:10px">
     <h2>Tool stack: from requirements to the running app</h2>
     <div class="ts">
@@ -1325,8 +1507,8 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
         <div class="ts-i"><b>Node.js trial build</b><span>Whole app in one HTML file for testers, no server</span></div>
       </div>
       <div class="ts-col t"><span class="kicker">3 · Verify</span><h3>Test &amp; review</h3>
-        <div class="ts-i"><b>GitHub pull requests</b><span>100 PRs merged, each reviewed; CODEOWNERS approval</span></div>
-        <div class="ts-i"><b>GitHub Actions + Playwright</b><span>128 automated tests on every pull request; each run saved in test/results</span></div>
+        <div class="ts-i"><b>GitHub pull requests</b><span>115 PRs merged, each reviewed; CODEOWNERS approval</span></div>
+        <div class="ts-i"><b>GitHub Actions + Playwright</b><span>134 automated tests on every pull request; each run saved in test/results</span></div>
         <div class="ts-i"><b>User tests</b><span>KPI check: ≥ 4 of 5 users in under 2 min</span></div>
       </div>
       <div class="ts-col r"><span class="kicker">4 · Run · 0 €</span><h3>Runtime</h3>
@@ -1351,7 +1533,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
 <!-- Backup: Risk management -->
 <section class="slide" data-chapter="Backup: Risk management" data-time="–" aria-label="Risks are managed in a loop, not once">
-  <header class="shead"><div class="sign"><b>Backup</b><span>Planning · risk management</span></div></header>
+  <header class="shead"><div class="sign"><b>Backup</b><span>Planning · risk management</span></div><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:10px">
     <h2>Risks are managed in a loop, not once</h2>
     <div class="box tbl rk">
@@ -1359,19 +1541,19 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
         <thead><tr><th>Category</th><th>Baumarkt-Buddy examples in the MVP</th><th>What we do</th></tr></thead>
         <tbody>
           <tr><td>Project risks<small>schedule · team · tools</small></td><td>3-week course sprint with a part-time team of 5; AI agent limits or blocked tools; work only on a laptop, not pushed; two people editing the same Excel workbook</td><td class="resp">Own branch per change, pull request with review, CI, change log; one owner per data file</td></tr>
-          <tr><td>Product risks<small>quality · safety</small></td><td>Wrong fixing for the load; AI invents a product; gaps in the sample catalogue; requirement does not match reality (cabinet up to 120 cm wide)</td><td class="resp">Rules decide, the AI only reads text; stop instead of guessing; 128 automated tests; preview and trial file before release</td></tr>
+          <tr><td>Product risks<small>quality · safety</small></td><td>Wrong fixing for the load; AI invents a product; gaps in the sample catalogue; requirement does not match reality (cabinet up to 120 cm wide)</td><td class="resp">Rules decide, the AI only reads text; stop instead of guessing; 134 automated tests; preview and trial file before release</td></tr>
           <tr><td>Business risks<small>organisation</small></td><td>Big chains build their own assistant; no access to real store data; customers do not trust the app; product liability for software (EU, from Dec 2026)</td><td class="resp">Target mid-sized chains; pilot with one retailer; user tests; legal review before a real launch</td></tr>
         </tbody>
       </table>
     </div>
-    <div class="uml-p" style="padding:6px 8px"><svg viewBox="0 0 1040 168" class="uml" role="img" aria-label="Iterative risk-management loop for Baumarkt-Buddy"><defs><marker id="rk-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="u-ah"/></marker><marker id="rk-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--signal)"/></marker></defs><line x1="218" y1="46" x2="300" y2="46" class="r-arr" marker-end="url(#rk-a)"/><line x1="478" y1="46" x2="560" y2="46" class="r-arr" marker-end="url(#rk-a)"/><line x1="738" y1="46" x2="820" y2="46" class="r-arr" marker-end="url(#rk-a)"/><path d="M910,21 V6 H390 V19" class="r-fb" marker-end="url(#rk-f)"/><text x="650" y="16" class="r-fbt" text-anchor="middle">repeat every sprint: new risks, changed decisions, new test results</text><ellipse cx="130" cy="46" rx="88" ry="25" class="r-st"/><text x="130" y="43" class="u-cn" text-anchor="middle">Risk</text><text x="130" y="58" class="u-cn" text-anchor="middle">identification</text><line x1="130" y1="71" x2="130" y2="96" class="r-arr" marker-end="url(#rk-a)"/><rect x="12" y="99" width="236" height="51" rx="3" class="r-out"/><text x="130" y="118" class="u-at" text-anchor="middle">Risk register: 20 risks in 5 areas</text><text x="130" y="131" class="u-at" text-anchor="middle">(docs/risk-analysis.md)</text><text x="130" y="144" class="u-at" text-anchor="middle">exploratory test → issues #101–#113</text><ellipse cx="390" cy="46" rx="88" ry="25" class="r-st"/><text x="390" y="43" class="u-cn" text-anchor="middle">Risk</text><text x="390" y="58" class="u-cn" text-anchor="middle">analysis</text><line x1="390" y1="71" x2="390" y2="96" class="r-arr" marker-end="url(#rk-a)"/><rect x="272" y="99" width="236" height="51" rx="3" class="r-out"/><text x="390" y="118" class="u-at" text-anchor="middle">Likelihood × impact matrix</text><text x="390" y="131" class="u-at" text-anchor="middle">Top: market + data access (B1, B2),</text><text x="390" y="144" class="u-at" text-anchor="middle">template review (D3), catalogue gaps</text><ellipse cx="650" cy="46" rx="88" ry="25" class="r-st acc"/><text x="650" y="43" class="u-cn" text-anchor="middle">Risk</text><text x="650" y="58" class="u-cn" text-anchor="middle">planning</text><line x1="650" y1="71" x2="650" y2="96" class="r-arr" marker-end="url(#rk-a)"/><rect x="532" y="99" width="236" height="51" rx="3" class="r-out"/><text x="650" y="118" class="u-at" text-anchor="middle">Avoid: rules decide, stop if unknown</text><text x="650" y="131" class="u-at" text-anchor="middle">Contingency: preview flag, revert PR,</text><text x="650" y="144" class="u-at" text-anchor="middle">keyword mode if the AI fails</text><ellipse cx="910" cy="46" rx="88" ry="25" class="r-st"/><text x="910" y="43" class="u-cn" text-anchor="middle">Risk</text><text x="910" y="58" class="u-cn" text-anchor="middle">monitoring</text><line x1="910" y1="71" x2="910" y2="96" class="r-arr" marker-end="url(#rk-a)"/><rect x="792" y="99" width="236" height="51" rx="3" class="r-out"/><text x="910" y="118" class="u-at" text-anchor="middle">CI runs 128 tests on every PR</text><text x="910" y="131" class="u-at" text-anchor="middle">results in test/results, CHANGELOG,</text><text x="910" y="144" class="u-at" text-anchor="middle">team decisions D-1 … D-14</text></svg></div>
+    <div class="uml-p" style="padding:6px 8px"><svg viewBox="0 0 1040 168" class="uml" role="img" aria-label="Iterative risk-management loop for Baumarkt-Buddy"><defs><marker id="rk-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="u-ah"/></marker><marker id="rk-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--signal)"/></marker></defs><line x1="218" y1="46" x2="300" y2="46" class="r-arr" marker-end="url(#rk-a)"/><line x1="478" y1="46" x2="560" y2="46" class="r-arr" marker-end="url(#rk-a)"/><line x1="738" y1="46" x2="820" y2="46" class="r-arr" marker-end="url(#rk-a)"/><path d="M910,21 V6 H390 V19" class="r-fb" marker-end="url(#rk-f)"/><text x="650" y="16" class="r-fbt" text-anchor="middle">repeat every sprint: new risks, changed decisions, new test results</text><ellipse cx="130" cy="46" rx="88" ry="25" class="r-st"/><text x="130" y="43" class="u-cn" text-anchor="middle">Risk</text><text x="130" y="58" class="u-cn" text-anchor="middle">identification</text><line x1="130" y1="71" x2="130" y2="96" class="r-arr" marker-end="url(#rk-a)"/><rect x="12" y="99" width="236" height="51" rx="3" class="r-out"/><text x="130" y="118" class="u-at" text-anchor="middle">Risk register: 20 risks in 5 areas</text><text x="130" y="131" class="u-at" text-anchor="middle">(docs/risk-analysis.md)</text><text x="130" y="144" class="u-at" text-anchor="middle">exploratory test → issues #101–#113</text><ellipse cx="390" cy="46" rx="88" ry="25" class="r-st"/><text x="390" y="43" class="u-cn" text-anchor="middle">Risk</text><text x="390" y="58" class="u-cn" text-anchor="middle">analysis</text><line x1="390" y1="71" x2="390" y2="96" class="r-arr" marker-end="url(#rk-a)"/><rect x="272" y="99" width="236" height="51" rx="3" class="r-out"/><text x="390" y="118" class="u-at" text-anchor="middle">Likelihood × impact matrix</text><text x="390" y="131" class="u-at" text-anchor="middle">Top: market + data access (B1, B2),</text><text x="390" y="144" class="u-at" text-anchor="middle">template review (D3), catalogue gaps</text><ellipse cx="650" cy="46" rx="88" ry="25" class="r-st acc"/><text x="650" y="43" class="u-cn" text-anchor="middle">Risk</text><text x="650" y="58" class="u-cn" text-anchor="middle">planning</text><line x1="650" y1="71" x2="650" y2="96" class="r-arr" marker-end="url(#rk-a)"/><rect x="532" y="99" width="236" height="51" rx="3" class="r-out"/><text x="650" y="118" class="u-at" text-anchor="middle">Avoid: rules decide, stop if unknown</text><text x="650" y="131" class="u-at" text-anchor="middle">Contingency: preview flag, revert PR,</text><text x="650" y="144" class="u-at" text-anchor="middle">keyword mode if the AI fails</text><ellipse cx="910" cy="46" rx="88" ry="25" class="r-st"/><text x="910" y="43" class="u-cn" text-anchor="middle">Risk</text><text x="910" y="58" class="u-cn" text-anchor="middle">monitoring</text><line x1="910" y1="71" x2="910" y2="96" class="r-arr" marker-end="url(#rk-a)"/><rect x="792" y="99" width="236" height="51" rx="3" class="r-out"/><text x="910" y="118" class="u-at" text-anchor="middle">CI runs 134 tests on every PR</text><text x="910" y="131" class="u-at" text-anchor="middle">results in test/results, CHANGELOG,</text><text x="910" y="144" class="u-at" text-anchor="middle">team decisions D-1 … D-14</text></svg></div>
     <p class="rk-ex"><b>One loop in practice:</b> testers found that a 120 cm wall cabinet does not exist → rated as a product risk (requirement misalignment) → limit set to 75 cm with a test → CI now checks it on every pull request.</p>
   </div>
 </section>
 
 <!-- 11 Backup: MoSCoW scope R1 -->
 <section class="slide" data-chapter="Backup: MoSCoW" data-time="–" aria-label="Release 1 scope by MoSCoW">
-  <header class="shead"><div class="sign"><b>Backup</b><span>Requirements · MoSCoW</span></div></header>
+  <header class="shead"><div class="sign"><b>Backup</b><span>Requirements · MoSCoW</span></div><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:10px">
     <h2>59 R1 requirements: 50 must-haves, 9 should-haves</h2>
 
@@ -1470,7 +1652,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
 <!-- Backup: UML 1/2 use cases + domain model -->
 <section class="slide" data-chapter="Backup: UML use cases" data-time="–" aria-label="What the customer can do, and the data behind it">
-  <header class="shead"><div class="sign"><b>Backup</b><span>Design · UML use cases &amp; classes</span></div></header>
+  <header class="shead"><div class="sign"><b>Backup</b><span>Design · UML use cases &amp; classes</span></div><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:10px">
     <h2>What the customer can do, and the data behind it</h2>
     <div class="uml-grid">
@@ -1490,7 +1672,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
 <!-- Backup: Live demo scenarios -->
 <section class="slide" data-chapter="Backup: Demo scenarios" data-time="–" aria-label="Three scenarios, three results">
-  <header class="shead"><div class="sign"><b>Backup</b><span>Implementation · demo scenarios</span></div></header>
+  <header class="shead"><div class="sign"><b>Backup</b><span>Implementation · demo scenarios</span></div><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:10px">
     <h2>Three scenarios, three results</h2>
     <div class="grid g3">
@@ -1535,7 +1717,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 
 <!-- Backup: Traceability matrix -->
 <section class="slide" data-chapter="Backup: Traceability" data-time="–" aria-label="Traceability: requirements, test cases and test results for R1">
-  <header class="shead"><div class="sign"><b>Backup</b><span>Testing · traceability</span></div></header>
+  <header class="shead"><div class="sign"><b>Backup</b><span>Testing · traceability</span></div><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:10px">
     <h2>All 59 requirements traced and verified by passing tests</h2>
     <div class="tx">
@@ -1807,7 +1989,7 @@ Manual run: all linked system / red-team tests PASS">09</span></div></div>
           <div class="fn-r"><span>Fully verified</span><div class="fn-b"><i class="g" style="width:100%"></i></div><b>59 / 59</b></div>
           <div class="fn-r"><span>Manual test passed</span><div class="fn-b"><i class="g" style="width:100%"></i></div><b>59 / 59</b></div>
         </div>
-        <p class="tx-src">Sources: requirements R1 (3 Nov, 59 IDs, incl. D-13 / D-14) · test cases v1.3 (147 tests: 127 TC · 12 UT · 8 RT) · automated run 2026-11-05, commit ef8707c: 128 / 128 PASS · manual run: 127 system + 8 red-team tests PASS, five users 5 / 5 under 2 min. Hover a tile for its tests and results.</p>
+        <p class="tx-src">Sources: requirements R1 (3 Nov, 59 IDs, incl. D-13 / D-14) · test cases v1.3 (147 tests: 127 TC · 12 UT · 8 RT) · automated run 2026-11-06, commit 54442fa: 134 / 134 PASS · manual run: 127 system + 8 red-team tests PASS, five users 5 / 5 under 2 min. Hover a tile for its tests and results.</p>
       </div>
       <div class="tx-col">
         <div class="mk-h"><h3>One trace · SR-03</h3><span class="kicker">Must · mounting gate</span></div>
@@ -1821,7 +2003,7 @@ Manual run: all linked system / red-team tests PASS">09</span></div></div>
       </div>
     </div>
     <div class="gp done">
-      <p><b>59 / 59 verified:</b> every requirement has a passing test – 128 automated tests and the manual run of 127 system tests and 8 red-team tests</p>
+      <p><b>59 / 59 verified:</b> every requirement has a passing test – 134 automated tests and the manual run of 127 system tests and 8 red-team tests</p>
       <p><b>10 manual only:</b> FR-27, FR-35, FR-36, FR-37, SR-10, SR-19, NFR-01, NFR-06, NFR-10, NFR-12 – candidates for new automated tests in R2</p>
       <p><b>User test:</b> 5 of 5 users got their checked list in under 2 minutes (NFR-12, target ≥ 4 of 5)</p>
       <p><b>21 release gates PASS</b> (19 also automated) → R1 go. Open: legacy IDs in result names (G2, R-16, UC-1, C-8)</p>
@@ -1831,7 +2013,7 @@ Manual run: all linked system / red-team tests PASS">09</span></div></div>
 
 <!-- Backup: test report (trace status and coverage) -->
 <section class="slide" data-chapter="Backup: Test report" data-time="–" aria-label="Test report: trace status and coverage of requirements and test cases">
-  <header class="shead"><div class="sign"><b>Backup</b><span>Testing · test report</span></div></header>
+  <header class="shead"><div class="sign"><b>Backup</b><span>Testing · test report</span></div><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:12px">
     <h2>59 requirements, 147 test cases, every one traced</h2>
     <div class="trp">
@@ -1851,8 +2033,8 @@ Manual run: all linked system / red-team tests PASS">09</span></div></div>
         <p class="trp-note"><b>How they relate:</b> every requirement has at least one test case, most have several (SR-13: 16). One test case can cover several requirements, so 147 tests trace all 59 IDs.</p>
       </div>
       <div class="trp-c">
-        <div class="mk-h"><h3>Results · coverage</h3><span class="kicker">5 Nov 2026</span></div>
-        <div class="trp-bars"><div class="trp-bar"><span>Requirements linked to a test</span><b>59 / 59</b><i><em class="k" style="width:100.0%"></em></i></div><div class="trp-bar"><span>Requirements with automated evidence</span><b>55 / 59</b><i><em class="k" style="width:93.2%"></em></i></div><div class="trp-bar"><span>Automated suite</span><b>128 / 128</b><i><em style="width:100.0%"></em></i></div><div class="trp-bar"><span>Manual system tests</span><b>127 / 127</b><i><em style="width:100.0%"></em></i></div><div class="trp-bar"><span>Red-team tests</span><b>8 / 8</b><i><em style="width:100.0%"></em></i></div><div class="trp-bar"><span>Five users, list in &lt; 2 min</span><b>5 / 5</b><i><em style="width:100.0%"></em></i></div></div>
+        <div class="mk-h"><h3>Results · coverage</h3><span class="kicker">6 Nov 2026</span></div>
+        <div class="trp-bars"><div class="trp-bar"><span>Requirements linked to a test</span><b>59 / 59</b><i><em class="k" style="width:100.0%"></em></i></div><div class="trp-bar"><span>Requirements with automated evidence</span><b>55 / 59</b><i><em class="k" style="width:93.2%"></em></i></div><div class="trp-bar"><span>Automated suite</span><b>134 / 134</b><i><em style="width:100.0%"></em></i></div><div class="trp-bar"><span>Manual system tests</span><b>127 / 127</b><i><em style="width:100.0%"></em></i></div><div class="trp-bar"><span>Red-team tests</span><b>8 / 8</b><i><em style="width:100.0%"></em></i></div><div class="trp-bar"><span>Five users, list in &lt; 2 min</span><b>5 / 5</b><i><em style="width:100.0%"></em></i></div></div>
         <span class="trp-pass">✓ All tests PASS · R1 go</span>
       </div>
     </div>
@@ -1866,19 +2048,19 @@ Manual run: all linked system / red-team tests PASS">09</span></div></div>
 
 <!-- Backup: KPI results -->
 <section class="slide" data-chapter="Backup: KPIs" data-time="–" aria-label="KPI targets and results for the R1 MVP">
-  <header class="shead"><div class="sign"><b>Backup</b><span>Validation · KPI results</span></div></header>
+  <header class="shead"><div class="sign"><b>Backup</b><span>Validation · KPI results</span></div><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:14px">
     <h2>All five MVP KPIs met</h2>
     <div class="kr-row"><div class="kr"><svg viewBox="0 0 100 100" role="img" aria-label="Products from the catalogue: 100 %, target 100 %"><title>100 % of listed products come from the catalogue, 0 % outside (target 0 % outside)</title><circle cx="50" cy="50" r="38" class="trk"/><circle cx="50" cy="50" r="38" class="arc" style="--off:0"/><text x="50" y="52" text-anchor="middle" class="val">100 %</text><text x="50" y="66" text-anchor="middle" class="sub">catalogue</text></svg><strong>Products from the catalogue</strong><span class="tg">Target 0 % outside</span><span class="met">✓ Met</span><span class="ev">Unknown products rejected (#9, #16) · manual TC PASS</span></div><div class="kr"><svg viewBox="0 0 100 100" role="img" aria-label="High-risk jobs refused: 100 %, target 100 %"><title>High-risk jobs refused: 100 % (target 100 %)</title><circle cx="50" cy="50" r="38" class="trk"/><circle cx="50" cy="50" r="38" class="arc" style="--off:0"/><text x="50" y="52" text-anchor="middle" class="val">100 %</text><text x="50" y="66" text-anchor="middle" class="sub">refused</text></svg><strong>High-risk jobs refused</strong><span class="tg">Target 100 %</span><span class="met">✓ Met</span><span class="ev">Text, voice, typos (#31 #39 #44 #46 #53 #116) · RT-01…03</span></div><div class="kr"><svg viewBox="0 0 100 100" role="img" aria-label="Unknown wall / load blocks advice: 100 %, target 100 %"><title>Unknown wall / load blocks advice: 100 % (target 100 %)</title><circle cx="50" cy="50" r="38" class="trk"/><circle cx="50" cy="50" r="38" class="arc" style="--off:0"/><text x="50" y="52" text-anchor="middle" class="val">100 %</text><text x="50" y="66" text-anchor="middle" class="sub">stopped</text></svg><strong>Unknown wall / load blocks advice</strong><span class="tg">Target 100 %</span><span class="met">✓ Met</span><span class="ev">#4 #5 #104 #111 · TC-029 / TC-030</span></div><div class="kr"><svg viewBox="0 0 100 100" role="img" aria-label="List generated: 0.6 ms, target < 5 s"><title>List generated in 0.6 ms in the automated run (target under 5 s)</title><circle cx="50" cy="50" r="38" class="trk"/><circle cx="50" cy="50" r="38" class="arc" style="--off:0"/><text x="50" y="52" text-anchor="middle" class="val">0.6 ms</text><text x="50" y="66" text-anchor="middle" class="sub">list</text></svg><strong>List generated</strong><span class="tg">Target < 5 s</span><span class="met">✓ Met</span><span class="ev">Automated timing #33 (store search 0.03 ms)</span></div><div class="kr"><svg viewBox="0 0 100 100" role="img" aria-label="Users finish in < 2 min: 5 / 5, target ≥ 4 of 5"><title>5 of 5 users finished in under 2 minutes (target at least 4 of 5, tick mark)</title><circle cx="50" cy="50" r="38" class="trk"/><circle cx="50" cy="50" r="38" class="arc" style="--off:0"/><line x1="18.6" y1="39.8" x2="7.2" y2="36.1" class="tgt"/><text x="50" y="52" text-anchor="middle" class="val">5 / 5</text><text x="50" y="66" text-anchor="middle" class="sub">users</text></svg><strong>Users finish in < 2 min</strong><span class="tg">Target ≥ 4 of 5</span><span class="met">✓ Met</span><span class="ev">Five-user test TC-047 (NFR-12)</span></div></div>
-    <div class="box" style="gap:10px"><span class="kicker">Test status · automated run 5 Nov (ef8707c) + manual run</span>
-      <div class="kb"><div title="Automated tests (CI): 128 of 128 PASS"><span>Automated tests (CI)</span><span class="bar"><i></i></span><b>128 / 128 PASS</b></div><div title="Manual system tests: 127 of 127 PASS"><span>Manual system tests</span><span class="bar"><i></i></span><b>127 / 127 PASS</b></div><div title="Red-team tests: 8 of 8 PASS"><span>Red-team tests</span><span class="bar"><i></i></span><b>8 / 8 PASS</b></div><div title="Release gates: 21 of 21 PASS"><span>Release gates</span><span class="bar"><i></i></span><b>21 / 21 PASS</b></div><div title="Requirements verified: 59 of 59 PASS"><span>Requirements verified</span><span class="bar"><i></i></span><b>59 / 59 PASS</b></div></div>
+    <div class="box" style="gap:10px"><span class="kicker">Test status · automated run 6 Nov (54442fa) + manual run</span>
+      <div class="kb"><div title="Automated tests (CI): 134 of 134 PASS"><span>Automated tests (CI)</span><span class="bar"><i></i></span><b>134 / 134 PASS</b></div><div title="Manual system tests: 127 of 127 PASS"><span>Manual system tests</span><span class="bar"><i></i></span><b>127 / 127 PASS</b></div><div title="Red-team tests: 8 of 8 PASS"><span>Red-team tests</span><span class="bar"><i></i></span><b>8 / 8 PASS</b></div><div title="Release gates: 21 of 21 PASS"><span>Release gates</span><span class="bar"><i></i></span><b>21 / 21 PASS</b></div><div title="Requirements verified: 59 of 59 PASS"><span>Requirements verified</span><span class="bar"><i></i></span><b>59 / 59 PASS</b></div></div>
     </div>
   </div>
 </section>
 
 <!-- Backup: Further releases -->
 <section class="slide" data-chapter="Backup: Releases" data-time="1:00" aria-label="From MVP to pilot store">
-  <header class="shead"><div class="sign"><b>Backup</b><span>Operation · release milestones</span></div><span class="stime">~1:00</span></header>
+  <header class="shead"><div class="sign"><b>Backup</b><span>Operation · release milestones</span></div><span class="stime">~1:00</span><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody">
     <h2>From MVP to pilot store</h2>
     <div class="road">
@@ -1897,7 +2079,7 @@ Manual run: all linked system / red-team tests PASS">09</span></div></div>
 
 <!-- Backup: Software evolution 1/2 -->
 <section class="slide" data-chapter="Backup: Software evolution" data-time="–" aria-label="Software evolution: every change runs the same loop">
-  <header class="shead"><div class="sign"><b>Backup</b><span>Evolution · releases</span></div></header>
+  <header class="shead"><div class="sign"><b>Backup</b><span>Evolution · releases</span></div><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:10px">
     <h2>Every change runs the same loop – release by release</h2>
     <div class="uml-p"><svg viewBox="0 0 1040 300" class="uml" role="img" aria-label="Software evolution process for Baumarkt-Buddy">
@@ -1950,14 +2132,14 @@ Manual run: all linked system / red-team tests PASS">09</span></div></div>
 
 <!-- Backup: Software evolution 2/2 – change management and maintenance -->
 <section class="slide" data-chapter="Backup: Change &amp; maintenance" data-time="–" aria-label="How we manage change and maintain the app">
-  <header class="shead"><div class="sign"><b>Backup</b><span>Evolution · change management &amp; maintenance</span></div></header>
+  <header class="shead"><div class="sign"><b>Backup</b><span>Evolution · change management &amp; maintenance</span></div><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:12px">
     <h2>How a change gets in, and how the app stays healthy</h2>
     <div class="cm">
       <div class="cm-flow">
         <div class="cm-s"><i>1</i><b>Proposal</b><span>Change proposal or team decision</span><em>CP-D14-W · D-14</em></div>
         <div class="cm-s"><i>2</i><b>Branch</b><span>Never on main</span><em>claude/…</em></div>
-        <div class="cm-s"><i>3</i><b>Test</b><span>Regression on every change</span><em>128 auto + manual</em></div>
+        <div class="cm-s"><i>3</i><b>Test</b><span>Regression on every change</span><em>134 auto + manual</em></div>
         <div class="cm-s"><i>4</i><b>Review</b><span>Person approves the pull request</span><em>CODEOWNERS</em></div>
         <div class="cm-s"><i>5</i><b>Record</b><span>Change log milestone, README</span><em>CHANGELOG.md</em></div>
       </div>
@@ -1974,14 +2156,14 @@ Manual run: all linked system / red-team tests PASS">09</span></div></div>
 
 <!-- Backup: Git repository and change log -->
 <section class="slide" data-chapter="Backup: Git &amp; change log" data-time="–" aria-label="Git repository and change log: one place for code, data, tests and every change">
-  <header class="shead"><div class="sign"><b>Backup</b><span>Evolution · Git repository &amp; change log</span></div></header>
+  <header class="shead"><div class="sign"><b>Backup</b><span>Evolution · Git repository &amp; change log</span></div><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:12px">
     <h2>One repository: the app, its data, its tests and the story of every change</h2>
     <div class="grid g4">
-      <div class="kpi"><b>294</b><span>commits on main, 17 Oct → 5 Nov</span></div>
+      <div class="kpi"><b>303</b><span>commits on main, 17 Oct → 6 Nov</span></div>
       <div class="kpi"><b>115</b><span>pull requests merged, each by a person</span></div>
-      <div class="kpi"><b>100</b><span>commits written by the agent (Claude)</span></div>
-      <div class="kpi"><b>49</b><span>change log milestones</span></div>
+      <div class="kpi"><b>101</b><span>commits written by the agent (Claude)</span></div>
+      <div class="kpi"><b>51</b><span>change log milestones</span></div>
     </div>
     <div class="git-g">
       <div class="git-c">
@@ -1999,7 +2181,7 @@ README.md      <em>how to use</em>
       </div>
       <div class="git-c">
         <div class="mk-h"><h3>Commits per day</h3><span class="kicker">main</span></div>
-        <div class="git-act"><svg viewBox="0 0 320 120" role="img" aria-label="Commits per day on main, 17 Oct to 5 Nov 2026"><line x1="0" y1="96" x2="320" y2="96" class="base"/><rect x="2.0" y="86.8" width="12.0" height="9.2" rx="1.5" class="bar"><title>17 Oct: 7 commits</title></rect><text x="2" y="108" class="ax" text-anchor="start">17 Oct</text><rect x="18.0" y="93.4" width="12.0" height="2.6" rx="1.5" class="bar"><title>18 Oct: 2 commits</title></rect><rect x="34.0" y="89.4" width="12.0" height="6.6" rx="1.5" class="bar"><title>19 Oct: 5 commits</title></rect><rect x="50.0" y="85.4" width="12.0" height="10.6" rx="1.5" class="bar"><title>20 Oct: 8 commits</title></rect><rect x="66.0" y="96.0" width="12.0" height="0.0" rx="1.5" class="bar"><title>21 Oct: 0 commits</title></rect><rect x="82.0" y="90.7" width="12.0" height="5.3" rx="1.5" class="bar"><title>22 Oct: 4 commits</title></rect><rect x="98.0" y="39.2" width="12.0" height="56.8" rx="1.5" class="bar"><title>23 Oct: 43 commits</title></rect><rect x="114.0" y="66.9" width="12.0" height="29.1" rx="1.5" class="bar"><title>24 Oct: 22 commits</title></rect><rect x="130.0" y="29.9" width="12.0" height="66.1" rx="1.5" class="bar hi"><title>25 Oct: 50 commits</title></rect><text x="136.0" y="108" class="ax" text-anchor="middle">25 Oct</text><rect x="146.0" y="93.4" width="12.0" height="2.6" rx="1.5" class="bar"><title>26 Oct: 2 commits</title></rect><rect x="162.0" y="59.0" width="12.0" height="37.0" rx="1.5" class="bar"><title>27 Oct: 28 commits</title></rect><rect x="178.0" y="92.0" width="12.0" height="4.0" rx="1.5" class="bar"><title>28 Oct: 3 commits</title></rect><rect x="194.0" y="86.8" width="12.0" height="9.2" rx="1.5" class="bar"><title>29 Oct: 7 commits</title></rect><rect x="210.0" y="96.0" width="12.0" height="0.0" rx="1.5" class="bar"><title>30 Oct: 0 commits</title></rect><rect x="226.0" y="80.1" width="12.0" height="15.9" rx="1.5" class="bar"><title>31 Oct: 12 commits</title></rect><text x="232.0" y="108" class="ax" text-anchor="middle">31 Oct</text><rect x="242.0" y="90.7" width="12.0" height="5.3" rx="1.5" class="bar"><title>1 Nov: 4 commits</title></rect><rect x="258.0" y="94.7" width="12.0" height="1.3" rx="1.5" class="bar"><title>2 Nov: 1 commits</title></rect><rect x="274.0" y="22.0" width="12.0" height="74.0" rx="1.5" class="bar hi"><title>3 Nov: 56 commits</title></rect><text x="280.0" y="108" class="ax" text-anchor="middle">3 Nov</text><rect x="290.0" y="90.7" width="12.0" height="5.3" rx="1.5" class="bar"><title>4 Nov: 4 commits</title></rect><rect x="306.0" y="48.4" width="12.0" height="47.6" rx="1.5" class="bar"><title>5 Nov: 36 commits</title></rect><text x="312.0" y="108" class="ax" text-anchor="middle">5 Nov</text><text x="136.0" y="14" class="an" text-anchor="middle">R1 MVP</text><text x="274.0" y="12" class="an" text-anchor="middle">D-13 / D-14</text></svg></div>
+        <div class="git-act"><svg viewBox="0 0 336 120" role="img" aria-label="Commits per day on main, 17 Oct to 6 Nov 2026"><line x1="0" y1="96" x2="336" y2="96" class="base"/><rect x="2.0" y="86.8" width="12.0" height="9.2" rx="1.5" class="bar"><title>17 Oct: 7 commits</title></rect><text x="2" y="108" class="ax" text-anchor="start">17 Oct</text><rect x="18.0" y="93.4" width="12.0" height="2.6" rx="1.5" class="bar"><title>18 Oct: 2 commits</title></rect><rect x="34.0" y="89.4" width="12.0" height="6.6" rx="1.5" class="bar"><title>19 Oct: 5 commits</title></rect><rect x="50.0" y="85.4" width="12.0" height="10.6" rx="1.5" class="bar"><title>20 Oct: 8 commits</title></rect><rect x="66.0" y="96.0" width="12.0" height="0.0" rx="1.5" class="bar"><title>21 Oct: 0 commits</title></rect><rect x="82.0" y="90.7" width="12.0" height="5.3" rx="1.5" class="bar"><title>22 Oct: 4 commits</title></rect><rect x="98.0" y="39.2" width="12.0" height="56.8" rx="1.5" class="bar"><title>23 Oct: 43 commits</title></rect><rect x="114.0" y="66.9" width="12.0" height="29.1" rx="1.5" class="bar"><title>24 Oct: 22 commits</title></rect><rect x="130.0" y="29.9" width="12.0" height="66.1" rx="1.5" class="bar hi"><title>25 Oct: 50 commits</title></rect><text x="136.0" y="108" class="ax" text-anchor="middle">25 Oct</text><rect x="146.0" y="93.4" width="12.0" height="2.6" rx="1.5" class="bar"><title>26 Oct: 2 commits</title></rect><rect x="162.0" y="59.0" width="12.0" height="37.0" rx="1.5" class="bar"><title>27 Oct: 28 commits</title></rect><rect x="178.0" y="92.0" width="12.0" height="4.0" rx="1.5" class="bar"><title>28 Oct: 3 commits</title></rect><rect x="194.0" y="86.8" width="12.0" height="9.2" rx="1.5" class="bar"><title>29 Oct: 7 commits</title></rect><rect x="210.0" y="96.0" width="12.0" height="0.0" rx="1.5" class="bar"><title>30 Oct: 0 commits</title></rect><rect x="226.0" y="80.1" width="12.0" height="15.9" rx="1.5" class="bar"><title>31 Oct: 12 commits</title></rect><text x="232.0" y="108" class="ax" text-anchor="middle">31 Oct</text><rect x="242.0" y="90.7" width="12.0" height="5.3" rx="1.5" class="bar"><title>1 Nov: 4 commits</title></rect><rect x="258.0" y="94.7" width="12.0" height="1.3" rx="1.5" class="bar"><title>2 Nov: 1 commits</title></rect><rect x="274.0" y="22.0" width="12.0" height="74.0" rx="1.5" class="bar hi"><title>3 Nov: 56 commits</title></rect><text x="280.0" y="108" class="ax" text-anchor="middle">3 Nov</text><rect x="290.0" y="90.7" width="12.0" height="5.3" rx="1.5" class="bar"><title>4 Nov: 4 commits</title></rect><rect x="306.0" y="48.4" width="12.0" height="47.6" rx="1.5" class="bar"><title>5 Nov: 36 commits</title></rect><rect x="322.0" y="84.1" width="12.0" height="11.9" rx="1.5" class="bar"><title>6 Nov: 9 commits</title></rect><text x="334.0" y="108" class="ax" text-anchor="end">6 Nov</text><text x="136.0" y="14" class="an" text-anchor="middle">R1 MVP</text><text x="274.0" y="12" class="an" text-anchor="middle">D-13 / D-14</text></svg></div>
         <div class="git-entry"><code>CHANGELOG.md · one entry</code>
           <p><span>Date</span>2026-11-05</p>
           <p><span>What</span>Mounting logic D-13 / D-14 is the normal flow</p>
@@ -2023,6 +2205,24 @@ README.md      <em>how to use</em>
     </div>
   </div>
 </section>
+
+<!-- Last: contribution list -->
+<section class="slide" data-chapter="Contribution list" data-time="–" aria-label="Contribution list: who did what">
+  <header class="shead"><div class="sign"><b>Team</b><span>Contribution list</span></div><span class="stime">–</span><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
+  <div class="sbody">
+    <h2>Contribution list: who did what</h2>
+    <div class="cl">
+      <div class="cl-row cl-h"><span class="kicker">Team member</span><span class="kicker">Contribution · roles and pitch slides</span></div>
+      <div class="cl-row"><div class="cl-name"><i aria-hidden="true">SS</i><strong>Sara Schönhöfer</strong></div><div class="cl-what"><span class="cl-slide">Slide 2 · Problem &amp; Solution</span><span class="cl-slide">Slide 3 · Target users</span></div></div>
+      <div class="cl-row"><div class="cl-name"><i aria-hidden="true">CB</i><strong>Christoph Braun</strong></div><div class="cl-what"><span class="cl-role">App testing</span><span class="cl-slide">Slide 4 · Market &amp; Competitors</span><span class="cl-slide">Slide 5 · App workflow</span></div></div>
+      <div class="cl-row"><div class="cl-name"><i aria-hidden="true">HG</i><strong>Hariram Gopalakrishnan</strong></div><div class="cl-what"><span class="cl-role">Product owner</span><span class="cl-role">Pitch deck creator</span><span class="cl-slide">Slide 8 · V-model</span></div></div>
+      <div class="cl-row"><div class="cl-name"><i aria-hidden="true">PS</i><strong>Patrik Saile</strong></div><div class="cl-what"><span class="cl-role">Git owner</span><span class="cl-role">Vibe coding &amp; implementation</span><span class="cl-slide">Slide 9 · Architecture &amp; zero cost</span><span class="cl-slide">Slide 10 · Vibe coding process</span></div></div>
+      <div class="cl-row"><div class="cl-name"><i aria-hidden="true">SK</i><strong>Shally Kapoor</strong></div><div class="cl-what"><span class="cl-role">Requirements manager</span><span class="cl-role">Release review</span><span class="cl-slide">Slide 13 · Key takeaways &amp; lessons learned</span></div></div>
+    </div>
+    <div class="principle">Every team member contributed equally and helped to complete the MVP successfully.</div>
+  </div>
+</section>
+
 
 </div></div>
 
@@ -2054,13 +2254,13 @@ README.md      <em>how to use</em>
     d.setAttribute('aria-label','Go to slide '+(n+1)+': '+info(n).ch);
     d.addEventListener('click',function(){go(n)});dots.appendChild(d);
 
-    var b=document.createElement('button');b.type='button';b.setAttribute('role','menuitem');
-    var num=document.createElement('span');num.textContent=String(n+1).padStart(2,'0')+' · '+info(n).time;
-    var lab=document.createElement('strong');lab.textContent=info(n).ch;
+    var b=document.createElement('button');b.type='button';b.setAttribute('role','menuitem');b.tabIndex=-1;
+    var ch=info(n).ch,bk=/^Backup: /.test(ch);
+    var num=document.createElement('span');num.textContent=String(n+1);
+    var lab=document.createElement('strong');lab.textContent=ch.replace(/^Backup: /,'');
     b.appendChild(num);b.appendChild(lab);
-    b.addEventListener('mouseenter',function(){highlight(n)});
-    b.addEventListener('focus',function(){highlight(n)});
-    b.addEventListener('click',function(){go(n);toggleMenu(false)});
+    if(bk){var tg=document.createElement('em');tg.textContent='Backup';b.appendChild(tg)}
+    b.addEventListener('click',function(e){e.stopPropagation();go(n);toggleMenu(false)});
     tabs.appendChild(b);
   });
 
@@ -2069,8 +2269,17 @@ README.md      <em>how to use</em>
     [].forEach.call(tabs.children,function(b,k){b.classList.toggle('hi',k===n)});
     var x=info(n);
     preview.firstChild.textContent=x.t;
-    preview.lastChild.textContent='Slide '+(n+1)+' of '+slides.length+' · ~'+x.time+' min';
+    preview.lastChild.textContent='Slide '+(n+1)+' of '+slides.length+(/^Backup: /.test(x.ch)?' · backup':'');
   }
+  /* dial: the item in the middle band is the chosen one; items further away get smaller and turn away */
+  var ROW=46;
+  function dialTo(n,smooth){n=Math.max(0,Math.min(slides.length-1,n));tabs.scrollTo({top:n*ROW,behavior:smooth?'smooth':'auto'});highlight(n);dialPaint()}
+  function dialPaint(){
+    var c=tabs.scrollTop/ROW;
+    [].forEach.call(tabs.children,function(b,k){var d=k-c,a=Math.min(Math.abs(d),4);
+      b.style.transform='rotateX('+(-d*9)+'deg) scale('+(1-a*.07)+')';b.style.opacity=String(Math.max(.3,1-a*.2))});
+  }
+  tabs.addEventListener('scroll',function(){var n=Math.round(tabs.scrollTop/ROW);if(n!==hi)highlight(n);dialPaint()});
 
   /* build steps: elements with data-step="1", "2", ... appear one per click.
      data-audio = file to play, data-delay = wait in ms after the element appears. */
@@ -2085,6 +2294,7 @@ README.md      <em>how to use</em>
     stopAudio();
     showSteps(i,showAll?maxStep(i):0);
     slides.forEach(function(s,k){s.classList.toggle('on',k===i)});
+    [].forEach.call(document.querySelectorAll('video.vfull'),function(v){clearTimeout(v._t);if(slides[i].contains(v)){try{v.currentTime=0}catch(e){}v.muted=false;v.volume=+(v.getAttribute('data-volume')||1);var st=function(){var r=v.play();if(r&&r.catch)r.catch(function(){})};var d=+(v.getAttribute('data-delay')||0);if(d){v.pause();v._t=setTimeout(st,d)}else st()}else v.pause()});
     [].forEach.call(slides[i].querySelectorAll('iframe[data-src]'),function(f){if(!f.getAttribute('src'))f.src=f.getAttribute('data-src')});
     [].forEach.call(dots.children,function(d,k){d.classList.toggle('on',k===i);d.setAttribute('aria-current',k===i?'true':'false')});
     [].forEach.call(tabs.children,function(b,k){b.setAttribute('aria-current',k===i?'true':'false')});
@@ -2163,11 +2373,10 @@ README.md      <em>how to use</em>
   function toggleMenu(open){
     if(open===undefined)open=menu.hidden;
     menu.hidden=!open;menuBtn.setAttribute('aria-expanded',open?'true':'false');
-    if(open){highlight(i);tabs.children[i].focus()}
+    if(open){dialTo(i,false);tabs.focus({preventScroll:true})}
   }
   menuBtn.addEventListener('click',function(e){e.stopPropagation();toggleMenu()});
-  document.addEventListener('click',function(e){if(!menu.hidden&&!menu.contains(e.target))toggleMenu(false)});
-  tabs.addEventListener('mouseleave',function(){highlight(i)});
+  document.addEventListener('click',function(e){if(!menu.hidden&&!menu.querySelector('.dial-box').contains(e.target))toggleMenu(false)});
 
   var wrap=document.querySelector('.wrap'),fsBtn=document.getElementById('fsBtn');
   function fsEl(){return document.fullscreenElement||document.webkitFullscreenElement}
@@ -2191,8 +2400,9 @@ README.md      <em>how to use</em>
     if((k==='a'||k==='A')&&menu.hidden){e.preventDefault();toggleAudio();return}
     if(!menu.hidden){
       if(k==='Escape'){toggleMenu(false);menuBtn.focus();return}
-      if(k==='ArrowRight'||k==='ArrowDown'){e.preventDefault();tabs.children[Math.min(slides.length-1,hi+1)].focus()}
-      if(k==='ArrowLeft'||k==='ArrowUp'){e.preventDefault();tabs.children[Math.max(0,hi-1)].focus()}
+      if(k==='ArrowRight'||k==='ArrowDown'){e.preventDefault();dialTo(hi+1,true)}
+      if(k==='ArrowLeft'||k==='ArrowUp'){e.preventDefault();dialTo(hi-1,true)}
+      if(k==='Enter'||k===' '){e.preventDefault();go(hi);toggleMenu(false)}
       return;
     }
     if(k==='ArrowRight'||k==='PageDown'||k===' '){e.preventDefault();forward()}
@@ -2232,6 +2442,7 @@ README.md      <em>how to use</em>
 
   go(0);
 })();
+  [].forEach.call(document.querySelectorAll('video.vfull'),function(v){v.setAttribute('data-vclick','');if(v.hasAttribute('data-repeat-muted'))v.addEventListener('ended',function(){v.muted=true;v.currentTime=0;var r=v.play();if(r&&r.catch)r.catch(function(){})});v.addEventListener('click',function(e){e.stopPropagation();if(v.paused){var r=v.play();if(r&&r.catch)r.catch(function(){})}else v.pause()})});
 </script>
 
 </body></html>
