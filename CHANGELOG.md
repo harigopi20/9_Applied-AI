@@ -6,8 +6,24 @@ when they are released to `main`.
 
 ## Unreleased
 
-- **2026-11-07 – Merged the team's `main` into the deck branch.** Conflicts in `pitch/index.html`, CHANGELOG and README resolved: the final deck is kept; the closing animation, the uploaded images and videos from `main` stay in the repository.
-  *Why:* PR #188 could not be merged. *Prompt (paraphrased):* "PR 188 shows conflicts we don't know how to resolve."
+## Milestone: Pitch deck footer, seek bar, Git repository link and tool logos – 2026-11-07
+Summary (same as the pull request):
+- Footer "Digital Business and AI 2025–2027 · Applied AI" and a clickable seek bar with "Slide x / 14 · n to go" on every slide
+- Q&A: GitHub logo with "gitrepo_baumarktbuddy" (links to the repository), pops up together with the QR code
+- V-model: "– Tools:" with Claude, ChatGPT and GitHub logos in the heading; Requirements box "59 in R1, defined by MoSCoW"
+- Architecture slide: "Swap by config" removed from "Gray box, not black box", more space between the points
+
+- **2026-11-07 – Footer, seek bar, Git repository link and tool logos.** Every slide gets the footer
+  "Digital Business and AI 2025–2027 · Applied AI" (bottom left, inside the slide margin, content unchanged) and a
+  seek bar along the bottom edge: one segment per slide (main part orange, backup grey), hover shows the title,
+  click jumps there; bottom right shows "Slide x / 14 · n to go" or "Backup · n". It is part of the slide, so it
+  also shows in fullscreen. Q&A: GitHub logo (`img/github.png`) with "gitrepo_baumarktbuddy", linking to the
+  repository, pops up at the same time as the QR code. V-model: heading "Defined on the left, proven on the right –
+  Tools:" with milky Claude (`img/claude.jpg`), ChatGPT (OpenAI icon, simple-icons) and GitHub logos; Requirements box
+  now "59 in R1, defined by MoSCoW". Architecture slide: "Swap by config" removed, wider spacing between the points.
+  *Why:* the team wants the programme name on every slide, a progress view while presenting and the repository on
+  the closing Q&A. *Prompt (paraphrased):* "Add a footer, a seek option at the bottom, our Git repo on the Questions
+  slide and the tool logos in the V-model heading."
 
 ## Milestone: Final pitch deck with videos, closing slide, contribution list and dial menu – 2026-11-06
 Summary (same as the pull request):
@@ -36,6 +52,9 @@ Summary (same as the pull request):
   new roles: Concept definition (Sara Schönhöfer) and App demo (Christoph Braun).
   *Why:* final presentation on 7 Nov 2026. *Prompt (paraphrased):* "Add the video slides, the closing slide and
   the contribution list, simplify the menu, then push the new slides with the image updates so I can open the PR."
+
+- **2026-11-07 – Merged the team's `main` into the deck branch.** Conflicts in `pitch/index.html`, CHANGELOG and README resolved: the final deck is kept; the closing animation, the uploaded images and videos from `main` stay in the repository.
+  *Why:* PR #188 could not be merged. *Prompt (paraphrased):* "PR 188 shows conflicts we don't know how to resolve."
 
 ## Milestone: Closing slide animation – 2026-11-06
 Summary (same as the pull request):
