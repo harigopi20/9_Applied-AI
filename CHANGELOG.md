@@ -6,6 +6,37 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-11-07 – Merged the team's `main` into the deck branch.** Conflicts in `pitch/index.html`, CHANGELOG and README resolved: the final deck is kept; the closing animation, the uploaded images and videos from `main` stay in the repository.
+  *Why:* PR #188 could not be merged. *Prompt (paraphrased):* "PR 188 shows conflicts we don't know how to resolve."
+
+## Milestone: Final pitch deck with videos, closing slide, contribution list and dial menu – 2026-11-06
+Summary (same as the pull request):
+- Two warm-up video slides before Key takeaways & lessons learned (Anthropic clip, quiet and repeating silently; Matrix meme)
+- Key takeaways: "Code is cheap; decisions are the real work" (human in the loop) replaces "One integrated app"; 4th lesson learned on consolidated issues and reviews
+- Closing slide "Project done. Thank you!" with the new picture and falling confetti; contribution list as the last slide
+- Chapter menu (M) as a dial in the centre of the screen, without times
+- "Key takeaway #0" (Anthropic video) moved after Key takeaways & lessons learned, right before Q&A
+- UML sequence diagram moved from the main part to the backup, after Requirements · MoSCoW (no click animation, shown complete)
+- Contribution list: roles and pitch slides in two colour-coded columns; Concept definition (Sara) and App demo (Christoph) added
+- Deck images and videos now in `pitch/img/` and `pitch/media/`, so the repository copy works on its own
+
+- **2026-11-06 – Pitch deck: final version with videos, closing slide, contribution list and dial menu.**
+  `pitch/index.html` replaced by the team's current local deck (30 slides). New: video slides "Key takeaways"
+  (`media/anthropic.mp4`, starts after 1 s at 8 % volume, then repeats muted) and "Lessons learned"
+  (`media/matrix.mp4`, loops), both without player controls so the built-in captions stay visible; Key takeaways
+  reworked (Rules first, then "Code is cheap; decisions are the real work", then 100 % traceable) and a 4th lesson
+  learned; closing slide with `img/project_done.webp` and confetti; contribution list (who did which roles and
+  slides, all contributed equally) as the last slide; the chapter menu is a dial with slide number and topic only.
+  The images and videos the deck uses are added under `pitch/img/` and `pitch/media/` (before, the repository
+  copy had none of them). README updated.
+  Follow-up (2026-11-07): the "Key takeaway #0" video slide moved after Key takeaways & lessons learned, right
+  before Q&A. The UML sequence diagram moved to the backup (after Requirements · MoSCoW, labelled
+  "Design · UML sequence diagram") and is shown complete without the click-by-click build. The contribution list
+  now names slides 7, 8, 9 and 11 and shows roles (dark) and pitch slides (orange) in two separate columns;
+  new roles: Concept definition (Sara Schönhöfer) and App demo (Christoph Braun).
+  *Why:* final presentation on 7 Nov 2026. *Prompt (paraphrased):* "Add the video slides, the closing slide and
+  the contribution list, simplify the menu, then push the new slides with the image updates so I can open the PR."
+
 ## Milestone: Closing slide animation – 2026-11-06
 Summary (same as the pull request):
 - New `pitch/closing-animation.mp4`: Josie and Andrea (persona photos) celebrate their finished projects – "Shelf hung", "Wall painted", confetti, "Project done. Thank you!"
