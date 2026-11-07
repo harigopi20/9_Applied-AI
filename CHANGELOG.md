@@ -13,6 +13,7 @@ Summary (same as the pull request):
 - Closing slide "Project done. Thank you!" with the new picture and falling confetti; contribution list as the last slide
 - Chapter menu (M) as a dial in the centre of the screen, without times
 - "Key takeaway #0" (Anthropic video) moved after Key takeaways & lessons learned, right before Q&A
+- UML sequence diagram moved from the main part to the backup, after Requirements · MoSCoW
 - Deck images and videos now in `pitch/img/` and `pitch/media/`, so the repository copy works on its own
 
 - **2026-11-06 – Pitch deck: final version with videos, closing slide, contribution list and dial menu.**
@@ -25,7 +26,8 @@ Summary (same as the pull request):
   The images and videos the deck uses are added under `pitch/img/` and `pitch/media/` (before, the repository
   copy had none of them). README updated.
   Follow-up (2026-11-07): the "Key takeaway #0" video slide moved after Key takeaways & lessons learned, right
-  before Q&A; the contribution list now names slide 12 for Key takeaways & lessons learned.
+  before Q&A. The UML sequence diagram moved to the backup (after Requirements · MoSCoW, labelled
+  "Design · UML sequence diagram"); the contribution list now names slides 7, 8, 9 and 11.
   *Why:* final presentation on 7 Nov 2026. *Prompt (paraphrased):* "Add the video slides, the closing slide and
   the contribution list, simplify the menu, then push the new slides with the image updates so I can open the PR."
 
