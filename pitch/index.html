@@ -879,6 +879,57 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 /* UML sequence in the backup: shown complete, the three notes as short headlines */
 .seq-static .seq-notes{gap:10px}
 .seq-static .seq-note p{display:none}
+
+/* footer on every slide: bottom left, inside the slide padding, so the content keeps its place */
+.slide{position:relative}
+.dmba-foot{position:absolute;left:38.4px;bottom:9px;z-index:5;pointer-events:none;
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;line-height:1;color:var(--muted);white-space:nowrap}
+.slide.cele2 .dmba-foot{background:rgba(255,255,255,.85);color:#1d2328;padding:4px 8px;border-radius:4px;left:16px;bottom:10px}
+
+/* Q&A: Git repository, pops up together with the QR code */
+.qa-git{display:inline-flex;align-items:center;gap:12px;align-self:flex-start;text-decoration:none;color:var(--ink);opacity:0}
+.qa-git svg{width:38px;height:38px;flex:none}
+.qa-git span{display:flex;flex-direction:column;line-height:1.1}
+.qa-git small{font-family:var(--f-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.qa-git b{font-family:var(--f-mono);font-size:19px;font-weight:600}
+.qa-git:hover b{color:var(--signal)}
+.slide.has-qr.on .qa-git{animation:qrIn .6s cubic-bezier(.2,.9,.3,1.15) .4s forwards;transform-origin:20px 50%}
+/* seek bar at the bottom of every slide: where we are and how much is left */
+.seek{position:absolute;left:0;right:0;bottom:0;height:34px;z-index:8;pointer-events:none}
+.seek-bar{position:absolute;left:38.4px;right:38.4px;bottom:0;height:12px;display:flex;align-items:flex-end;gap:2px;pointer-events:auto}
+.seek-bar .seg{flex:1;height:3px;padding:0;border:0;border-radius:2px;background:color-mix(in srgb,var(--muted) 28%,transparent);cursor:pointer;transition:height .15s}
+.seek-bar .seg.bk{flex:.45;background:color-mix(in srgb,var(--muted) 14%,transparent)}
+.seek-bar .seg.first-bk{margin-left:8px}
+.seek-bar .seg.done{background:var(--signal)}
+.seek-bar .seg.bk.done{background:color-mix(in srgb,var(--muted) 55%,transparent)}
+.seek-bar .seg.cur{background:var(--ink);height:5px}
+.seek-bar:hover .seg{height:7px}
+.seek-txt{position:absolute;right:38.4px;bottom:16px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;line-height:1;color:var(--muted);white-space:nowrap}
+.seek-tip{position:absolute;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--panel);font-family:var(--f-mono);font-size:11px;padding:4px 8px;border-radius:4px;white-space:nowrap}
+.dmba-foot{bottom:16px}
+.slide.cele2 .dmba-foot{bottom:14px}
+.deck:has(.slide.cele2.on) .seek-txt,.deck:has(.slide.cover.on) .seek-txt{background:rgba(255,255,255,.85);color:#1d2328;padding:4px 8px;border-radius:4px;bottom:12px;right:16px}
+.deck:has(.slide.cele2.on) .seek-bar .seg:not(.done):not(.cur){background:rgba(255,255,255,.7)}
+.wrap:fullscreen .seek-bar .seg{cursor:pointer}
+
+/* V-model heading with the tools we used */
+.h-tools{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.tools-logos{display:inline-flex;align-items:center;gap:10px}
+.tlogo{width:38px;height:38px;border-radius:9px;display:block;object-fit:cover;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+img.tlogo[src$="claude.jpg"]{transform:scale(1.08);clip-path:inset(4% round 9px)}
+.tlogo.oa{background:#000;display:grid;place-items:center}
+.tlogo.oa svg{width:24px;height:24px}
+.qa-git img{width:38px;height:38px;border-radius:9px;flex:none;display:block}
+/* softer logos: slightly see-through with a light glossy sheen, so they don't compete with the heading */
+.tools-logos{position:relative}
+.tlogo,.qa-git img{opacity:.6;filter:saturate(.75);box-shadow:0 1px 3px rgba(0,0,0,.10);transition:opacity .2s,filter .2s}
+.tlogo:hover,.qa-git:hover img{opacity:1;filter:none}
+.tools-logos::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:9px;
+  background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.35) 45%,transparent 60%)}
+/* V-model only: milky like the title-slide picture (see-through on the light slide), no shadow */
+.h-tools .tlogo{opacity:.34;filter:none;box-shadow:none}
+.h-tools .tools-logos::after{display:none}
+.h-tools .tlogo:hover{opacity:1}
 </style>
 
 <div class="wrap">
@@ -892,6 +943,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 </div>
 
 <div class="stage" id="stage"><div class="deck" id="deck">
+<div class="seek" id="seek" aria-label="Slide progress"><div class="seek-bar" id="seekBar"></div><div class="seek-txt" id="seekTxt"></div><div class="seek-tip" id="seekTip" hidden></div></div>
 
 <!-- 1 Title -->
 <section class="slide title cover on" data-chapter="Title" data-time="1:30" aria-label="Baumarkt-Buddy">
@@ -904,6 +956,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
     <div class="ruler" aria-hidden="true"></div>
     <div class="meta" style="display:grid;grid-template-columns:auto 1fr;gap:6px 22px"><span>Team:</span><span><b>Patrik Saile, Hariram Gopalakrishnan, Sara Schönhöfer, Christoph Braun, Shally Kapoor</b></span><span>Date:</span><span>07.11.26</span></div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- 2 Problem & Solution -->
@@ -943,6 +996,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
       </article>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- 3 Target users -->
@@ -985,6 +1039,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
       <div class="nf-side"><p>High-risk jobs are refused with a hand-off to a professional:</p><img src="img/demo-stop.png" alt="App message: This job needs a professional"></div>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- 4 Market & competitors -->
@@ -1033,6 +1088,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
     </div>
     <div class="principle" data-step="2">Our opportunity: the full journey in one app, with safety stops, for German chains.</div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- 5 App workflow -->
@@ -1116,6 +1172,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
       <p><b>Privacy:</b> no login. The postcode stays on the device and is not stored.</p>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- 6 Live demo (app inside the slide) -->
@@ -1154,19 +1211,20 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
       </div>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- 7 V-model -->
 <section class="slide" data-chapter="V-model" data-time="2:30" aria-label="Defined on the left, proven on the right">
   <header class="shead"><div class="sign"><b>07</b><span>V-model</span></div><span class="stime">~2:30</span><span class="bb-logo" role="img" aria-label="Baumarkt-Buddy"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 41H40V20L24 6 8 20V33" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 39L26 24" stroke="var(--signal)" stroke-width="5.5" stroke-linecap="round"/><rect x="21" y="17.5" width="17" height="8" rx="2" transform="rotate(45 29.5 21.5)" fill="var(--signal)"/></svg><span>Baumarkt-<b>Buddy</b></span></span></header>
   <div class="sbody" style="gap:10px">
-    <h2>Defined on the left, proven on the right</h2>
+    <h2 class="h-tools"><span>Defined on the left, proven on the right – Tools:</span><span class="tools-logos"><img class="tlogo" src="img/claude.jpg" alt="Claude" title="Claude"><span class="tlogo oa" role="img" aria-label="ChatGPT" title="ChatGPT"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg></span><img class="tlogo" src="img/github.png" alt="GitHub" title="GitHub"></span></h2>
     <div class="v">
       <div class="vn" data-step="1" style="grid-column:1/3;grid-row:1"><span class="who">Team</span><strong>Concept</strong><small>Vision, use cases, KPIs</small></div>
       <div class="pair" data-step="2" style="grid-column:3/6;grid-row:1">KPIs checked with real users: 5 / 5 under 2 min</div>
       <div class="vn" data-step="2" style="grid-column:6/8;grid-row:1"><span class="who">Team</span><strong>Operation &amp; Maintenance</strong><small>GitHub Pages, KPI review, change log</small></div>
 
-      <div class="vn agent" data-step="1" style="grid-column:2;grid-row:2"><span class="who">Agent + team</span><strong>Requirements</strong><small>59 in R1 · 50 Must · 9 Should</small></div>
+      <div class="vn agent" data-step="1" style="grid-column:2;grid-row:2"><span class="who">Agent + team</span><strong>Requirements</strong><small>59 in R1, defined by MoSCoW</small></div>
       <div class="pair" data-step="2" style="grid-column:3/6;grid-row:2">59 / 59 traced to test cases</div>
       <div class="vn agent" data-step="2" style="grid-column:6;grid-row:2"><span class="who">Agent + team</span><strong>Validation &amp; Verification</strong><small>127 system + 8 red-team tests PASS · 21 gates</small></div>
 
@@ -1186,6 +1244,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
     </div>
     <div class="legend"><span><i class="sw" aria-hidden="true"></i>Team</span><span><i class="sw a" aria-hidden="true"></i>AI agent (Claude)</span><span><i class="sw b" aria-hidden="true"></i>Vibe coding</span><span>R1 requirements: 22 functional · 18 safety · 10 non-functional · 9 data</span></div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- 8 Architecture & zero cost -->
@@ -1212,15 +1271,15 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
         </table></div>
       </div>
       <div class="box" data-step="4"><span class="kicker">Gray box, not black box</span>
-        <ul class="mark">
+        <ul class="mark" style="gap:12px">
           <li><span class="ok">✓</span><span><b>Closed product world:</b> the AI never picks a product, so it cannot invent one</span></li>
           <li><span class="ok">✓</span><span><b>Fail-safe:</b> unknown wall or load → stop, never a guess</span></li>
           <li><span class="ok">✓</span><span><b>LLM ready, not active:</b> proxy built, switched off by team decision. 6 projects don't need a frontier model</span></li>
-          <li><span class="ok">✓</span><span><b>Swap by config:</b> same JSON contract, same checks</span></li>
         </ul>
       </div>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- 9 Vibe coding process -->
@@ -1253,6 +1312,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
     </div>
     <div class="principle" data-step="2">The AI saved us days. The decisions and the responsibility stayed with us.</div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Video 2 (warm-up before the lessons) -->
@@ -1270,6 +1330,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
       </div>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- 10 Key takeaways & lessons learned -->
@@ -1315,6 +1376,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
     </div>
     <div class="principle" data-step="2">The User enters. Deterministic code decides. People stay accountable.</div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Video: Key takeaway #0 (after the takeaways, before Q&A) -->
@@ -1336,6 +1398,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
       </div>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- 10 Q&A -->
@@ -1346,14 +1409,17 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
     <p class="lead">Baumarkt-Buddy: one project in, a safe and compatible shopping list out.</p>
     <div class="ruler" aria-hidden="true"></div>
     <div class="meta"><span>Team:</span><span><b>Patrik Saile, Hariram Gopalakrishnan, Sara Schönhöfer, Christoph Braun, Shally Kapoor</b></span></div>
+    <a class="qa-git" href="https://github.com/st854d2gpb-create/9_Applied-AI" target="_blank" rel="noopener" title="https://github.com/st854d2gpb-create/9_Applied-AI"><img src="img/github.png" alt="GitHub"><span><small>Git repository</small><b>gitrepo_baumarktbuddy</b></span></a>
   </div>
   <figure class="qa-qr"><img src="img/QR_code.png" alt="QR code: open the Baumarkt-Buddy app"><figcaption>Scan to try the app</figcaption></figure>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Closing: projects done (title image, falling confetti) -->
 <section class="slide cele2" data-chapter="Project done" data-time="0:20" aria-label="Project done. Thank you!">
   <img class="cele2-img" src="img/project_done.webp" alt="Project done, thank you: Josie next to her hung shelf and Andrea at her painted wall, two happy DIYers">
   <div class="cele-conf" aria-hidden="true"><i class="r" style="--x:41%;--w:8px;--c:var(--signal);--d:4.1s;--t:0.47s;--dx:90px;--rot:377deg"></i><i style="--x:12%;--w:9px;--c:var(--go);--d:4.6s;--t:3.48s;--dx:-66px;--rot:-644deg"></i><i style="--x:11%;--w:10px;--c:#FFC83D;--d:4.2s;--t:1.14s;--dx:21px;--rot:149deg"></i><i style="--x:7%;--w:11px;--c:#4A90E2;--d:3.5s;--t:1.08s;--dx:40px;--rot:473deg"></i><i class="r" style="--x:7%;--w:11px;--c:#E94F7A;--d:4.6s;--t:0.47s;--dx:-64px;--rot:-625deg"></i><i style="--x:71%;--w:8px;--c:#FF7E21;--d:3.9s;--t:0.80s;--dx:-90px;--rot:449deg"></i><i style="--x:39%;--w:11px;--c:var(--signal);--d:5.2s;--t:0.93s;--dx:28px;--rot:449deg"></i><i style="--x:81%;--w:8px;--c:var(--go);--d:4.1s;--t:2.22s;--dx:-104px;--rot:435deg"></i><i class="r" style="--x:7%;--w:11px;--c:#FFC83D;--d:3.7s;--t:2.68s;--dx:-11px;--rot:-77deg"></i><i style="--x:59%;--w:11px;--c:#4A90E2;--d:5.4s;--t:1.57s;--dx:-57px;--rot:-352deg"></i><i style="--x:89%;--w:8px;--c:#E94F7A;--d:3.4s;--t:1.35s;--dx:6px;--rot:-17deg"></i><i style="--x:93%;--w:10px;--c:#FF7E21;--d:3.9s;--t:3.73s;--dx:-90px;--rot:328deg"></i><i class="r" style="--x:53%;--w:8px;--c:var(--signal);--d:5.0s;--t:0.83s;--dx:5px;--rot:143deg"></i><i style="--x:5%;--w:12px;--c:var(--go);--d:3.4s;--t:2.25s;--dx:82px;--rot:-78deg"></i><i style="--x:43%;--w:12px;--c:#FFC83D;--d:4.0s;--t:2.04s;--dx:84px;--rot:214deg"></i><i style="--x:8%;--w:7px;--c:#4A90E2;--d:5.5s;--t:1.96s;--dx:50px;--rot:-587deg"></i><i class="r" style="--x:7%;--w:12px;--c:#E94F7A;--d:4.9s;--t:2.56s;--dx:54px;--rot:192deg"></i><i style="--x:36%;--w:12px;--c:#FF7E21;--d:4.1s;--t:2.64s;--dx:-115px;--rot:225deg"></i><i style="--x:45%;--w:8px;--c:var(--signal);--d:4.7s;--t:2.03s;--dx:-65px;--rot:-132deg"></i><i style="--x:16%;--w:12px;--c:var(--go);--d:3.8s;--t:1.67s;--dx:103px;--rot:296deg"></i><i class="r" style="--x:10%;--w:8px;--c:#FFC83D;--d:4.3s;--t:2.22s;--dx:106px;--rot:-440deg"></i><i style="--x:55%;--w:11px;--c:#4A90E2;--d:3.9s;--t:1.75s;--dx:-29px;--rot:678deg"></i><i style="--x:48%;--w:8px;--c:#E94F7A;--d:3.6s;--t:0.92s;--dx:-61px;--rot:628deg"></i><i style="--x:29%;--w:7px;--c:#FF7E21;--d:4.4s;--t:2.36s;--dx:-53px;--rot:-143deg"></i><i class="r" style="--x:0%;--w:8px;--c:var(--signal);--d:4.2s;--t:1.59s;--dx:24px;--rot:-68deg"></i><i style="--x:16%;--w:12px;--c:var(--go);--d:5.3s;--t:3.63s;--dx:47px;--rot:664deg"></i><i style="--x:94%;--w:7px;--c:#FFC83D;--d:4.3s;--t:3.35s;--dx:103px;--rot:673deg"></i><i style="--x:71%;--w:10px;--c:#4A90E2;--d:4.2s;--t:1.68s;--dx:3px;--rot:579deg"></i><i class="r" style="--x:51%;--w:7px;--c:#E94F7A;--d:3.7s;--t:3.75s;--dx:-8px;--rot:-388deg"></i><i style="--x:14%;--w:9px;--c:#FF7E21;--d:4.6s;--t:0.66s;--dx:25px;--rot:-411deg"></i><i style="--x:68%;--w:7px;--c:var(--signal);--d:5.5s;--t:2.45s;--dx:-102px;--rot:-295deg"></i><i style="--x:78%;--w:10px;--c:var(--go);--d:3.6s;--t:1.18s;--dx:-32px;--rot:513deg"></i><i class="r" style="--x:46%;--w:10px;--c:#FFC83D;--d:3.5s;--t:3.27s;--dx:-1px;--rot:263deg"></i><i style="--x:61%;--w:9px;--c:#4A90E2;--d:3.4s;--t:0.66s;--dx:-33px;--rot:-178deg"></i><i style="--x:61%;--w:12px;--c:#E94F7A;--d:3.6s;--t:0.38s;--dx:15px;--rot:20deg"></i><i style="--x:18%;--w:12px;--c:#FF7E21;--d:4.5s;--t:0.39s;--dx:15px;--rot:-110deg"></i><i class="r" style="--x:82%;--w:7px;--c:var(--signal);--d:4.9s;--t:1.21s;--dx:-27px;--rot:-378deg"></i><i style="--x:45%;--w:8px;--c:var(--go);--d:4.5s;--t:3.03s;--dx:-36px;--rot:583deg"></i><i style="--x:28%;--w:11px;--c:#FFC83D;--d:5.1s;--t:3.75s;--dx:98px;--rot:-321deg"></i><i style="--x:30%;--w:10px;--c:#4A90E2;--d:5.0s;--t:1.09s;--dx:12px;--rot:289deg"></i><i class="r" style="--x:45%;--w:12px;--c:#E94F7A;--d:3.3s;--t:0.40s;--dx:-49px;--rot:247deg"></i><i style="--x:33%;--w:8px;--c:#FF7E21;--d:4.9s;--t:3.65s;--dx:-6px;--rot:-5deg"></i><i style="--x:46%;--w:7px;--c:var(--signal);--d:3.7s;--t:1.09s;--dx:-70px;--rot:-29deg"></i><i style="--x:26%;--w:10px;--c:var(--go);--d:4.7s;--t:3.45s;--dx:95px;--rot:-717deg"></i><i class="r" style="--x:61%;--w:12px;--c:#FFC83D;--d:4.0s;--t:2.55s;--dx:93px;--rot:632deg"></i><i style="--x:15%;--w:10px;--c:#4A90E2;--d:5.1s;--t:2.93s;--dx:2px;--rot:-355deg"></i></div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- 12 Backup: end-to-end workflow, concept to operation -->
@@ -1420,6 +1486,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
       <span>Dark = define · Orange = build · Green = verify</span>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Backup: Agentic AI in the development process -->
@@ -1487,6 +1554,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
     </div>
     <p class="rk-ex"><b>Example, 4 Nov:</b> "check the cabinet size while typing" → the agent read the code, changed 6 files, ran 127 tests, checked the screens in a browser at phone width, wrote the change log – a person approved the push.</p>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Backup: Tool stack -->
@@ -1529,6 +1597,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
       <p><b>People in the loop:</b> every agent result is reviewed before it is merged.</p>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Backup: Risk management -->
@@ -1549,6 +1618,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
     <div class="uml-p" style="padding:6px 8px"><svg viewBox="0 0 1040 168" class="uml" role="img" aria-label="Iterative risk-management loop for Baumarkt-Buddy"><defs><marker id="rk-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="u-ah"/></marker><marker id="rk-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--signal)"/></marker></defs><line x1="218" y1="46" x2="300" y2="46" class="r-arr" marker-end="url(#rk-a)"/><line x1="478" y1="46" x2="560" y2="46" class="r-arr" marker-end="url(#rk-a)"/><line x1="738" y1="46" x2="820" y2="46" class="r-arr" marker-end="url(#rk-a)"/><path d="M910,21 V6 H390 V19" class="r-fb" marker-end="url(#rk-f)"/><text x="650" y="16" class="r-fbt" text-anchor="middle">repeat every sprint: new risks, changed decisions, new test results</text><ellipse cx="130" cy="46" rx="88" ry="25" class="r-st"/><text x="130" y="43" class="u-cn" text-anchor="middle">Risk</text><text x="130" y="58" class="u-cn" text-anchor="middle">identification</text><line x1="130" y1="71" x2="130" y2="96" class="r-arr" marker-end="url(#rk-a)"/><rect x="12" y="99" width="236" height="51" rx="3" class="r-out"/><text x="130" y="118" class="u-at" text-anchor="middle">Risk register: 20 risks in 5 areas</text><text x="130" y="131" class="u-at" text-anchor="middle">(docs/risk-analysis.md)</text><text x="130" y="144" class="u-at" text-anchor="middle">exploratory test → issues #101–#113</text><ellipse cx="390" cy="46" rx="88" ry="25" class="r-st"/><text x="390" y="43" class="u-cn" text-anchor="middle">Risk</text><text x="390" y="58" class="u-cn" text-anchor="middle">analysis</text><line x1="390" y1="71" x2="390" y2="96" class="r-arr" marker-end="url(#rk-a)"/><rect x="272" y="99" width="236" height="51" rx="3" class="r-out"/><text x="390" y="118" class="u-at" text-anchor="middle">Likelihood × impact matrix</text><text x="390" y="131" class="u-at" text-anchor="middle">Top: market + data access (B1, B2),</text><text x="390" y="144" class="u-at" text-anchor="middle">template review (D3), catalogue gaps</text><ellipse cx="650" cy="46" rx="88" ry="25" class="r-st acc"/><text x="650" y="43" class="u-cn" text-anchor="middle">Risk</text><text x="650" y="58" class="u-cn" text-anchor="middle">planning</text><line x1="650" y1="71" x2="650" y2="96" class="r-arr" marker-end="url(#rk-a)"/><rect x="532" y="99" width="236" height="51" rx="3" class="r-out"/><text x="650" y="118" class="u-at" text-anchor="middle">Avoid: rules decide, stop if unknown</text><text x="650" y="131" class="u-at" text-anchor="middle">Contingency: preview flag, revert PR,</text><text x="650" y="144" class="u-at" text-anchor="middle">keyword mode if the AI fails</text><ellipse cx="910" cy="46" rx="88" ry="25" class="r-st"/><text x="910" y="43" class="u-cn" text-anchor="middle">Risk</text><text x="910" y="58" class="u-cn" text-anchor="middle">monitoring</text><line x1="910" y1="71" x2="910" y2="96" class="r-arr" marker-end="url(#rk-a)"/><rect x="792" y="99" width="236" height="51" rx="3" class="r-out"/><text x="910" y="118" class="u-at" text-anchor="middle">CI runs 134 tests on every PR</text><text x="910" y="131" class="u-at" text-anchor="middle">results in test/results, CHANGELOG,</text><text x="910" y="144" class="u-at" text-anchor="middle">team decisions D-1 … D-14</text></svg></div>
     <p class="rk-ex"><b>One loop in practice:</b> testers found that a 120 cm wall cabinet does not exist → rated as a product risk (requirement misalignment) → limit set to 75 cm with a test → CI now checks it on every pull request.</p>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- 11 Backup: MoSCoW scope R1 -->
@@ -1648,6 +1718,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
     </div>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Backup: UML sequence diagram (moved from the main part) -->
@@ -1660,6 +1731,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
     <div class="seq-notes"><div class="seq-note"><b class="n">1</b><strong>Six players · safety first</strong><p>The <em>customer</em> and the <em>app</em> in the browser; filter, parser and rule engine are plain code; products and plug ratings come from our <em>Excel catalogue</em>. The customer describes the project, and filter <em>G0</em> first looks for high-risk work (electrics, gas, load-bearing walls). Nothing found.</p></div><div class="seq-note"><b class="n">2</b><strong>Guess, confirm, two questions</strong><p>The keyword parser reads project, wall and length: <em>only guesses</em>. The customer confirms each one; nothing unconfirmed reaches the rule engine (SR-01). Then <em>wall type</em>, <em>size</em> and the <em>used-parts check</em> (ST-06).</p></div><div class="seq-note"><b class="n">3</b><strong>Plan, choose, list or stop</strong><p>Plug ratings from sheet <em>System ratings</em>; the weakest part decides, safety factor <em>1.25</em> included. The customer picks a plug (<em>"max. 32 kg"</em>). <em>All checks pass:</em> checked list with evidence log. <em>Wall unknown or too deep:</em> stop with rule ID, ask a store associate.</p></div></div>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Backup: UML 1/2 use cases + domain model -->
@@ -1680,6 +1752,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 </defs><rect x="4" y="10" width="142" height="75" rx="3" class="u-box "/><rect x="4" y="10" width="142" height="22" rx="3" class="u-hd "/><text x="75.0" y="25" class="u-cn" text-anchor="middle">ProjectTemplate</text><line x1="4" y1="32" x2="146" y2="32" class="u-sep"/><text x="12" y="47" class="u-at" text-anchor="start">id: PRJ-01 … 09</text><text x="12" y="62" class="u-at" text-anchor="start">safetyLevel</text><text x="12" y="77" class="u-at" text-anchor="start">questions, limits</text><rect x="179" y="10" width="142" height="60" rx="3" class="u-box "/><rect x="179" y="10" width="142" height="22" rx="3" class="u-hd "/><text x="250.0" y="25" class="u-cn" text-anchor="middle">Fact</text><line x1="179" y1="32" x2="321" y2="32" class="u-sep"/><text x="187" y="47" class="u-at" text-anchor="start">name, value, unit</text><text x="187" y="62" class="u-at" text-anchor="start">confirmed: yes / no</text><rect x="354" y="10" width="142" height="60" rx="3" class="u-box "/><rect x="354" y="10" width="142" height="22" rx="3" class="u-hd "/><text x="425.0" y="25" class="u-cn" text-anchor="middle">Store</text><line x1="354" y1="32" x2="496" y2="32" class="u-sep"/><text x="362" y="47" class="u-at" text-anchor="start">name, postcode</text><text x="362" y="62" class="u-at" text-anchor="start">coordinates</text><rect x="4" y="150" width="142" height="60" rx="3" class="u-box "/><rect x="4" y="150" width="142" height="22" rx="3" class="u-hd "/><text x="75.0" y="165" class="u-cn" text-anchor="middle">EvidenceEntry</text><line x1="4" y1="172" x2="146" y2="172" class="u-sep"/><text x="12" y="187" class="u-at" text-anchor="start">ruleId</text><text x="12" y="202" class="u-at" text-anchor="start">reason, source</text><rect x="179" y="142" width="142" height="87" rx="3" class="u-box acc"/><rect x="179" y="142" width="142" height="34" rx="3" class="u-hd acc"/><text x="250.0" y="154" class="u-k on-acc" text-anchor="middle">«service»</text><text x="250.0" y="169" class="u-cn on-acc" text-anchor="middle">RuleEngine</text><line x1="179" y1="176" x2="321" y2="176" class="u-sep"/><text x="187" y="191" class="u-at" text-anchor="start">checkHighRisk()</text><text x="187" y="206" class="u-at" text-anchor="start">checkLimits()</text><text x="187" y="221" class="u-at" text-anchor="start">buildList()</text><rect x="354" y="150" width="142" height="60" rx="3" class="u-box "/><rect x="354" y="150" width="142" height="22" rx="3" class="u-hd "/><text x="425.0" y="165" class="u-cn" text-anchor="middle">StoreStock</text><line x1="354" y1="172" x2="496" y2="172" class="u-sep"/><text x="362" y="187" class="u-at" text-anchor="start">aisle, shelf</text><text x="362" y="202" class="u-at" text-anchor="start">quantity</text><rect x="4" y="296" width="142" height="60" rx="3" class="u-box "/><rect x="4" y="296" width="142" height="22" rx="3" class="u-hd "/><text x="75.0" y="311" class="u-cn" text-anchor="middle">ShoppingList</text><line x1="4" y1="318" x2="146" y2="318" class="u-sep"/><text x="12" y="333" class="u-at" text-anchor="start">sections, subtotals</text><text x="12" y="348" class="u-at" text-anchor="start">total</text><rect x="179" y="296" width="142" height="60" rx="3" class="u-box "/><rect x="179" y="296" width="142" height="22" rx="3" class="u-hd "/><text x="250.0" y="311" class="u-cn" text-anchor="middle">ListItem</text><line x1="179" y1="318" x2="321" y2="318" class="u-sep"/><text x="187" y="333" class="u-at" text-anchor="start">quantity, owned</text><text x="187" y="348" class="u-at" text-anchor="start">reason</text><rect x="354" y="296" width="142" height="60" rx="3" class="u-box "/><rect x="354" y="296" width="142" height="22" rx="3" class="u-hd "/><text x="425.0" y="311" class="u-cn" text-anchor="middle">Product</text><line x1="354" y1="318" x2="496" y2="318" class="u-sep"/><text x="362" y="333" class="u-at" text-anchor="start">wallTypes, maxLoad</text><text x="362" y="348" class="u-at" text-anchor="start">safetyNote, price</text><line x1="146" y1="47.5" x2="179" y2="40.0" class="u-ln"/><text x="162.5" y="42.5" class="u-k" text-anchor="middle">asks</text><text x="152" y="59.5" class="u-k" text-anchor="start">1</text><text x="176" y="52.0" class="u-k" text-anchor="end">1..*</text><line x1="425.0" y1="70" x2="425.0" y2="150" class="u-ln"/><text x="431.0" y="82" class="u-k" text-anchor="start">1</text><text x="431.0" y="146" class="u-k" text-anchor="start">*</text><line x1="425.0" y1="210" x2="425.0" y2="296" class="u-ln"/><text x="431.0" y="222" class="u-k" text-anchor="start">*</text><text x="431.0" y="292" class="u-k" text-anchor="start">1</text><line x1="157" y1="326.0" x2="179" y2="326.0" class="u-ln"/><path d="M146,326.0 l6,-4 l6,4 l-6,4 z" class="u-ah"/><text x="160" y="321.0" class="u-k" text-anchor="start">1</text><text x="174" y="321.0" class="u-k" text-anchor="end">1..*</text><line x1="321" y1="326.0" x2="354" y2="326.0" class="u-ln"/><text x="326" y="321.0" class="u-k" text-anchor="start">*</text><text x="349" y="321.0" class="u-k" text-anchor="end">1</text><line x1="250.0" y1="142" x2="250.0" y2="70" class="u-dash" marker-end="url(#uml-oc)"/><text x="256.0" y="130" class="u-k" text-anchor="start">reads</text><line x1="199" y1="142" x2="75.0" y2="85" class="u-dash" marker-end="url(#uml-oc)"/><text x="145" y="116" class="u-k" text-anchor="start">uses</text><line x1="179" y1="185.5" x2="146" y2="180.0" class="u-dash" marker-end="url(#uml-oc)"/><text x="162.5" y="180.5" class="u-k" text-anchor="middle">writes</text><line x1="250.0" y1="229" x2="250.0" y2="296" class="u-dash" marker-end="url(#uml-oc)"/><text x="256.0" y="249" class="u-k" text-anchor="start">creates</text><line x1="321" y1="219" x2="374" y2="296" class="u-dash" marker-end="url(#uml-oc)"/><text x="329" y="237" class="u-k" text-anchor="start">checks</text><g transform="translate(8,400)"><line x1="0" y1="0" x2="22" y2="0" class="u-ln"/><text x="28" y="4" class="u-k" text-anchor="start">association</text><line x1="110" y1="0" x2="132" y2="0" class="u-dash" marker-end="url(#uml-oc)"/><text x="138" y="4" class="u-k" text-anchor="start">uses / depends on</text><path d="M250,0 l6,-4 l6,4 l-6,4 z" class="u-ah"/><line x1="262" y1="0" x2="280" y2="0" class="u-ln"/><text x="286" y="4" class="u-k" text-anchor="start">composition (part of)</text></g></svg></div>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Backup: Live demo scenarios -->
@@ -1725,6 +1798,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
       </div>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Backup: Traceability matrix -->
@@ -2021,6 +2095,7 @@ Manual run: all linked system / red-team tests PASS">09</span></div></div>
       <p><b>21 release gates PASS</b> (19 also automated) → R1 go. Open: legacy IDs in result names (G2, R-16, UC-1, C-8)</p>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Backup: test report (trace status and coverage) -->
@@ -2056,6 +2131,7 @@ Manual run: all linked system / red-team tests PASS">09</span></div></div>
       <p><b>R2:</b> automate the 10 manual-only requirements, so every requirement has automated evidence</p>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Backup: KPI results -->
@@ -2068,6 +2144,7 @@ Manual run: all linked system / red-team tests PASS">09</span></div></div>
       <div class="kb"><div title="Automated tests (CI): 134 of 134 PASS"><span>Automated tests (CI)</span><span class="bar"><i></i></span><b>134 / 134 PASS</b></div><div title="Manual system tests: 127 of 127 PASS"><span>Manual system tests</span><span class="bar"><i></i></span><b>127 / 127 PASS</b></div><div title="Red-team tests: 8 of 8 PASS"><span>Red-team tests</span><span class="bar"><i></i></span><b>8 / 8 PASS</b></div><div title="Release gates: 21 of 21 PASS"><span>Release gates</span><span class="bar"><i></i></span><b>21 / 21 PASS</b></div><div title="Requirements verified: 59 of 59 PASS"><span>Requirements verified</span><span class="bar"><i></i></span><b>59 / 59 PASS</b></div></div>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Backup: Further releases -->
@@ -2087,6 +2164,7 @@ Manual run: all linked system / red-team tests PASS">09</span></div></div>
     </div>
     <div class="principle">For the store: fuller baskets, fewer returns and less staff time per customer.</div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Backup: Software evolution 1/2 -->
@@ -2140,6 +2218,7 @@ Manual run: all linked system / red-team tests PASS">09</span></div></div>
       <div><b>Same team = same loop</b><span>Evolution is just the next iteration of development</span></div>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Backup: Software evolution 2/2 – change management and maintenance -->
@@ -2164,6 +2243,7 @@ Manual run: all linked system / red-team tests PASS">09</span></div></div>
     </div>
     <div class="principle">Maintenance cost stays low because code, data, tests and docs change together in one repo.</div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Backup: Git repository and change log -->
@@ -2216,6 +2296,7 @@ README.md      <em>how to use</em>
       </div>
     </div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 <!-- Last: contribution list -->
@@ -2233,6 +2314,7 @@ README.md      <em>how to use</em>
     </div>
     <div class="principle">Every team member contributed equally and helped to complete the MVP successfully.</div>
   </div>
+<div class="dmba-foot">Digital Business and AI 2025–2027 · Applied AI</div>
 </section>
 
 
@@ -2311,7 +2393,25 @@ README.md      <em>how to use</em>
     [].forEach.call(dots.children,function(d,k){d.classList.toggle('on',k===i);d.setAttribute('aria-current',k===i?'true':'false')});
     [].forEach.call(tabs.children,function(b,k){b.setAttribute('aria-current',k===i?'true':'false')});
     pos.textContent=(i+1)+' / '+slides.length;
+    seekUi();
     navUi();
+  }
+  /* seek bar: one segment per slide, main part orange, backup grey; click to jump */
+  var seekBar=document.getElementById('seekBar'),seekTxt=document.getElementById('seekTxt'),seekTip=document.getElementById('seekTip'),seekEl=document.getElementById('seek');
+  var mainN=0;while(mainN<slides.length&&!/^Backup: /.test(info(mainN).ch))mainN++;
+  slides.forEach(function(s,n){
+    var g=document.createElement('button');g.type='button';g.className='seg'+(n>=mainN?' bk':'')+(n===mainN?' first-bk':'');
+    g.setAttribute('aria-label','Slide '+(n+1)+': '+info(n).ch);
+    g.addEventListener('mouseenter',function(){seekTip.hidden=false;seekTip.textContent=(n+1)+' · '+info(n).ch.replace(/^Backup: /,'Backup · ');
+      var r=g.getBoundingClientRect(),d=seekEl.getBoundingClientRect(),k=d.width/seekEl.offsetWidth;seekTip.style.left=((r.left+r.width/2-d.left)/k)+'px'});
+    g.addEventListener('mouseleave',function(){seekTip.hidden=true});
+    g.addEventListener('click',function(e){e.stopPropagation();go(n)});
+    seekBar.appendChild(g);
+  });
+  function seekUi(){
+    [].forEach.call(seekBar.children,function(g,k){g.classList.toggle('done',k<i);g.classList.toggle('cur',k===i)});
+    var left=mainN-1-i;
+    seekTxt.textContent=i<mainN?('Slide '+(i+1)+' / '+mainN+' · '+(left>0?left+' to go':'last slide')):('Backup · '+(i+1));
   }
   function navUi(){prev.disabled=i===0&&stepOf[i]===0;next.disabled=i===slides.length-1&&stepOf[i]>=maxStep(i)}
   function forward(){
