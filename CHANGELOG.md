@@ -6,6 +6,9 @@ when they are released to `main`.
 
 ## Unreleased
 
+- **2026-11-07 – Merged the team's `main` into the deck branch.** Conflicts in `pitch/index.html`, CHANGELOG and README resolved: the final deck is kept; the closing animation, the uploaded images and videos from `main` stay in the repository.
+  *Why:* PR #188 could not be merged. *Prompt (paraphrased):* "PR 188 shows conflicts we don't know how to resolve."
+
 ## Milestone: Final pitch deck with videos, closing slide, contribution list and dial menu – 2026-11-06
 Summary (same as the pull request):
 - Two warm-up video slides before Key takeaways & lessons learned (Anthropic clip, quiet and repeating silently; Matrix meme)
@@ -33,6 +36,17 @@ Summary (same as the pull request):
   new roles: Concept definition (Sara Schönhöfer) and App demo (Christoph Braun).
   *Why:* final presentation on 7 Nov 2026. *Prompt (paraphrased):* "Add the video slides, the closing slide and
   the contribution list, simplify the menu, then push the new slides with the image updates so I can open the PR."
+
+## Milestone: Closing slide animation – 2026-11-06
+Summary (same as the pull request):
+- New `pitch/closing-animation.mp4`: Josie and Andrea (persona photos) celebrate their finished projects – "Shelf hung", "Wall painted", confetti, "Project done. Thank you!"
+- 1920 × 1080, 30 fps, 24 s, loops seamlessly every 8 s; deck colours and fonts
+- README folder table mentions the video
+
+- **2026-11-06 – Closing slide animation.** Added `pitch/closing-animation.mp4` for the
+  last slide of the pitch, using the persona photos from the Target users slide.
+  *Why:* the team wants a joyful closing slide showing the personas after their project.
+  *Prompt:* "Make an animated video of our personas dancing with joy … use it as the closing slide … push this in Git."
 
 ## Milestone: Hang a picture – new wall choices, aerated concrete and wood – 2026-11-06
 Summary (same as the pull request):

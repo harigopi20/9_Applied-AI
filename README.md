@@ -375,7 +375,7 @@ usability test or by hand.
 | `test/` | Test case descriptions (current version: `01_test_cases.md`; older dated copies in `test/archive/`) and saved test results in `test/results/` |
 | `diagrams/` | Architecture and planning diagrams |
 | `docs/` | Research documents: [competitor analysis](docs/competitor-analysis.md), [risk analysis](docs/risk-analysis.md) |
-| `pitch/` | Pitch deck: open `pitch/index.html` in a browser (arrow keys to move, **M** for the chapter dial, **F** for fullscreen); images in `pitch/img/`, videos in `pitch/media/` |
+| `pitch/` | Pitch deck: open `pitch/index.html` in a browser (arrow keys to move, **M** for the chapter dial, **F** for fullscreen); images in `pitch/img/`, videos in `pitch/media/`; `closing-animation.mp4` = optional closing video (personas celebrating, 24 s loop) |
 
 ## Team
 | Role | Member |
