@@ -12,6 +12,7 @@ Summary (same as the pull request):
 - Key takeaways: "Code is cheap; decisions are the real work" (human in the loop) replaces "One integrated app"; 4th lesson learned on consolidated issues and reviews
 - Closing slide "Project done. Thank you!" with the new picture and falling confetti; contribution list as the last slide
 - Chapter menu (M) as a dial in the centre of the screen, without times
+- "Key takeaway #0" (Anthropic video) moved after Key takeaways & lessons learned, right before Q&A
 - Deck images and videos now in `pitch/img/` and `pitch/media/`, so the repository copy works on its own
 
 - **2026-11-06 – Pitch deck: final version with videos, closing slide, contribution list and dial menu.**
@@ -23,6 +24,8 @@ Summary (same as the pull request):
   slides, all contributed equally) as the last slide; the chapter menu is a dial with slide number and topic only.
   The images and videos the deck uses are added under `pitch/img/` and `pitch/media/` (before, the repository
   copy had none of them). README updated.
+  Follow-up (2026-11-07): the "Key takeaway #0" video slide moved after Key takeaways & lessons learned, right
+  before Q&A; the contribution list now names slide 12 for Key takeaways & lessons learned.
   *Why:* final presentation on 7 Nov 2026. *Prompt (paraphrased):* "Add the video slides, the closing slide and
   the contribution list, simplify the menu, then push the new slides with the image updates so I can open the PR."
 
